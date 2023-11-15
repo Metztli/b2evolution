@@ -11,32 +11,32 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$Form = new Form( $admin_url, 'item_mass_cats_checkchanges', 'post' );
+$Form = new Form($admin_url, 'item_mass_cats_checkchanges', 'post');
 
 $Form->begin_form();
 
-	$Form->add_crumb( 'item' );
-	$Form->hidden( 'ctrl', 'items' );
-	$Form->hidden( 'action', 'mass_change_cat' );
-	$Form->hidden( 'blog', $blog );
-	foreach( $selected_items as $item_ID )
-	{
-		$Form->hidden( 'selected_items[]', $item_ID );
-	}
-	$Form->hidden( 'cat_type', $cat_type );
-	$Form->hidden( 'redirect_to', $redirect_to );
-	$Form->add_crumb( 'items' );
+$Form->add_crumb('item');
+$Form->hidden('ctrl', 'items');
+$Form->hidden('action', 'mass_change_cat');
+$Form->hidden('blog', $blog);
+foreach ($selected_items as $item_ID) {
+    $Form->hidden('selected_items[]', $item_ID);
+}
+$Form->hidden('cat_type', $cat_type);
+$Form->hidden('redirect_to', $redirect_to);
+$Form->add_crumb('items');
 
-	cat_select( $Form, true, true, array(
-			'display_main'  => ( $cat_type == 'main' ),
-			'display_extra' => ( $cat_type == 'extra' || $cat_type == 'remove_extra' ),
-			'display_order' => false,
-			'display_new'   => false,
-		) );
+cat_select($Form, true, true, [
+    'display_main' => ($cat_type == 'main'),
+    'display_extra' => ($cat_type == 'extra' || $cat_type == 'remove_extra'),
+    'display_order' => false,
+    'display_new' => false,
+]);
 
-	$Form->buttons( array( array( 'submit', 'actionArray[mass_change_cat]', TB_('Change main category'), 'SaveButton' ) ) );
+$Form->buttons([['submit', 'actionArray[mass_change_cat]', TB_('Change main category'), 'SaveButton']]);
 
 $Form->end_form();
-?>

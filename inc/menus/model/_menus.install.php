@@ -8,7 +8,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $db_storage_charset;
@@ -22,20 +24,20 @@ global $db_storage_charset;
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-$schema_queries = array_merge( $schema_queries, array(
-	'T_menus__menu' => array(
-		'Creating table for Menus',
-		"CREATE TABLE T_menus__menu (
+$schema_queries = array_merge($schema_queries, [
+    'T_menus__menu' => [
+        'Creating table for Menus',
+        "CREATE TABLE T_menus__menu (
 			menu_ID     INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			menu_translates_menu_ID INT(10) UNSIGNED NULL DEFAULT NULL,
 			menu_name   VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
 			menu_locale VARCHAR(20) COLLATE ascii_general_ci NOT NULL DEFAULT 'en-US',
 			PRIMARY KEY (menu_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_menus__entry' => array(
-		'Creating table for Menu entries',
-		"CREATE TABLE T_menus__entry (
+    'T_menus__entry' => [
+        'Creating table for Menu entries',
+        "CREATE TABLE T_menus__entry (
 			ment_ID             INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			ment_menu_ID        INT(10) UNSIGNED NOT NULL,
 			ment_parent_ID      INT(10) UNSIGNED NULL,
@@ -58,7 +60,5 @@ $schema_queries = array_merge( $schema_queries, array(
 			PRIMARY KEY          (ment_ID),
 			INDEX ment_menu_ID   (ment_menu_ID),
 			INDEX ment_parent_ID (ment_parent_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
-) );
-
-?>
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
+]);

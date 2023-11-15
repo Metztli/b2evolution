@@ -11,7 +11,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $db_storage_charset;
@@ -25,26 +27,26 @@ global $db_storage_charset;
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-$schema_queries['T_sessions'] = array(
-		'Creating table for active sessions',
-		"CREATE TABLE T_sessions (
+$schema_queries['T_sessions'] = [
+    'Creating table for active sessions',
+    "CREATE TABLE T_sessions (
 			sess_ID          INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			sess_key         CHAR(32) COLLATE ascii_general_ci NULL,
 			sess_start_ts    TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			sess_lastseen_ts TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00' COMMENT 'User last logged activation time. Value may be off by up to 60 seconds',
-			sess_ipaddress   VARCHAR(45) COLLATE ascii_general_ci NOT NULL DEFAULT '',"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */."
+			sess_ipaddress   VARCHAR(45) COLLATE ascii_general_ci NOT NULL DEFAULT '',"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */ . "
 			sess_user_ID     INT(10) DEFAULT NULL,
 			sess_data        MEDIUMBLOB DEFAULT NULL,
 			sess_device      VARCHAR(8) COLLATE ascii_general_ci NOT NULL DEFAULT '',
 			PRIMARY KEY      ( sess_ID ),
 		  KEY sess_user_ID (sess_user_ID)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
-		// NOTE: sess_lastseen is only relevant/used by Sessions class (+ stats) and results in a quite large index (file size wise)
-		// NOTE: sess_data is (MEDIUM)BLOB because e.g. serialize() does not completely convert binary data to text
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
+// NOTE: sess_lastseen is only relevant/used by Sessions class (+ stats) and results in a quite large index (file size wise)
+// NOTE: sess_data is (MEDIUM)BLOB because e.g. serialize() does not completely convert binary data to text
 
-$schema_queries['T_basedomains'] = array(
-		'Creating table for base domains',
-		"CREATE TABLE T_basedomains (
+$schema_queries['T_basedomains'] = [
+    'Creating table for base domains',
+    "CREATE TABLE T_basedomains (
 			dom_ID     INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			dom_name   VARCHAR(250)  COLLATE utf8_bin NOT NULL DEFAULT '',
 			dom_status ENUM('unknown','trusted','suspect','blocked') COLLATE ascii_general_ci NOT NULL DEFAULT 'unknown',
@@ -53,23 +55,23 @@ $schema_queries['T_basedomains'] = array(
 			dom_source_tag VARCHAR(32) COLLATE utf8mb4_unicode_ci NULL,
 			PRIMARY KEY     (dom_ID),
 			UNIQUE dom_name ( dom_name)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_track__keyphrase'] = array(
-		'Creating table for Hit-Logs keyphrases',
-		"CREATE TABLE T_track__keyphrase (
+$schema_queries['T_track__keyphrase'] = [
+    'Creating table for Hit-Logs keyphrases',
+    "CREATE TABLE T_track__keyphrase (
 			keyp_ID      INT UNSIGNED NOT NULL AUTO_INCREMENT,
 			keyp_phrase  VARCHAR( 250 ) COLLATE utf8mb4_bin NOT NULL,
 			keyp_count_refered_searches INT UNSIGNED DEFAULT 0,
 			keyp_count_internal_searches INT UNSIGNED DEFAULT 0,
 			PRIMARY KEY        ( keyp_ID ),
 			UNIQUE keyp_phrase ( keyp_phrase )
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
 
-$schema_queries['T_hitlog'] = array(
-		'Creating table for Hit-Logs',
-		"CREATE TABLE T_hitlog (
+$schema_queries['T_hitlog'] = [
+    'Creating table for Hit-Logs',
+    "CREATE TABLE T_hitlog (
 			hit_ID                INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			hit_sess_ID           INT UNSIGNED,
 			hit_datetime          TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
@@ -85,7 +87,7 @@ $schema_queries['T_hitlog'] = array(
 			hit_keyphrase         VARCHAR(250) COLLATE utf8mb4_bin DEFAULT NULL,
 			hit_serprank          SMALLINT UNSIGNED DEFAULT NULL,
 			hit_coll_ID           INT(10) UNSIGNED NULL DEFAULT NULL,
-			hit_remote_addr       VARCHAR(45) COLLATE ascii_general_ci DEFAULT NULL,"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */."
+			hit_remote_addr       VARCHAR(45) COLLATE ascii_general_ci DEFAULT NULL,"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */ . "
 			hit_agent_type        ENUM('robot','browser','unknown') COLLATE ascii_general_ci DEFAULT 'unknown' NOT NULL,
 			hit_agent_ID          SMALLINT UNSIGNED NULL DEFAULT NULL,
 			hit_response_code     SMALLINT DEFAULT NULL,
@@ -96,25 +98,25 @@ $schema_queries['T_hitlog'] = array(
 			INDEX hit_referer_dom_ID ( hit_referer_dom_ID ),
 			INDEX hit_remote_addr    ( hit_remote_addr ),
 			INDEX hit_sess_ID        ( hit_sess_ID )
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
-		// Note: hit_remote_addr is used for goal matching stats
-		// fp> needed? 			INDEX hit_keyphrase_keyp_ID( hit_keyphrase_keyp_ID ),
-		// dh> There appear too many indexes here, which makes inserting hits rather
-		//     slow! If the indexes need to stay, would it be possible to queue
-		//     the hit logs and let them get handled by cron?!
-		//     Well, converting the table to MyISAM (from InnoDB) helped a lot..
-		// fp> Yes we do have a chronic problem with the hitlogging
-		//     The best solution would indeed be to write to a non indexed MyISAM table
-		//     and then to consolidate the data once per day/hour (not sure) to tables that will be used for viewing stats
-		//     ALSO ideally we would not keep all the hit data but only CONSOLIDATED data
-		//     needed for reports, e-g: this date = this many hits of type browser/robot/rss etc but not necessarilly the detail
-		//     MAYBE a 2 step process would make sense?
-		//      1) write to MyISAM and cron every x minutes to replicate to indexed table
-		//      2) consolidate once a day
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
+// Note: hit_remote_addr is used for goal matching stats
+// fp> needed? 			INDEX hit_keyphrase_keyp_ID( hit_keyphrase_keyp_ID ),
+// dh> There appear too many indexes here, which makes inserting hits rather
+//     slow! If the indexes need to stay, would it be possible to queue
+//     the hit logs and let them get handled by cron?!
+//     Well, converting the table to MyISAM (from InnoDB) helped a lot..
+// fp> Yes we do have a chronic problem with the hitlogging
+//     The best solution would indeed be to write to a non indexed MyISAM table
+//     and then to consolidate the data once per day/hour (not sure) to tables that will be used for viewing stats
+//     ALSO ideally we would not keep all the hit data but only CONSOLIDATED data
+//     needed for reports, e-g: this date = this many hits of type browser/robot/rss etc but not necessarilly the detail
+//     MAYBE a 2 step process would make sense?
+//      1) write to MyISAM and cron every x minutes to replicate to indexed table
+//      2) consolidate once a day
 
-$schema_queries['T_hits__aggregate'] = array(
-		'Creating table for Hits aggregations',
-		"CREATE TABLE T_hits__aggregate (
+$schema_queries['T_hits__aggregate'] = [
+    'Creating table for Hits aggregations',
+    "CREATE TABLE T_hits__aggregate (
 			hagg_ID           INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			hagg_date         DATE NOT NULL DEFAULT '2000-01-01',
 			hagg_coll_ID      INT(10) UNSIGNED NULL DEFAULT NULL,
@@ -124,11 +126,11 @@ $schema_queries['T_hits__aggregate'] = array(
 			hagg_count        INT(11) UNSIGNED NOT NULL,
 			PRIMARY KEY       (hagg_ID),
 			UNIQUE            hagg_date_coll_ID_types (hagg_date, hagg_coll_ID, hagg_type, hagg_referer_type, hagg_agent_type)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_hits__aggregate_sessions'] = array(
-		'Creating table for aggregations of hit sessions',
-		"CREATE TABLE T_hits__aggregate_sessions (
+$schema_queries['T_hits__aggregate_sessions'] = [
+    'Creating table for aggregations of hit sessions',
+    "CREATE TABLE T_hits__aggregate_sessions (
 			hags_ID            INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			hags_date          DATE NOT NULL DEFAULT '2000-01-01',
 			hags_coll_ID       INT(10) UNSIGNED NULL DEFAULT NULL,
@@ -136,11 +138,11 @@ $schema_queries['T_hits__aggregate_sessions'] = array(
 			hags_count_api     INT(11) UNSIGNED NOT NULL DEFAULT 0,
 			PRIMARY KEY        (hags_ID),
 			UNIQUE             hags_date_coll_ID (hags_date, hags_coll_ID)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_track__goal'] = array(
-		'Creating goals table',
-		"CREATE TABLE T_track__goal(
+$schema_queries['T_track__goal'] = [
+    'Creating goals table',
+    "CREATE TABLE T_track__goal(
 		  goal_ID             int(10) unsigned NOT NULL auto_increment,
 		  goal_gcat_ID        int(10) unsigned NOT NULL,
 		  goal_name           varchar(50) COLLATE utf8mb4_unicode_ci default NULL,
@@ -153,11 +155,11 @@ $schema_queries['T_track__goal'] = array(
 		  goal_notes          TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 		  PRIMARY KEY (goal_ID),
 		  UNIQUE KEY goal_key (goal_key)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_track__goalhit'] = array(
-		'Creating goal hits table',
-		"CREATE TABLE T_track__goalhit (
+$schema_queries['T_track__goalhit'] = [
+    'Creating goal hits table',
+    "CREATE TABLE T_track__goalhit (
 		  ghit_ID         int(10) unsigned NOT NULL auto_increment,
 		  ghit_goal_ID    int(10) unsigned NOT NULL,
 		  ghit_hit_ID     int(10) unsigned NOT NULL,
@@ -165,26 +167,24 @@ $schema_queries['T_track__goalhit'] = array(
 		  PRIMARY KEY  (ghit_ID),
 		  KEY ghit_goal_ID (ghit_goal_ID),
 		  KEY ghit_hit_ID (ghit_hit_ID)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_track__goalhit_aggregate'] = array(
-		'Creating table for aggregations of goal hits',
-		"CREATE TABLE T_track__goalhit_aggregate (
+$schema_queries['T_track__goalhit_aggregate'] = [
+    'Creating table for aggregations of goal hits',
+    "CREATE TABLE T_track__goalhit_aggregate (
 		  ghag_ID      INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 		  ghag_date    DATE NOT NULL DEFAULT '2000-01-01',
 		  ghag_goal_ID INT(10) UNSIGNED NOT NULL,
 		  ghag_count   INT(10) UNSIGNED NOT NULL,
 		  PRIMARY KEY  (ghag_ID),
 		  UNIQUE       ghag_date_goal_ID (ghag_date, ghag_goal_ID)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];
 
-$schema_queries['T_track__goalcat'] = array(
-	'Creating goal categories table',
-	"CREATE TABLE T_track__goalcat (
+$schema_queries['T_track__goalcat'] = [
+    'Creating goal categories table',
+    "CREATE TABLE T_track__goalcat (
 		  gcat_ID     int(10) unsigned NOT NULL auto_increment,
 		  gcat_name   varchar(50) COLLATE utf8mb4_unicode_ci default NULL,
 		  gcat_color  char(7) COLLATE ascii_general_ci default NULL,
 		  PRIMARY KEY (gcat_ID)
-		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset" );
-
-?>
+		) ENGINE = myisam DEFAULT CHARACTER SET = $db_storage_charset"];

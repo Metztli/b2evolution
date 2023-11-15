@@ -23,9 +23,11 @@
  *
  * @version $Id: _item_location.widget.php 10056 2016-09-09 12:00:00 erhsatingin $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -36,133 +38,122 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class item_location_Widget extends ComponentWidget
 {
-	var $icon = 'location-arrow';
+    public $icon = 'location-arrow';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'item_location' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'item_location');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('item-location-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'item-location-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Item Location');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('Item Location'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Item Location');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display item location.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('Item Location') );
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Item;
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display item location.');
-	}
+        if (empty($Item)) {	// Don't display this widget when no Item object:
+            $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because there is no Item.');
+            return false;
+        }
 
+        // Get item locations:
+        $item_location = $Item->get_location('<div class="evo_post_location"><strong>' . T_('Location') . ': </strong>', '</div>');
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display' ),
-					'defaultvalue' => '',
-				)
-			), parent::get_param_definitions( $params ) );
+        if (empty($item_location)) {	// Don't display this widget when Item has no locations:
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because Item has no locations.');
+            return false;
+        }
 
-		return $r;
-	}
+        $this->init_display($params);
 
+        echo $this->disp_params['block_start'];
+        $this->disp_title();
+        echo $this->disp_params['block_body_start'];
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Item;
+        // Display item locations:
+        echo $item_location;
 
-		if( empty( $Item ) )
-		{	// Don't display this widget when no Item object:
-			$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because there is no Item.' );
-			return false;
-		}
+        echo $this->disp_params['block_body_end'];
+        echo $this->disp_params['block_end'];
 
-		// Get item locations:
-		$item_location = $Item->get_location( '<div class="evo_post_location"><strong>'.T_('Location').': </strong>', '</div>' );
+        return true;
+    }
 
-		if( empty( $item_location ) )
-		{	// Don't display this widget when Item has no locations:
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because Item has no locations.' );
-			return false;
-		}
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $Item;
 
-		$this->init_display( $params );
-
-		echo $this->disp_params['block_start'];
-		$this->disp_title();
-		echo $this->disp_params['block_body_start'];
-
-		// Display item locations:
-		echo $item_location;
-
-		echo $this->disp_params['block_body_end'];
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $Item;
-
-		return array(
-				'wi_ID'        => $this->ID, // Cache each widget separately + Have the widget settings changed ?
-				'set_coll_ID'  => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'cont_coll_ID' => empty( $this->disp_params['blog_ID'] ) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
-				'item_ID'      => ( empty( $Item->ID ) ? 0 : $Item->ID ), // Cache each item separately + Has the Item changed?
-			);
-	}
+        return [
+            'wi_ID' => $this->ID, // Cache each widget separately + Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'cont_coll_ID' => empty($this->disp_params['blog_ID']) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
+            'item_ID' => (empty($Item->ID) ? 0 : $Item->ID), // Cache each item separately + Has the Item changed?
+        ];
+    }
 }
-
-?>

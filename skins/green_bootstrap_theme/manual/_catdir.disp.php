@@ -14,21 +14,22 @@
  * @package evoskins
  * @subpackage bootstrap_manual
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // --------------------------------- START OF CONTENT HIERARCHY --------------------------------
-echo '<h2 class="table_contents">'.T_('Table of contents').'</h2>';
-skin_widget( array(
-		// CODE for the widget:
-		'widget' => 'content_hierarchy',
-		// Optional display params
-		'display_blog_title'   => false,
-		'open_children_levels' => 20,
-		'class_selected'       => '',
-		'item_before_opened'   => get_icon( 'collapse' ),
-		'item_before_closed'   => get_icon( 'expand' ),
-		'item_before_post'     => get_icon( 'file_message' ),
-	) );
+echo '<h2 class="table_contents">' . T_('Table of contents') . '</h2>';
+skin_widget([
+    // CODE for the widget:
+    'widget' => 'content_hierarchy',
+    // Optional display params
+    'display_blog_title' => false,
+    'open_children_levels' => 20,
+    'class_selected' => '',
+    'item_before_opened' => get_icon('collapse'),
+    'item_before_closed' => get_icon('expand'),
+    'item_before_post' => get_icon('file_message'),
+]);
 // ---------------------------------- END OF CONTENT HIERARCHY ---------------------------------
-?>

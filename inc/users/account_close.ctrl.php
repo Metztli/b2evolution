@@ -10,61 +10,60 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Check minimum permission:
-check_user_perm( 'users', 'view', true );
+check_user_perm('users', 'view', true);
 
-$AdminUI->set_path( 'users', 'usersettings', 'accountclose' );
+$AdminUI->set_path('users', 'usersettings', 'accountclose');
 
 param_action();
 
-switch ( $action )
-{
-	case 'update':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'accountclose' );
+switch ($action) {
+    case 'update':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('accountclose');
 
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-		// UPDATE the account closing settings:
-		param( 'account_close_enabled', 'integer', 0 );
-		param( 'account_close_intro', 'text' );
-		param( 'account_close_reasons', 'text' );
-		param( 'account_close_byemsg', 'text' );
+        // UPDATE the account closing settings:
+        param('account_close_enabled', 'integer', 0);
+        param('account_close_intro', 'text');
+        param('account_close_reasons', 'text');
+        param('account_close_byemsg', 'text');
 
-		$Settings->set_array( array(
-									 array( 'account_close_enabled', $account_close_enabled ),
-									 array( 'account_close_intro', $account_close_intro ),
-									 array( 'account_close_reasons', $account_close_reasons ),
-									 array( 'account_close_byemsg', $account_close_byemsg ) ) );
+        $Settings->set_array([
+            ['account_close_enabled', $account_close_enabled],
+            ['account_close_intro', $account_close_intro],
+            ['account_close_reasons', $account_close_reasons],
+            ['account_close_byemsg', $account_close_byemsg]]);
 
-		if( ! $Messages->has_errors() )
-		{
-			if( $Settings->dbupdate() )
-			{
-				// invalidate all PageCaches
-				invalidate_pagecaches();
+        if (! $Messages->has_errors()) {
+            if ($Settings->dbupdate()) {
+                // invalidate all PageCaches
+                invalidate_pagecaches();
 
-				$Messages->add( TB_('The settings of account closing have been updated.'), 'success' );
-				// Redirect so that a reload doesn't write to the DB twice:
-				header_redirect( '?ctrl=accountclose', 303 ); // Will EXIT
-				// We have EXITed already at this point!!
-			}
-		}
+                $Messages->add(TB_('The settings of account closing have been updated.'), 'success');
+                // Redirect so that a reload doesn't write to the DB twice:
+                header_redirect('?ctrl=accountclose', 303); // Will EXIT
+                // We have EXITed already at this point!!
+            }
+        }
 
-		break;
+        break;
 }
 
 
-$AdminUI->breadcrumbpath_init( false );  // fp> I'm playing with the idea of keeping the current blog in the path here...
-$AdminUI->breadcrumbpath_add( TB_('Users'), '?ctrl=users' );
-$AdminUI->breadcrumbpath_add( TB_('Settings'), '?ctrl=usersettings' );
-$AdminUI->breadcrumbpath_add( TB_('Account closing'), '?ctrl=accountclose' );
+$AdminUI->breadcrumbpath_init(false);  // fp> I'm playing with the idea of keeping the current blog in the path here...
+$AdminUI->breadcrumbpath_add(TB_('Users'), '?ctrl=users');
+$AdminUI->breadcrumbpath_add(TB_('Settings'), '?ctrl=usersettings');
+$AdminUI->breadcrumbpath_add(TB_('Account closing'), '?ctrl=accountclose');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'user-settings-account-closing-tab' );
+$AdminUI->set_page_manual_link('user-settings-account-closing-tab');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -76,12 +75,10 @@ $AdminUI->disp_body_top();
 $AdminUI->disp_payload_begin();
 
 // Display VIEW:
-$AdminUI->disp_view( 'users/views/_account_close_setting.form.php' );
+$AdminUI->disp_view('users/views/_account_close_setting.form.php');
 
 // End payload block:
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

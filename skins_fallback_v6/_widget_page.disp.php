@@ -13,41 +13,41 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF POSTS -------------------------------------
 // Display message if no post:
 display_if_empty();
 
-if( $Item = & mainlist_get_item() )
-{	// If Item is found for current filter request (for item type usage 'widget-page'):
-	widget_page_containers( $Item->ID, array(
-			// The following (optional) params will be used as defaults for widgets included in this container:
-			'container_display_if_empty' => false, // If no widget, don't display container at all
-			// This will enclose each widget in a block:
-			'block_start' => '<div class="evo_widget $wi_class$">',
-			'block_end' => '</div>',
-			// This will enclose the title of each widget:
-			'block_title_start' => '<h3>',
-			'block_title_end' => '</h3>',
-			// Template params for "Item Link" widget
-			'widget_item_link_before'    => '<p class="evo_post_link">',
-			'widget_item_link_after'     => '</p>',
-			// Template params for "Item Tags" widget
-			'widget_item_tags_before'    => '<nav class="small post_tags">'.T_('Tags').': ',
-			'widget_item_tags_after'     => '</nav>',
-			// Params for skin file "_item_content.inc.php"
-			'widget_item_content_params' => $params,
-			// Template params for "Item Attachments" widget:
-			'widget_item_attachments_params' => array(
-					'limit_attach'       => 1000,
-					'before'             => '<div class="evo_post_attachments"><h3>'.T_('Attachments').':</h3><ul class="evo_files">',
-					'after'              => '</ul></div>',
-					'before_attach'      => '<li class="evo_file">',
-					'after_attach'       => '</li>',
-					'before_attach_size' => ' <span class="evo_file_size">(',
-					'after_attach_size'  => ')</span>',
-				),
-		) );
+if ($Item = &mainlist_get_item()) {	// If Item is found for current filter request (for item type usage 'widget-page'):
+    widget_page_containers($Item->ID, [
+        // The following (optional) params will be used as defaults for widgets included in this container:
+        'container_display_if_empty' => false, // If no widget, don't display container at all
+        // This will enclose each widget in a block:
+        'block_start' => '<div class="evo_widget $wi_class$">',
+        'block_end' => '</div>',
+        // This will enclose the title of each widget:
+        'block_title_start' => '<h3>',
+        'block_title_end' => '</h3>',
+        // Template params for "Item Link" widget
+        'widget_item_link_before' => '<p class="evo_post_link">',
+        'widget_item_link_after' => '</p>',
+        // Template params for "Item Tags" widget
+        'widget_item_tags_before' => '<nav class="small post_tags">' . T_('Tags') . ': ',
+        'widget_item_tags_after' => '</nav>',
+        // Params for skin file "_item_content.inc.php"
+        'widget_item_content_params' => $params,
+        // Template params for "Item Attachments" widget:
+        'widget_item_attachments_params' => [
+            'limit_attach' => 1000,
+            'before' => '<div class="evo_post_attachments"><h3>' . T_('Attachments') . ':</h3><ul class="evo_files">',
+            'after' => '</ul></div>',
+            'before_attach' => '<li class="evo_file">',
+            'after_attach' => '</li>',
+            'before_attach_size' => ' <span class="evo_file_size">(',
+            'after_attach_size' => ')</span>',
+        ],
+    ]);
 }
-?>

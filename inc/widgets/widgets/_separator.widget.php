@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,105 +26,96 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class separator_Widget extends ComponentWidget
 {
-	var $icon = 'window-minimize';
+    public $icon = 'window-minimize';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'separator' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'separator');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('separator-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'separator-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Separator');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     *
+     * @return string The block title, the first 60 characters of the block
+     *                content or an empty string.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->disp_params['title']);
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Separator');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('HTML separator.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        // Demo data:
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'size' => 60,
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 *
-	 * @return string The block title, the first 60 characters of the block
-	 *                content or an empty string.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( $this->disp_params['title'] );
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Blog;
 
-  /**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('HTML separator.');
-	}
+        $this->init_display($params);
 
+        echo $this->disp_params['block_start'];
 
-  /**
-   * Get definitions for editable params
-   *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		// Demo data:
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_('Block title'),
-					'size' => 60,
-				),
-			), parent::get_param_definitions( $params )	);
+        $this->disp_title();
 
-		return $r;
+        echo $this->disp_params['block_body_start'];
 
-	}
+        echo '<hr />';
 
+        echo $this->disp_params['block_body_end'];
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Blog;
+        echo $this->disp_params['block_end'];
 
-		$this->init_display( $params );
-
-		echo $this->disp_params['block_start'];
-
-		$this->disp_title();
-
-		echo $this->disp_params['block_body_start'];
-
-		echo '<hr />';
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

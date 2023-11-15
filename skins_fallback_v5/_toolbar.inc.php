@@ -12,11 +12,12 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-if( ! is_logged_in() )
-{
-	return;
+if (! is_logged_in()) {
+    return;
 }
 
 /**
@@ -25,9 +26,8 @@ if( ! is_logged_in() )
 global $current_User;
 
 global $show_toolbar;
-if( $show_toolbar !== 'hidden' && ! show_toolbar() )
-{	// Don't show toolbar if it is disabled for current page or current User:
-	return;
+if ($show_toolbar !== 'hidden' && ! show_toolbar()) {	// Don't show toolbar if it is disabled for current page or current User:
+    return;
 }
 
 global $Collection, $Blog;
@@ -51,7 +51,7 @@ global $locale_from_get, $disp_handler, $disp_handler_custom, $disp_handler_cust
 
 global $Session;
 
-load_class( '_core/ui/_menu.class.php', 'Menu' );
+load_class('_core/ui/_menu.class.php', 'Menu');
 
 /**
  * @global Menu Evobar menu on the top left (should be useed for content & system management features)
@@ -67,68 +67,58 @@ $topright_Menu = new Menu();
 
 
 // Switch to users locale (if not overridden via REQUEST):
-if( ! $locale_from_get )
-{
-	locale_temp_switch($current_User->locale);
+if (! $locale_from_get) {
+    locale_temp_switch($current_User->locale);
 }
 
 // Let the modules construct the menu:
-modules_call_method( 'build_evobar_menu' );
+modules_call_method('build_evobar_menu');
 
 // Call AdminAfterToolbarInit to notify Plugins that the toolbar menus are initialized. Plugins can add entries.
-$Plugins->trigger_event( 'AdminAfterEvobarInit' );
+$Plugins->trigger_event('AdminAfterEvobarInit');
 
 ?>
 
 <div id="evo_toolbar" class="evo_toolbar_<?php echo $Hit->get_agent_name(); ?>"<?php echo $show_toolbar === 'hidden' ? ' style="display:none"' : ''; ?>>
 	<div class="actions_right">
 		<?php
-			// Display evobar menu:
-			echo $topright_Menu->get_html_menu( NULL, 'evobar-menu-right' );
-		?>
+            // Display evobar menu:
+            echo $topright_Menu->get_html_menu(null, 'evobar-menu-right');
+?>
 	</div>
 	<div class="actions_left">
 		<?php
-		if( $topleft_Menu->has_entires() )
-		{ // The Menu has entries, it means that current User has permission to at least one action
-			// Display evobar menu:
-			echo $topleft_Menu->get_html_menu( NULL, 'evobar-menu-left' );
-		}
-		?>
+if ($topleft_Menu->has_entires()) { // The Menu has entries, it means that current User has permission to at least one action
+    // Display evobar menu:
+    echo $topleft_Menu->get_html_menu(null, 'evobar-menu-left');
+}
+?>
 	</div>
 	<div class="clear"></div>
 </div>
 
 <?php
-	if( ! is_admin_page() && isset( $Blog ) && $Session->get( 'display_includes_'.$Blog->ID ) )
-	{ // Wrap the include with a visible div:
-		echo '<div class="dev-blocks dev-blocks--include dev-blocks--belowtoolbar">';
-		echo '<div class="dev-blocks-name"><b>';
-		if( ! empty( $disp_handler_custom ) )
-		{ // Custom template
-			echo 'CUSTOM Main template: ';
-			if( empty( $disp_handler_custom_found ) )
-			{ // Custom template in NOT found
-				echo $disp_handler_custom.' -&gt; Fallback to:';
-			}
-			else
-			{ // Custom template in found
-				echo $disp_handler_custom.' -&gt; Found:';
-			}
-		}
-		else
-		{ // Default template
-			echo 'Main template: ';
-		}
-		echo '</b> '.rel_path_to_base( $disp_handler ).'</div>';
-		echo '</div>';
-	}
+    if (! is_admin_page() && isset($Blog) && $Session->get('display_includes_' . $Blog->ID)) { // Wrap the include with a visible div:
+        echo '<div class="dev-blocks dev-blocks--include dev-blocks--belowtoolbar">';
+        echo '<div class="dev-blocks-name"><b>';
+        if (! empty($disp_handler_custom)) { // Custom template
+            echo 'CUSTOM Main template: ';
+            if (empty($disp_handler_custom_found)) { // Custom template in NOT found
+                echo $disp_handler_custom . ' -&gt; Fallback to:';
+            } else { // Custom template in found
+                echo $disp_handler_custom . ' -&gt; Found:';
+            }
+        } else { // Default template
+            echo 'Main template: ';
+        }
+        echo '</b> ' . rel_path_to_base($disp_handler) . '</div>';
+        echo '</div>';
+    }
 ?>
 
 
 <?php
-if( ! $locale_from_get )
-{
-	locale_restore_previous();
+if (! $locale_from_get) {
+    locale_restore_previous();
 }
 ?>

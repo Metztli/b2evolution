@@ -11,12 +11,12 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // ------------------ "Compare Main Area" CONTAINER EMBEDDED HERE -------------------
 // Display container and contents:
-skin_container( NT_('Compare Main Area') );
+skin_container(NT_('Compare Main Area'));
 // --------------------- END OF "Compare Main Area" CONTAINER -----------------------
-
-?>

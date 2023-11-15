@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 
 /**
@@ -30,2043 +32,1876 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class ItemLight extends DataObject
 {
-	/**
-	 * Publish date ("Y-m-d H:i:s"). This may be in the future.
-	 * This should get compared to {@link $localtimenow}.
-	 * @var string
-	 */
-	var $issue_date;
-
-	/**
-	 * Last modification date (timestamp)
-	 * This should get compared to {@link $localtimenow}.
-	 * @var integer
-	 */
-	var $datemodified;
-
-	var $short_title;
-
-	var $title;
-
-	var $excerpt;
-
-	var $urltitle;
-
-	var $canonical_slug_ID;
-
-	var $tiny_slug_ID;
-
-	/**
-	 * External URL the item links to (if any).
-	 * @var string
-	 */
-	var $url;
-
-	var $ityp_ID;
-	var $ItemType = NULL;
-
-	/**
-	 * Single/page view
-	 *
-	 * 'normal', '404', 'redirected'
-	 *
-	 * @var string
-	 */
-	var $single_view = 'normal';
-
-	/**
-	 * ID of the main category.
-	 * Use {@link ItemLight::set()} to set it, since other vars get lazily derived from it.
-	 * @var integer
-	 */
-	var $main_cat_ID = 0;
-	/**
-	 * @var Chapter
-	 * @access protected
-	 * @see ItemLight::get_main_Chapter()
-	 */
-	var $main_Chapter;
-
-	/**
-	 * ID of current extra category
-	 * Used to set correct item URL in {@link ItemLight::get_single_url()}
-	 * @var integer
-	 */
-	var $current_extra_cat_ID = NULL;
-
-	/**
-	 * Derived from $main_cat_ID.
-	 *
-	 * @var integer
-	 * @access protected
-	 * @see ItemLight::get_blog_ID()
-	 */
-	var $blog_ID;
-
-	/**
-	 * The Blog of the Item (lazy filled, use {@link get_Blog()} to access it.
-	 * @access protected
-	 * @var Blog
-	 */
-	var $Blog;
-
-	/**
-	 * Array of tags (strings)
-	 *
-	 * Lazy loaded.
-	 * @see ItemLight::get_tags()
-	 * @access protected
-	 * @var array
-	 */
-	var $tags = NULL;
-
-	/**
-	 * Array of checklist lines
-	 * 
-	 * Lazy loaded.
-	 * @see ItemLight::get_checklist_lines()
-	 * @var array
-	 */
-	var $checklist_lines = NULL;
-
-	/**
-	 * Array of dbchanges flag to be able to check modifications, and execute update queries only when required
-	 * Note: Only those updates needs to be tracked in this var which are saved in a relational table ( e.g. tags, extracats )
-	 * @access protected
-	 * @var array
-	 */
-	var $dbchanges_flags = array();
-
-
-	/**
-	 * Constructor
-	 *
-	 * @param object table Database row
-	 * @param string
-	 * @param string
-	 * @param string
-	 * @param string for derived classes
-	 * @param string datetime field name
-	 * @param string datetime field name
-	 * @param string User ID field name
-	 * @param string User ID field name
-	 */
-	function __construct( $db_row = NULL, $dbtable = 'T_items__item', $dbprefix = 'post_', $dbIDname = 'post_ID', $objtype = 'ItemLight',
-	               $datecreated_field = '', $datemodified_field = 'datemodified',
-	               $creator_field = '', $lasteditor_field = '' )
-	{
-		global $localtimenow, $default_locale;
-
-		// Call parent constructor:
-		parent::__construct( $dbtable, $dbprefix, $dbIDname, $datecreated_field, $datemodified_field,
-												$creator_field, $lasteditor_field );
-
-		$this->objtype = $objtype;
-
-		if( $db_row == NULL )
-		{ // New item:
-			$this->ID = 0;
-			$this->set( 'issue_date', date('Y-m-d H:i:s', $localtimenow) );
-		}
-		else
-		{
-			$this->ID = $db_row->$dbIDname;
-			$this->issue_date = $db_row->post_datestart;			// Publication date of a post/item
-			$this->datestart = $db_row->post_datestart;			// This is the same as issue_date, but unfortunatly both of them are used, One of them should be removed
-			$this->datemodified = $db_row->post_datemodified;			// Date of last edit of post/item
-			$this->main_cat_ID = $db_row->post_main_cat_ID;
-			$this->urltitle = $db_row->post_urltitle;
-			$this->canonical_slug_ID = $db_row->post_canonical_slug_ID;
-			$this->tiny_slug_ID = $db_row->post_tiny_slug_ID;
-			$this->short_title = isset( $db_row->post_short_title ) ? $db_row->post_short_title : '';
-			$this->title = $db_row->post_title;
-			$this->excerpt = $db_row->post_excerpt;
-			$this->ityp_ID = $db_row->post_ityp_ID;
-			$this->url = $db_row->post_url;
-			$this->single_view = isset( $db_row->post_single_view ) ? $db_row->post_single_view : $this->single_view;
-			$this->current_extra_cat_ID = isset( $db_row->postcat_cat_ID ) ? $db_row->postcat_cat_ID : $this->current_extra_cat_ID;
-		}
-	}
-
-
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table'=>'T_items__item', 'fk'=>'post_parent_ID', 'msg'=>T_('%d links to child items'),
-					'class'=>'Item', 'class_path'=>'items/model/_item.class.php' ),
-			);
-	}
-
-
-	/**
-	 * Get delete cascade settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_cascades()
-	{
-		return array(
-				array( 'table'=>'T_links', 'fk'=>'link_itm_ID', 'msg'=>T_('%d links to destination items'),
-						'class'=>'Link', 'class_path'=>'links/model/_link.class.php' ),
-				array( 'table'=>'T_postcats', 'fk'=>'postcat_post_ID', 'msg'=>T_('%d links to extra categories') ),
-				array( 'table'=>'T_comments', 'fk'=>'comment_item_ID', 'msg'=>T_('%d comments'),
-						'class'=>'Comment', 'class_path'=>'comments/model/_comment.class.php' ),
-				array( 'table'=>'T_items__version', 'fk'=>'iver_itm_ID', 'msg'=>T_('%d versions') ),
-				array( 'table'=>'T_slug', 'fk'=>'slug_itm_ID', 'msg'=>T_('%d slugs') ),
-				array( 'table'=>'T_items__itemtag', 'fk'=>'itag_itm_ID', 'msg'=>T_('%d links to tags') ),
-				array( 'table'=>'T_items__item_settings', 'fk'=>'iset_item_ID', 'msg'=>T_('%d items settings') ),
-				array( 'table'=>'T_items__subscriptions', 'fk'=>'isub_item_ID', 'msg'=>T_('%d items subscriptions') ),
-				array( 'table'=>'T_items__prerendering', 'fk'=>'itpr_itm_ID', 'msg'=>T_('%d prerendered content') ),
-				array( 'table'=>'T_items__user_data', 'fk'=>'itud_item_ID', 'msg'=>T_('%d recordings of user data for a specific post') ),
-				array( 'table'=>'T_items__checklist_lines', 'fk'=>'check_item_ID', 'msg'=>T_('%d checklist items') ),
-			);
-	}
-
-
-	/**
-	 * Get this class db table config params
-	 *
-	 * @return array
-	 */
-	static function get_class_db_config()
-	{
-		return array(
-			'dbtablename'        => 'T_items__item',
-			'dbprefix'           => 'post_',
-			'dbIDname'           => 'post_ID',
-			'datecreated_field'  => '',
-			'datemodified_field' => 'datemodified',
-			'creator_field'      => '',
-			'lasteditor_field'   => '',
-		);
-	}
-
-
-	/**
-	 * Get the ItemType object for the Item.
-	 *
-	 * @return object ItemType
-	 */
-	function & get_ItemType()
-	{
-		if( empty( $this->ItemType ) )
-		{
-			$ItemTypeCache = & get_ItemTypeCache();
-			$this->ItemType = & $ItemTypeCache->get_by_ID( $this->ityp_ID, false, false );
-		}
-
-		return $this->ItemType;
-	}
-
-
-	/**
-	 * Get setting of the post type
-	 *
-	 * @param string Setting name
-	 * @return string Setting value
-	 */
-	function get_type_setting( $setting_name )
-	{
-		if( ! $this->get_ItemType() )
-		{ // Unknown post type
-			return false;
-		}
-
-		return $this->ItemType->get( $setting_name );
-	}
-
-
-	/**
-	 * Is this a Special post (Page, Intros, Sidebar, Advertisement)
-	 *
-	 * @return boolean
-	 */
-	function is_special()
-	{
-		// Check if this post type usage is NOT "post":
-		return ( $this->get_type_setting( 'usage' ) != 'post' );
-	}
-
-
-	/**
-	 * Is this an Intro post
-	 *
-	 * @return boolean
-	 */
-	function is_intro()
-	{
-		if( ! $this->get_ItemType() )
-		{	// Unknown post type:
-			return false;
-		}
-
-		return $this->ItemType->is_intro();
-	}
-
-
-	/**
-	 * Is this a featured post (any intro post will return false even if it's checked as "featured")
-	 *
-	 * @return boolean
-	 */
-	function is_featured()
-	{
-		return ! empty( $this->featured ) && ! $this->is_intro();
-	}
-
-
-	/**
-	 * Generate a single URL for this Item
-	 *
-	 * Used by Item->get_permanent_url()
-	 *
-	 * @param boolean allow redir to permalink, true | false | 'auto' to prevent redit only if single isn't the current permalink type
-	 * @param string base url to use
-	 * @param string glue between url params
-	 * @param integer Collection ID, to use URL of first category of this Item from the collection, NULL - use current collection when it is allowed to stay in same collection when cross-posted
-	 * @param integer Category ID, to use URL of this Item from the requested category
-	 * @return string
-	 */
-	function get_single_url( $allow_redir = true, $blogurl = '', $glue = '&amp;', $blog_ID = NULL, $cat_ID = NULL )
-	{
-		$this->get_Blog();
-
-		if( empty( $blogurl ) )
-		{
-			$blogurl = $this->Blog->gen_blogurl();
-		}
-
-		$single_links = $this->Blog->get_setting('single_links');
-
- 		if( !empty( $this->urltitle ) && $single_links != 'param_num' )
-		{	// We can and we want to use the url title:
-			$urlparam = 'title='.$this->urltitle;
-			$urltail = $this->urltitle;
-		}
-		else
-		{
-			$urlparam = 'p='.$this->ID;
-			$urltail = 'p'.$this->ID;
-		}
-
-		switch( $single_links )
-		{
-			case 'param_num':
-			case 'param_title':
-				$permalink = url_add_param( $blogurl, $urlparam.$glue.'more=1', $glue );
-				break;
-
-			case 'y':
-				$permalink = url_add_tail( $blogurl, mysql2date('/Y/', $this->issue_date).$urltail );
-				break;
-
-			case 'ym':
-				$permalink = url_add_tail( $blogurl, mysql2date('/Y/m/', $this->issue_date).$urltail );
-				break;
-
-			case 'ymd':
-				$permalink = url_add_tail( $blogurl, mysql2date('/Y/m/d/', $this->issue_date).$urltail );
-				break;
-
-			case 'subchap':
-			case 'chapters':
-				if( $blog_ID === NULL )
-				{	// Try to get current collection:
-					global $blog, $Settings;
-					if( ! empty( $blog ) && ( $item_Blog = & $this->get_Blog() ) && $item_Blog->get_setting( 'allow_crosspost_urls' ) )
-					{	// If it is allowed to stay in same collection when cross-posted:
-						$blog_ID = $blog;
-					}
-				}
-				if( $blog_ID !== NULL && $blogurl != $this->Blog->gen_blogurl() )
-				{	// If requested collection is not collection of main category:
-					if( ! empty( $this->current_extra_cat_ID ) )
-					{	// Use first detected extra category:
-						$ChapterCache = & get_ChapterCache();
-						$url_Chapter = & $ChapterCache->get_by_ID( $this->current_extra_cat_ID, false, false );
-					}
-					// Try to find first extra or requested category of this Item from the requested collection:
-					if( empty( $url_Chapter ) )
-					{	// If we know what collection use to search category, but exclude main collection in order to use main category instead of extra:
-						$item_chapters = $this->get_Chapters();
-						foreach( $item_chapters as $item_Chapter )
-						{
-							if( $item_Chapter->get( 'blog_ID' ) == $blog_ID &&
-							  ( $cat_ID === NULL || $item_Chapter->ID == $cat_ID ) )
-							{	// Use first found or requested category of this Item from the requested collection:
-								$url_Chapter = $item_Chapter;
-								break;
-							}
-						}
-					}
-				}
-				if( empty( $url_Chapter ) )
-				{	// Use main category if another is not requested or cannot be detected above:
-					$url_Chapter = & $this->get_main_Chapter();
-				}
-				$chapter_url = ( $single_links == 'subchap' ? $url_Chapter->urlname.'/' : $url_Chapter->get_url_path() );
-				$permalink = url_add_tail( $blogurl, '/'.$chapter_url.$urltail );
-				break;
-
-			case 'short':
-			default:
-				$permalink = url_add_tail( $blogurl, '/'.$urltail );
-				break;
-		}
-
-		if( $allow_redir == 'auto' )
-		{	// We allow redir only if the permalink is already single.
-			// In other words: we implicitely allow redir if there is no need to redir!
-			// and more useful: we explicitly prevent redir if we know it would take place.
-			$allow_redir = ($this->Blog->get_setting( 'permalinks' ) == 'single');
-		}
-
-		if( ! $allow_redir )
-		{
-			$permalink = url_add_param( $permalink, 'redir=no', $glue );
-		}
-
-		return $permalink;
-	}
-
-
-	/**
-	 * Generate a link to the post in the archives
-	 *
- 	 * @param string base url to use
-	 * @param string glue between url params
-	 */
-	function get_archive_url( $blogurl = '', $glue = '&amp;' )
-	{
-		$this->get_Blog();
-
-		if( empty( $blogurl ) )
-		{
-			$blogurl = $this->Blog->gen_blogurl();
-		}
-
-		$permalink = $this->Blog->get_archive_url( $this->issue_date, $glue );
-
-		return $permalink.'#item_'.$this->ID;
-	}
-
-
-	/**
-	 * Generate a link to the post in the category
-	 *
- 	 * @param string base url to use
-	 * @param string glue between url params
-	 */
-	function get_chapter_url( $blogurl = '', /* TODO: not used.. */ $glue = '&amp;' )
-	{
-		if( empty( $blogurl ) )
-		{
-			$this->get_Blog();
-			$blogurl = $this->Blog->gen_blogurl();
-		}
-
-		$main_Chapter = & $this->get_main_Chapter();
-		$permalink = url_add_tail( $blogurl, '/'.$main_Chapter->get_url_path() );
-
-		return $permalink.'#item_'.$this->ID;
-	}
-
-
-	/**
-	 * Generate the permalink for the item.
-    *
-    * Uses Item->get_single_url()
-    * Used by Itel->get_item_url()
-	 *
-	 * Note: Each item has an unique permalink at any given time.
-	 * Some admin settings may however change the permalinks for previous items.
-	 * Note: This actually only returns the URL, to get a real link, use {@link Item::get_permanent_link()}
-	 *
-	 * @todo archives modes in clean URL mode
-	 *
-	 * @param string Permalink type for case when it cannot be automatically detected from item settings (single, archive, subchap)
-	 * @param string Base url to use
-	 * @param string Glue between url params
-	 * @param array What permanent types should be ignored to don't return a permanent URL
-	 * @param integer Collection ID, to use URL of first category of this Item from the collection
-	 * @param integer Category ID, to use URL of this Item from the requested category
-	 * @return string|boolean Permalink URL | FALSE when some permanent type must be ignored
-	 */
-	function get_permanent_url( $permalink_type = '', $blogurl = '', $glue = '&amp;', $ignore_types = array(), $blog_ID = NULL, $cat_ID = NULL )
-	{
-		// Get permalink type depending on this item settings:
-		$permalink_type = $this->get_permalink_type( $permalink_type );
-
-		if( ! empty( $ignore_types ) && in_array( $permalink_type, $ignore_types ) )
-		{	// This permanent type must be ignored:
-			return false;
-		}
-
-		switch( $this->get( 'single_view' ) )
-		{	// Force permanent url depending on item setting "Single/page view":
-			case '404':
-				// Don't allow permanent url for Item with 404 page instead of single view:
-				return false;
-			case 'redirected':
-				if( empty( $this->url ) )
-				{	// Force to 404 page when url is not provided for this Item:
-					return false;
-				}
-				else
-				{	// Use a specified url instead of original permanent url of this Item:
-					return $this->url;
-				}
-		}
-
-		switch( $permalink_type )
-		{
-			case 'archive':
-				return $this->get_archive_url( $blogurl, $glue );
-
-			case 'subchap':
-				return $this->get_chapter_url( $blogurl, $glue );
-
-			case 'front':
-				// Link to collection front page:
-				return $this->Blog->gen_blogurl();
-
-			case 'none':
-				// This is a silent fallback when we try to permalink to an Item that cannot be addressed directly:
-				return $this->Blog->gen_blogurl();
-
-			case 'tag':
-				// Link to permanent url of first tag:
-				$item_tags = $this->get_tags();
-				if( ! empty( $item_tags ) )
-				{	// If Item has at least one tag:
-					$item_Blog = & $this->get_Blog();
-					return $item_Blog->gen_tag_url( array_shift( $item_tags ), 1, $glue );
-				}
-				// else fallback to category permanent url:
-
-			case 'cat':
-				// Link to permanent url of main chapter:
-				$this->get_main_Chapter();
-				return $this->main_Chapter->get_permanent_url( NULL, $blogurl, 1, NULL, $glue );
-
-			case 'single':
-			default:
-				return $this->get_single_url( true, $blogurl, $glue, $blog_ID, $cat_ID );
-		}
-	}
-
-
-	/**
-	 * Get permalink type
-	 *
-	 * @return string Permalink type: front, none, cat, tag, single, archive, subchap
-	 */
-	function get_permalink_type( $default_permalink_type = '' )
-	{
-		if( $ItemType = & $this->get_ItemType() )
-		{	// Get type usage of this item:
-			$item_type_usage = $ItemType->get( 'usage' );
-		}
-		else
-		{	// Use default item type usage:
-			$item_type_usage = 'post';
-		}
-
-		$this->load_Blog();
-
-		// Special Items types/usages will have special permalink types
-		if( ( $this->Blog->get_setting( 'front_disp' ) == 'page' &&
-		      $this->Blog->get_setting( 'front_post_ID' ) == $this->ID ) ||
-		    ( $this->Blog->get_setting( 'front_disp' ) == 'single' &&
-		      ( $first_mainlist_Item = & $this->Blog->get_first_mainlist_Item() ) &&
-		      $first_mainlist_Item->ID == $this->ID ) )
-		{ // This item is used as front specific page or as first post on the blog's home
-			$permalink_type = 'front';
-		}
-		elseif( $item_type_usage != 'post' ) // page, intros, sidebar and other not "post"
-		{	// This is not an "in stream" post:
-			if( in_array( $item_type_usage, array( 'intro-front', 'intro-main' ) ) )
-			{	// This type of post is not allowed to have a permalink:
-				$permalink_type = 'front';
-			}
-			elseif( in_array( $item_type_usage, array( 'special', 'content-block' ) ) )
-			{	// This type of post is not allowed to have a permalink:
-				$permalink_type = 'none';
-			}
-			elseif( in_array( $item_type_usage, array( 'intro-cat', 'intro-sub', 'intro-all' ) ) )
-			{	// This post has a permanent URL as url to main chapter:
-				$permalink_type = 'cat';
-			}
-			elseif( $item_type_usage == 'intro-tag' )
-			{	// This post has a permanent URL as url to tag page:
-				$permalink_type = 'tag';
-			}
-			else
-			{	// Allowed to have a permalink:
-				// force use of single url:
-				$permalink_type = 'single';
-			}
-		}
-		elseif( empty( $permalink_type ) )
-		{	// Normal "in stream" post:
-			// Use default from collection settings (may be an "in stream" URL):
-			$permalink_type = $this->Blog->get_setting( 'permalinks' );
-		}
-		else
-		{	// Use type from param if it is not defined in all other cases above:
-			$permalink_type = $default_permalink_type;
-		}
-
-		return $permalink_type;
-	}
-
-
-	/**
-	 * Template function: list all the category names
-	 *
-	 * @param string Output format for each cat, see {@link format_to_output()}
-	 */
-	function categories( $params = array() )
-	{
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'before'          => ' ',
-				'after'           => ' ',
-				'include_main'    => true,
-				'include_other'   => true,
-				'include_external'=> true,
-				'before_main'     => '',       // string fo display before the MAIN category,
-				'after_main'      => '',       // string fo display after the MAIN category
-				'before_other'    => '',       // string fo display before OTHER categories
-				'after_other'     => '',       // string fo display after OTHER categories
-				'before_external' => '<em>',   // string fo display before EXTERNAL categories
-				'after_external'  => '</em>',  // string fo display after EXTERNAL categories,
-				'separator'       => ', ',
-				'link_categories' => true,
-				'link_title'      => '#',
-				'format'          => 'htmlbody',
-				'show_locked'     => false,
-			), $params );
-
-
-		if( $params['link_title'] == '#' )
-		{ /* TRANS: When the categories for a specific post are displayed, the user can click
-					on these cats to browse them, this is the default href title displayed there */
-			$params['link_title'] = T_('Browse category');
-		}
-
-		$categoryNames = array();
-		foreach( $this->get_Chapters() as $Chapter )
-		{
-			$cat_name = $Chapter->dget( 'name' );
-
-			if( $params['link_categories'] )
-			{ // we want to display links
-				$lBlog = & $Chapter->get_Blog();
-				$cat_name = '<a href="'.$Chapter->get_permanent_url().'" title="'.htmlspecialchars($params['link_title']).'">'.$cat_name.'</a>';
-			}
-
-			if( $Chapter->ID == $this->main_cat_ID )
-			{ // We are displaying the main cat!
-				if( !$params['include_main'] )
-				{ // ignore main cat !!!
-					continue;
-				}
-				$cat_name = $params['before_main'].$cat_name.$params['after_main'];
-			}
-			elseif( $Chapter->blog_ID == $this->blog_ID )
-			{ // We are displaying another cat in the same blog
-				if( !$params['include_other'] )
-				{ // ignore main cat !!!
-					continue;
-				}
-				$cat_name = $params['before_other'].$cat_name.$params['after_other'];
-			}
-			else
-			{ // We are displaying an external cat (in another blog)
-				if( !$params['include_external'] )
-				{ // ignore main cat !!!
-					continue;
-				}
-				$cat_name = $params['before_external'].$cat_name.$params['after_external'];
-			}
-
-			if( $Chapter->lock && $params[ 'show_locked' ] )
-			{
-				$cat_name .= '<span style="padding-left:5px;" >'.get_icon( 'file_not_allowed', 'imgtag', array( 'title' => T_('Locked')) ).'</span>';
-			}
-
-			$categoryNames[] = $cat_name;
-		}
-
-		echo $params['before'];
-		echo format_to_output( implode( $params['separator'], $categoryNames ), $params['format'] );
- 		echo $params['after'];
-	}
-
-
-	/**
-	 * Add nav_target param into the end of the url, but only if it is necessary
-	 *
-	 * @param string the url
-	 * @param string the current blog or current skin post_navigation setting
-	 * @param integer the ID of the navigation target
-	 * @param string glue
-	 * @param integer ID of Collection of the URL
-	 * @return string the received url or the received url extended with the navigation param
-	 */
-	function add_navigation_param( $url, $post_navigation, $nav_target, $glue = '&amp;', $coll_ID = NULL )
-	{
-		if( empty( $url ) || empty( $nav_target ) )
-		{ // the url or the navigation target is not set we can't modify anything
-			return $url;
-		}
-
-		switch( $post_navigation )
-		{
-			case 'same_category': // navigate through the selected category
-				if( $this->main_cat_ID != $nav_target )
-				{
-					if( $coll_ID === NULL ||
-					    ( ( $ChapterCache = & get_ChapterCache() ) &&
-					      ( $target_Chapter = & $ChapterCache->get_by_ID( $nav_target, false, false ) ) &&
-					      $target_Chapter->get( 'blog_ID' ) == $coll_ID
-					    )
-					  )
-					{	// If the Category is from the same Collection as the URL:
-						$url = url_add_param( $url, 'cat='.$nav_target, $glue );
-					}
-				}
-				break;
-
-			case 'same_tag': // navigate through the selected tag
-				$tags = $this->get_tags();
-				if( count( $tags ) > 1 )
-				{
-					$url = url_add_param( $url, 'tag='.$nav_target, $glue );
-				}
-				break;
-
-			case 'same_author': // navigate through this item author's posts ( param not needed because a post always has only one author )
-			case 'same_blog': // by default don't add any param
-			default:
-				break;
-		}
-
-		return $url;
-	}
-
-
-	/**
-	 * Template function: display main category name
-	 *
-	 * @param string Output format, see {@link format_to_output()}
-	 * @param array Params
-	 */
-	function main_category( $format = 'htmlbody', $params = array() )
-	{
-		$params = array_merge( array(
-				'display_link' => false, // TRUE to display category's name as link
-				'link_class'   => ''
-			), $params );
-
-		$Chapter = & $this->get_main_Chapter();
-
-		if( $params['display_link'] )
-		{	// Display category's name as link
-
-			$link_class = '';
-			if( !empty( $params['link_class'] ) )
-			{	// Set attribute for class
-				$link_class = 'class="'.$params['link_class'].'"';
-			}
-
-			echo '<a href="'.$Chapter->get_permanent_url().'"'.$link_class.'>';
-		}
-
-		// Display category's name
-		$Chapter->disp( 'name', $format );
-
-		if( $params['display_link'] )
-		{
-			echo '</a>';
-		}
-	}
-
-
-	/**
-	 * Get list of Chapter objects.
-	 *
-	 * sam2kb> TODO: Cache item cat IDs into Item::categories property instead of global $cache_postcats
-	 *
-	 * @return array of {@link Chapter chapters} (references)
-	 */
-	function get_Chapters()
-	{
-		global $DB, $preview, $postIDlist, $cache_postcats;
-
-		if( $preview )
-		{	// Preview mode
-			global $extracats, $post_category;
-
-			$extracats = param( 'post_extracats', 'array:integer', array() );
-			if( ( ! empty( $post_category ) ) && ( ! in_array( $post_category, $extracats ) ) )
-			{
-				$extracats[] = $post_category;
-			}
-			$categoryIDs = $extracats;
-		}
-		elseif( empty( $this->ID ) )
-		{ // This item doesn't exist yet
-			$categoryIDs = NULL;
-		}
-		else
-		{
-			$search_post_ids = empty( $postIDlist ) ? NULL : explode( ',', $postIDlist );
-			if( empty( $search_post_ids ) || !in_array( $this->ID, $search_post_ids ) )
-			{	// Load cats for current item
-				$categoryIDs = postcats_get_byID( $this->ID );
-			}
-			else
-			{	// Load cats for items list
-				if( ! isset($cache_postcats[$this->ID]) && ! empty( $postIDlist ) )
-				{	// Add to cache
-					$sql = "SELECT postcat_post_ID, postcat_cat_ID
+    /**
+     * Publish date ("Y-m-d H:i:s"). This may be in the future.
+     * This should get compared to {@link $localtimenow}.
+     * @var string
+     */
+    public $issue_date;
+
+    /**
+     * Last modification date (timestamp)
+     * This should get compared to {@link $localtimenow}.
+     * @var integer
+     */
+    public $datemodified;
+
+    public $short_title;
+
+    public $title;
+
+    public $excerpt;
+
+    public $urltitle;
+
+    public $canonical_slug_ID;
+
+    public $tiny_slug_ID;
+
+    /**
+     * External URL the item links to (if any).
+     * @var string
+     */
+    public $url;
+
+    public $ityp_ID;
+
+    public $ItemType = null;
+
+    /**
+     * Single/page view
+     *
+     * 'normal', '404', 'redirected'
+     *
+     * @var string
+     */
+    public $single_view = 'normal';
+
+    /**
+     * ID of the main category.
+     * Use {@link ItemLight::set()} to set it, since other vars get lazily derived from it.
+     * @var integer
+     */
+    public $main_cat_ID = 0;
+
+    /**
+     * @var Chapter
+     * @access protected
+     * @see ItemLight::get_main_Chapter()
+     */
+    public $main_Chapter;
+
+    /**
+     * ID of current extra category
+     * Used to set correct item URL in {@link ItemLight::get_single_url()}
+     * @var integer
+     */
+    public $current_extra_cat_ID = null;
+
+    /**
+     * Derived from $main_cat_ID.
+     *
+     * @var integer
+     * @access protected
+     * @see ItemLight::get_blog_ID()
+     */
+    public $blog_ID;
+
+    /**
+     * The Blog of the Item (lazy filled, use {@link get_Blog()} to access it.
+     * @access protected
+     * @var Blog
+     */
+    public $Blog;
+
+    /**
+     * Array of tags (strings)
+     *
+     * Lazy loaded.
+     * @see ItemLight::get_tags()
+     * @access protected
+     * @var array
+     */
+    public $tags = null;
+
+    /**
+     * Array of checklist lines
+     *
+     * Lazy loaded.
+     * @see ItemLight::get_checklist_lines()
+     * @var array
+     */
+    public $checklist_lines = null;
+
+    /**
+     * Array of dbchanges flag to be able to check modifications, and execute update queries only when required
+     * Note: Only those updates needs to be tracked in this var which are saved in a relational table ( e.g. tags, extracats )
+     * @access protected
+     * @var array
+     */
+    public $dbchanges_flags = [];
+
+    /**
+     * Constructor
+     *
+     * @param object table Database row
+     * @param string
+     * @param string
+     * @param string
+     * @param string for derived classes
+     * @param string datetime field name
+     * @param string datetime field name
+     * @param string User ID field name
+     * @param string User ID field name
+     */
+    public function __construct(
+        $db_row = null,
+        $dbtable = 'T_items__item',
+        $dbprefix = 'post_',
+        $dbIDname = 'post_ID',
+        $objtype = 'ItemLight',
+        $datecreated_field = '',
+        $datemodified_field = 'datemodified',
+        $creator_field = '',
+        $lasteditor_field = ''
+    ) {
+        global $localtimenow, $default_locale;
+
+        // Call parent constructor:
+        parent::__construct(
+            $dbtable,
+            $dbprefix,
+            $dbIDname,
+            $datecreated_field,
+            $datemodified_field,
+            $creator_field,
+            $lasteditor_field
+        );
+
+        $this->objtype = $objtype;
+
+        if ($db_row == null) { // New item:
+            $this->ID = 0;
+            $this->set('issue_date', date('Y-m-d H:i:s', $localtimenow));
+        } else {
+            $this->ID = $db_row->$dbIDname;
+            $this->issue_date = $db_row->post_datestart;			// Publication date of a post/item
+            $this->datestart = $db_row->post_datestart;			// This is the same as issue_date, but unfortunatly both of them are used, One of them should be removed
+            $this->datemodified = $db_row->post_datemodified;			// Date of last edit of post/item
+            $this->main_cat_ID = $db_row->post_main_cat_ID;
+            $this->urltitle = $db_row->post_urltitle;
+            $this->canonical_slug_ID = $db_row->post_canonical_slug_ID;
+            $this->tiny_slug_ID = $db_row->post_tiny_slug_ID;
+            $this->short_title = isset($db_row->post_short_title) ? $db_row->post_short_title : '';
+            $this->title = $db_row->post_title;
+            $this->excerpt = $db_row->post_excerpt;
+            $this->ityp_ID = $db_row->post_ityp_ID;
+            $this->url = $db_row->post_url;
+            $this->single_view = isset($db_row->post_single_view) ? $db_row->post_single_view : $this->single_view;
+            $this->current_extra_cat_ID = isset($db_row->postcat_cat_ID) ? $db_row->postcat_cat_ID : $this->current_extra_cat_ID;
+        }
+    }
+
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_items__item',
+                'fk' => 'post_parent_ID',
+                'msg' => T_('%d links to child items'),
+                'class' => 'Item',
+                'class_path' => 'items/model/_item.class.php',
+            ],
+        ];
+    }
+
+    /**
+     * Get delete cascade settings
+     *
+     * @return array
+     */
+    public static function get_delete_cascades()
+    {
+        return [
+            [
+                'table' => 'T_links',
+                'fk' => 'link_itm_ID',
+                'msg' => T_('%d links to destination items'),
+                'class' => 'Link',
+                'class_path' => 'links/model/_link.class.php',
+            ],
+            [
+                'table' => 'T_postcats',
+                'fk' => 'postcat_post_ID',
+                'msg' => T_('%d links to extra categories'),
+            ],
+            [
+                'table' => 'T_comments',
+                'fk' => 'comment_item_ID',
+                'msg' => T_('%d comments'),
+                'class' => 'Comment',
+                'class_path' => 'comments/model/_comment.class.php',
+            ],
+            [
+                'table' => 'T_items__version',
+                'fk' => 'iver_itm_ID',
+                'msg' => T_('%d versions'),
+            ],
+            [
+                'table' => 'T_slug',
+                'fk' => 'slug_itm_ID',
+                'msg' => T_('%d slugs'),
+            ],
+            [
+                'table' => 'T_items__itemtag',
+                'fk' => 'itag_itm_ID',
+                'msg' => T_('%d links to tags'),
+            ],
+            [
+                'table' => 'T_items__item_settings',
+                'fk' => 'iset_item_ID',
+                'msg' => T_('%d items settings'),
+            ],
+            [
+                'table' => 'T_items__subscriptions',
+                'fk' => 'isub_item_ID',
+                'msg' => T_('%d items subscriptions'),
+            ],
+            [
+                'table' => 'T_items__prerendering',
+                'fk' => 'itpr_itm_ID',
+                'msg' => T_('%d prerendered content'),
+            ],
+            [
+                'table' => 'T_items__user_data',
+                'fk' => 'itud_item_ID',
+                'msg' => T_('%d recordings of user data for a specific post'),
+            ],
+            [
+                'table' => 'T_items__checklist_lines',
+                'fk' => 'check_item_ID',
+                'msg' => T_('%d checklist items'),
+            ],
+        ];
+    }
+
+    /**
+     * Get this class db table config params
+     *
+     * @return array
+     */
+    public static function get_class_db_config()
+    {
+        return [
+            'dbtablename' => 'T_items__item',
+            'dbprefix' => 'post_',
+            'dbIDname' => 'post_ID',
+            'datecreated_field' => '',
+            'datemodified_field' => 'datemodified',
+            'creator_field' => '',
+            'lasteditor_field' => '',
+        ];
+    }
+
+    /**
+     * Get the ItemType object for the Item.
+     *
+     * @return object ItemType
+     */
+    public function &get_ItemType()
+    {
+        if (empty($this->ItemType)) {
+            $ItemTypeCache = &get_ItemTypeCache();
+            $this->ItemType = &$ItemTypeCache->get_by_ID($this->ityp_ID, false, false);
+        }
+
+        return $this->ItemType;
+    }
+
+    /**
+     * Get setting of the post type
+     *
+     * @param string Setting name
+     * @return string Setting value
+     */
+    public function get_type_setting($setting_name)
+    {
+        if (! $this->get_ItemType()) { // Unknown post type
+            return false;
+        }
+
+        return $this->ItemType->get($setting_name);
+    }
+
+    /**
+     * Is this a Special post (Page, Intros, Sidebar, Advertisement)
+     *
+     * @return boolean
+     */
+    public function is_special()
+    {
+        // Check if this post type usage is NOT "post":
+        return ($this->get_type_setting('usage') != 'post');
+    }
+
+    /**
+     * Is this an Intro post
+     *
+     * @return boolean
+     */
+    public function is_intro()
+    {
+        if (! $this->get_ItemType()) {	// Unknown post type:
+            return false;
+        }
+
+        return $this->ItemType->is_intro();
+    }
+
+    /**
+     * Is this a featured post (any intro post will return false even if it's checked as "featured")
+     *
+     * @return boolean
+     */
+    public function is_featured()
+    {
+        return ! empty($this->featured) && ! $this->is_intro();
+    }
+
+    /**
+     * Generate a single URL for this Item
+     *
+     * Used by Item->get_permanent_url()
+     *
+     * @param boolean allow redir to permalink, true | false | 'auto' to prevent redit only if single isn't the current permalink type
+     * @param string base url to use
+     * @param string glue between url params
+     * @param integer Collection ID, to use URL of first category of this Item from the collection, NULL - use current collection when it is allowed to stay in same collection when cross-posted
+     * @param integer Category ID, to use URL of this Item from the requested category
+     * @return string
+     */
+    public function get_single_url($allow_redir = true, $blogurl = '', $glue = '&amp;', $blog_ID = null, $cat_ID = null)
+    {
+        $this->get_Blog();
+
+        if (empty($blogurl)) {
+            $blogurl = $this->Blog->gen_blogurl();
+        }
+
+        $single_links = $this->Blog->get_setting('single_links');
+
+        if (! empty($this->urltitle) && $single_links != 'param_num') {	// We can and we want to use the url title:
+            $urlparam = 'title=' . $this->urltitle;
+            $urltail = $this->urltitle;
+        } else {
+            $urlparam = 'p=' . $this->ID;
+            $urltail = 'p' . $this->ID;
+        }
+
+        switch ($single_links) {
+            case 'param_num':
+            case 'param_title':
+                $permalink = url_add_param($blogurl, $urlparam . $glue . 'more=1', $glue);
+                break;
+
+            case 'y':
+                $permalink = url_add_tail($blogurl, mysql2date('/Y/', $this->issue_date) . $urltail);
+                break;
+
+            case 'ym':
+                $permalink = url_add_tail($blogurl, mysql2date('/Y/m/', $this->issue_date) . $urltail);
+                break;
+
+            case 'ymd':
+                $permalink = url_add_tail($blogurl, mysql2date('/Y/m/d/', $this->issue_date) . $urltail);
+                break;
+
+            case 'subchap':
+            case 'chapters':
+                if ($blog_ID === null) {	// Try to get current collection:
+                    global $blog, $Settings;
+                    if (! empty($blog) && ($item_Blog = &$this->get_Blog()) && $item_Blog->get_setting('allow_crosspost_urls')) {	// If it is allowed to stay in same collection when cross-posted:
+                        $blog_ID = $blog;
+                    }
+                }
+                if ($blog_ID !== null && $blogurl != $this->Blog->gen_blogurl()) {	// If requested collection is not collection of main category:
+                    if (! empty($this->current_extra_cat_ID)) {	// Use first detected extra category:
+                        $ChapterCache = &get_ChapterCache();
+                        $url_Chapter = &$ChapterCache->get_by_ID($this->current_extra_cat_ID, false, false);
+                    }
+                    // Try to find first extra or requested category of this Item from the requested collection:
+                    if (empty($url_Chapter)) {	// If we know what collection use to search category, but exclude main collection in order to use main category instead of extra:
+                        $item_chapters = $this->get_Chapters();
+                        foreach ($item_chapters as $item_Chapter) {
+                            if ($item_Chapter->get('blog_ID') == $blog_ID &&
+                              ($cat_ID === null || $item_Chapter->ID == $cat_ID)) {	// Use first found or requested category of this Item from the requested collection:
+                                $url_Chapter = $item_Chapter;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (empty($url_Chapter)) {	// Use main category if another is not requested or cannot be detected above:
+                    $url_Chapter = &$this->get_main_Chapter();
+                }
+                $chapter_url = ($single_links == 'subchap' ? $url_Chapter->urlname . '/' : $url_Chapter->get_url_path());
+                $permalink = url_add_tail($blogurl, '/' . $chapter_url . $urltail);
+                break;
+
+            case 'short':
+            default:
+                $permalink = url_add_tail($blogurl, '/' . $urltail);
+                break;
+        }
+
+        if ($allow_redir == 'auto') {	// We allow redir only if the permalink is already single.
+            // In other words: we implicitely allow redir if there is no need to redir!
+            // and more useful: we explicitly prevent redir if we know it would take place.
+            $allow_redir = ($this->Blog->get_setting('permalinks') == 'single');
+        }
+
+        if (! $allow_redir) {
+            $permalink = url_add_param($permalink, 'redir=no', $glue);
+        }
+
+        return $permalink;
+    }
+
+    /**
+     * Generate a link to the post in the archives
+     *
+     * @param string base url to use
+     * @param string glue between url params
+     */
+    public function get_archive_url($blogurl = '', $glue = '&amp;')
+    {
+        $this->get_Blog();
+
+        if (empty($blogurl)) {
+            $blogurl = $this->Blog->gen_blogurl();
+        }
+
+        $permalink = $this->Blog->get_archive_url($this->issue_date, $glue);
+
+        return $permalink . '#item_' . $this->ID;
+    }
+
+    /**
+     * Generate a link to the post in the category
+     *
+     * @param string base url to use
+     * @param string glue between url params
+     */
+    public function get_chapter_url($blogurl = '', /* TODO: not used.. */ $glue = '&amp;')
+    {
+        if (empty($blogurl)) {
+            $this->get_Blog();
+            $blogurl = $this->Blog->gen_blogurl();
+        }
+
+        $main_Chapter = &$this->get_main_Chapter();
+        $permalink = url_add_tail($blogurl, '/' . $main_Chapter->get_url_path());
+
+        return $permalink . '#item_' . $this->ID;
+    }
+
+    /**
+     * Generate the permalink for the item.
+     *
+     * Uses Item->get_single_url()
+     * Used by Itel->get_item_url()
+     *
+     * Note: Each item has an unique permalink at any given time.
+     * Some admin settings may however change the permalinks for previous items.
+     * Note: This actually only returns the URL, to get a real link, use {@link Item::get_permanent_link()}
+     *
+     * @todo archives modes in clean URL mode
+     *
+     * @param string Permalink type for case when it cannot be automatically detected from item settings (single, archive, subchap)
+     * @param string Base url to use
+     * @param string Glue between url params
+     * @param array What permanent types should be ignored to don't return a permanent URL
+     * @param integer Collection ID, to use URL of first category of this Item from the collection
+     * @param integer Category ID, to use URL of this Item from the requested category
+     * @return string|boolean Permalink URL | FALSE when some permanent type must be ignored
+     */
+    public function get_permanent_url($permalink_type = '', $blogurl = '', $glue = '&amp;', $ignore_types = [], $blog_ID = null, $cat_ID = null)
+    {
+        // Get permalink type depending on this item settings:
+        $permalink_type = $this->get_permalink_type($permalink_type);
+
+        if (! empty($ignore_types) && in_array($permalink_type, $ignore_types)) {	// This permanent type must be ignored:
+            return false;
+        }
+
+        switch ($this->get('single_view')) {	// Force permanent url depending on item setting "Single/page view":
+            case '404':
+                // Don't allow permanent url for Item with 404 page instead of single view:
+                return false;
+            case 'redirected':
+                if (empty($this->url)) {	// Force to 404 page when url is not provided for this Item:
+                    return false;
+                } else {	// Use a specified url instead of original permanent url of this Item:
+                    return $this->url;
+                }
+        }
+
+        switch ($permalink_type) {
+            case 'archive':
+                return $this->get_archive_url($blogurl, $glue);
+
+            case 'subchap':
+                return $this->get_chapter_url($blogurl, $glue);
+
+            case 'front':
+                // Link to collection front page:
+                return $this->Blog->gen_blogurl();
+
+            case 'none':
+                // This is a silent fallback when we try to permalink to an Item that cannot be addressed directly:
+                return $this->Blog->gen_blogurl();
+
+            case 'tag':
+                // Link to permanent url of first tag:
+                $item_tags = $this->get_tags();
+                if (! empty($item_tags)) {	// If Item has at least one tag:
+                    $item_Blog = &$this->get_Blog();
+                    return $item_Blog->gen_tag_url(array_shift($item_tags), 1, $glue);
+                }
+                // else fallback to category permanent url:
+
+                // no break
+            case 'cat':
+                // Link to permanent url of main chapter:
+                $this->get_main_Chapter();
+                return $this->main_Chapter->get_permanent_url(null, $blogurl, 1, null, $glue);
+
+            case 'single':
+            default:
+                return $this->get_single_url(true, $blogurl, $glue, $blog_ID, $cat_ID);
+        }
+    }
+
+    /**
+     * Get permalink type
+     *
+     * @return string Permalink type: front, none, cat, tag, single, archive, subchap
+     */
+    public function get_permalink_type($default_permalink_type = '')
+    {
+        if ($ItemType = &$this->get_ItemType()) {	// Get type usage of this item:
+            $item_type_usage = $ItemType->get('usage');
+        } else {	// Use default item type usage:
+            $item_type_usage = 'post';
+        }
+
+        $this->load_Blog();
+
+        // Special Items types/usages will have special permalink types
+        if (($this->Blog->get_setting('front_disp') == 'page' &&
+              $this->Blog->get_setting('front_post_ID') == $this->ID) ||
+            ($this->Blog->get_setting('front_disp') == 'single' &&
+              ($first_mainlist_Item = &$this->Blog->get_first_mainlist_Item()) &&
+              $first_mainlist_Item->ID == $this->ID)) { // This item is used as front specific page or as first post on the blog's home
+            $permalink_type = 'front';
+        } elseif ($item_type_usage != 'post') { // page, intros, sidebar and other not "post"
+            // This is not an "in stream" post:
+            if (in_array($item_type_usage, ['intro-front', 'intro-main'])) {	// This type of post is not allowed to have a permalink:
+                $permalink_type = 'front';
+            } elseif (in_array($item_type_usage, ['special', 'content-block'])) {	// This type of post is not allowed to have a permalink:
+                $permalink_type = 'none';
+            } elseif (in_array($item_type_usage, ['intro-cat', 'intro-sub', 'intro-all'])) {	// This post has a permanent URL as url to main chapter:
+                $permalink_type = 'cat';
+            } elseif ($item_type_usage == 'intro-tag') {	// This post has a permanent URL as url to tag page:
+                $permalink_type = 'tag';
+            } else {	// Allowed to have a permalink:
+                // force use of single url:
+                $permalink_type = 'single';
+            }
+        } elseif (empty($permalink_type)) {	// Normal "in stream" post:
+            // Use default from collection settings (may be an "in stream" URL):
+            $permalink_type = $this->Blog->get_setting('permalinks');
+        } else {	// Use type from param if it is not defined in all other cases above:
+            $permalink_type = $default_permalink_type;
+        }
+
+        return $permalink_type;
+    }
+
+    /**
+     * Template function: list all the category names
+     *
+     * @param string Output format for each cat, see {@link format_to_output()}
+     */
+    public function categories($params = [])
+    {
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'before' => ' ',
+            'after' => ' ',
+            'include_main' => true,
+            'include_other' => true,
+            'include_external' => true,
+            'before_main' => '',       // string fo display before the MAIN category,
+            'after_main' => '',       // string fo display after the MAIN category
+            'before_other' => '',       // string fo display before OTHER categories
+            'after_other' => '',       // string fo display after OTHER categories
+            'before_external' => '<em>',   // string fo display before EXTERNAL categories
+            'after_external' => '</em>',  // string fo display after EXTERNAL categories,
+            'separator' => ', ',
+            'link_categories' => true,
+            'link_title' => '#',
+            'format' => 'htmlbody',
+            'show_locked' => false,
+        ], $params);
+
+        if ($params['link_title'] == '#') { /* TRANS: When the categories for a specific post are displayed, the user can click
+                    on these cats to browse them, this is the default href title displayed there */
+            $params['link_title'] = T_('Browse category');
+        }
+
+        $categoryNames = [];
+        foreach ($this->get_Chapters() as $Chapter) {
+            $cat_name = $Chapter->dget('name');
+
+            if ($params['link_categories']) { // we want to display links
+                $lBlog = &$Chapter->get_Blog();
+                $cat_name = '<a href="' . $Chapter->get_permanent_url() . '" title="' . htmlspecialchars($params['link_title']) . '">' . $cat_name . '</a>';
+            }
+
+            if ($Chapter->ID == $this->main_cat_ID) { // We are displaying the main cat!
+                if (! $params['include_main']) { // ignore main cat !!!
+                    continue;
+                }
+                $cat_name = $params['before_main'] . $cat_name . $params['after_main'];
+            } elseif ($Chapter->blog_ID == $this->blog_ID) { // We are displaying another cat in the same blog
+                if (! $params['include_other']) { // ignore main cat !!!
+                    continue;
+                }
+                $cat_name = $params['before_other'] . $cat_name . $params['after_other'];
+            } else { // We are displaying an external cat (in another blog)
+                if (! $params['include_external']) { // ignore main cat !!!
+                    continue;
+                }
+                $cat_name = $params['before_external'] . $cat_name . $params['after_external'];
+            }
+
+            if ($Chapter->lock && $params['show_locked']) {
+                $cat_name .= '<span style="padding-left:5px;" >' . get_icon('file_not_allowed', 'imgtag', [
+                    'title' => T_('Locked'),
+                ]) . '</span>';
+            }
+
+            $categoryNames[] = $cat_name;
+        }
+
+        echo $params['before'];
+        echo format_to_output(implode($params['separator'], $categoryNames), $params['format']);
+        echo $params['after'];
+    }
+
+    /**
+     * Add nav_target param into the end of the url, but only if it is necessary
+     *
+     * @param string the url
+     * @param string the current blog or current skin post_navigation setting
+     * @param integer the ID of the navigation target
+     * @param string glue
+     * @param integer ID of Collection of the URL
+     * @return string the received url or the received url extended with the navigation param
+     */
+    public function add_navigation_param($url, $post_navigation, $nav_target, $glue = '&amp;', $coll_ID = null)
+    {
+        if (empty($url) || empty($nav_target)) { // the url or the navigation target is not set we can't modify anything
+            return $url;
+        }
+
+        switch ($post_navigation) {
+            case 'same_category': // navigate through the selected category
+                if ($this->main_cat_ID != $nav_target) {
+                    if ($coll_ID === null ||
+                        (
+                            ($ChapterCache = &get_ChapterCache()) &&
+                          ($target_Chapter = &$ChapterCache->get_by_ID($nav_target, false, false)) &&
+                          $target_Chapter->get('blog_ID') == $coll_ID
+                        )
+                    ) {	// If the Category is from the same Collection as the URL:
+                        $url = url_add_param($url, 'cat=' . $nav_target, $glue);
+                    }
+                }
+                break;
+
+            case 'same_tag': // navigate through the selected tag
+                $tags = $this->get_tags();
+                if (count($tags) > 1) {
+                    $url = url_add_param($url, 'tag=' . $nav_target, $glue);
+                }
+                break;
+
+            case 'same_author': // navigate through this item author's posts ( param not needed because a post always has only one author )
+            case 'same_blog': // by default don't add any param
+            default:
+                break;
+        }
+
+        return $url;
+    }
+
+    /**
+     * Template function: display main category name
+     *
+     * @param string Output format, see {@link format_to_output()}
+     * @param array Params
+     */
+    public function main_category($format = 'htmlbody', $params = [])
+    {
+        $params = array_merge([
+            'display_link' => false, // TRUE to display category's name as link
+            'link_class' => '',
+        ], $params);
+
+        $Chapter = &$this->get_main_Chapter();
+
+        if ($params['display_link']) {	// Display category's name as link
+            $link_class = '';
+            if (! empty($params['link_class'])) {	// Set attribute for class
+                $link_class = 'class="' . $params['link_class'] . '"';
+            }
+
+            echo '<a href="' . $Chapter->get_permanent_url() . '"' . $link_class . '>';
+        }
+
+        // Display category's name
+        $Chapter->disp('name', $format);
+
+        if ($params['display_link']) {
+            echo '</a>';
+        }
+    }
+
+    /**
+     * Get list of Chapter objects.
+     *
+     * sam2kb> TODO: Cache item cat IDs into Item::categories property instead of global $cache_postcats
+     *
+     * @return array of {@link Chapter chapters} (references)
+     */
+    public function get_Chapters()
+    {
+        global $DB, $preview, $postIDlist, $cache_postcats;
+
+        if ($preview) {	// Preview mode
+            global $extracats, $post_category;
+
+            $extracats = param('post_extracats', 'array:integer', []);
+            if ((! empty($post_category)) && (! in_array($post_category, $extracats))) {
+                $extracats[] = $post_category;
+            }
+            $categoryIDs = $extracats;
+        } elseif (empty($this->ID)) { // This item doesn't exist yet
+            $categoryIDs = null;
+        } else {
+            $search_post_ids = empty($postIDlist) ? null : explode(',', $postIDlist);
+            if (empty($search_post_ids) || ! in_array($this->ID, $search_post_ids)) {	// Load cats for current item
+                $categoryIDs = postcats_get_byID($this->ID);
+            } else {	// Load cats for items list
+                if (! isset($cache_postcats[$this->ID]) && ! empty($postIDlist)) {	// Add to cache
+                    $sql = "SELECT postcat_post_ID, postcat_cat_ID
 							FROM T_postcats
 							WHERE postcat_post_ID IN ($postIDlist)
 							ORDER BY postcat_post_ID, postcat_cat_ID";
 
-					foreach( $DB->get_results( $sql, ARRAY_A, 'Get categories for items' ) as $row )
-					{
-						$postcat_post_ID = $row['postcat_post_ID'];
-						if( ! isset( $cache_postcats[$postcat_post_ID] ) )
-						{
-							 $cache_postcats[$postcat_post_ID] = array();
-						}
-						$cache_postcats[$postcat_post_ID][] = $row['postcat_cat_ID'];
-					}
-				}
-				$categoryIDs = $cache_postcats[$this->ID];
-			}
-		}
-
-		$chapters = array();
-		if( ! empty( $categoryIDs ) )
-		{
-			$ChapterCache = & get_ChapterCache();
-			// Load all required Chapters
-			$ChapterCache->load_list( $categoryIDs );
-
-			foreach( $categoryIDs as $cat_ID )
-			{
-				if( $Chapter = & $ChapterCache->get_by_ID( $cat_ID, false, false ) )
-				{
-					$chapters[] = $Chapter;
-				}
-			}
-		}
-
-		return $chapters;
-	}
-
-
-	/**
-	 * Get the main Chapter.
-	 *
-	 * @return Chapter
-	 */
-	function & get_main_Chapter()
-	{
-		if( is_null( $this->main_Chapter ) )
-		{
-			$ChapterCache = & get_ChapterCache();
-			/**
-			 * @var Chapter
-			 */
-			$this->main_Chapter = & $ChapterCache->get_by_ID( $this->main_cat_ID, false );
-			if( empty( $this->main_Chapter ) )
-			{	// If main chapter is broken we should get it from one of extra chapters
-				$chapters = $this->get_Chapters();
-				foreach( $chapters as $Chapter )
-				{
-					if( !empty( $Chapter ) )
-					{	// We have found a valid Chapter...
-						$this->main_Chapter = & $Chapter;
-						$this->main_cat_ID = $Chapter->ID;
-						break;
-					}
-				}
-			}
-			if( empty( $this->main_Chapter ) )
-			{	// If we still don't have a valid Chapter, display clean error and die().
-				global $admin_url, $Collection, $Blog, $blog;
-				if( empty( $Blog ) )
-				{
-					if( !empty( $blog ) )
-					{
-						$BlogCache = & get_BlogCache();
-						$Collection = $Blog = & $BlogCache->get_by_ID( $blog, false );
-					}
-				}
-
-				$url_to_edit_post = $admin_url.'?ctrl=items&amp;action=edit&amp;p='.$this->ID;
-
-				if( !empty( $Blog ) )
-				{
-					$url_to_edit_post .= '&amp;blog='.$Blog->ID;
-					if( is_admin_page() )
-					{	// Try to set a main category
-						$default_cat_ID = $Blog->get_default_cat_ID();
-						if( !empty( $default_cat_ID ) )
-						{	// If default category is set
-							$this->main_cat_ID = $default_cat_ID;
-							$this->main_Chapter = & $ChapterCache->get_by_ID( $this->main_cat_ID, false );
-						}
-						else
-						{	// Set from first chapter of the blog
-							$ChapterCache->clear();
-							$ChapterCache->load_subset( $Blog->ID );
-							if( $Chapter = & $ChapterCache->get_next() )
-							{
-								$this->main_cat_ID = $Chapter->ID;
-								$this->main_Chapter = & $Chapter;
-							}
-						}
-					}
-				}
-
-				$message = sprintf( 'Item with ID <a %s>%s</a> has an invalid main category ID %s.', /* Do NOT translate debug messages! */
-						'href="'.$url_to_edit_post.'"',
-						$this->ID,
-						$this->main_cat_ID
-					);
-				if( empty( $Blog ) )
-				{	// No blog defined
-					$message .= ' In addition we cannot fallback to the default category because no valid blog ID has been specified.';
-				}
-
-				if( empty( $this->main_Chapter ) )
-				{	// Main chapter is not defined, because blog doesn't have the default cat ID and even blog doesn't have any categories
-					debug_die( $message );
-				}
-				else
-				{	// Main chapter is defined, we can show the page
-					global $Messages;
-					if( check_user_perm( 'blogs', 'editall' ) )
-					{ // User has permission to all blogs posts and comments, display a message as note in order to allow update it
-						$message_type = 'note';
-					}
-					else
-					{ // No permission, display this message as error. Such users cannot update this post.
-						$message_type = 'error';
-					}
-					$Messages->add( $message, $message_type );
-				}
-			}
-		}
-
-		return $this->main_Chapter;
-	}
-
-
-	/**
-	 * Get the blog ID of this item (derived from main chapter).
-	 * @return integer
-	 */
-	function get_blog_ID()
-	{
-		if( is_null($this->blog_ID) )
-		{
-			$main_Chapter = & $this->get_main_Chapter();
-			$this->blog_ID = $main_Chapter->blog_ID;
-		}
-		return $this->blog_ID;
-	}
-
-
-	/**
-	 * returns issue date (datetime) of Item
-	 * @param array
-	 *   - 'before'
-	 *   - 'after'
-	 *   - 'date_format': Date format
-	 *   - 'use_GMT': Use GMT/UTC date
-	 */
-	function get_issue_date( $params = array() )
-	{
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'before'      => ' ',
-				'after'       => ' ',
-				'date_format' => '#',
-				'use_GMT'     => false,
-			), $params );
-
-		if( $params['date_format'] == '#' )
-		{
-			$params['date_format'] = locale_datefmt();
-		}
-
-		$date_format = locale_resolve_datetime_fmt( $params['date_format'] );
-
-		return $params['before'].mysql2date( $date_format, $this->issue_date, $params['use_GMT'] ).$params['after'];
-	}
-
-
-	/**
-	 * Template function: display issue date (datetime) of Item
-	 * @see get_issue_date()
-	 */
-	function issue_date( $params = array() )
-	{
-		echo $this->get_issue_date( $params );
-	}
-
-
-	/**
-	 * Template function: display issue time (datetime) of Item
-	 * @param array
-	 *   - 'time_format': Time format ('#short_time' - to use short time)
-	 *   - ... see {@link get_issue_date()}
-	 * @see get_issue_date()
-	 */
-	function issue_time( $params = array() )
-	{
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'time_format'  => '#',
-			), $params );
-
-		if( !isset($params['date_format']) )
-		{
-			$params['date_format'] = $params['time_format'];
-		}
-
-		if( $params['date_format'] == '#' )
-		{	// Use default time format of current locale
-			$params['date_format'] = locale_timefmt();
-		}
-
-		echo $this->get_issue_date( $params );
-	}
-
-
-	/**
-	 * Template function: display locale for item
-	 */
-	function lang()
-	{
-		$this->disp( 'locale', 'raw' );
-	}
-
-
-	/**
-	 * Template function: display locale for item
-	 */
-	function locale()
-	{
-		$this->disp( 'locale', 'raw' );
-	}
-
-
-	/**
-	 * Template tag
-	 */
-	function locale_flag( $params = array() )
-	{
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'before'      => ' ',
-				'after'       => ' ',
-				'collection'  => 'h10px',
-				'format'      => 'htmlbody',
-				'class'       => 'flag',
-				'align'       => '',
-				'locale'      => 'item', // Possible values: 'item', 'blog', custom locale, empty string for current locale
-			), $params );
-
-		if( $params['locale'] == 'blog' )
-		{
-			$params['locale'] = $this->get_Blog()->locale;
-		}
-		elseif( $params['locale'] == 'item' )
-		{
-			$params['locale'] = $this->locale;
-		}
-
-		echo $params['before'];
-		echo locale_flag( $params['locale'], $params['collection'], $params['class'], $params['align'] );
-		echo $params['after'];
-	}
-
-
-	/**
-	 * Template function: Temporarily switch to this post's locale or to current blog's locale depending on setting
-	 */
-	function locale_temp_switch()
-	{
-		global $Collection, $Blog;
-
-		if( ! empty( $Blog ) && $Blog->get_setting( 'post_locale_source' ) == 'blog' )
-		{ // Use locale what current blog is using now
-			return;
-		}
-		else
-		{ // Use locale of this post
-			$locale = $this->locale;
-		}
-
-		locale_temp_switch( $locale );
-	}
-
-
-	/**
-	 * Template function: display language name for item
-	 *
-	 * @param string Output format, see {@link format_to_output()}
-	 */
-	function language( $format = 'htmlbody' )
-	{
-		global $locales;
-		$locale = $locales[ $this->locale ];
-		echo format_to_output( $locale['name'], $format );
-	}
-
-
-	/**
-	 * Get creation time of Item
-	 * 
-	 * @param string date/time format: leave empty to use locale default date format
-	 * @param boolean true if you want GMT
-	 */
-	function get_creation_time( $format = '', $useGM = false )
-	{
-		$format = locale_resolve_datetime_fmt( $format );
-
-		return mysql2date( $format, $this->datecreated, $useGM );
-	}
-
-
-	/**
-	 * Get last mod date (datetime) of Item
-	 *
-	 * @param string date/time format: leave empty to use locale default date format
-	 * @param boolean true if you want GMT
-	 */
-	function get_mod_date( $format = '', $useGM = false )
-	{
-		$format = locale_resolve_datetime_fmt( $format );
-
-		return mysql2date( $format, $this->datemodified, $useGM );
-	}
-
-
-	/**
-	 * Get last touched timestamp of Item
-	 * 
-	 * @param string date/time format: leave empty to use locale default date format
-	 * @param boolean true if you want GMT
-	 */
-	function get_last_touched_ts( $format = '', $useGM = false )
-	{
-		$format = locale_resolve_datetime_fmt( $format );
-
-		return mysql2date( $format, $this->get( 'last_touched_ts' ), $useGM );
-	}
-
-
-	/**
-	 * Get contents last updated timestamp of Item
-	 * 
-	 * @param string date/time format: leave empty to use locale default date format
-	 * @param boolean true if you want GMT
-	 */
-	function get_contents_last_updated_ts( $format = '', $useGM = false )
-	{
-		$format = locale_resolve_datetime_fmt( $format );
-
-		return mysql2date( $format, $this->get( 'contents_last_updated_ts' ), $useGM );
-	}
-
-
-	/**
-	 * Template function: display last mod date (datetime) of Item
-	 *
-	 * @param string date/time format: leave empty to use locale default date format
-	 * @param boolean true if you want GMT
-	 */
-	function mod_date( $format = '', $useGM = false )
-	{
-		$format = locale_resolve_datetime_fmt( $format );
-
-		echo $this->get_mod_date( $format, $useGM );
-	}
-
-
-	/**
-	 * Template function: display last mod time (datetime) of Item
-	 *
-	 * @param string date/time format: leave empty to use locale default time format
-	 * @param boolean true if you want GMT
-	 */
-	function mod_time( $format = '', $useGM = false )
-	{
-		if( empty($format) )
-			$format = '#long_time';
-
-		$format = locale_resolve_datetime_fmt( $format );
-
-		echo mysql2date( $format, $this->datemodified, $useGM );
-	}
-
-
-	/**
-	 * Check if current Item has at least one category, which belongs to the given blog
-	 *
-	 * @param integer the given blog ID
-	 * @return boolean true if there is at least one category in the given blog, false otherwise
-	 */
-	function is_part_of_blog( $coll_ID )
-	{
-		return ( $this->get_cat_ID_in_collection( $coll_ID ) != false );
-	}
-
-
-	/**
-	 * Get some category for the Item in a given collection
-	 *
-	 * @param integer the given collection ID
-	 * @return integer cat ID in the requested collection, false otherwise
-	 */
-	function get_cat_ID_in_collection( $coll_ID )
-	{
-		if( empty( $this->ID ) )
-		{
-			return false;
-		}
-
-		if( ! isset( $this->coll_to_cat ) )
-		{	// Initialize array of collections where this Item has at least one category:
-			global $DB;
-			$SQL = new SQL( 'Select colelctions & categories for Item #'.$this->ID );
-			$SQL->SELECT( 'cat_blog_ID, cat_ID' );
-			$SQL->FROM( 'T_postcats INNER JOIN T_categories ON cat_ID = postcat_cat_ID' );
-			$SQL->WHERE( 'postcat_post_ID = '.$this->ID );
-			$this->coll_to_cat = $DB->get_assoc( $SQL );
-		}
-
-		if( !isset($this->coll_to_cat[$coll_ID]) )
-		{	// No cat for given collection
-			return false;
-		}
-
-		//cat ID in requested collection
-		return $this->coll_to_cat[$coll_ID];
-	}
-
-
-	/**
-	 * Check if cross post navigation should stay in the current collection or not.
-	 * Also check that this item has at least one category that belongs to the given collection.
-	 * If current collection is the same as item collection then, this function will return false, because no need to check.
-	 *
-	 * @param string 'auto' value means this call needs to decide to stay in the current collection or not. Every other value will return false!
-	 * @param integer the given "current" collection ID (its usually the current collection id)
-	 * @return boolean true if we have to stay in the current collection, false otherwise
-	 */
-	function stay_in_cross_posted_collection( $target_blog, $target_coll_ID )
-	{
-		global $Settings;
-
-		if( $target_blog != 'auto' )
-		{ // target_blog is not set to auto, we have to navigate to the item's main cat's blog.
-			return false;
-		}
-
-		// Check if Item main cat is in current Coll
-		$item_Blog = & $this->get_Blog();
-		if( ! $item_Blog || $item_Blog->ID == $target_coll_ID )
-		{	// Item's collection is the same as target blog
-			return false;
-		}
-
-		// Check if target coll ID is an existing collection
-		$BlogCache = & get_BlogCache();
-		if( ! ( $target_Blog = & $BlogCache->get_by_ID( $target_coll_ID, false, false ) ) )
-		{	// Wrong target collection:
-			return false;
-		}
-
-		// Does the target collection allow cross posts?
-		if( ! $target_Blog->get_setting( 'allow_crosspost_urls' ) )
-		{	// We have to navigate to the Collection of the Item's main Category:
-			return false;
-		}
-
-		// Check if the item is part of target collection
-		return $this->get_cat_ID_in_collection( $target_coll_ID );
-		// return cat ID if current item has at least one category which belongs to the target coll ID, false otherwise
-	}
-
-
-	/**
-	 * Template function: display permalink for item
-	 *
-	 * Note: This actually only outputs the URL, to display a real link, use {@link Item::permanent_link()}
-	 *
-	 * @param string 'post', 'archive#id' or 'archive#title'
-	 * @param string url to use
-	 */
-	function permanent_url( $mode = '', $blogurl='' )
-	{
-		echo $this->get_permanent_url( $mode, $blogurl );
-	}
-
-
-	/*
-	 * Return the item URL, which may be different from the permament URL as it may be a NON canoncial.
-	 * It may be the URL in current Collection or in current Category.
-	 *
-	 * Added 2020-02-26
-	 * Uses Item->get_permanent_url()
-	 * TODO: maybe we should use Item->get_single_url() instead of this function.
-	 *
- 	 * @param string 'auto' or Target collection
-	 * @param string Post navigation type: same_category, same_tag, same_author, same_blog
-	 * @param integer|NULL ID of post navigation target
-	 * @param array What permanent types should be ignored and not return a permanent URL
- 	 */
-	function get_item_url( $target_blog = '', $post_navigation = '', $nav_target = NULL, $ignore_types = array() )
-	{
-		global $Collection, $Blog;
-
-		if( ! empty( $Blog ) && ($cat_ID = $this->stay_in_cross_posted_collection( $target_blog, $Blog->ID ) ) )
-		{	// Get view URL in currently opened collection and not of this Item's collection:
-
-			// Get item permanent URL:
-			$url = $this->get_permanent_url( $Blog->get_setting( 'permalinks' ), $Blog->gen_blogurl(), '&amp;', $ignore_types, NULL, NULL );
-			if( $url === false )
-			{	// If URL is not detected, e-g when it is ignored for current permanent type:
-				return '';
-			}
-
-			// Add navigation param to target a valid category in cross posted collection:
-			$url = $this->add_navigation_param( $url, 'same_category', $cat_ID, '&amp;', $Blog->ID );
-		}
-		else
-		{	// Get standard permalink referencing Item main cat collection:
-
-			// Get item permanent URL:
-			$url = $this->get_permanent_url( '', '', '&amp;', $ignore_types, NULL, NULL );
-			if( $url === false )
-			{	// If URL is not detected, e-g when it is ignored for current permanent type:
-				return '';
-			}
-
-			// Add navigation param if necessary:
-			$url = $this->add_navigation_param( $url, $post_navigation, $nav_target, '&amp;', $this->get_blog_ID() );
-		}
-
-		return $url;
-	}
-
-
-	/**
-	 * Returns a permalink link to the Item
-	 *
-	 * Note: If you only want the permalink URL, use {@link Item::get_permanent_url()}
-	 *
-	 * @param string Link text or special value: '#', '#icon#', '#text#', '#title#' '... $title$ ...'
-	 * @param string Link title
-	 * @param string Class name
-	 * @param string 'auto' or Target collection
-	 * @param string Post navigation type: same_category, same_tag, same_author, same_blog
-	 * @param integer|NULL ID of post navigation target
-	 * @param array What permanent types should be ignored and not return a permanent URL
-	 * @param array Additional parameters
-	 */
-	function get_permanent_link( $text = '#', $title = '#', $class = '', $target_blog = '', $post_navigation = '', $nav_target = NULL, $ignore_types = array(), $params = array() )
-	{
-		$params = array_merge( array(
-				'nofollow' => false,
-			), $params );
-
-		// Get "permanent" URL (stay in current collection / current cat if requested):
-		$url = $this->get_item_url( $target_blog, $post_navigation, $nav_target, $ignore_types );
-
-		switch( $text )
-		{
-			case '#linkicon':
-			case '#icon#':
-				$text = get_icon( 'permalink' );
-				break;
-
-			case '#fileicon+title':
-				$text = get_icon( 'file_message' ).format_to_output( $this->get( 'title' ) );
-				break;
-
-			case '#linkicon+text':
-			case '#':
-				$text = get_icon( 'permalink' ).T_('Permalink');
-				break;
-
-			case '#fileicon':
-				$text = get_icon( 'file_message' );
-				break;
-
-			case '#title':
-			case '#title#':
-				$text = format_to_output( $this->get( 'title' ) );
-				break;
-
-			case '#text':
-			case '#text#':
-				$text = T_('Permalink');
-				break;
-
-			case '#more+arrow':
-				$text = T_('More').' &raquo;';
-				break;
-
-			case '#view+arrow':
-				$text = T_('View').' &raquo;';
-				break;
-
-		}
-
-		if( $title == '#' )
-		{	// Use default title for link:
-			$title = T_('Permanent link to full entry');
-		}
-
-		// Build a permanent link to Item:
-		$r = '<a href="'.$url.'"'
-				.( empty( $title ) ? '' : ' title="'.format_to_output( $title, 'htmlattr' ).'"' )
-				.( empty( $class ) ? '' : ' class="'.format_to_output( $class, 'htmlattr' ).'"' )
-				.( $params['nofollow'] ? ' rel="nofollow"' : '' )
-			.'>'
-				.str_replace( '$title$', format_to_output( $this->get( 'title' ) ), $text )
-			.'</a>';
-
-		return $r;
-	}
-
-
-	/**
-	 * Displays a permalink link to the Item
-	 *
-	 * Note: If you only want the permalink URL, use {@link Item::permanent_url()}
-	 *
-	 * @param array
-	 */
-	function permanent_link( $params = array() )
-	{
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'before'      => '',
-				'after'       => '',
-				'text'        => '#',	// possible special values: ...
-				'title'       => '#',
-				'class'       => 'nowrap',
-				'target_blog' => '',
-				'post_navigation' => '',
-				'nav_target'      => NULL,
-			//	'format'      => 'htmlbody',
-			), $params );
-
-		$link = $this->get_permanent_link( $params['text'], $params['title'], $params['class'], $params['target_blog'], $params['post_navigation'], $params['nav_target'] );
-
-		if( !empty( $link ) )
-		{
-			echo $params['before'];
-			echo $link;
-			echo $params['after'];
-		}
-	}
-
-
-	/**
-	 * Template function: display title for item and link to related URL
-	 */
-	function title( $params = array() )
-	{
-		$params = array_merge( array(
-				'target_blog'  => 'auto',
-			), $params );
-		echo $this->get_title($params);
-	}
-
-
-	/**
-	 * Get "nice" title of the Item
-	 * @return string
-	 */
-	function get_title( $params = array() )
-	{
-		global $ReqURL, $Collection, $Blog, $MainList;
-
-		// Set default post navigation
-		$def_post_navigation = empty( $Blog ) ? 'same_blog' : $Blog->get_setting( 'post_navigation' );
-
-		// Make sure we are not missing any param:
-		$params = array_merge( array(
-				'before'          => '',
-				'after'           => '',
-				'before_title'    => '',
-				'after_title'     => '',
-				'format'          => 'htmlbody',
-				'link_type'       => '#',
-				'custom_url'      => '',
-				'link_class'      => '#',
-				'link_target'     => '',
-				'max_length'      => '',
-				'target_blog'     => '',
-				'nav_target'      => NULL,
-				'post_navigation' => $def_post_navigation,
-				'title_field'     => 'title', // Possible values: 'title', 'short_title', 'title_override' for value from param 'title_override' below.
-																			// May be several fields separated by comma. Only first not empty field is displayed,
-																			// e.g. 'short_title,title,title_override' or 'short_title,title_override,title' etc.
-				'title_override'  => $this->get( 'title' ),
-			), $params );
-
-		$title_fields = explode( ',', $params['title_field'] );
-		foreach( $title_fields as $title_field )
-		{
-			if( $title_field == 'short_title' && $this->get_type_setting( 'use_short_title' ) == 'never' )
-			{	// Allow to use short title only if it is enabled by item type:
-				continue;
-			}
-			$title = ( $title_field == 'title_override' ? $params['title_override'] : $this->get( $title_field ) );
-			$title = format_to_output( $title, $params['format'] );
-			if( ! empty( $title ) )
-			{	// Use first not empty field:
-				break;
-			}
-		}
-
-		if( $params['max_length'] != '' )
-		{	// Crop long title:
-			$title = strmaxlen( $title, intval( $params['max_length'] ) );
-		}
-
-		if( empty( $title ) )
-		{
-			return;
-		}
-
-
-		// TODO: the following has already been  factorized in $this->get_item_url()
-		$blogurl = '';
-		$url_coll_ID = $this->get_blog_ID();
-		if( ! empty( $Blog ) 
-			&& in_array( $params['link_type'], array( '#', 'permalink' ) )
-			&& $this->stay_in_cross_posted_collection( $params['target_blog'], $Blog->ID ) ) // This Item can stay in the current Collection
-		{	// Get collection URL only when it is required:
-			$blogurl = $Blog->gen_blogurl();
-			$url_coll_ID = $Blog->ID;
-		}
-
-		// TODO: Some of the rules below should probably be factorized in some function.
-		// e-g: 'special' sidebar items -> this is in NO WAY specific to get_title()
-		if( $params['link_type'] == '#' )
-		{	// Use default link type from settings:
-			if( $this->is_intro() )
-			{	// This is an intro, do not link title by default:
-				$params['link_type'] = 'none';
-			}
-			elseif( is_single_page( $this->ID ) )
-			{	// We are on the single url already:
-				$params['link_type'] = 'none';
-			}
-			elseif( $this->get_type_setting( 'usage' ) == 'special' )
-			{	// This is a sidebar link, link to its "link to" URL by default:
-				$params['link_type'] = 'linkto_url';
-			}
-			else
-			{	// This is a normal post: use default link strategy from Blog settings:
-				$this->get_Blog();
-				$params['link_type'] = $this->Blog->get_setting( 'title_link_type' );
-			}
-		}
-
-		// TODO: Some of the rules below should probably be factorized in some function.
-		// e-g: 'admin_view' -> this is in NO WAY specific to get_title()
-		switch( $params['link_type'] )
-		{
-			case 'auto':
-				// If no specific URL passed, then link to permanent URL.
-				// TODO: use $this->get_item_url() so it works correctly for cross posted Items.
-				$url = ( empty($this->url) ? $this->get_permanent_url() : $this->url );
-				break;
-
-			case 'permalink':
-				// TODO: use $this->get_item_url() so it works correctly for cross posted Items.
-				$url = $this->get_permanent_url( '', $blogurl );
-				break;
-
-			case 'linkto_url':
-				// Use url field
-				$url = $this->url;
-				break;
-
-			case 'admin_view':
-				// View in admin
-				global $admin_url;
-				$url = $admin_url.'?ctrl=items&amp;blog='.$this->get_blog_ID().'&amp;p='.$this->ID;
-				break;
-
-			case 'edit_view_url':
-				if( ! $url = $this->get_edit_url() )
-				{	// If edit URL is not available use URL ot view Item:
-					$url = is_admin_page() ? $this->get_url( 'admin_view' ) : $this->get_permanent_url( '', $blogurl );
-				}
-				break;
-
-			case 'custom_url':
-				$url = $params['custom_url'];
-				break;
-
-			case 'none':
-			default:
-		}
-
-		// TODO: the following has already been  factorized in $this->get_item_url()
-		if( ! empty( $url ) )
-		{ // url is set, also add navigation param if it is necessary
-			$nav_target = ( $params['nav_target'] === NULL && isset( $MainList ) && ! empty( $MainList->nav_target ) ) ? $MainList->nav_target : $params['nav_target'];
-			$url = $this->add_navigation_param( $url, $params['post_navigation'], $nav_target, '&amp;', $url_coll_ID );
-		}
-
-		$link_class = ( $params['link_class'] == '#' ? '' : ' class="'.format_to_output( $params['link_class'], 'htmlattr' ).'"' );
-		$link_target = ( $params['link_target'] === '' ? '' : ' target="'.format_to_output( $params['link_target'], 'htmlattr' ).'"' );
-
-		$r = $params['before'];
-		$title = $params['before_title'].$title.$params['after_title'];
-		if( !empty($url) )
-		{
-			$r .= '<a href="'.$url.'"'.$link_class.$link_target.'>'.$title.'</a>';
-		}
-		else
-		{
-			$r .= $title;
-		}
-		$r .= $params['after'];
-		return $r;
-	}
-
-
-	/**
-	 * Template function: display type of item
-	 *
-	 * @param string
-	 * @param string
-	 * @param string Output format, see {@link format_to_output()}
-	 */
-	function type( $before = '', $after = '', $format = 'htmlbody' )
-	{
-		$ItemTypeCache = & get_ItemTypeCache();
-		$Element = & $ItemTypeCache->get_by_ID( $this->ityp_ID, true, false );
-		if( !$Element )
-		{ // No status:
-			return;
-		}
-
-		$type_name = $Element->get('name');
-
-		if( $format == 'raw' )
-		{
-			$this->disp( $type_name, 'raw' );
-		}
-		else
-		{
-			echo $before.format_to_output( $type_name, $format ).$after;
-		}
-	}
-
-
-	/**
-	 * Template tag: get excerpt
-	 * This light version does display only. It never tries to auto-generate the excerpt.
-	 *
-	 *  May be used in ItemLight lists such as sitemaps, feeds, recent posts, post widgets where the exceprt might be used as a title, etc.
-	 *
-	 * @param string filename to use to display more
-	 * @return string
-	 */
-	function get_excerpt( $format = 'htmlbody' )
-	{
-		// Character conversions + old DBs may have tags in excerpts, so we strip them:
-		return format_to_output( utf8_strip_tags( $this->excerpt ), $format );
-	}
-
-
-	/**
-	 * Get a member param by its name
-	 *
-	 * @param mixed Name of parameter
-	 * @return mixed Value of parameter
-	 */
-	function get( $parname )
-	{
-		switch( $parname )
-		{
-			case 'title':
-				$title = parent::get( $parname );
-				if( empty( $title ) && is_admin_page() && ! empty( $this->ID ) )
-				{	// Display item ID when title is disabled or optional and empty, only on back-office:
-					$title = '#'.$this->ID;
-				}
-				return $title;
-
-			case 'extra_cat_IDs':
-				if( isset( $this->extra_cat_IDs ) && is_array( $this->extra_cat_IDs ) )
-				{	// Get currently updating extra categories IDs:
-					return $this->extra_cat_IDs;
-				}
-				else
-				{	// Load chapters from DB:
-					return postcats_get_byID( $this->ID );
-				}
-
-			default:
-				return parent::get( $parname );
-		}
-	}
-
-
-	/**
-	 * Set param value
-	 *
-	 * By default, all values will be considered strings
-	 *
-	 * @todo extra_cat_IDs recording
-	 *
-	 * @param string parameter name
-	 * @param mixed parameter value
-	 * @param boolean true to set to NULL if empty value
-	 * @return boolean true, if a value has been set; false if it has not changed
-	 */
-	function set( $parname, $parvalue, $make_null = false )
-	{
-		switch( $parname )
-		{
-			case 'main_cat_ID':
-				$r = $this->set_param( 'main_cat_ID', 'number', $parvalue, false );
-				// re-set the extracat ids to make sure main cat is in extracat list and there are no duplicates
-				$this->set( 'extra_cat_IDs', $this->extra_cat_IDs, false );
-				// Invalidate derived property:
-				$this->blog_ID = NULL;
-				unset($this->main_Chapter); // dereference
-				$this->main_Chapter = NULL;
-				unset($this->Blog);
-				$this->Blog = NULL;
-				return $r;
-
-			case 'extra_cat_IDs':
-				// ARRAY! We do not record this change (yet)
-				$this->extra_cat_IDs = $parvalue;
-				// make sure main cat is in extracat list and there are no duplicates
-				$this->extra_cat_IDs[] = $this->main_cat_ID;
-				$this->extra_cat_IDs = array_unique( $this->extra_cat_IDs );
-				// Mark that extracats has been updated
-				$this->dbchanges_flags['extra_cat_IDs'] = true;
-				return true; // always return true, since we don't know what was the previous value
-
-			case 'issue_date':
-			case 'datestart':
-				// Remove seconds from issue date and start date
-				// fp> TODO: this should only be done if the date is in the future. If it's in the past there are no sideeffects to having seconds.
-				// asimo> Why do we have two parameter with the same content if only one is stored in the database?
-				// Also it doesn't make sense to remove seconds from a db date field because the database format has seconds anyway.
-				// If we remove seconds from datstart field, then datestart will be always inserted into the dbchagnes even if it was not changed.
-				// If we don't want seconds in the end of the datestart then we need to remove it in the itemlight constructor as well.
-				// asimo> We have to set seconds to '00' and not remove them, this way the posts can appear right after creating, and the format is OK as well.
-				$parvalue_empty_seconds = remove_seconds(strtotime($parvalue), 'Y-m-d H:i:s');
-				$this->issue_date = $parvalue_empty_seconds;
-				return $this->set_param( 'datestart', 'date', $parvalue_empty_seconds, false );
-
-			case 'ityp_ID':
-				if( $this->get( 'ityp_ID' ) != $parvalue )
-				{	// Reset Item Type and parent Item on changing ID to different value:
-					$this->ItemType = NULL;
-					$this->parent_Item = NULL;
-				}
-				return $this->set_param( $parname, 'number', $parvalue, true );
-
-			case 'canonical_slug_ID':
-			case 'tiny_slug_ID':
-			case 'dateset':
-			case 'excerpt_autogenerated':
-				return $this->set_param( $parname, 'number', $parvalue, true );
-
-			default:
-				return $this->set_param( $parname, 'string', $parvalue, $make_null );
-		}
-	}
-
-
-	/**
-	 * Get the Blog object for the Item.
-	 *
-	 * @return Blog
-	 */
-	function & get_Blog()
-	{
-		if( is_null($this->Blog) )
-		{
-			$this->load_Blog();
-		}
-
-		return $this->Blog;
-	}
-
-
-	/**
-	 * Load the Blog object for the Item, without returning it.
-	 *
-	 * This is needed for {@link Results} object callbacks.
-	 */
-	function load_Blog()
-	{
-		if( is_null($this->Blog) )
-		{
-			$BlogCache = & get_BlogCache();
-			$this->Blog = & $BlogCache->get_by_ID( $this->get_blog_ID() );
-		}
-	}
-
-
-	/**
-	 * Get setting of Item's collection
-	 *
-	 * @param string setting name
-	 * @return string|false|NULL value as string on success; NULL if not found; false in case of error
-	 */
-	function get_coll_setting( $parname )
-	{
-		if( $item_Blog = & $this->get_Blog() )
-		{	// Return setting value of this Item's collection 
-			return $item_Blog->get_setting( $parname );
-		}
-
-		// Error case when Item has no collection:
-		return false;
-	}
-
-
-	/**
-	 * Get array of tags.
-	 *
-	 * Load from DB if necessary, prefetching any other tags from MainList/ItemList.
-	 *
-	 * @return array
-	 */
-	function & get_tags()
-	{
-		global $DB;
-
-		if( ! isset( $this->tags ) )
-		{
-			$ItemTagsCache = & get_ItemTagsCache();
-			if( ! isset($ItemTagsCache[$this->ID]) )
-			{
-				/* Only try to fetch tags for items that are not yet in
-				 * the cache. This will always give at least the ID of
-				 * this Item.
-				 */
-				$prefetch_item_IDs = array_diff( $this->get_prefetch_itemlist_IDs(), array_keys( $ItemTagsCache ) );
-				// Assume these items don't have any tags:
-				foreach( $prefetch_item_IDs as $item_ID )
-				{
-					$ItemTagsCache[$item_ID] = array();
-				}
-
-				// Now fetch the tags:
-				$SQL = new SQL( 'Get tags for items #'.implode( ',', $prefetch_item_IDs ) );
-				$SQL->SELECT( 'itag_itm_ID, tag_ID, tag_name' );
-				$SQL->FROM( 'T_items__itemtag' );
-				$SQL->FROM_add( 'INNER JOIN T_items__tag ON itag_tag_ID = tag_ID' );
-				$SQL->WHERE( 'itag_itm_ID IN ('.$DB->quote($prefetch_item_IDs ).')' );
-				$SQL->ORDER_BY( 'tag_name' );
-				$tags = $DB->get_results( $SQL );
-				foreach( $tags as $tag )
-				{
-					$ItemTagsCache[ $tag->itag_itm_ID ][ $tag->tag_ID ] = $tag->tag_name;
-				}
-			}
-
-			$this->tags = $ItemTagsCache[$this->ID];
-		}
-
-		return $this->tags;
-	}
-
-
-	/**
-	 * Get array of checklist lines.
-	 *
-	 * @return array
-	 */
-	function get_checklist_lines()
-	{
-		global $DB;
-
-		if( ! isset( $this->checklist_lines ) )
-		{
-			// Build query to get the checklist lines:
-			$checklist_SQL = new SQL( 'Get checklist lines for Item #'.$this->ID );
-			$checklist_SQL->SELECT( 'check_ID, check_item_ID, check_checked, check_label, check_order' );
-			$checklist_SQL->FROM( 'T_items__checklist_lines' );
-			$checklist_SQL->WHERE( 'check_item_ID = '.$DB->quote( $this->ID ) );
-			$checklist_SQL->ORDER_BY( 'check_order ASC, check_ID ASC' );
-			$this->checklist_lines = $DB->get_results( $checklist_SQL );
-		}
-
-		return $this->checklist_lines;
-	}
-
-
-	/**
-	 * Get number of unchecked checklist lines
-	 */
-	function get_unchecked_checklist_lines()
-	{
-		$checklist_lines = $this->get_checklist_lines();
-		$unchecked_checklist_lines = 0;
-		foreach( $checklist_lines as $checklist_line )
-		{
-			if( ! $checklist_line->check_checked )
-			{
-				$unchecked_checklist_lines++;
-			}
-		}
-
-		return $unchecked_checklist_lines;
-	}
-
-
-	/**
-	 * Get a list of item IDs from $MainList and $ItemList, if they are loaded.
-	 * This is used for prefetching item related data for the whole list(s).
-	 * This will at least return the item's ID itself.
-	 * @return array
-	 */
-	function get_prefetch_itemlist_IDs()
-	{
-		global $MainList, $ItemList;
-
-		// Add the current ID to the list to prefetch, if it's not in the MainList/ItemList (e.g. featured item).
-		$r = array($this->ID);
-
-		if( $MainList )
-		{
-			$r = array_merge($r, $MainList->get_page_ID_array());
-		}
-		if( $ItemList )
-		{
-			$r = array_merge($r, $ItemList->get_page_ID_array());
-		}
-
-		return array_unique( $r );
-	}
-
-
-	/**
-	 * Get a link to history of Item
-	 *
-	 * @return string A link to history
-	 */
-	function get_history_link( $params = array() )
-	{
-		$params = array_merge( array(
-				'before'    => '',
-				'after'     => '',
-				'link_text' => '$icon$', // Use a mask $icon$ or some other text
-				'class'     => '',
-				'check_perm' => true, // FALSE - if this link must be displayed even if current has no permission to view item history page
-			), $params );
-
-		if( ( $history_url = $this->get_history_url( '&amp;', $params['check_perm'] ) ) === false )
-		{ // No url available for current user, Don't display a link
-			return;
-		}
-
-		// Replace all masks with values
-		$link_text = str_replace( '$icon$', $this->history_info_icon(), $params['link_text'] );
-
-		return $params['before']
-			.'<a href="'.$history_url.'"'.( empty( $params['class'] ) ? '' : ' class="'.$params['class'].'"' ).'>'.$link_text.'</a>'
-			.$params['after'];
-	}
-
-
-	/**
-	 * Get URL to history of Item
-	 *
-	 * @param string Glue between url params
-	 * @return string|boolean URL to history OR False when user cannot see a history
-	 */
-	function get_history_url( $glue = '&amp;', $check_perm = true )
-	{
-		global $admin_url;
-
-		if( $check_perm && ! check_user_perm( 'item_post!CURSTATUS', 'edit', false, $this ) )
-		{ // Current user cannot see a history
-			return false;
-		}
-
-		return $admin_url.'?ctrl=items'.$glue.'action=history'.$glue.'p='.$this->ID;
-	}
-
-
-	/**
-	 * Get the links to all chapters of this item
-	 *
-	 * @param array Params
-	 * @return string The chapter links
-	 */
-	function get_chapter_links( $params = array() )
-	{
-		$params = array_merge( array(
-				'separator' => ', ',
-			) );
-
-		// Get all item chapters:
-		$chapters = $this->get_Chapters();
-
-		if( empty( $chapters ) )
-		{	// No chapters for this item, Return empty string:
-			return '';
-		}
-
-		$chapter_links = '';
-		foreach( $chapters as $c => $Chapter )
-		{
-			$chapter_links .= '<a href="'.$Chapter->get_permanent_url().'">'.$Chapter->get_path_name().'</a>';
-			if( $c < count( $chapters ) - 1 )
-			{	// Add separator between chapters:
-				$chapter_links .= $params['separator'];
-			}
-		}
-
-		return $chapter_links;
-	}
-
-
-	/**
-	 * Check if currently this Item is viewed as revision(archived version or proposed change)
-	 *
-	 * @return boolean
-	 */
-	function is_revision()
-	{
-		return ! empty( $this->revision );
-	}
+                    foreach ($DB->get_results($sql, ARRAY_A, 'Get categories for items') as $row) {
+                        $postcat_post_ID = $row['postcat_post_ID'];
+                        if (! isset($cache_postcats[$postcat_post_ID])) {
+                            $cache_postcats[$postcat_post_ID] = [];
+                        }
+                        $cache_postcats[$postcat_post_ID][] = $row['postcat_cat_ID'];
+                    }
+                }
+                $categoryIDs = $cache_postcats[$this->ID];
+            }
+        }
+
+        $chapters = [];
+        if (! empty($categoryIDs)) {
+            $ChapterCache = &get_ChapterCache();
+            // Load all required Chapters
+            $ChapterCache->load_list($categoryIDs);
+
+            foreach ($categoryIDs as $cat_ID) {
+                if ($Chapter = &$ChapterCache->get_by_ID($cat_ID, false, false)) {
+                    $chapters[] = $Chapter;
+                }
+            }
+        }
+
+        return $chapters;
+    }
+
+    /**
+     * Get the main Chapter.
+     *
+     * @return Chapter
+     */
+    public function &get_main_Chapter()
+    {
+        if (is_null($this->main_Chapter)) {
+            $ChapterCache = &get_ChapterCache();
+            /**
+             * @var Chapter
+             */
+            $this->main_Chapter = &$ChapterCache->get_by_ID($this->main_cat_ID, false);
+            if (empty($this->main_Chapter)) {	// If main chapter is broken we should get it from one of extra chapters
+                $chapters = $this->get_Chapters();
+                foreach ($chapters as $Chapter) {
+                    if (! empty($Chapter)) {	// We have found a valid Chapter...
+                        $this->main_Chapter = &$Chapter;
+                        $this->main_cat_ID = $Chapter->ID;
+                        break;
+                    }
+                }
+            }
+            if (empty($this->main_Chapter)) {	// If we still don't have a valid Chapter, display clean error and die().
+                global $admin_url, $Collection, $Blog, $blog;
+                if (empty($Blog)) {
+                    if (! empty($blog)) {
+                        $BlogCache = &get_BlogCache();
+                        $Collection = $Blog = &$BlogCache->get_by_ID($blog, false);
+                    }
+                }
+
+                $url_to_edit_post = $admin_url . '?ctrl=items&amp;action=edit&amp;p=' . $this->ID;
+
+                if (! empty($Blog)) {
+                    $url_to_edit_post .= '&amp;blog=' . $Blog->ID;
+                    if (is_admin_page()) {	// Try to set a main category
+                        $default_cat_ID = $Blog->get_default_cat_ID();
+                        if (! empty($default_cat_ID)) {	// If default category is set
+                            $this->main_cat_ID = $default_cat_ID;
+                            $this->main_Chapter = &$ChapterCache->get_by_ID($this->main_cat_ID, false);
+                        } else {	// Set from first chapter of the blog
+                            $ChapterCache->clear();
+                            $ChapterCache->load_subset($Blog->ID);
+                            if ($Chapter = &$ChapterCache->get_next()) {
+                                $this->main_cat_ID = $Chapter->ID;
+                                $this->main_Chapter = &$Chapter;
+                            }
+                        }
+                    }
+                }
+
+                $message = sprintf(
+                    'Item with ID <a %s>%s</a> has an invalid main category ID %s.', /* Do NOT translate debug messages! */
+                    'href="' . $url_to_edit_post . '"',
+                    $this->ID,
+                    $this->main_cat_ID
+                );
+                if (empty($Blog)) {	// No blog defined
+                    $message .= ' In addition we cannot fallback to the default category because no valid blog ID has been specified.';
+                }
+
+                if (empty($this->main_Chapter)) {	// Main chapter is not defined, because blog doesn't have the default cat ID and even blog doesn't have any categories
+                    debug_die($message);
+                } else {	// Main chapter is defined, we can show the page
+                    global $Messages;
+                    if (check_user_perm('blogs', 'editall')) { // User has permission to all blogs posts and comments, display a message as note in order to allow update it
+                        $message_type = 'note';
+                    } else { // No permission, display this message as error. Such users cannot update this post.
+                        $message_type = 'error';
+                    }
+                    $Messages->add($message, $message_type);
+                }
+            }
+        }
+
+        return $this->main_Chapter;
+    }
+
+    /**
+     * Get the blog ID of this item (derived from main chapter).
+     * @return integer
+     */
+    public function get_blog_ID()
+    {
+        if (is_null($this->blog_ID)) {
+            $main_Chapter = &$this->get_main_Chapter();
+            $this->blog_ID = $main_Chapter->blog_ID;
+        }
+        return $this->blog_ID;
+    }
+
+    /**
+     * returns issue date (datetime) of Item
+     * @param array
+     *   - 'before'
+     *   - 'after'
+     *   - 'date_format': Date format
+     *   - 'use_GMT': Use GMT/UTC date
+     */
+    public function get_issue_date($params = [])
+    {
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'before' => ' ',
+            'after' => ' ',
+            'date_format' => '#',
+            'use_GMT' => false,
+        ], $params);
+
+        if ($params['date_format'] == '#') {
+            $params['date_format'] = locale_datefmt();
+        }
+
+        $date_format = locale_resolve_datetime_fmt($params['date_format']);
+
+        return $params['before'] . mysql2date($date_format, $this->issue_date, $params['use_GMT']) . $params['after'];
+    }
+
+    /**
+     * Template function: display issue date (datetime) of Item
+     * @see get_issue_date()
+     */
+    public function issue_date($params = [])
+    {
+        echo $this->get_issue_date($params);
+    }
+
+    /**
+     * Template function: display issue time (datetime) of Item
+     * @param array
+     *   - 'time_format': Time format ('#short_time' - to use short time)
+     *   - ... see {@link get_issue_date()}
+     * @see get_issue_date()
+     */
+    public function issue_time($params = [])
+    {
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'time_format' => '#',
+        ], $params);
+
+        if (! isset($params['date_format'])) {
+            $params['date_format'] = $params['time_format'];
+        }
+
+        if ($params['date_format'] == '#') {	// Use default time format of current locale
+            $params['date_format'] = locale_timefmt();
+        }
+
+        echo $this->get_issue_date($params);
+    }
+
+    /**
+     * Template function: display locale for item
+     */
+    public function lang()
+    {
+        $this->disp('locale', 'raw');
+    }
+
+    /**
+     * Template function: display locale for item
+     */
+    public function locale()
+    {
+        $this->disp('locale', 'raw');
+    }
+
+    /**
+     * Template tag
+     */
+    public function locale_flag($params = [])
+    {
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'before' => ' ',
+            'after' => ' ',
+            'collection' => 'h10px',
+            'format' => 'htmlbody',
+            'class' => 'flag',
+            'align' => '',
+            'locale' => 'item', // Possible values: 'item', 'blog', custom locale, empty string for current locale
+        ], $params);
+
+        if ($params['locale'] == 'blog') {
+            $params['locale'] = $this->get_Blog()->locale;
+        } elseif ($params['locale'] == 'item') {
+            $params['locale'] = $this->locale;
+        }
+
+        echo $params['before'];
+        echo locale_flag($params['locale'], $params['collection'], $params['class'], $params['align']);
+        echo $params['after'];
+    }
+
+    /**
+     * Template function: Temporarily switch to this post's locale or to current blog's locale depending on setting
+     */
+    public function locale_temp_switch()
+    {
+        global $Collection, $Blog;
+
+        if (! empty($Blog) && $Blog->get_setting('post_locale_source') == 'blog') { // Use locale what current blog is using now
+            return;
+        } else { // Use locale of this post
+            $locale = $this->locale;
+        }
+
+        locale_temp_switch($locale);
+    }
+
+    /**
+     * Template function: display language name for item
+     *
+     * @param string Output format, see {@link format_to_output()}
+     */
+    public function language($format = 'htmlbody')
+    {
+        global $locales;
+        $locale = $locales[$this->locale];
+        echo format_to_output($locale['name'], $format);
+    }
+
+    /**
+     * Get creation time of Item
+     *
+     * @param string date/time format: leave empty to use locale default date format
+     * @param boolean true if you want GMT
+     */
+    public function get_creation_time($format = '', $useGM = false)
+    {
+        $format = locale_resolve_datetime_fmt($format);
+
+        return mysql2date($format, $this->datecreated, $useGM);
+    }
+
+    /**
+     * Get last mod date (datetime) of Item
+     *
+     * @param string date/time format: leave empty to use locale default date format
+     * @param boolean true if you want GMT
+     */
+    public function get_mod_date($format = '', $useGM = false)
+    {
+        $format = locale_resolve_datetime_fmt($format);
+
+        return mysql2date($format, $this->datemodified, $useGM);
+    }
+
+    /**
+     * Get last touched timestamp of Item
+     *
+     * @param string date/time format: leave empty to use locale default date format
+     * @param boolean true if you want GMT
+     */
+    public function get_last_touched_ts($format = '', $useGM = false)
+    {
+        $format = locale_resolve_datetime_fmt($format);
+
+        return mysql2date($format, $this->get('last_touched_ts'), $useGM);
+    }
+
+    /**
+     * Get contents last updated timestamp of Item
+     *
+     * @param string date/time format: leave empty to use locale default date format
+     * @param boolean true if you want GMT
+     */
+    public function get_contents_last_updated_ts($format = '', $useGM = false)
+    {
+        $format = locale_resolve_datetime_fmt($format);
+
+        return mysql2date($format, $this->get('contents_last_updated_ts'), $useGM);
+    }
+
+    /**
+     * Template function: display last mod date (datetime) of Item
+     *
+     * @param string date/time format: leave empty to use locale default date format
+     * @param boolean true if you want GMT
+     */
+    public function mod_date($format = '', $useGM = false)
+    {
+        $format = locale_resolve_datetime_fmt($format);
+
+        echo $this->get_mod_date($format, $useGM);
+    }
+
+    /**
+     * Template function: display last mod time (datetime) of Item
+     *
+     * @param string date/time format: leave empty to use locale default time format
+     * @param boolean true if you want GMT
+     */
+    public function mod_time($format = '', $useGM = false)
+    {
+        if (empty($format)) {
+            $format = '#long_time';
+        }
+
+        $format = locale_resolve_datetime_fmt($format);
+
+        echo mysql2date($format, $this->datemodified, $useGM);
+    }
+
+    /**
+     * Check if current Item has at least one category, which belongs to the given blog
+     *
+     * @param integer the given blog ID
+     * @return boolean true if there is at least one category in the given blog, false otherwise
+     */
+    public function is_part_of_blog($coll_ID)
+    {
+        return ($this->get_cat_ID_in_collection($coll_ID) != false);
+    }
+
+    /**
+     * Get some category for the Item in a given collection
+     *
+     * @param integer the given collection ID
+     * @return integer cat ID in the requested collection, false otherwise
+     */
+    public function get_cat_ID_in_collection($coll_ID)
+    {
+        if (empty($this->ID)) {
+            return false;
+        }
+
+        if (! isset($this->coll_to_cat)) {	// Initialize array of collections where this Item has at least one category:
+            global $DB;
+            $SQL = new SQL('Select colelctions & categories for Item #' . $this->ID);
+            $SQL->SELECT('cat_blog_ID, cat_ID');
+            $SQL->FROM('T_postcats INNER JOIN T_categories ON cat_ID = postcat_cat_ID');
+            $SQL->WHERE('postcat_post_ID = ' . $this->ID);
+            $this->coll_to_cat = $DB->get_assoc($SQL);
+        }
+
+        if (! isset($this->coll_to_cat[$coll_ID])) {	// No cat for given collection
+            return false;
+        }
+
+        //cat ID in requested collection
+        return $this->coll_to_cat[$coll_ID];
+    }
+
+    /**
+     * Check if cross post navigation should stay in the current collection or not.
+     * Also check that this item has at least one category that belongs to the given collection.
+     * If current collection is the same as item collection then, this function will return false, because no need to check.
+     *
+     * @param string 'auto' value means this call needs to decide to stay in the current collection or not. Every other value will return false!
+     * @param integer the given "current" collection ID (its usually the current collection id)
+     * @return boolean true if we have to stay in the current collection, false otherwise
+     */
+    public function stay_in_cross_posted_collection($target_blog, $target_coll_ID)
+    {
+        global $Settings;
+
+        if ($target_blog != 'auto') { // target_blog is not set to auto, we have to navigate to the item's main cat's blog.
+            return false;
+        }
+
+        // Check if Item main cat is in current Coll
+        $item_Blog = &$this->get_Blog();
+        if (! $item_Blog || $item_Blog->ID == $target_coll_ID) {	// Item's collection is the same as target blog
+            return false;
+        }
+
+        // Check if target coll ID is an existing collection
+        $BlogCache = &get_BlogCache();
+        if (! ($target_Blog = &$BlogCache->get_by_ID($target_coll_ID, false, false))) {	// Wrong target collection:
+            return false;
+        }
+
+        // Does the target collection allow cross posts?
+        if (! $target_Blog->get_setting('allow_crosspost_urls')) {	// We have to navigate to the Collection of the Item's main Category:
+            return false;
+        }
+
+        // Check if the item is part of target collection
+        return $this->get_cat_ID_in_collection($target_coll_ID);
+        // return cat ID if current item has at least one category which belongs to the target coll ID, false otherwise
+    }
+
+    /**
+     * Template function: display permalink for item
+     *
+     * Note: This actually only outputs the URL, to display a real link, use {@link Item::permanent_link()}
+     *
+     * @param string 'post', 'archive#id' or 'archive#title'
+     * @param string url to use
+     */
+    public function permanent_url($mode = '', $blogurl = '')
+    {
+        echo $this->get_permanent_url($mode, $blogurl);
+    }
+
+    /*
+     * Return the item URL, which may be different from the permament URL as it may be a NON canoncial.
+     * It may be the URL in current Collection or in current Category.
+     *
+     * Added 2020-02-26
+     * Uses Item->get_permanent_url()
+     * TODO: maybe we should use Item->get_single_url() instead of this function.
+     *
+     * @param string 'auto' or Target collection
+     * @param string Post navigation type: same_category, same_tag, same_author, same_blog
+     * @param integer|NULL ID of post navigation target
+     * @param array What permanent types should be ignored and not return a permanent URL
+     */
+    public function get_item_url($target_blog = '', $post_navigation = '', $nav_target = null, $ignore_types = [])
+    {
+        global $Collection, $Blog;
+
+        if (! empty($Blog) && ($cat_ID = $this->stay_in_cross_posted_collection($target_blog, $Blog->ID))) {	// Get view URL in currently opened collection and not of this Item's collection:
+            // Get item permanent URL:
+            $url = $this->get_permanent_url($Blog->get_setting('permalinks'), $Blog->gen_blogurl(), '&amp;', $ignore_types, null, null);
+            if ($url === false) {	// If URL is not detected, e-g when it is ignored for current permanent type:
+                return '';
+            }
+
+            // Add navigation param to target a valid category in cross posted collection:
+            $url = $this->add_navigation_param($url, 'same_category', $cat_ID, '&amp;', $Blog->ID);
+        } else {	// Get standard permalink referencing Item main cat collection:
+            // Get item permanent URL:
+            $url = $this->get_permanent_url('', '', '&amp;', $ignore_types, null, null);
+            if ($url === false) {	// If URL is not detected, e-g when it is ignored for current permanent type:
+                return '';
+            }
+
+            // Add navigation param if necessary:
+            $url = $this->add_navigation_param($url, $post_navigation, $nav_target, '&amp;', $this->get_blog_ID());
+        }
+
+        return $url;
+    }
+
+    /**
+     * Returns a permalink link to the Item
+     *
+     * Note: If you only want the permalink URL, use {@link Item::get_permanent_url()}
+     *
+     * @param string Link text or special value: '#', '#icon#', '#text#', '#title#' '... $title$ ...'
+     * @param string Link title
+     * @param string Class name
+     * @param string 'auto' or Target collection
+     * @param string Post navigation type: same_category, same_tag, same_author, same_blog
+     * @param integer|null ID of post navigation target
+     * @param array What permanent types should be ignored and not return a permanent URL
+     * @param array Additional parameters
+     */
+    public function get_permanent_link($text = '#', $title = '#', $class = '', $target_blog = '', $post_navigation = '', $nav_target = null, $ignore_types = [], $params = [])
+    {
+        $params = array_merge([
+            'nofollow' => false,
+        ], $params);
+
+        // Get "permanent" URL (stay in current collection / current cat if requested):
+        $url = $this->get_item_url($target_blog, $post_navigation, $nav_target, $ignore_types);
+
+        switch ($text) {
+            case '#linkicon':
+            case '#icon#':
+                $text = get_icon('permalink');
+                break;
+
+            case '#fileicon+title':
+                $text = get_icon('file_message') . format_to_output($this->get('title'));
+                break;
+
+            case '#linkicon+text':
+            case '#':
+                $text = get_icon('permalink') . T_('Permalink');
+                break;
+
+            case '#fileicon':
+                $text = get_icon('file_message');
+                break;
+
+            case '#title':
+            case '#title#':
+                $text = format_to_output($this->get('title'));
+                break;
+
+            case '#text':
+            case '#text#':
+                $text = T_('Permalink');
+                break;
+
+            case '#more+arrow':
+                $text = T_('More') . ' &raquo;';
+                break;
+
+            case '#view+arrow':
+                $text = T_('View') . ' &raquo;';
+                break;
+        }
+
+        if ($title == '#') {	// Use default title for link:
+            $title = T_('Permanent link to full entry');
+        }
+
+        // Build a permanent link to Item:
+        $r = '<a href="' . $url . '"'
+                . (empty($title) ? '' : ' title="' . format_to_output($title, 'htmlattr') . '"')
+                . (empty($class) ? '' : ' class="' . format_to_output($class, 'htmlattr') . '"')
+                . ($params['nofollow'] ? ' rel="nofollow"' : '')
+            . '>'
+                . str_replace('$title$', format_to_output($this->get('title')), $text)
+            . '</a>';
+
+        return $r;
+    }
+
+    /**
+     * Displays a permalink link to the Item
+     *
+     * Note: If you only want the permalink URL, use {@link Item::permanent_url()}
+     *
+     * @param array
+     */
+    public function permanent_link($params = [])
+    {
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'before' => '',
+            'after' => '',
+            'text' => '#',	// possible special values: ...
+            'title' => '#',
+            'class' => 'nowrap',
+            'target_blog' => '',
+            'post_navigation' => '',
+            'nav_target' => null,
+            //	'format'      => 'htmlbody',
+        ], $params);
+
+        $link = $this->get_permanent_link($params['text'], $params['title'], $params['class'], $params['target_blog'], $params['post_navigation'], $params['nav_target']);
+
+        if (! empty($link)) {
+            echo $params['before'];
+            echo $link;
+            echo $params['after'];
+        }
+    }
+
+    /**
+     * Template function: display title for item and link to related URL
+     */
+    public function title($params = [])
+    {
+        $params = array_merge([
+            'target_blog' => 'auto',
+        ], $params);
+        echo $this->get_title($params);
+    }
+
+    /**
+     * Get "nice" title of the Item
+     * @return string
+     */
+    public function get_title($params = [])
+    {
+        global $ReqURL, $Collection, $Blog, $MainList;
+
+        // Set default post navigation
+        $def_post_navigation = empty($Blog) ? 'same_blog' : $Blog->get_setting('post_navigation');
+
+        // Make sure we are not missing any param:
+        $params = array_merge([
+            'before' => '',
+            'after' => '',
+            'before_title' => '',
+            'after_title' => '',
+            'format' => 'htmlbody',
+            'link_type' => '#',
+            'custom_url' => '',
+            'link_class' => '#',
+            'link_target' => '',
+            'max_length' => '',
+            'target_blog' => '',
+            'nav_target' => null,
+            'post_navigation' => $def_post_navigation,
+            'title_field' => 'title', // Possible values: 'title', 'short_title', 'title_override' for value from param 'title_override' below.
+            // May be several fields separated by comma. Only first not empty field is displayed,
+            // e.g. 'short_title,title,title_override' or 'short_title,title_override,title' etc.
+            'title_override' => $this->get('title'),
+        ], $params);
+
+        $title_fields = explode(',', $params['title_field']);
+        foreach ($title_fields as $title_field) {
+            if ($title_field == 'short_title' && $this->get_type_setting('use_short_title') == 'never') {	// Allow to use short title only if it is enabled by item type:
+                continue;
+            }
+            $title = ($title_field == 'title_override' ? $params['title_override'] : $this->get($title_field));
+            $title = format_to_output($title, $params['format']);
+            if (! empty($title)) {	// Use first not empty field:
+                break;
+            }
+        }
+
+        if ($params['max_length'] != '') {	// Crop long title:
+            $title = strmaxlen($title, intval($params['max_length']));
+        }
+
+        if (empty($title)) {
+            return;
+        }
+
+        // TODO: the following has already been  factorized in $this->get_item_url()
+        $blogurl = '';
+        $url_coll_ID = $this->get_blog_ID();
+        if (! empty($Blog)
+            && in_array($params['link_type'], ['#', 'permalink'])
+            && $this->stay_in_cross_posted_collection($params['target_blog'], $Blog->ID)) { // This Item can stay in the current Collection
+            // Get collection URL only when it is required:
+            $blogurl = $Blog->gen_blogurl();
+            $url_coll_ID = $Blog->ID;
+        }
+
+        // TODO: Some of the rules below should probably be factorized in some function.
+        // e-g: 'special' sidebar items -> this is in NO WAY specific to get_title()
+        if ($params['link_type'] == '#') {	// Use default link type from settings:
+            if ($this->is_intro()) {	// This is an intro, do not link title by default:
+                $params['link_type'] = 'none';
+            } elseif (is_single_page($this->ID)) {	// We are on the single url already:
+                $params['link_type'] = 'none';
+            } elseif ($this->get_type_setting('usage') == 'special') {	// This is a sidebar link, link to its "link to" URL by default:
+                $params['link_type'] = 'linkto_url';
+            } else {	// This is a normal post: use default link strategy from Blog settings:
+                $this->get_Blog();
+                $params['link_type'] = $this->Blog->get_setting('title_link_type');
+            }
+        }
+
+        // TODO: Some of the rules below should probably be factorized in some function.
+        // e-g: 'admin_view' -> this is in NO WAY specific to get_title()
+        switch ($params['link_type']) {
+            case 'auto':
+                // If no specific URL passed, then link to permanent URL.
+                // TODO: use $this->get_item_url() so it works correctly for cross posted Items.
+                $url = (empty($this->url) ? $this->get_permanent_url() : $this->url);
+                break;
+
+            case 'permalink':
+                // TODO: use $this->get_item_url() so it works correctly for cross posted Items.
+                $url = $this->get_permanent_url('', $blogurl);
+                break;
+
+            case 'linkto_url':
+                // Use url field
+                $url = $this->url;
+                break;
+
+            case 'admin_view':
+                // View in admin
+                global $admin_url;
+                $url = $admin_url . '?ctrl=items&amp;blog=' . $this->get_blog_ID() . '&amp;p=' . $this->ID;
+                break;
+
+            case 'edit_view_url':
+                if (! $url = $this->get_edit_url()) {	// If edit URL is not available use URL ot view Item:
+                    $url = is_admin_page() ? $this->get_url('admin_view') : $this->get_permanent_url('', $blogurl);
+                }
+                break;
+
+            case 'custom_url':
+                $url = $params['custom_url'];
+                break;
+
+            case 'none':
+            default:
+        }
+
+        // TODO: the following has already been  factorized in $this->get_item_url()
+        if (! empty($url)) { // url is set, also add navigation param if it is necessary
+            $nav_target = ($params['nav_target'] === null && isset($MainList) && ! empty($MainList->nav_target)) ? $MainList->nav_target : $params['nav_target'];
+            $url = $this->add_navigation_param($url, $params['post_navigation'], $nav_target, '&amp;', $url_coll_ID);
+        }
+
+        $link_class = ($params['link_class'] == '#' ? '' : ' class="' . format_to_output($params['link_class'], 'htmlattr') . '"');
+        $link_target = ($params['link_target'] === '' ? '' : ' target="' . format_to_output($params['link_target'], 'htmlattr') . '"');
+
+        $r = $params['before'];
+        $title = $params['before_title'] . $title . $params['after_title'];
+        if (! empty($url)) {
+            $r .= '<a href="' . $url . '"' . $link_class . $link_target . '>' . $title . '</a>';
+        } else {
+            $r .= $title;
+        }
+        $r .= $params['after'];
+        return $r;
+    }
+
+    /**
+     * Template function: display type of item
+     *
+     * @param string
+     * @param string
+     * @param string Output format, see {@link format_to_output()}
+     */
+    public function type($before = '', $after = '', $format = 'htmlbody')
+    {
+        $ItemTypeCache = &get_ItemTypeCache();
+        $Element = &$ItemTypeCache->get_by_ID($this->ityp_ID, true, false);
+        if (! $Element) { // No status:
+            return;
+        }
+
+        $type_name = $Element->get('name');
+
+        if ($format == 'raw') {
+            $this->disp($type_name, 'raw');
+        } else {
+            echo $before . format_to_output($type_name, $format) . $after;
+        }
+    }
+
+    /**
+     * Template tag: get excerpt
+     * This light version does display only. It never tries to auto-generate the excerpt.
+     *
+     *  May be used in ItemLight lists such as sitemaps, feeds, recent posts, post widgets where the exceprt might be used as a title, etc.
+     *
+     * @param string filename to use to display more
+     * @return string
+     */
+    public function get_excerpt($format = 'htmlbody')
+    {
+        // Character conversions + old DBs may have tags in excerpts, so we strip them:
+        return format_to_output(utf8_strip_tags($this->excerpt), $format);
+    }
+
+    /**
+     * Get a member param by its name
+     *
+     * @param mixed Name of parameter
+     * @return mixed Value of parameter
+     */
+    public function get($parname)
+    {
+        switch ($parname) {
+            case 'title':
+                $title = parent::get($parname);
+                if (empty($title) && is_admin_page() && ! empty($this->ID)) {	// Display item ID when title is disabled or optional and empty, only on back-office:
+                    $title = '#' . $this->ID;
+                }
+                return $title;
+
+            case 'extra_cat_IDs':
+                if (isset($this->extra_cat_IDs) && is_array($this->extra_cat_IDs)) {	// Get currently updating extra categories IDs:
+                    return $this->extra_cat_IDs;
+                } else {	// Load chapters from DB:
+                    return postcats_get_byID($this->ID);
+                }
+
+                // no break
+            default:
+                return parent::get($parname);
+        }
+    }
+
+    /**
+     * Set param value
+     *
+     * By default, all values will be considered strings
+     *
+     * @todo extra_cat_IDs recording
+     *
+     * @param string parameter name
+     * @param mixed parameter value
+     * @param boolean true to set to NULL if empty value
+     * @return boolean true, if a value has been set; false if it has not changed
+     */
+    public function set($parname, $parvalue, $make_null = false)
+    {
+        switch ($parname) {
+            case 'main_cat_ID':
+                $r = $this->set_param('main_cat_ID', 'number', $parvalue, false);
+                // re-set the extracat ids to make sure main cat is in extracat list and there are no duplicates
+                $this->set('extra_cat_IDs', $this->extra_cat_IDs, false);
+                // Invalidate derived property:
+                $this->blog_ID = null;
+                unset($this->main_Chapter); // dereference
+                $this->main_Chapter = null;
+                unset($this->Blog);
+                $this->Blog = null;
+                return $r;
+
+            case 'extra_cat_IDs':
+                // ARRAY! We do not record this change (yet)
+                $this->extra_cat_IDs = $parvalue;
+                // make sure main cat is in extracat list and there are no duplicates
+                $this->extra_cat_IDs[] = $this->main_cat_ID;
+                $this->extra_cat_IDs = array_unique($this->extra_cat_IDs);
+                // Mark that extracats has been updated
+                $this->dbchanges_flags['extra_cat_IDs'] = true;
+                return true; // always return true, since we don't know what was the previous value
+
+            case 'issue_date':
+            case 'datestart':
+                // Remove seconds from issue date and start date
+                // fp> TODO: this should only be done if the date is in the future. If it's in the past there are no sideeffects to having seconds.
+                // asimo> Why do we have two parameter with the same content if only one is stored in the database?
+                // Also it doesn't make sense to remove seconds from a db date field because the database format has seconds anyway.
+                // If we remove seconds from datstart field, then datestart will be always inserted into the dbchagnes even if it was not changed.
+                // If we don't want seconds in the end of the datestart then we need to remove it in the itemlight constructor as well.
+                // asimo> We have to set seconds to '00' and not remove them, this way the posts can appear right after creating, and the format is OK as well.
+                $parvalue_empty_seconds = remove_seconds(strtotime($parvalue), 'Y-m-d H:i:s');
+                $this->issue_date = $parvalue_empty_seconds;
+                return $this->set_param('datestart', 'date', $parvalue_empty_seconds, false);
+
+            case 'ityp_ID':
+                if ($this->get('ityp_ID') != $parvalue) {	// Reset Item Type and parent Item on changing ID to different value:
+                    $this->ItemType = null;
+                    $this->parent_Item = null;
+                }
+                return $this->set_param($parname, 'number', $parvalue, true);
+
+            case 'canonical_slug_ID':
+            case 'tiny_slug_ID':
+            case 'dateset':
+            case 'excerpt_autogenerated':
+                return $this->set_param($parname, 'number', $parvalue, true);
+
+            default:
+                return $this->set_param($parname, 'string', $parvalue, $make_null);
+        }
+    }
+
+    /**
+     * Get the Blog object for the Item.
+     *
+     * @return Blog
+     */
+    public function &get_Blog()
+    {
+        if (is_null($this->Blog)) {
+            $this->load_Blog();
+        }
+
+        return $this->Blog;
+    }
+
+    /**
+     * Load the Blog object for the Item, without returning it.
+     *
+     * This is needed for {@link Results} object callbacks.
+     */
+    public function load_Blog()
+    {
+        if (is_null($this->Blog)) {
+            $BlogCache = &get_BlogCache();
+            $this->Blog = &$BlogCache->get_by_ID($this->get_blog_ID());
+        }
+    }
+
+    /**
+     * Get setting of Item's collection
+     *
+     * @param string setting name
+     * @return string|false|null value as string on success; NULL if not found; false in case of error
+     */
+    public function get_coll_setting($parname)
+    {
+        if ($item_Blog = &$this->get_Blog()) {	// Return setting value of this Item's collection
+            return $item_Blog->get_setting($parname);
+        }
+
+        // Error case when Item has no collection:
+        return false;
+    }
+
+    /**
+     * Get array of tags.
+     *
+     * Load from DB if necessary, prefetching any other tags from MainList/ItemList.
+     *
+     * @return array
+     */
+    public function &get_tags()
+    {
+        global $DB;
+
+        if (! isset($this->tags)) {
+            $ItemTagsCache = &get_ItemTagsCache();
+            if (! isset($ItemTagsCache[$this->ID])) {
+                /* Only try to fetch tags for items that are not yet in
+                 * the cache. This will always give at least the ID of
+                 * this Item.
+                 */
+                $prefetch_item_IDs = array_diff($this->get_prefetch_itemlist_IDs(), array_keys($ItemTagsCache));
+                // Assume these items don't have any tags:
+                foreach ($prefetch_item_IDs as $item_ID) {
+                    $ItemTagsCache[$item_ID] = [];
+                }
+
+                // Now fetch the tags:
+                $SQL = new SQL('Get tags for items #' . implode(',', $prefetch_item_IDs));
+                $SQL->SELECT('itag_itm_ID, tag_ID, tag_name');
+                $SQL->FROM('T_items__itemtag');
+                $SQL->FROM_add('INNER JOIN T_items__tag ON itag_tag_ID = tag_ID');
+                $SQL->WHERE('itag_itm_ID IN (' . $DB->quote($prefetch_item_IDs) . ')');
+                $SQL->ORDER_BY('tag_name');
+                $tags = $DB->get_results($SQL);
+                foreach ($tags as $tag) {
+                    $ItemTagsCache[$tag->itag_itm_ID][$tag->tag_ID] = $tag->tag_name;
+                }
+            }
+
+            $this->tags = $ItemTagsCache[$this->ID];
+        }
+
+        return $this->tags;
+    }
+
+    /**
+     * Get array of checklist lines.
+     *
+     * @return array
+     */
+    public function get_checklist_lines()
+    {
+        global $DB;
+
+        if (! isset($this->checklist_lines)) {
+            // Build query to get the checklist lines:
+            $checklist_SQL = new SQL('Get checklist lines for Item #' . $this->ID);
+            $checklist_SQL->SELECT('check_ID, check_item_ID, check_checked, check_label, check_order');
+            $checklist_SQL->FROM('T_items__checklist_lines');
+            $checklist_SQL->WHERE('check_item_ID = ' . $DB->quote($this->ID));
+            $checklist_SQL->ORDER_BY('check_order ASC, check_ID ASC');
+            $this->checklist_lines = $DB->get_results($checklist_SQL);
+        }
+
+        return $this->checklist_lines;
+    }
+
+    /**
+     * Get number of unchecked checklist lines
+     */
+    public function get_unchecked_checklist_lines()
+    {
+        $checklist_lines = $this->get_checklist_lines();
+        $unchecked_checklist_lines = 0;
+        foreach ($checklist_lines as $checklist_line) {
+            if (! $checklist_line->check_checked) {
+                $unchecked_checklist_lines++;
+            }
+        }
+
+        return $unchecked_checklist_lines;
+    }
+
+    /**
+     * Get a list of item IDs from $MainList and $ItemList, if they are loaded.
+     * This is used for prefetching item related data for the whole list(s).
+     * This will at least return the item's ID itself.
+     * @return array
+     */
+    public function get_prefetch_itemlist_IDs()
+    {
+        global $MainList, $ItemList;
+
+        // Add the current ID to the list to prefetch, if it's not in the MainList/ItemList (e.g. featured item).
+        $r = [$this->ID];
+
+        if ($MainList) {
+            $r = array_merge($r, $MainList->get_page_ID_array());
+        }
+        if ($ItemList) {
+            $r = array_merge($r, $ItemList->get_page_ID_array());
+        }
+
+        return array_unique($r);
+    }
+
+    /**
+     * Get a link to history of Item
+     *
+     * @return string A link to history
+     */
+    public function get_history_link($params = [])
+    {
+        $params = array_merge([
+            'before' => '',
+            'after' => '',
+            'link_text' => '$icon$', // Use a mask $icon$ or some other text
+            'class' => '',
+            'check_perm' => true, // FALSE - if this link must be displayed even if current has no permission to view item history page
+        ], $params);
+
+        if (($history_url = $this->get_history_url('&amp;', $params['check_perm'])) === false) { // No url available for current user, Don't display a link
+            return;
+        }
+
+        // Replace all masks with values
+        $link_text = str_replace('$icon$', $this->history_info_icon(), $params['link_text']);
+
+        return $params['before']
+            . '<a href="' . $history_url . '"' . (empty($params['class']) ? '' : ' class="' . $params['class'] . '"') . '>' . $link_text . '</a>'
+            . $params['after'];
+    }
+
+    /**
+     * Get URL to history of Item
+     *
+     * @param string Glue between url params
+     * @return string|boolean URL to history OR False when user cannot see a history
+     */
+    public function get_history_url($glue = '&amp;', $check_perm = true)
+    {
+        global $admin_url;
+
+        if ($check_perm && ! check_user_perm('item_post!CURSTATUS', 'edit', false, $this)) { // Current user cannot see a history
+            return false;
+        }
+
+        return $admin_url . '?ctrl=items' . $glue . 'action=history' . $glue . 'p=' . $this->ID;
+    }
+
+    /**
+     * Get the links to all chapters of this item
+     *
+     * @param array Params
+     * @return string The chapter links
+     */
+    public function get_chapter_links($params = [])
+    {
+        $params = array_merge([
+            'separator' => ', ',
+        ]);
+
+        // Get all item chapters:
+        $chapters = $this->get_Chapters();
+
+        if (empty($chapters)) {	// No chapters for this item, Return empty string:
+            return '';
+        }
+
+        $chapter_links = '';
+        foreach ($chapters as $c => $Chapter) {
+            $chapter_links .= '<a href="' . $Chapter->get_permanent_url() . '">' . $Chapter->get_path_name() . '</a>';
+            if ($c < count($chapters) - 1) {	// Add separator between chapters:
+                $chapter_links .= $params['separator'];
+            }
+        }
+
+        return $chapter_links;
+    }
+
+    /**
+     * Check if currently this Item is viewed as revision(archived version or proposed change)
+     *
+     * @return boolean
+     */
+    public function is_revision()
+    {
+        return ! empty($this->revision);
+    }
 }
-
-?>

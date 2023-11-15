@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 
 /**
@@ -25,302 +27,268 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class generic_menu_link_Widget extends ComponentWidget
 {
-	// Enable additional params for classes of Link/Button:
-	var $allow_link_css_params = true;
+    // Enable additional params for classes of Link/Button:
+    public $allow_link_css_params = true;
 
-	// Style to display debug messages on customizer mode: 'menu', 'standard'
-	var $debug_message_style = 'menu';
+    // Style to display debug messages on customizer mode: 'menu', 'standard'
+    public $debug_message_style = 'menu';
 
-	/**
-	 * Get a layout for menu link
-	 *
-	 * @param string Link URL
-	 * @param string Link text
-	 * @param boolean Is active menu link?
-	 * @param string Link template, possible masks: $link_url$, $link_class$, $link_text$
-	 * @param string Extra link class
-	 * @return string
-	 */
-	function get_layout_menu_link( $link_url, $link_text, $is_active_link, $link_template = NULL, $extra_link_class = '' )
-	{
-		if( $link_template === NULL )
-		{	// Use default template:
-			$link_template = '<a href="$link_url$" class="$link_class$">$link_text$</a>';
-		}
+    /**
+     * Get a layout for menu link
+     *
+     * @param string Link URL
+     * @param string Link text
+     * @param boolean Is active menu link?
+     * @param string Link template, possible masks: $link_url$, $link_class$, $link_text$
+     * @param string Extra link class
+     * @return string
+     */
+    public function get_layout_menu_link($link_url, $link_text, $is_active_link, $link_template = null, $extra_link_class = '')
+    {
+        if ($link_template === null) {	// Use default template:
+            $link_template = '<a href="$link_url$" class="$link_class$">$link_text$</a>';
+        }
 
-		switch( $this->get_display_mode() )
-		{
-			case 'buttons':
-				// "out-of list" button display:
-				$item_end = '';
-				break;
+        switch ($this->get_display_mode()) {
+            case 'buttons':
+                // "out-of list" button display:
+                $item_end = '';
+                break;
 
-			case 'tabs':
-				// Tabs display mode:
-				$item_end = ( $is_active_link ? $this->disp_params['tab_selected_end'] : $this->disp_params['tab_end'] );
-				break;
+            case 'tabs':
+                // Tabs display mode:
+                $item_end = ($is_active_link ? $this->disp_params['tab_selected_end'] : $this->disp_params['tab_end']);
+                break;
 
-			default:
-				// Classic menu link display:
-				$item_end = ( $is_active_link ? $this->disp_params['item_selected_end'] : $this->disp_params['item_end'] );
-		}
+            default:
+                // Classic menu link display:
+                $item_end = ($is_active_link ? $this->disp_params['item_selected_end'] : $this->disp_params['item_end']);
+        }
 
-		$r = $this->get_menu_link_item_start( $is_active_link );
+        $r = $this->get_menu_link_item_start($is_active_link);
 
-		$link_class = $this->get_link_class( $is_active_link );
+        $link_class = $this->get_link_class($is_active_link);
 
-		if( ! empty( $extra_link_class ) )
-		{	// Append extra CSS class:
-			$r = update_html_tag_attribs( $r, array( 'class' => $extra_link_class ) );
-			$link_class = trim( $link_class.' '.$extra_link_class );
-		}
+        if (! empty($extra_link_class)) {	// Append extra CSS class:
+            $r = update_html_tag_attribs($r, [
+                'class' => $extra_link_class,
+            ]);
+            $link_class = trim($link_class . ' ' . $extra_link_class);
+        }
 
-		// Get a link/button/tab from template:
-		$r .= str_replace(
-			array( '$link_url$', '$link_class$', '$link_text$' ),
-			array( $link_url, $link_class, $link_text ),
-			$link_template );
+        // Get a link/button/tab from template:
+        $r .= str_replace(
+            ['$link_url$', '$link_class$', '$link_text$'],
+            [$link_url, $link_class, $link_text],
+            $link_template
+        );
 
-		$r .= $item_end;
+        $r .= $item_end;
 
-		return $r;
-	}
+        return $r;
+    }
 
+    /**
+     * Get html layout for menu wrappers depending on current display mode
+     *
+     * @param string Type: 'start' or 'end' of the wrapper
+     * @return string
+     */
+    public function get_layout_menu_wrapper($type)
+    {
+        switch ($this->get_display_mode()) {
+            case 'buttons':
+                // "out-of list" button display:
+                return $type == 'start'
+                    ? $this->disp_params['button_group_start']
+                    : $this->disp_params['button_group_end'];
 
-	/**
-	 * Get html layout for menu wrappers depending on current display mode
-	 *
-	 * @param string Type: 'start' or 'end' of the wrapper
-	 * @return string
-	 */
-	function get_layout_menu_wrapper( $type )
-	{
-		switch( $this->get_display_mode() )
-		{
-			case 'buttons':
-				// "out-of list" button display:
-				return $type == 'start'
-					? $this->disp_params['button_group_start']
-					: $this->disp_params['button_group_end'];
+            case 'tabs':
+                // Tabs display mode:
+                return $type == 'start'
+                    ? $this->disp_params['tabs_start']
+                    : $this->disp_params['tabs_end'];
 
-			case 'tabs':
-				// Tabs display mode:
-				return $type == 'start'
-					? $this->disp_params['tabs_start']
-					: $this->disp_params['tabs_end'];
+            default:
+                // Classic menu link display:
+                return $type == 'start'
+                    ? $this->disp_params['list_start']
+                    : $this->disp_params['list_end'];
+        }
+    }
 
-			default:
-				// Classic menu link display:
-				return $type == 'start'
-					? $this->disp_params['list_start']
-					: $this->disp_params['list_end'];
-		}
-	}
+    /**
+     * Get html layout for item link depending on current display mode
+     *
+     * @param boolean Is active link?
+     * @return string
+     */
+    public function get_menu_link_item_start($is_active_link)
+    {
+        switch ($this->get_display_mode()) {
+            case 'buttons':
+                // Buttons:
+                return '';
 
+            case 'tabs':
+                // Tabs:
+                return ($is_active_link ? $this->disp_params['tab_selected_start'] : $this->disp_params['tab_start']);
 
-	/**
-	 * Get html layout for item link depending on current display mode
-	 *
-	 * @param boolean Is active link?
-	 * @return string
-	 */
-	function get_menu_link_item_start( $is_active_link )
-	{
-		switch( $this->get_display_mode() )
-		{
-			case 'buttons':
-				// Buttons:
-				return '';
+            default:
+                // List:
+                return ($is_active_link ? $this->disp_params['item_selected_start'] : $this->disp_params['item_start']);
+        }
+    }
 
-			case 'tabs':
-				// Tabs:
-				return ( $is_active_link ? $this->disp_params['tab_selected_start'] : $this->disp_params['tab_start'] );
+    /**
+     * Get link class depending on current display mode
+     *
+     * @param boolean Is active link?
+     * @return string
+     */
+    public function get_link_class($is_active_link)
+    {
+        switch ($this->get_display_mode()) {
+            case 'buttons':
+                // Buttons:
+                if ($is_active_link) {	// Class for active button:
+                    $link_class = empty($this->disp_params['widget_active_link_class']) ? $this->disp_params['button_selected_class'] : $this->disp_params['widget_active_link_class'];
+                } else {	// Class for normal(not active) button:
+                    $link_class = empty($this->disp_params['widget_link_class']) ? $this->disp_params['button_default_class'] : $this->disp_params['widget_link_class'];
+                }
+                break;
 
-			default:
-				// List:
-				return ( $is_active_link ? $this->disp_params['item_selected_start'] : $this->disp_params['item_start'] );
-		}
-	}
+            case 'tabs':
+                // Tabs:
+                if ($is_active_link) {	// Class for active tab:
+                    $link_class = $this->disp_params['tab_selected_class'] . (empty($this->disp_params['widget_active_link_class']) ? '' : ' ' . $this->disp_params['widget_active_link_class']);
+                } else {	// Class for normal(not active) tab:
+                    $link_class = $this->disp_params['tab_default_class'] . (empty($this->disp_params['widget_link_class']) ? '' : ' ' . $this->disp_params['widget_link_class']);
+                }
+                break;
 
+            default:
+                // List:
+                if ($is_active_link) {	// Class for active link:
+                    $link_class = $this->disp_params['link_selected_class'] . (empty($this->disp_params['widget_active_link_class']) ? '' : ' ' . $this->disp_params['widget_active_link_class']);
+                } else {	// Class for normal(not active) link:
+                    $link_class = $this->disp_params['link_default_class'] . (empty($this->disp_params['widget_link_class']) ? '' : ' ' . $this->disp_params['widget_link_class']);
+                }
+                break;
+        }
 
-	/**
-	 * Get link class depending on current display mode
-	 *
-	 * @param boolean Is active link?
-	 * @return string
-	 */
-	function get_link_class( $is_active_link )
-	{
-		switch( $this->get_display_mode() )
-		{
-			case 'buttons':
-				// Buttons:
-				if( $is_active_link )
-				{	// Class for active button:
-					$link_class = empty( $this->disp_params['widget_active_link_class'] ) ? $this->disp_params['button_selected_class'] : $this->disp_params['widget_active_link_class'];
-				}
-				else
-				{	// Class for normal(not active) button:
-					$link_class = empty( $this->disp_params['widget_link_class'] ) ? $this->disp_params['button_default_class'] : $this->disp_params['widget_link_class'];
-				}
-				break;
+        if (! empty($this->disp_params['link_type'])) {	// Append class per link type:
+            $link_class .= ' evo_widget_' . $this->code . '_' . $this->disp_params['link_type'];
+        }
 
-			case 'tabs':
-				// Tabs:
-				if( $is_active_link )
-				{	// Class for active tab:
-					$link_class = $this->disp_params['tab_selected_class'].( empty( $this->disp_params['widget_active_link_class'] ) ? '' : ' '.$this->disp_params['widget_active_link_class'] );
-				}
-				else
-				{	// Class for normal(not active) tab:
-					$link_class = $this->disp_params['tab_default_class'].( empty( $this->disp_params['widget_link_class'] ) ? '' : ' '.$this->disp_params['widget_link_class'] );
-				}
-				break;
+        return trim($link_class);
+    }
 
-			default:
-				// List:
-				if( $is_active_link )
-				{	// Class for active link:
-					$link_class = $this->disp_params['link_selected_class'].( empty( $this->disp_params['widget_active_link_class'] ) ? '' : ' '.$this->disp_params['widget_active_link_class'] );
-				}
-				else
-				{	// Class for normal(not active) link:
-					$link_class = $this->disp_params['link_default_class'].( empty( $this->disp_params['widget_link_class'] ) ? '' : ' '.$this->disp_params['widget_link_class'] );
-				}
-				break;
-		}
+    /**
+     * Get display mode
+     *
+     * @return string Display mode: 'list', 'buttons', 'tabs'
+     */
+    public function get_display_mode()
+    {
+        if (isset($this->disp_params['display_mode']) &&
+            in_array($this->disp_params['display_mode'], ['list', 'buttons', 'tabs'])) {	// Use provided display mode:
+            return $this->disp_params['display_mode'];
+        }
 
-		if( ! empty( $this->disp_params['link_type'] ) )
-		{	// Append class per link type:
-			$link_class .= ' evo_widget_'.$this->code.'_'.$this->disp_params['link_type'];
-		}
+        // Get auto display mode:
 
-		return trim( $link_class );
-	}
+        // Are we displaying a link in a list or a standalone button?
+        // "Menu" Containers are 'inlist'. Some sub-containers will also be 'inlist' (displaying a local menu).
+        // fp> Maybe this should be moved up to container level?
+        $inlist = isset($this->disp_params['inlist']) ? $this->disp_params['inlist'] : (isset($this->disp_params['display_mode']) ? $this->disp_params['display_mode'] : false);
+        if ($inlist === 'auto') {
+            if (empty($this->disp_params['list_start'])) {	// We're not starting a list. This means (very high probability) that we are already in a list:
+                $inlist = true;
+            } else {	// We have no override for list start. This means (very high probability) that we are displaying a standalone link -> we want a button for this widget
+                $inlist = false;
+            }
+        }
 
+        return $inlist ? 'list' : 'buttons';
+    }
 
-	/**
-	 * Get display mode
-	 *
-	 * @return string Display mode: 'list', 'buttons', 'tabs'
-	 */
-	function get_display_mode()
-	{
-		if( isset( $this->disp_params['display_mode'] ) &&
-		    in_array( $this->disp_params['display_mode'], array( 'list', 'buttons', 'tabs' ) ) )
-		{	// Use provided display mode:
-			return $this->disp_params['display_mode'];
-		}
+    /**
+     * Get a layout for standalone menu link
+     *
+     * @param string Link URL
+     * @param string Link text
+     * @param boolean Is active menu link?
+     * @param string Link template, possible masks: $link_url$, $link_class$, $link_text$
+     * @return string
+     */
+    public function get_layout_standalone_menu_link($link_url, $link_text, $is_active_link, $link_template = null)
+    {
+        $r = $this->disp_params['block_start'];
+        $r .= $this->disp_params['block_body_start'];
 
-		// Get auto display mode:
+        $r .= $this->get_layout_menu_wrapper('start');
+        $r .= $this->get_layout_menu_link($link_url, $link_text, $is_active_link, $link_template);
+        $r .= $this->get_layout_menu_wrapper('end');
 
-		// Are we displaying a link in a list or a standalone button?
-		// "Menu" Containers are 'inlist'. Some sub-containers will also be 'inlist' (displaying a local menu).
-		// fp> Maybe this should be moved up to container level? 
-		$inlist = isset( $this->disp_params['inlist'] ) ? $this->disp_params['inlist'] : ( isset( $this->disp_params['display_mode'] ) ? $this->disp_params['display_mode'] : false );
-		if( $inlist === 'auto' )
-		{
-			if( empty( $this->disp_params['list_start'] ) )
-			{	// We're not starting a list. This means (very high probability) that we are already in a list:
-				$inlist = true;
-			}
-			else
-			{	// We have no override for list start. This means (very high probability) that we are displaying a standalone link -> we want a button for this widget
-				$inlist = false;
-			}
-		}
+        $r .= $this->disp_params['block_body_end'];
+        $r .= $this->disp_params['block_end'];
 
-		return $inlist ? 'list' : 'buttons';
-	}
+        return $r;
+    }
 
+    /**
+     * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
+     *
+     * @param string Message
+     */
+    public function display_debug_message($message = null)
+    {
+        if ($this->debug_message_style == 'standard') {	// Use standard debug message without menu style:
+            parent::display_debug_message($message);
+            return;
+        }
 
-	/**
-	 * Get a layout for standalone menu link
-	 *
-	 * @param string Link URL
-	 * @param string Link text
-	 * @param boolean Is active menu link?
-	 * @param string Link template, possible masks: $link_url$, $link_class$, $link_text$
-	 * @return string
-	 */
-	function get_layout_standalone_menu_link( $link_url, $link_text, $is_active_link, $link_template = NULL )
-	{
-		$r = $this->disp_params['block_start'];
-		$r .= $this->disp_params['block_body_start'];
+        // Menu style:
+        if ($this->mode == 'designer') {	// Display message on designer mode:
+            if ($message === null) {	// Set default message:
+                $message = 'Hidden';
+                if (! empty($this->disp_params['link_type'])) {
+                    $message .= '(' . $this->disp_params['link_type'] . ')';
+                }
+            }
 
-		$r .= $this->get_layout_menu_wrapper( 'start' );
-		$r .= $this->get_layout_menu_link( $link_url, $link_text, $is_active_link, $link_template );
-		$r .= $this->get_layout_menu_wrapper( 'end' );
+            echo $this->get_layout_standalone_menu_link('#', $message, false);
+        }
+    }
 
-		$r .= $this->disp_params['block_body_end'];
-		$r .= $this->disp_params['block_end'];
+    /**
+     * Display an error message
+     *
+     * @param string Message
+     */
+    public function display_error_message($message = null)
+    {
+        if ($this->debug_message_style == 'standard') {	// Use standard debug message without menu style:
+            parent::display_error_message($message);
+            return;
+        }
 
-		return $r;
-	}
+        // Menu style:
+        global $current_User, $Blog;
 
+        if (isset($this->BlockCache)) {	// Do NOT cache because this widget has an error which is dispalyed only for collection admin:
+            $this->BlockCache->abort_collect();
+        }
 
-	/**
-	 * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
-	 *
-	 * @param string Message
-	 */
-	function display_debug_message( $message = NULL )
-	{
-		if( $this->debug_message_style == 'standard' )
-		{	// Use standard debug message without menu style:
-			parent::display_debug_message( $message );
-			return;
-		}
-
-		// Menu style:
-		if( $this->mode == 'designer' )
-		{	// Display message on designer mode:
-			if( $message === NULL )
-			{	// Set default message:
-				$message = 'Hidden';
-				if( ! empty( $this->disp_params['link_type'] ) )
-				{
-					$message .= '('.$this->disp_params['link_type'].')';
-				}
-			}
-
-			echo $this->get_layout_standalone_menu_link( '#', $message, false );
-		}
-	}
-
-
-	/**
-	 * Display an error message
-	 *
-	 * @param string Message
-	 */
-	function display_error_message( $message = NULL )
-	{
-		if( $this->debug_message_style == 'standard' )
-		{	// Use standard debug message without menu style:
-			parent::display_error_message( $message );
-			return;
-		}
-
-		// Menu style:
-		global $current_User, $Blog;
-
-		if( isset( $this->BlockCache ) )
-		{	// Do NOT cache because this widget has an error which is dispalyed only for collection admin:
-			$this->BlockCache->abort_collect();
-		}
-
-		if( is_logged_in() && $current_User->check_perm( 'blog_admin', 'edit', false, $Blog->ID ) )
-		{	// Display error only for collection admin:
-			if( $message === NULL )
-			{	// Set default message:
-				$message = 'Error';
-				if( ! empty( $this->disp_params['link_type'] ) && $this->disp_params['link_type'] != 'canonic' )
-				{
-					$message .= '('.$this->disp_params['link_type'].')';
-				}
-			}
-			echo $this->get_layout_standalone_menu_link( '#', get_rendering_error( $message, 'span' ), false );
-		}
-	}
+        if (is_logged_in() && $current_User->check_perm('blog_admin', 'edit', false, $Blog->ID)) {	// Display error only for collection admin:
+            if ($message === null) {	// Set default message:
+                $message = 'Error';
+                if (! empty($this->disp_params['link_type']) && $this->disp_params['link_type'] != 'canonic') {
+                    $message .= '(' . $this->disp_params['link_type'] . ')';
+                }
+            }
+            echo $this->get_layout_standalone_menu_link('#', get_rendering_error($message, 'span'), false);
+        }
+    }
 }

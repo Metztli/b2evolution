@@ -11,18 +11,19 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // ------------------------- "404 Page" CONTAINER EMBEDDED HERE --------------------------
-skin_container( /* TRANS: Widget container name */ NT_('404 Page'), array(
-	// The following params will be used as defaults for widgets included in this container:
-	// This will enclose each widget in a block:
-	'block_start' => '<div class="widget error_404 $wi_class$">',
-	'block_end'   => '</div>',
-	// This will enclose the title of each widget:
-	'block_title_start' => '<h3>',
-	'block_title_end'   => '</h3>',
-) );
+skin_container( /* TRANS: Widget container name */ NT_('404 Page'), [
+    // The following params will be used as defaults for widgets included in this container:
+    // This will enclose each widget in a block:
+    'block_start' => '<div class="widget error_404 $wi_class$">',
+    'block_end' => '</div>',
+    // This will enclose the title of each widget:
+    'block_title_start' => '<h3>',
+    'block_title_end' => '</h3>',
+]);
 // ----------------------------- END OF "404 Page" CONTAINER -----------------------------
-?>

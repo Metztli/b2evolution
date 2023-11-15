@@ -11,17 +11,17 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // ------------------ "Compare Main Area" CONTAINER EMBEDDED HERE -------------------
 // Display container and contents:
-widget_container( 'compare_main_area', array(
-		// The following params will be used as defaults for widgets included in this container:
-		'container_display_if_empty' => false, // If no widget, don't display container at all
-		'block_start' => '<div class="evo_widget $wi_class$">',
-		'block_end'   => '</div>',
-	) );
+widget_container('compare_main_area', [
+    // The following params will be used as defaults for widgets included in this container:
+    'container_display_if_empty' => false, // If no widget, don't display container at all
+    'block_start' => '<div class="evo_widget $wi_class$">',
+    'block_end' => '</div>',
+]);
 // --------------------- END OF "Compare Main Area" CONTAINER -----------------------
-
-?>

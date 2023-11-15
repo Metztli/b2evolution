@@ -16,7 +16,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -29,12 +31,12 @@ global $Session;
 $fadeout_id = $Session->get('fadeout_id');
 
 $SQL = new SQL();
-$SQL->SELECT( 'plug_status, plug_ID, plug_priority, plug_code' );
-$SQL->FROM( 'T_plugins' );
+$SQL->SELECT('plug_status, plug_ID, plug_priority, plug_code');
+$SQL->FROM('T_plugins');
 
-$Results = new Results( $SQL->get(), 'plug_', '--A' /* by name */, 0 /* no limit */ );
+$Results = new Results($SQL->get(), 'plug_', '--A' /* by name */, 0 /* no limit */);
 
-$Results->Cache = & $admin_Plugins;
+$Results->Cache = &$admin_Plugins;
 
 /*
 // TODO: dh> make this an optional view (while also removing the "group" col then)?
@@ -46,230 +48,221 @@ $Results->Cache = & $admin_Plugins;
 //
 $Results->group_by_obj_prop = 'group';
 $Results->grp_cols[] = array(
-		'td' => '% ( empty( {Obj}->group ) && $this->current_group_count[0] > 1 ? T_(\'Un-Grouped\') : {Obj}->group ) %',
-		'td_colspan' => 0,
-	);
+        'td' => '% ( empty( {Obj}->group ) && $this->current_group_count[0] > 1 ? T_(\'Un-Grouped\') : {Obj}->group ) %',
+        'td_colspan' => 0,
+    );
 */
 
-$Results->title = T_('Installed plugins').get_manual_link('installed-plugins');
+$Results->title = T_('Installed plugins') . get_manual_link('installed-plugins');
 
-if( count( $admin_Plugins->get_plugin_groups() ) )
-{
-	/*
-	 * Grouping params:
-	 */
-	$Results->group_by_obj_prop = 'group';
+if (count($admin_Plugins->get_plugin_groups())) {
+    /*
+     * Grouping params:
+     */
+    $Results->group_by_obj_prop = 'group';
 
 
-	/*
-	 * Group columns:
-	 */
-	$Results->grp_cols[] = array(
-			'td_colspan' => 0,
-			'td' => '~conditional( {Obj}->group != "", {Obj}->group, "'.T_('Unclassified').'" )~',
-		);
+    /*
+     * Group columns:
+     */
+    $Results->grp_cols[] = [
+        'td_colspan' => 0,
+        'td' => '~conditional( {Obj}->group != "", {Obj}->group, "' . T_('Unclassified') . '" )~',
+    ];
 }
 
 /*
  * STATUS TD:
  */
-function plugin_results_td_status( $plug_status, $plug_ID )
+function plugin_results_td_status($plug_status, $plug_ID)
 {
-	global $admin_Plugins, $admin_url;
+    global $admin_Plugins, $admin_url;
 
-	$perm_edit = check_user_perm( 'options', 'edit', false );
+    $perm_edit = check_user_perm('options', 'edit', false);
 
-	if( $plug_status == 'enabled' )
-	{ // Enabled
-		if( $perm_edit )
-		{ // URL to disable the plugin
-			$plugin_status_url = $admin_url.'?ctrl=plugins&amp;action=disable_plugin&amp;plugin_ID='.$plug_ID.'&amp;'.url_crumb( 'plugin' );
-		}
-		$plugin_status_icon = get_icon( 'bullet_green', 'imgtag', array( 'title' => T_('The plugin is enabled.') ) );
-	}
-	elseif( $plug_status == 'broken' )
-	{ // Broken
-		$plugin_status_icon = get_icon( 'warning', 'imgtag', array(
-			'title' => T_('The plugin is broken.')
-				.// Display load error from Plugins::register() (if any):
-				( isset( $admin_Plugins->plugin_errors[ $plug_ID ] )
-					&& ! empty( $admin_Plugins->plugin_errors[ $plug_ID ]['register'] )
-					? ' '.$admin_Plugins->plugin_errors[ $plug_ID ]['register']
-					: '' )
-			) );
-	}
-	elseif( $plug_status == 'needs_config' )
-	{ // Needs config
-		if( $perm_edit )
-		{ // URL to edit plugin settings
-			$plugin_status_url = $admin_url.'?ctrl=plugins&amp;action=edit_settings&amp;plugin_ID='.$plug_ID;
-		}
-		$plugin_status_icon = get_icon( 'question', 'imgtag', array( 'title' => T_('The plugin is not installed completely.') ) );
-	}
-	else
-	{ // Disabled
-		if( $perm_edit )
-		{ // URL to enable the plugin
-			$plugin_status_url = $admin_url.'?ctrl=plugins&amp;action=enable_plugin&amp;plugin_ID='.$plug_ID.'&amp;'.url_crumb( 'plugin' );
-		}
-		$plugin_status_icon = get_icon( 'bullet_empty_grey', 'imgtag', array( 'title' => T_('The plugin is disabled.') ) );
-	}
+    if ($plug_status == 'enabled') { // Enabled
+        if ($perm_edit) { // URL to disable the plugin
+            $plugin_status_url = $admin_url . '?ctrl=plugins&amp;action=disable_plugin&amp;plugin_ID=' . $plug_ID . '&amp;' . url_crumb('plugin');
+        }
+        $plugin_status_icon = get_icon('bullet_green', 'imgtag', [
+            'title' => T_('The plugin is enabled.'),
+        ]);
+    } elseif ($plug_status == 'broken') { // Broken
+        $plugin_status_icon = get_icon('warning', 'imgtag', [
+            'title' => T_('The plugin is broken.')
+                . // Display load error from Plugins::register() (if any):
+                (isset($admin_Plugins->plugin_errors[$plug_ID])
+                    && ! empty($admin_Plugins->plugin_errors[$plug_ID]['register'])
+                    ? ' ' . $admin_Plugins->plugin_errors[$plug_ID]['register']
+                    : ''),
+        ]);
+    } elseif ($plug_status == 'needs_config') { // Needs config
+        if ($perm_edit) { // URL to edit plugin settings
+            $plugin_status_url = $admin_url . '?ctrl=plugins&amp;action=edit_settings&amp;plugin_ID=' . $plug_ID;
+        }
+        $plugin_status_icon = get_icon('question', 'imgtag', [
+            'title' => T_('The plugin is not installed completely.'),
+        ]);
+    } else { // Disabled
+        if ($perm_edit) { // URL to enable the plugin
+            $plugin_status_url = $admin_url . '?ctrl=plugins&amp;action=enable_plugin&amp;plugin_ID=' . $plug_ID . '&amp;' . url_crumb('plugin');
+        }
+        $plugin_status_icon = get_icon('bullet_empty_grey', 'imgtag', [
+            'title' => T_('The plugin is disabled.'),
+        ]);
+    }
 
-	if( isset( $plugin_status_url ) )
-	{
-		return '<a href="'.$plugin_status_url.'">'.$plugin_status_icon.'</a>';
-	}
-	else
-	{
-		return $plugin_status_icon;
-	}
+    if (isset($plugin_status_url)) {
+        return '<a href="' . $plugin_status_url . '">' . $plugin_status_icon . '</a>';
+    } else {
+        return $plugin_status_icon;
+    }
 }
-$Results->cols[] = array(
-		'th' => /* TRANS: shortcut for enabled */ T_('En'),
-		'th_title' => T_('Enabled'),
-		'order' => 'plug_status',
-		'td' => '%plugin_results_td_status( #plug_status#, #plug_ID# )%',
-		'td_class' => 'center',
-	);
+$Results->cols[] = [
+    'th' => /* TRANS: shortcut for enabled */ T_('En'),
+    'th_title' => T_('Enabled'),
+    'order' => 'plug_status',
+    'td' => '%plugin_results_td_status( #plug_status#, #plug_ID# )%',
+    'td_class' => 'center',
+];
 
 /*
  * PLUGIN NAME TD:
  */
-function plugin_results_td_name( $Plugin )
+function plugin_results_td_name($Plugin)
 {
-	$r = '<strong>'.$Plugin->name.'</strong>';
+    $r = '<strong>' . $Plugin->name . '</strong>';
 
-	if( check_user_perm( 'options', 'edit', false ) )
-	{ // Wrap in "edit settings" link:
-		$r = '<a href="'.regenerate_url( '', 'action=edit_settings&amp;plugin_ID='.$Plugin->ID )
-			.'" title="'.T_('Edit plugin settings!').'">'.$r.'</a>';
-	}
-	return $r;
+    if (check_user_perm('options', 'edit', false)) { // Wrap in "edit settings" link:
+        $r = '<a href="' . regenerate_url('', 'action=edit_settings&amp;plugin_ID=' . $Plugin->ID)
+            . '" title="' . T_('Edit plugin settings!') . '">' . $r . '</a>';
+    }
+    return $r;
 }
-function plugin_results_name_order_callback( $a, $b, $order )
+function plugin_results_name_order_callback($a, $b, $order)
 {
-	$r = strcasecmp( $a->name, $b->name );
-	if( $order == 'DESC' ) { $r = -$r; }
-	return $r;
+    $r = strcasecmp($a->name, $b->name);
+    if ($order == 'DESC') {
+        $r = -$r;
+    }
+    return $r;
 }
-$Results->cols[] = array(
-		'th' => T_('Plugin'),
-		'order_objects_callback' => 'plugin_results_name_order_callback',
-		'td' => '% plugin_results_td_name( {Obj} ) %',
-	);
+$Results->cols[] = [
+    'th' => T_('Plugin'),
+    'order_objects_callback' => 'plugin_results_name_order_callback',
+    'td' => '% plugin_results_td_name( {Obj} ) %',
+];
 
 /*
  * PRIORITY TD:
  */
-$Results->cols[] = array(
-		'th' => T_('Priority'),
-		'order' => 'plug_priority',
-		'td' => '$plug_priority$',
-		'td_class' => 'right',
-	);
+$Results->cols[] = [
+    'th' => T_('Priority'),
+    'order' => 'plug_priority',
+    'td' => '$plug_priority$',
+    'td_class' => 'right',
+];
 
 /*
  * PLUGIN DESCRIPTION TD:
  */
-function plugin_results_desc_order_callback( $a, $b, $order )
+function plugin_results_desc_order_callback($a, $b, $order)
 {
-	$r = strcasecmp( $a->short_desc, $b->short_desc );
-	if( $order == 'DESC' ) { $r = -$r; }
-	return $r;
+    $r = strcasecmp($a->short_desc, $b->short_desc);
+    if ($order == 'DESC') {
+        $r = -$r;
+    }
+    return $r;
 }
-$Results->cols[] = array(
-		'th' => T_('Description'),
-		'td' => '% {Obj}->short_desc %',
-		'order_objects_callback' => 'plugin_results_desc_order_callback',
-	);
+$Results->cols[] = [
+    'th' => T_('Description'),
+    'td' => '% {Obj}->short_desc %',
+    'order_objects_callback' => 'plugin_results_desc_order_callback',
+];
 
 /*
  * PLUGIN CODE TD:
  */
-$Results->cols[] = array(
-		'th' => /* TRANS: Code of a plugin */ T_('Code'),
-		'th_title' => T_('The code to call the plugin by code (SkinTag) or as Renderer.'),
-		'order' => 'plug_code',
-		'td' => '% {Obj}->code %',
-	);
+$Results->cols[] = [
+    'th' => /* TRANS: Code of a plugin */ T_('Code'),
+    'th_title' => T_('The code to call the plugin by code (SkinTag) or as Renderer.'),
+    'order' => 'plug_code',
+    'td' => '% {Obj}->code %',
+];
 
 /*
  * VERSION TD:
  */
-function plugin_results_td_version( $Plugin )
+function plugin_results_td_version($Plugin)
 {
-	return '<a href="'.regenerate_url( 'action,plugin_class', 'action=info&amp;plugin_class='.$Plugin->classname )
-		.'">'.$Plugin->version.'</a>';
-
+    return '<a href="' . regenerate_url('action,plugin_class', 'action=info&amp;plugin_class=' . $Plugin->classname)
+        . '">' . $Plugin->version . '</a>';
 }
-$Results->cols[] = array(
-		'th' => T_('Version'),
-		'td' => '% plugin_results_td_version( {Obj} ) %'
-	);
+$Results->cols[] = [
+    'th' => T_('Version'),
+    'td' => '% plugin_results_td_version( {Obj} ) %',
+];
 
 /*
  * HELP TD:
  */
-function plugin_results_td_help( $Plugin )
+function plugin_results_td_help($Plugin)
 {
-	return action_icon( T_('Display info'), 'info', regenerate_url( 'action,plugin_class', 'action=info&amp;plugin_class='.$Plugin->classname ) )
-		// Help icons, if available:
-		.$Plugin->get_help_link('$help_url');
+    return action_icon(T_('Display info'), 'info', regenerate_url('action,plugin_class', 'action=info&amp;plugin_class=' . $Plugin->classname))
+        // Help icons, if available:
+        . $Plugin->get_help_link('$help_url');
 }
-$Results->cols[] = array(
-		'th' => T_('Help'),
-		'td_class' => 'nowrap',
-		'td' => '% plugin_results_td_help( {Obj} ) %',
-	);
+$Results->cols[] = [
+    'th' => T_('Help'),
+    'td_class' => 'nowrap',
+    'td' => '% plugin_results_td_help( {Obj} ) %',
+];
 
 /*
  * ACTIONS TD:
  */
-function plugin_results_td_actions( $Plugin )
+function plugin_results_td_actions($Plugin)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$r = '';
-	if( $Plugin->status == 'enabled' )
-	{
-		$r .= action_icon( T_('Disable the plugin!'), 'deactivate', $admin_url.'?ctrl=plugins&amp;action=disable_plugin&amp;plugin_ID='.$Plugin->ID.'&amp;'.url_crumb( 'plugin' ) );
-	}
-	elseif( $Plugin->status != 'broken' )
-	{
-		$r .= action_icon( T_('Enable the plugin!'), 'activate', $admin_url.'?ctrl=plugins&amp;action=enable_plugin&amp;plugin_ID='.$Plugin->ID.'&amp;'.url_crumb( 'plugin' ) );
-	}
-	$r .= $Plugin->get_edit_settings_link();
-	$r .= action_icon( T_('Un-install this plugin!'), 'delete', $admin_url.'?ctrl=plugins&amp;action=uninstall&amp;plugin_ID='.$Plugin->ID.'&amp;'.url_crumb( 'plugin' ) );
-	return $r;
+    $r = '';
+    if ($Plugin->status == 'enabled') {
+        $r .= action_icon(T_('Disable the plugin!'), 'deactivate', $admin_url . '?ctrl=plugins&amp;action=disable_plugin&amp;plugin_ID=' . $Plugin->ID . '&amp;' . url_crumb('plugin'));
+    } elseif ($Plugin->status != 'broken') {
+        $r .= action_icon(T_('Enable the plugin!'), 'activate', $admin_url . '?ctrl=plugins&amp;action=enable_plugin&amp;plugin_ID=' . $Plugin->ID . '&amp;' . url_crumb('plugin'));
+    }
+    $r .= $Plugin->get_edit_settings_link();
+    $r .= action_icon(T_('Un-install this plugin!'), 'delete', $admin_url . '?ctrl=plugins&amp;action=uninstall&amp;plugin_ID=' . $Plugin->ID . '&amp;' . url_crumb('plugin'));
+    return $r;
 }
-if( check_user_perm( 'options', 'edit', false ) )
-{
-	$Results->cols[] = array(
-			'th' => T_('Actions'),
-			'td' => '% plugin_results_td_actions( {Obj} ) %',
-			'td_class' => 'shrinkwrap',
-		);
+if (check_user_perm('options', 'edit', false)) {
+    $Results->cols[] = [
+        'th' => T_('Actions'),
+        'td' => '% plugin_results_td_actions( {Obj} ) %',
+        'td_class' => 'shrinkwrap',
+    ];
 }
 
 // Action icons:
 
-if( check_user_perm( 'options', 'edit' ) )
-{ // Display action link to reload plugins:
-	$Results->global_icon( T_('Reload events and codes for installed plugins.'), 'reload', regenerate_url( 'action', 'action=reload_plugins' ).'&amp;'.url_crumb('plugin'), T_('Reload plugins'), 3, 4 );
+if (check_user_perm('options', 'edit')) { // Display action link to reload plugins:
+    $Results->global_icon(T_('Reload events and codes for installed plugins.'), 'reload', regenerate_url('action', 'action=reload_plugins') . '&amp;' . url_crumb('plugin'), T_('Reload plugins'), 3, 4);
 }
 
-$Results->global_icon( T_('Install new plugin...'), 'new', regenerate_url( 'action', 'action=list_available' ), T_('Install new'), 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+$Results->global_icon(T_('Install new plugin...'), 'new', regenerate_url('action', 'action=list_available'), T_('Install new'), 3, 4, [
+    'class' => 'action_icon btn-primary',
+]);
 
 
 
 // if there happened something with a plugin, apply fadeout to the row:
-$highlight_fadeout = empty($fadeout_id) /* may be error string */ ? array() : array( 'plug_ID'=>array($fadeout_id) );
+$highlight_fadeout = empty($fadeout_id) /* may be error string */ ? [] : [
+    'plug_ID' => [$fadeout_id],
+];
 
-$Results->display( NULL, $highlight_fadeout );
+$Results->display(null, $highlight_fadeout);
 
 unset($Results); // free memory
 
 //Flush fadeout
-$Session->delete( 'fadeout_id');
-
-?>
+$Session->delete('fadeout_id');

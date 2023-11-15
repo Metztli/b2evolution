@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/ui/_uiwidget.class.php', 'Widget' );
+load_class('_core/ui/_uiwidget.class.php', 'Widget');
 
 /**
  * Menu class
@@ -23,496 +25,413 @@ load_class( '_core/ui/_uiwidget.class.php', 'Widget' );
  */
 class Menu extends Widget
 {
-	/**
-	 * The menu structure (array of arrays)
-	 *
-	 * Use {@link add_menu_entries()} to add them here.
-	 *
-	 * @access protected
-	 * @var array
-	 */
-	var $_menus = array();
+    /**
+     * The menu structure (array of arrays)
+     *
+     * Use {@link add_menu_entries()} to add them here.
+     *
+     * @access protected
+     * @var array
+     */
+    public $_menus = [];
 
+    /**
+     * Add menu entries to the list of entries for a given path.
+     *
+     * @param null|string|array The path to add the entries to. See {@link get_node_by_path()}.
+     * @param array Menu entries to add (key (string) => entry (array)).
+     *   An entry can have the following keys:
+     *     'text': Text/Caption for this entry.
+     *     'href': The link for this entry.
+     *     'entries': array of sub-entries
+     *     DEPRECATED 'style': CSS style for this entry.
+     *     DEPRECATED 'onclick': onclick property for this entry.
+     *     DEPRECATED 'name': name attribute of the link/entry.
+     * @param string Node name after which we should insert the menu entries, NULL - to insert to the end
+     */
+    public function add_menu_entries($path, $new_entries, $after_node = null)
+    {
+        // Get a reference to the node in the menu list.
+        $node = &$this->get_node_by_path($path, true);
 
-	/**
-	 * Add menu entries to the list of entries for a given path.
-	 *
-	 * @param NULL|string|array The path to add the entries to. See {@link get_node_by_path()}.
-	 * @param array Menu entries to add (key (string) => entry (array)).
-	 *   An entry can have the following keys:
-	 *     'text': Text/Caption for this entry.
-	 *     'href': The link for this entry.
-	 *     'entries': array of sub-entries
-	 *     DEPRECATED 'style': CSS style for this entry.
-	 *     DEPRECATED 'onclick': onclick property for this entry.
-	 *     DEPRECATED 'name': name attribute of the link/entry.
-	 * @param string Node name after which we should insert the menu entries, NULL - to insert to the end
-	 */
-	function add_menu_entries( $path, $new_entries, $after_node = NULL )
-	{
-		// Get a reference to the node in the menu list.
-		$node = & $this->get_node_by_path( $path, true );
+        /*
+        if( !is_array($node) )
+        {
+            debug_die( 'add_menu_entries() with non-existing path!' );
+        }
+        */
 
-		/*
-		if( !is_array($node) )
-		{
-			debug_die( 'add_menu_entries() with non-existing path!' );
-		}
-		*/
+        $new_entires_are_inserted = false;
 
-		$new_entires_are_inserted = false;
+        if (! is_null($after_node)) {	// We should insert new entries after specific node
+            $new_node = $node;
+            $new_node['entries'] = [];
+            if (isset($node['entries'])) {
+                foreach ($node['entries'] as $node_key => $node_entry) {
+                    $new_node['entries'][$node_key] = $node_entry;
+                    if ($node_key == $after_node) {	// Insert new entires here after specific node
+                        foreach ($new_entries as $l_key => $l_new_entry) {
+                            $new_node['entries'][$l_key] = $l_new_entry;
+                        }
+                        $new_entires_are_inserted = true;
+                    }
+                }
+            }
+            $node = $new_node;
+        }
 
-		if( !is_null( $after_node ) )
-		{	// We should insert new entries after specific node
-			$new_node = $node;
-			$new_node['entries'] = array();
-			if( isset( $node['entries'] ) )
-			{
-				foreach( $node['entries'] as $node_key => $node_entry )
-				{
-					$new_node['entries'][ $node_key ] = $node_entry;
-					if( $node_key == $after_node )
-					{	// Insert new entires here after specific node
-						foreach( $new_entries as $l_key => $l_new_entry )
-						{
-							$new_node['entries'][$l_key] = $l_new_entry;
-						}
-						$new_entires_are_inserted = true;
-					}
-				}
-			}
-			$node = $new_node;
-		}
+        if (! $new_entires_are_inserted) {	// Insert new entries to the end if they are still not inserted after specific node
+            foreach ($new_entries as $l_key => $l_new_entry) {
+                $node['entries'][$l_key] = $l_new_entry;
+            }
+        }
+    }
 
-		if( !$new_entires_are_inserted )
-		{	// Insert new entries to the end if they are still not inserted after specific node
-			foreach( $new_entries as $l_key => $l_new_entry )
-			{
-				$node['entries'][$l_key] = $l_new_entry;
-			}
-		}
-	}
+    /**
+     * Insert new menu entries right after the menu entry passed as path
+     *
+     * @param null|string|array The path. See {@link get_node_by_path()}.
+     * @param new entries
+     * @param position after which to insert new entries. If not given, new entries is inserted after Path
+     * @returns boolean Whether inserting was successfull.
+     */
+    public function insert_menu_entries_after($path, $new_entries, $index = false)
+    {
+        $menu_item = '';
+        if ($index === false) { // get menu item after which to insert new entries
+            if (is_array($path)) {
+                $menu_item = array_pop($path);
+            } elseif (is_string($path)) {
+                $menu_item = $path;
+                $path = null;
+            }
+        }
+        $menu = &$this->get_node_by_path($path);
+        if ($menu === false) { // no such path
+            return false;
+        }
+        $entries = &$menu['entries'];
+        if ($menu_item) { // find index of menu itemafter which to insert new entries
+            $keys = array_keys($entries);
 
-	/**
-	 * Insert new menu entries right after the menu entry passed as path
-	 *
-	 * @param NULL|string|array The path. See {@link get_node_by_path()}.
-	 * @param new entries
-	 * @param position after which to insert new entries. If not given, new entries is inserted after Path
-	 * @returns boolean Whether inserting was successfull.
-	 */
-	function insert_menu_entries_after( $path, $new_entries, $index = false )
-	{
-		$menu_item = '';
-		if( $index === false )
-		{ // get menu item after which to insert new entries
+            if (! empty($keys)) {
+                $index = array_search($menu_item, $keys, true);
+            }
+        }
 
-			if( is_array( $path ) )
-			{
-				$menu_item = array_pop( $path );
-			}
-			elseif( is_string( $path ) )
-			{
-				$menu_item = $path;
-				$path = NULL;
-			}
-		}
-		$menu = & $this->get_node_by_path( $path );
-		if( $menu === false )
-		{ // no such path
-			return false;
-		}
-		$entries = & $menu['entries'];
-		if( $menu_item )
-		{ // find index of menu itemafter which to insert new entries
-			$keys = array_keys( $entries );
+        if (($index === false) || ($index === null)) {
+            return false;
+        }
 
-			if( !empty( $keys ) ) $index = array_search( $menu_item, $keys, true );
-		}
+        // make new menu entries
+        $menu['entries'] = array_merge(
+            array_slice($entries, 0, $index + 1),
+            $new_entries,
+            array_slice($entries, $index)
+        );
 
-		if( ( $index === false ) || ($index === NULL) )
-		{
-			return false;
-		}
+        return true;
+    }
 
-		// make new menu entries
-		$menu['entries'] = array_merge(
-			array_slice( $entries, 0, $index + 1 ),
-			$new_entries,
-			array_slice( $entries, $index )
-		);
+    /**
+     * Get the reference of a node from the menu entries using a path.
+     *
+     * @param array|string|null The path. NULL means root, string means child of root,
+     *                          array means path below root. (eg <code>array('options', 'general')</code>).
+     * @param boolean Should the node be created if it does not exist already?
+     * @return array|false The node as array or false, if the path does not exist (and we do not $createIfNotExisting).
+     */
+    public function &get_node_by_path($path, $createIfNotExisting = false)
+    {
+        if (is_null($path)) { // root element
+            $path = [];
+        } elseif (! is_array($path)) {
+            $path = [$path];
+        }
 
-		return true;
-	}
+        $node = &$this->_menus;
+        foreach ($path as $lStep) {
+            if (! isset($node['entries'][$lStep])) {
+                if ($createIfNotExisting) {
+                    $node['entries'][$lStep] = [];
+                } else {
+                    $r = false;
+                    return $r;
+                }
+            }
+            $node = &$node['entries'][$lStep];
+        }
 
-	/**
-	 * Get the reference of a node from the menu entries using a path.
-	 *
-	 * @param array|string|NULL The path. NULL means root, string means child of root,
-	 *                          array means path below root. (eg <code>array('options', 'general')</code>).
-	 * @param boolean Should the node be created if it does not exist already?
-	 * @return array|false The node as array or false, if the path does not exist (and we do not $createIfNotExisting).
-	 */
-	function & get_node_by_path( $path, $createIfNotExisting = false )
-	{
-		if( is_null($path) )
-		{ // root element
-			$path = array();
-		}
-		elseif( ! is_array($path) )
-		{
-			$path = array($path);
-		}
+        return $node;
+    }
 
-		$node = & $this->_menus;
-		foreach( $path as $lStep )
-		{
-			if( ! isset($node['entries'][$lStep]) )
-			{
-				if( $createIfNotExisting )
-				{
-					$node['entries'][$lStep] = array();
-				}
-				else
-				{
-					$r = false;
-					return $r;
-				}
-			}
-			$node = & $node['entries'][$lStep];
-		}
+    /**
+     * Get menu entries for a given path.
+     *
+     * @param null|string|array The path. See {@link get_node_by_path()}.
+     * @return array The menu entries (may be empty).
+     */
+    public function get_menu_entries($path)
+    {
+        $node = &$this->get_node_by_path($path);
 
-		return $node;
-	}
+        return isset($node['entries']) ? $node['entries'] : [];
+    }
 
+    /**
+     * Get the key of a selected entry for a path.
+     *
+     * @param null|string|array The path. See {@link get_node_by_path()}.
+     * @return string|false
+     */
+    public function get_selected($path)
+    {
+        $node = &$this->get_node_by_path($path);
 
-	/**
-	 * Get menu entries for a given path.
-	 *
-	 * @param NULL|string|array The path. See {@link get_node_by_path()}.
-	 * @return array The menu entries (may be empty).
-	 */
-	function get_menu_entries( $path )
-	{
-		$node = & $this->get_node_by_path( $path );
+        if (isset($node['selected'])) {
+            return $node['selected'];
+        }
 
-		return isset( $node['entries'] ) ? $node['entries'] : array();
-	}
+        return false;
+    }
 
+    /**
+     * Get the HTML for the menu entries of a specific path.
+     *
+     * @param null|string|array The path. See {@link get_node_by_path()}.
+     * @param string Template name, see {@link get_template()}.
+     * @param integer Level
+     * @param boolean TRUE - to get template for empty menu, used to hide menus
+     * @return string The HTML for the menu.
+     */
+    public function get_html_menu($path = null, $template = 'main', $level = 0, $force_empty = false)
+    {
+        $r = '';
 
-	/**
-	 * Get the key of a selected entry for a path.
-	 *
-	 * @param NULL|string|array The path. See {@link get_node_by_path()}.
-	 * @return string|false
-	 */
-	function get_selected( $path )
-	{
-		$node = & $this->get_node_by_path($path);
+        if (is_null($path)) {
+            $path = [];
+        } elseif (! is_array($path)) {
+            $path = [$path];
+        }
 
-		if( isset($node['selected']) )
-		{
-			return $node['selected'];
-		}
+        $templateForLevel = $this->get_template($template, $level);
 
-		return false;
-	}
+        if ($force_empty || ! ($menuEntries = $this->get_menu_entries($path))) {	// No menu entries at this level
+            if (isset($templateForLevel['empty'])) {
+                $r .= $templateForLevel['empty'];
+            }
+        } else {	// There are entries to display:
+            $r .= $templateForLevel['before'];
 
+            $selected = $this->get_selected($path);
 
-	/**
-	 * Get the HTML for the menu entries of a specific path.
-	 *
-	 * @param NULL|string|array The path. See {@link get_node_by_path()}.
-	 * @param string Template name, see {@link get_template()}.
-	 * @param integer Level
-	 * @param boolean TRUE - to get template for empty menu, used to hide menus
-	 * @return string The HTML for the menu.
-	 */
-	function get_html_menu( $path = NULL, $template = 'main', $level = 0, $force_empty = false )
-	{
-		$r = '';
+            foreach ($menuEntries as $loop_key => $loop_details) {
+                if (empty($loop_details)) { // Empty placeholder, skip it. Might happen if the files module is disabled for example, then we had a file placeholder
+                    // in the blog menu that will never be used. So don't display it...
+                    continue;
+                }
 
-		if( is_null($path) )
-		{
-			$path = array();
-		}
-		elseif( ! is_array( $path ) )
-		{
-			$path = array( $path );
-		}
+                if (! empty($loop_details['separator'])) { // Separator
+                    $r .= $templateForLevel['separator'];
+                    continue;
+                }
 
-		$templateForLevel = $this->get_template( $template, $level );
+                if (! empty($loop_details['entries'])) { // Has sub-entries, check if any sub-entry can be displayed
+                    $has_entry = false;
+                    foreach ($loop_details['entries'] as $entry_key => $entry_details) {
+                        if (! empty($entry_details)) { // Menu has non-empty entry
+                            $has_entry = true;
+                            break;
+                        }
+                    }
+                    if (! $has_entry) {
+                        continue;
+                    }
+                }
 
-		if( $force_empty || !( $menuEntries = $this->get_menu_entries($path) ) )
-		{	// No menu entries at this level
-			if( isset($templateForLevel['empty']) )
-			{
-				$r .= $templateForLevel['empty'];
-			}
-		}
-		else
-		{	// There are entries to display:
-			$r .= $templateForLevel['before'];
+                // Menu entry
+                if (isset($loop_details['href'])) {
+                    $href = $loop_details['href'];
+                } elseif (! empty($loop_details['href_eval'])) { // Useful for passing dynamic context vars (fp>> I AM using it)
+                    $href = eval($loop_details['href_eval']);
+                } else {
+                    $href = null;
+                }
 
-			$selected = $this->get_selected($path);
+                $anchor = '<a';
 
-			foreach( $menuEntries as $loop_key => $loop_details )
-			{
-				if( empty( $loop_details ) )
-				{ // Empty placeholder, skip it. Might happen if the files module is disabled for example, then we had a file placeholder
-					// in the blog menu that will never be used. So don't display it...
-					continue;
-				}
+                if (! empty($href)) {
+                    $anchor .= ' href="' . $href . '"';
+                }
+                if (isset($loop_details['target'])) {
+                    $anchor .= ' target="' . $loop_details['target'] . '"';
+                }
+                if (isset($loop_details['rel'])) {
+                    $anchor .= ' rel="' . $loop_details['rel'] . '"';
+                }
+                if (isset($loop_details['style'])) {
+                    $anchor .= ' style="' . $loop_details['style'] . '"';
+                }
+                if (isset($loop_details['onclick'])) {
+                    $anchor .= ' onclick="' . $loop_details['onclick'] . '"';
+                }
+                if (isset($loop_details['name'])) {
+                    $anchor .= ' name="' . $loop_details['name'] . '"';
+                }
+                if (isset($loop_details['title'])) {
+                    $anchor .= ' title="' . $loop_details['title'] . '"';
+                }
+                if (isset($loop_details['shortcut'])) {
+                    $anchor .= ' data-shortcut="' . $loop_details['shortcut'] . '"';
+                }
+                if (isset($loop_details['shortcut-top'])) {
+                    $anchor .= ' data-shortcut-top="' . $loop_details['shortcut-top'] . '"';
+                }
 
-				if( !empty( $loop_details['separator'] ) )
-				{ // Separator
-					$r .= $templateForLevel['separator'];
-					continue;
-				}
+                // CLASS
+                $class = '';
+                if (! empty($loop_details['class'])) { // disabled
+                    $class .= ' ' . $loop_details['class'];
+                }
+                if (! empty($loop_details['disabled'])) { // disabled
+                    $class .= ' ' . $templateForLevel['disabled_class'];
+                }
+                if (! empty($class)) { // disabled
+                    $anchor .= ' class="' . trim($class) . '"';
+                }
 
-				if( ! empty( $loop_details['entries'] ) )
-				{ // Has sub-entries, check if any sub-entry can be displayed
-					$has_entry = false;
-					foreach( $loop_details['entries'] as $entry_key => $entry_details )
-					{
-						if( !empty( $entry_details ) )
-						{ // Menu has non-empty entry
-							$has_entry = true;
-							break;
-						}
-					}
-					if( ! $has_entry )
-					{
-						continue;
-					}
-				}
+                $anchor .= '>' . (isset($loop_details['text']) ? format_to_output($loop_details['text'], 'htmlbody') : '?');
+                $anchor_end = '</a>';
 
-				// Menu entry
-				if( isset( $loop_details['href'] ) )
-				{
-					$href = $loop_details['href'];
-				}
-				elseif( ! empty( $loop_details['href_eval'] ) )
-				{ // Useful for passing dynamic context vars (fp>> I AM using it)
-					$href = eval( $loop_details['href_eval'] );
-				}
-				else
-				{
-					$href = NULL;
-				}
+                if ($loop_key == $selected) { // Highlight selected entry
+                    if (isset($templateForLevel['_props']['recurse'])
+                            && $templateForLevel['_props']['recurse'] != 'no'
+                            && ($recursePath = array_merge($path, [$loop_key]))
+                            && $this->get_menu_entries($recursePath)) {
+                        $r .= isset($templateForLevel['beforeEachSelWithSub']) ? $templateForLevel['beforeEachSelWithSub'] : $templateForLevel['beforeEachSel'];
+                        $r .= $anchor;
 
-				$anchor = '<a';
+                        if ($templateForLevel['_props']['recurse'] != 'no' && // Recurse:
+                              (! isset($templateForLevel['_props']['recurse_level']) ||
+                                (isset($templateForLevel['_props']['recurse_level']) &&
+                                  $templateForLevel['_props']['recurse_level'] > $level + 1))) { // Display submenus if this level is not limited by param 'recurse_level'
+                            $r .= $templateForLevel['arrow_level_' . ($level + 1)] . '</a>';
+                            $r .= $this->get_html_menu($recursePath, $template, $level + 1);
+                        } else { // End anchor without sub menus
+                            $r .= $anchor_end;
+                        }
 
-				if( !empty($href) )
-				{
-					$anchor .= ' href="'.$href.'"';
-				}
-				if( isset($loop_details['target']) )
-				{
-					$anchor .= ' target="'.$loop_details['target'].'"';
-				}
-				if( isset($loop_details['rel']) )
-				{
-					$anchor .= ' rel="'.$loop_details['rel'].'"';
-				}
-				if( isset($loop_details['style']) )
-				{
-					$anchor .= ' style="'.$loop_details['style'].'"';
-				}
-				if( isset($loop_details['onclick']) )
-				{
-					$anchor .= ' onclick="'.$loop_details['onclick'].'"';
-				}
-				if( isset($loop_details['name']) )
-				{
-					$anchor .= ' name="'.$loop_details['name'].'"';
-				}
-				if( isset($loop_details['title']) )
-				{
-					$anchor .= ' title="'.$loop_details['title'].'"';
-				}
-				if( isset($loop_details['shortcut']) )
-				{
-					$anchor .= ' data-shortcut="'.$loop_details['shortcut'].'"';
-				}
-				if( isset($loop_details['shortcut-top']) )
-				{
-					$anchor .= ' data-shortcut-top="'.$loop_details['shortcut-top'].'"';
-				}
+                        $r .= isset($templateForLevel['afterEachSelWithSub']) ? $templateForLevel['afterEachSelWithSub'] : $templateForLevel['afterEachSel'];
+                    } else {
+                        if (isset($loop_details['order']) && $loop_details['order'] == 'group_last' &&
+                            isset($templateForLevel['beforeEachSelGrpLast'], $templateForLevel['afterEachSelGrpLast'])) { // This selected menu item is last in a group
+                            $r .= $templateForLevel['beforeEachSelGrpLast'];
+                            $r .= $anchor . $anchor_end;
+                            $r .= $templateForLevel['afterEachSelGrpLast'];
+                        } else { // Normal selected menu item
+                            $r .= $templateForLevel['beforeEachSel'];
+                            $r .= $anchor . $anchor_end;
+                            $r .= $templateForLevel['afterEachSel'];
+                        }
+                    }
+                } else {	// Not selected entry
+                    if (isset($templateForLevel['_props']['recurse'])
+                            && $templateForLevel['_props']['recurse'] == 'always'
+                            && ($recursePath = array_merge($path, [$loop_key]))
+                            && $this->get_menu_entries($recursePath)) {
+                        $r .= isset($templateForLevel['beforeEachWithSub']) ? $templateForLevel['beforeEachWithSub'] : $templateForLevel['beforeEachSel'];
+                        $r .= $anchor . $templateForLevel['arrow_level_' . ($level + 1)] . '</a>';
+                        // recurse:
+                        $r .= $this->get_html_menu($recursePath, $template, $level + 1);
+                        $r .= isset($templateForLevel['afterEachWithSub']) ? $templateForLevel['afterEachWithSub'] : $templateForLevel['afterEachSel'];
+                    } else {
+                        if (isset($loop_details['order']) && $loop_details['order'] == 'group_last' &&
+                            isset($templateForLevel['beforeEachGrpLast'], $templateForLevel['afterEachGrpLast'])) { // This menu item is last in a group
+                            $r .= $templateForLevel['beforeEachGrpLast'];
+                            $r .= $anchor . $anchor_end;
+                            $r .= $templateForLevel['afterEachGrpLast'];
+                        } else { // Normal menu item
+                            $r .= $templateForLevel['beforeEach'];
+                            $r .= $anchor . $anchor_end;
+                            $r .= $templateForLevel['afterEach'];
+                        }
+                    }
+                }
 
-				// CLASS
-				$class = '';
-				if( !empty( $loop_details['class'] ) )
-				{ // disabled
-					$class .= ' '.$loop_details['class'];
-				}
-				if( !empty( $loop_details['disabled'] ) )
-				{ // disabled
-					$class .= ' '.$templateForLevel['disabled_class'];
-				}
-				if( ! empty( $class ) )
-				{ // disabled
-					$anchor .= ' class="'.trim($class).'"';
-				}
+                // Additional attribures for each menu entry
+                $entry_attrs = '';
+                $entry_class = '';
+                if (! empty($loop_details['entry_class'])) { // Css class for entry
+                    if (strpos($r, '$entry_class$') === false) {
+                        $entry_attrs .= ' class="' . $loop_details['entry_class'] . '"';
+                    }
+                    $entry_class .= ' ' . $loop_details['entry_class'];
+                }
+                $r = str_replace(['$entry_attrs$', '$entry_class$'], [$entry_attrs, $entry_class], $r);
+            }
+            $r .= $templateForLevel['after'];
+        }
 
-				$anchor .= '>'.(isset($loop_details['text']) ? format_to_output( $loop_details['text'], 'htmlbody' ) : '?');
-				$anchor_end = '</a>';
+        return $r;
+    }
 
-				if( $loop_key == $selected )
-				{ // Highlight selected entry
-					if( isset( $templateForLevel['_props']['recurse'] )
-							&& $templateForLevel['_props']['recurse'] != 'no'
-							&& ( $recursePath = array_merge( $path, array($loop_key) ) )
-							&& $this->get_menu_entries($recursePath) )
-					{
-						$r .= isset($templateForLevel['beforeEachSelWithSub']) ? $templateForLevel['beforeEachSelWithSub'] : $templateForLevel['beforeEachSel'];
-						$r .= $anchor;
+    /**
+     * Get a template by name.
+     *
+     * This is a method (and not a member array) to allow dynamic generation and T_()
+     *
+     * @param string Name of the template ('main', 'sub')
+     * @return array Associative array which defines layout and optionally properties.
+     */
+    public function get_template($name, $level = 0)
+    {
+        switch ($name) {
+            case 'evobar-menu-right':
+                $arrow_level_2 = '<span class="evobar-icon-left fa fa-caret-left"></span>';
+                // no break
+            case 'evobar-menu-left':
+                return [
+                    'before' => '<ul class="evobar-menu ' . $name . '">',
+                    'after' => '</ul>',
+                    'beforeEach' => '<li$entry_attrs$>',
+                    'afterEach' => '</li>',
+                    'beforeEachSel' => '<li class="current$entry_class$"$entry_attrs$>',
+                    'afterEachSel' => '</li>',
+                    'separator' => '<li class="separator"><hr /></li>',
+                    'arrow_level_1' => '<span class="evobar-icon-down fa fa-caret-down"></span>',
+                    'arrow_level_2' => isset($arrow_level_2) ? $arrow_level_2 : '<span class="evobar-icon-right fa fa-caret-right"></span>',
+                    'disabled_class' => 'disabled',
+                    '_props' => [
+                        'recurse' => 'always',  // options are: 'no' 'always' or 'intoselected'
+                    ],
+                ];
+                break;
 
-						if( $templateForLevel['_props']['recurse'] != 'no' && // Recurse:
-							  ( ! isset( $templateForLevel['_props']['recurse_level'] ) ||
-							    ( isset( $templateForLevel['_props']['recurse_level'] ) &&
-							      $templateForLevel['_props']['recurse_level'] > $level + 1 ) ) )
-						{ // Display submenus if this level is not limited by param 'recurse_level'
-							$r .= $templateForLevel['arrow_level_'.( $level + 1 )].'</a>';
-							$r .= $this->get_html_menu( $recursePath, $template, $level+1 );
-						}
-						else
-						{ // End anchor without sub menus
-							$r .= $anchor_end;
-						}
+            default:
+                debug_die('Unknown $name for Menu::get_template(): ' . var_export($name, true));
+        }
+    }
 
-						$r .= isset($templateForLevel['afterEachSelWithSub']) ? $templateForLevel['afterEachSelWithSub'] : $templateForLevel['afterEachSel'];
-					}
-					else
-					{
-						if( isset( $loop_details['order'] ) && $loop_details['order'] == 'group_last' &&
-						    isset( $templateForLevel['beforeEachSelGrpLast'], $templateForLevel['afterEachSelGrpLast'] ) )
-						{ // This selected menu item is last in a group
-							$r .= $templateForLevel['beforeEachSelGrpLast'];
-							$r .= $anchor.$anchor_end;
-							$r .= $templateForLevel['afterEachSelGrpLast'];
-						}
-						else
-						{ // Normal selected menu item
-							$r .= $templateForLevel['beforeEachSel'];
-							$r .= $anchor.$anchor_end;
-							$r .= $templateForLevel['afterEachSel'];
-						}
-					}
-				}
-				else
-				{	// Not selected entry
-					if( isset( $templateForLevel['_props']['recurse'] )
-							&& $templateForLevel['_props']['recurse'] == 'always'
-							&& ( $recursePath = array_merge( $path, array($loop_key) ) )
-							&& $this->get_menu_entries($recursePath) )
-					{
-						$r .= isset($templateForLevel['beforeEachWithSub']) ? $templateForLevel['beforeEachWithSub'] : $templateForLevel['beforeEachSel'];
-						$r .= $anchor.$templateForLevel['arrow_level_'.( $level + 1 )].'</a>';
-						// recurse:
-						$r .= $this->get_html_menu( $recursePath, $template, $level+1 );
-						$r .= isset($templateForLevel['afterEachWithSub']) ? $templateForLevel['afterEachWithSub'] : $templateForLevel['afterEachSel'];
-					}
-					else
-					{
-						if( isset( $loop_details['order'] ) && $loop_details['order'] == 'group_last' &&
-						    isset( $templateForLevel['beforeEachGrpLast'], $templateForLevel['afterEachGrpLast'] ) )
-						{ // This menu item is last in a group
-							$r .= $templateForLevel['beforeEachGrpLast'];
-							$r .= $anchor.$anchor_end;
-							$r .= $templateForLevel['afterEachGrpLast'];
-						}
-						else
-						{ // Normal menu item
-							$r .= $templateForLevel['beforeEach'];
-							$r .= $anchor.$anchor_end;
-							$r .= $templateForLevel['afterEach'];
-						}
-					}
-				}
+    /**
+     * Check if menu is empty or contains at least one entry
+     *
+     * @return boolean true if the menu is not empty | false otherwise
+     */
+    public function has_entires()
+    {
+        return ! empty($this->_menus);
+    }
 
-				// Additional attribures for each menu entry
-				$entry_attrs = '';
-				$entry_class = '';
-				if( ! empty( $loop_details['entry_class'] ) )
-				{ // Css class for entry
-					if( strpos( $r, '$entry_class$' ) === false )
-					{
-						$entry_attrs .= ' class="'.$loop_details['entry_class'].'"';
-					}
-					$entry_class .= ' '.$loop_details['entry_class'];
-				}
-				$r = str_replace( array( '$entry_attrs$', '$entry_class$' ), array( $entry_attrs, $entry_class ), $r );
-			}
-			$r .= $templateForLevel['after'];
-		}
+    /**
+     * Clear menu entries of the given path.
+     *
+     * @param null|string The path to clear the entries from. See {@link get_node_by_path()}.
+     */
+    public function clear_menu_entries($path)
+    {
+        // Get a reference to the node in the menu list.
+        $node = &$this->get_node_by_path($path, true);
 
-		return $r;
-	}
-
-
-
-	/**
-	 * Get a template by name.
-	 *
-	 * This is a method (and not a member array) to allow dynamic generation and T_()
-	 *
-	 * @param string Name of the template ('main', 'sub')
-	 * @return array Associative array which defines layout and optionally properties.
-	 */
-	function get_template( $name, $level = 0 )
-	{
-		switch( $name )
-		{
-			case 'evobar-menu-right':
-				$arrow_level_2 = '<span class="evobar-icon-left fa fa-caret-left"></span>';
-			case 'evobar-menu-left':
-				return array(
-					'before'         => '<ul class="evobar-menu '.$name.'">',
-					'after'          => '</ul>',
-					'beforeEach'     => '<li$entry_attrs$>',
-					'afterEach'      => '</li>',
-					'beforeEachSel'  => '<li class="current$entry_class$"$entry_attrs$>',
-					'afterEachSel'   => '</li>',
-					'separator'      => '<li class="separator"><hr /></li>',
-					'arrow_level_1'  => '<span class="evobar-icon-down fa fa-caret-down"></span>',
-					'arrow_level_2'  => isset( $arrow_level_2 ) ? $arrow_level_2 : '<span class="evobar-icon-right fa fa-caret-right"></span>',
-					'disabled_class' => 'disabled',
-					'_props' => array(
-						'recurse' => 'always',  // options are: 'no' 'always' or 'intoselected'
-					),
-				);
-				break;
-
-			default:
-				debug_die( 'Unknown $name for Menu::get_template(): '.var_export($name, true) );
-		}
-	}
-
-
-	/**
-	 * Check if menu is empty or contains at least one entry
-	 *
-	 * @return boolean true if the menu is not empty | false otherwise
-	 */
-	function has_entires()
-	{
-		return !empty( $this->_menus );
-	}
-
-
-	/**
-	 * Clear menu entries of the given path.
-	 *
-	 * @param NULL|string The path to clear the entries from. See {@link get_node_by_path()}.
-	 */
-	function clear_menu_entries( $path )
-	{
-		// Get a reference to the node in the menu list.
-		$node = & $this->get_node_by_path( $path, true );
-
-		$node['entries'] = array();
-	}
+        $node['entries'] = [];
+    }
 }
-
-?>

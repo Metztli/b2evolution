@@ -11,63 +11,74 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $admin_url;
 
-$Form = new Form( NULL, 'users_automation_checkchanges' );
+$Form = new Form(null, 'users_automation_checkchanges');
 
-$Form->switch_template_parts( array(
-		'labelclass' => 'control-label col-sm-6',
-		'inputstart' => '<div class="controls col-sm-6">',
-		'inputstart_radio' => '<div class="controls col-sm-6">',
-		'infostart'  => '<div class="controls col-sm-6"><div class="form-control-static">',
-	) );
+$Form->switch_template_parts([
+    'labelclass' => 'control-label col-sm-6',
+    'inputstart' => '<div class="controls col-sm-6">',
+    'inputstart_radio' => '<div class="controls col-sm-6">',
+    'infostart' => '<div class="controls col-sm-6"><div class="form-control-static">',
+]);
 
-$Form->title_fmt = '<span style="float:right">$global_icons$</span><div>$title$</div>'."\n";
+$Form->title_fmt = '<span style="float:right">$global_icons$</span><div>$title$</div>' . "\n";
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-$Form->add_crumb( 'users' );
+$Form->add_crumb('users');
 $Form->hidden_ctrl();
 
 // A link to close popup window:
-$close_icon = action_icon( TB_('Close this window'), 'close', '', '', 0, 0, array( 'id' => 'close_button', 'class' => 'floatright' ) );
+$close_icon = action_icon(TB_('Close this window'), 'close', '', '', 0, 0, [
+    'id' => 'close_button',
+    'class' => 'floatright',
+]);
 
-$Form->begin_fieldset( TB_('Add users to Automation...').get_manual_link( 'add-users-list-to-automation' ).$close_icon );
+$Form->begin_fieldset(TB_('Add users to Automation...') . get_manual_link('add-users-list-to-automation') . $close_icon);
 
-$AutomationCache = & get_AutomationCache();
+$AutomationCache = &get_AutomationCache();
 $AutomationCache->load_all();
-$Form->select_input_object( 'autm_ID', '', $AutomationCache, TB_('Select automation'), array( 'allow_none' => true, 'required' => true ) );
+$Form->select_input_object('autm_ID', '', $AutomationCache, TB_('Select automation'), [
+    'allow_none' => true,
+    'required' => true,
+]);
 
-$Form->select_input_array( 'enlt_ID', '', array(), TB_('Select email list'), '', array( 'allow_none' => true, 'required' => true ) );
+$Form->select_input_array('enlt_ID', '', [], TB_('Select email list'), '', [
+    'allow_none' => true,
+    'required' => true,
+]);
 
-echo '<span class="loader_img loader_userlist_automation_data" title="'.TB_('Loading...').'" style="display:none"></span>';
+echo '<span class="loader_img loader_userlist_automation_data" title="' . TB_('Loading...') . '" style="display:none"></span>';
 echo '<div id="userlist_automation_details">';
 
-$Form->info( TB_('Users in current selection'), count( get_filterset_user_IDs() ) );
+$Form->info(TB_('Users in current selection'), count(get_filterset_user_IDs()));
 
-$Form->radio( 'users_no_subs', 'ignore', array(
-		array( 'ignore', TB_('Ignore') ),
-		array( 'add', TB_('Add anyway') ),
-	), sprintf( TB_('Users who are not subscribed to "%s" any more').': <span id="autm_users_no_subs_num"></span>', '<span id="autm_newsletter_name"></span>' ), true );
+$Form->radio('users_no_subs', 'ignore', [
+    ['ignore', TB_('Ignore')],
+    ['add', TB_('Add anyway')],
+], sprintf(TB_('Users who are not subscribed to "%s" any more') . ': <span id="autm_users_no_subs_num"></span>', '<span id="autm_newsletter_name"></span>'), true);
 
-$Form->radio( 'users_automated', 'ignore', array(
-		array( 'ignore', TB_('Ignore') ),
-		array( 'requeue', TB_('Requeue to Start') ),
-	), sprintf( TB_('Users who are already in automation "%s"').': <span id="autm_users_automated_num"></span>', '<span id="autm_automation_name"></span>' ), true );
+$Form->radio('users_automated', 'ignore', [
+    ['ignore', TB_('Ignore')],
+    ['requeue', TB_('Requeue to Start')],
+], sprintf(TB_('Users who are already in automation "%s"') . ': <span id="autm_users_automated_num"></span>', '<span id="autm_automation_name"></span>'), true);
 
-$Form->radio( 'users_new', 'add', array(
-		array( 'ignore', TB_('Ignore') ),
-		array( 'add', TB_('Add to automation') ),
-	), TB_('New users').': <span id="autm_users_new_num"></span>', true );
+$Form->radio('users_new', 'add', [
+    ['ignore', TB_('Ignore')],
+    ['add', TB_('Add to automation')],
+], TB_('New users') . ': <span id="autm_users_new_num"></span>', true);
 
 echo '</div>';
 
 $Form->end_fieldset();
 
-$Form->button( array( '', 'actionArray[add_automation]', TB_('Add selected users to "%s"'), 'SaveButton' ) );
+$Form->button(['', 'actionArray[add_automation]', TB_('Add selected users to "%s"'), 'SaveButton']);
 
 $Form->end_form();
 ?>
@@ -89,7 +100,7 @@ jQuery( document ).ready( function()
 				{
 					'action': 'get_userlist_automation',
 					'autm_ID': jQuery( this ).val(),
-					'crumb_users': '<?php echo get_crumb( 'users' ); ?>',
+					'crumb_users': '<?php echo get_crumb('users'); ?>',
 				},
 				success: function( result )
 				{	// Display selector with newsletters tied to selected automation:
@@ -122,7 +133,7 @@ jQuery( document ).ready( function()
 					'action': 'get_userlist_automation',
 					'autm_ID': jQuery( '#autm_ID' ).val(),
 					'enlt_ID': jQuery( this ).val(),
-					'crumb_users': '<?php echo get_crumb( 'users' ); ?>',
+					'crumb_users': '<?php echo get_crumb('users'); ?>',
 				},
 				success: function( result )
 				{	// Display additional form field before adding:

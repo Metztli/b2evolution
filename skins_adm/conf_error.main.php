@@ -10,23 +10,25 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $app_name, $app_version, $inc_path, $baseurl;
 
-require_once $inc_path.'/_core/_misc.funcs.php';
-require_once $inc_path.'/locales/_locale.funcs.php';
+require_once $inc_path . '/_core/_misc.funcs.php';
+require_once $inc_path . '/locales/_locale.funcs.php';
 
-$locale_lang = locale_lang( false );
+$locale_lang = locale_lang(false);
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo ( empty( $locale_lang ) ? 'en' : $locale_lang ); ?>">
+<html lang="<?php echo(empty($locale_lang) ? 'en' : $locale_lang); ?>">
 	<head>
 		<base href="<?php echo get_script_baseurl(); ?>">
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?php echo format_to_output( $error_title, 'htmlhead' ); ?></title>
+		<title><?php echo format_to_output($error_title, 'htmlhead'); ?></title>
 		<!-- Bootstrap -->
 		<link href="rsc/ext/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 		<link href="rsc/build/b2evo_helper_screens.css" rel="stylesheet">
@@ -69,9 +71,10 @@ $markdown_content = ob_get_clean();
 
 // Print out the markdown content with replacing php vars
 echo str_replace(
-		array( '$app_name$', '$app_version$', '$error_message$' ),
-		array( $app_name,     $app_version,   '<div class="alert alert-danger">'.$error_message.'</div>' ),
-		$markdown_content );
+    ['$app_name$', '$app_version$', '$error_message$'],
+    [$app_name,     $app_version,   '<div class="alert alert-danger">' . $error_message . '</div>'],
+    $markdown_content
+);
 ?>
 
 			<footer class="footer">
@@ -86,4 +89,4 @@ echo str_replace(
 		</div><!-- /container -->
 	</body>
 </html>
-<?php exit( 0 );?>
+<?php exit(0); ?>

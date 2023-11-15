@@ -40,14 +40,16 @@
  * @package evocore
  * @todo transaction support
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * ezSQL Constants
  */
-define( 'OBJECT', 0);
-define( 'ARRAY_A', 1);
-define( 'ARRAY_N', 2);
+define('OBJECT', 0);
+define('ARRAY_A', 1);
+define('ARRAY_N', 2);
 
 
 /**
@@ -57,400 +59,415 @@ define( 'ARRAY_N', 2);
  */
 class DB
 {
-	/**
-	 * Show/Print errors?
-	 * @var boolean
-	 */
-	var $show_errors = true;
-	/**
-	 * Halt on errors?
-	 * @var boolean
-	 */
-	var $halt_on_error = true;
-	/**
-	 * Log errors using {@link error_log()}?
-	 * There's no reason to disable this, apart from when you are expecting
-	 * to get an error, like with {@link get_db_version()}.
-	 * @var boolean
-	 */
-	var $log_errors = true;
-	/**
-	 * Has an error occured?
-	 * @var boolean
-	 */
-	var $error = false;
-	/**
-	 * Number of done queries.
-	 * @var integer
-	 */
-	var $num_queries = 0;
-	/**
-	 * last query SQL string
-	 * @var string
-	 */
-	var $last_query = '';
-	/**
-	 * last DB error string
-	 * @var string
-	 */
-	var $last_error = '';
+    /**
+     * Show/Print errors?
+     * @var boolean
+     */
+    public $show_errors = true;
 
-	/**
-	 * Last insert ID
-	 * @var integer
-	 */
-	var $insert_id = 0;
+    /**
+     * Halt on errors?
+     * @var boolean
+     */
+    public $halt_on_error = true;
 
-	/**
-	 * Reference to the last query
-	 * @var object
-	 */
-	protected $result;
+    /**
+     * Log errors using {@link error_log()}?
+     * There's no reason to disable this, apart from when you are expecting
+     * to get an error, like with {@link get_db_version()}.
+     * @var boolean
+     */
+    public $log_errors = true;
 
-	/**
-	 * Number of rows in result set
-	 */
-	var $num_rows = 0;
+    /**
+     * Has an error occured?
+     * @var boolean
+     */
+    public $error = false;
 
-	/**
-	 * Number of rows affected by insert, delete, update or replace
-	 */
-	var $rows_affected = 0;
+    /**
+     * Number of done queries.
+     * @var integer
+     */
+    public $num_queries = 0;
 
-	/**
-	 * Aliases that will be replaced in queries:
-	 */
-	var $dbaliases = array();
-	/**
-	 * Strings that will replace the aliases in queries:
-	 */
-	var $dbreplaces = array();
+    /**
+     * last query SQL string
+     * @var string
+     */
+    public $last_query = '';
 
-	/**
-	 * CREATE TABLE options.
-	 *
-	 * This gets appended to every "CREATE TABLE" query.
-	 *
-	 * Edit those if you have control over you MySQL server and want a more professional
-	 * database than what is commonly offered by popular hosting providers.
-	 *
-	 * @todo dh> If the query itself uses already e.g. "CHARACTER SET latin1" it should not get overridden..
-	 * @var string
-	 */
-	var $table_options = '';
+    /**
+     * last DB error string
+     * @var string
+     */
+    public $last_error = '';
 
-	/**
-	 * Use transactions in DB?
-	 *
-	 * You need to use InnoDB in order to enable this.  See the {@link $db_config "table_options" key}.
-	 */
-	var $use_transactions = false;
+    /**
+     * Last insert ID
+     * @var integer
+     */
+    public $insert_id = 0;
 
-	/**
-	 * Which transaction isolation level should be used?
-	 *
-	 * Possible values in case of MySQL: REPEATABLE READ | READ COMMITTED | READ UNCOMMITTED | SERIALIZABLE
-	 * Defailt value is REPEATABLE READ
-	 */
-	var $transaction_isolation_level = 'REPEATABLE READ';
+    /**
+     * Reference to the last query
+     * @var object
+     */
+    protected $result;
 
-	/**
-	 * How many transactions are currently nested?
-	 */
-	var $transaction_nesting_level = 0;
+    /**
+     * Number of rows in result set
+     */
+    public $num_rows = 0;
 
-	/**
-	 * Rememeber if we have to rollback at the end of a nested transaction construct
-	 */
-	var $rollback_nested_transaction = false;
+    /**
+     * Number of rows affected by insert, delete, update or replace
+     */
+    public $rows_affected = 0;
 
-	/**
-	 * MySQL Database handle
-	 * @var object
-	 */
-	protected $dbhandle;
+    /**
+     * Aliases that will be replaced in queries:
+     */
+    public $dbaliases = [];
 
-	/**
-	 * Database username
-	 * @var string
-	 */
-	var $dbuser;
+    /**
+     * Strings that will replace the aliases in queries:
+     */
+    public $dbreplaces = [];
 
-	/**
-	 * Database username's password
-	 * @var string
-	 */
-	var $dbpassword;
+    /**
+     * CREATE TABLE options.
+     *
+     * This gets appended to every "CREATE TABLE" query.
+     *
+     * Edit those if you have control over you MySQL server and want a more professional
+     * database than what is commonly offered by popular hosting providers.
+     *
+     * @todo dh> If the query itself uses already e.g. "CHARACTER SET latin1" it should not get overridden..
+     * @var string
+     */
+    public $table_options = '';
 
-	/**
-	 * Database name
-	 * @var string
-	 * @see select()
-	 */
-	var $dbname;
+    /**
+     * Use transactions in DB?
+     *
+     * You need to use InnoDB in order to enable this.  See the {@link $db_config "table_options" key}.
+     */
+    public $use_transactions = false;
 
-	/**
-	 * Database hostname
-	 * @var string
-	 */
-	var $dbhost = 'localhost';
+    /**
+     * Which transaction isolation level should be used?
+     *
+     * Possible values in case of MySQL: REPEATABLE READ | READ COMMITTED | READ UNCOMMITTED | SERIALIZABLE
+     * Defailt value is REPEATABLE READ
+     */
+    public $transaction_isolation_level = 'REPEATABLE READ';
 
-	/**
-	 * Current connection charset
-	 * @var string
-	 * @see DB::set_connection_charset()
-	 */
-	protected $connection_charset;
+    /**
+     * How many transactions are currently nested?
+     */
+    public $transaction_nesting_level = 0;
 
-	/**
-	 * The short MySQL version
-	 * @var string
-	 * @see DB::get_version
-	 */
-	protected $version;
+    /**
+     * Rememeber if we have to rollback at the end of a nested transaction construct
+     */
+    public $rollback_nested_transaction = false;
 
-	/**
-	 * The long MySQL version
-	 * @var string
-	 * @see DB::get_version
-	 */
-	protected $version_long;
+    /**
+     * MySQL Database handle
+     * @var object
+     */
+    protected $dbhandle;
 
-	/**
-	 * Is the connection persistent?
-	 * @var boolean
-	 */
-	protected $use_persistent;
+    /**
+     * Database username
+     * @var string
+     */
+    public $dbuser;
 
-	private $saved_error_states;
+    /**
+     * Database username's password
+     * @var string
+     */
+    public $dbpassword;
 
-	// DEBUG:
+    /**
+     * Database name
+     * @var string
+     * @see select()
+     */
+    public $dbname;
 
-	/**
-	 * Do we want to log queries?
-	 * If null, it gets set according to {@link $debug}.
-	 * A subclass may set it by default (e.g. DbUnitTestCase_DB).
-	 * This requires {@link $debug} to be true.
-	 * @var boolean
-	 */
-	var $log_queries;
+    /**
+     * Database hostname
+     * @var string
+     */
+    public $dbhost = 'localhost';
 
-	/**
-	 * Log of queries:
-	 * @var array
-	 */
-	var $queries = array();
+    /**
+     * Current connection charset
+     * @var string
+     * @see DB::set_connection_charset()
+     */
+    protected $connection_charset;
 
-	/**
-	 * Do we want to explain joins?
-	 * This requires {@link DB::$log_queries} to be true.
-	 *
-	 * @todo fp> we'd probably want to group all the advanced debug vars under a single setting now. We might even auto enable it when $debug=2. (And we might actually want to include a $debug="cookie" mode for easy switching with bookmarks or a bookmarklet)
-	 *
-	 * @var boolean
-	 */
-	var $debug_explain_joins = false;
+    /**
+     * The short MySQL version
+     * @var string
+     * @see DB::get_version
+     */
+    protected $version;
 
-	/**
-	 * Do we want to profile queries?
-	 * This requires {@link DB::$log_queries} to be true.
-	 *
-	 * This sets "profiling=1" for the session and queries "SHOW PROFILE" after
-	 * each query.
-	 *
-	 * @var boolean
-	 */
-	var $debug_profile_queries = false;
+    /**
+     * The long MySQL version
+     * @var string
+     * @see DB::get_version
+     */
+    protected $version_long;
 
-	/**
-	 * Do we want to output a function backtrace for every query?
-	 * Number of stack entries to show (from last to first) (Default: 0); true means 'all'.
-	 *
-	 * This requires {@link DB::$log_queries} to be true.
-	 *
-	 * @var integer
-	 */
-	var $debug_dump_function_trace_for_queries = 0;
+    /**
+     * Is the connection persistent?
+     * @var boolean
+     */
+    protected $use_persistent;
 
-	/**
-	 * Number of rows we want to dump in debug output (0 disables it)
-	 * This requires {@link DB::$log_queries} to be true.
-	 * @var integer
-	 */
-	var $debug_dump_rows = 0;
+    private $saved_error_states;
 
-	/**
-	 * Time in seconds that is considered a fast query (green).
-	 * @var float
-	 * @see dump_queries()
-	 */
-	var $query_duration_fast = 0.05;
+    // DEBUG:
 
-	/**
-	 * Time in seconds that is considered a slow query (red).
-	 * @var float
-	 * @see dump_queries()
-	 */
-	var $query_duration_slow = 0.3;
+    /**
+     * Do we want to log queries?
+     * If null, it gets set according to {@link $debug}.
+     * A subclass may set it by default (e.g. DbUnitTestCase_DB).
+     * This requires {@link $debug} to be true.
+     * @var boolean
+     */
+    public $log_queries;
 
+    /**
+     * Log of queries:
+     * @var array
+     */
+    public $queries = [];
 
-	/**
-	 * DB Constructor
-	 *
-	 * Connects to the server and selects a database.
-	 *
-	 * @param array An array of parameters.
-	 *   Manadatory:
-	 *    - 'user': username to connect with
-	 *    - 'password': password to connect with
-	 *    OR
-	 *    - 'handle': a MySQL Database handle (from a previous {@link mysqli::__construct()})
-	 *   Optional:
-	 *    - 'name': the name of the default database, see {@link DB::select()}
-	 *    - 'host': host of the database; Default: 'localhost'
-	 *    - 'port': the port on which the database listens
-	 *    - 'socket': the MySQL socket file
-	 *    - 'show_errors': Display SQL errors? (true/false); Default: don't change member default ({@link $show_errors})
-	 *    - 'halt_on_error': Halt on error? (true/false); Default: don't change member default ({@link $halt_on_error})
-	 *    - 'table_options': sets {@link $table_options}
-	 *    - 'use_transactions': sets {@link $use_transactions}
-	 *    - 'aliases': Aliases for tables (array( alias => table name )); Default: no aliases.
-	 *    - 'use_persistent': use a persistent connection
-	 *    - 'client_flags': optional settings like compression or SSL encryption. See {@link http://www.php.net/manual/en/mysqli.constants.php}.
-	 *       (requires PHP 4.3)
-	 *    - 'log_queries': should queries get logged internally? (follows $debug by default, and requires it to be enabled otherwise)
-	 *      This is a requirement for the following options:
-	 *    - 'debug_dump_rows': Number of rows to dump
-	 *    - 'debug_explain_joins': Explain JOINS? (calls "EXPLAIN $query")
-	 *    - 'debug_profile_queries': Profile queries? (calls "SHOW PROFILE" after each query)
-	 *    - 'debug_dump_function_trace_for_queries': Collect call stack for queries? (showing where queries have been called)
-	 */
-	function __construct( $params )
-	{
-		global $debug, $evo_charset;
+    /**
+     * Do we want to explain joins?
+     * This requires {@link DB::$log_queries} to be true.
+     *
+     * @todo fp> we'd probably want to group all the advanced debug vars under a single setting now. We might even auto enable it when $debug=2. (And we might actually want to include a $debug="cookie" mode for easy switching with bookmarks or a bookmarklet)
+     *
+     * @var boolean
+     */
+    public $debug_explain_joins = false;
 
-		// Mandatory parameters:
-		if( isset( $params['handle'] ) )
-		{ // DB-Link provided:
-			$this->dbhandle = $params['handle'];
-		}
-		else
-		{
-			$this->dbuser = $params['user'];
-			$this->dbpassword = $params['password'];
-		}
+    /**
+     * Do we want to profile queries?
+     * This requires {@link DB::$log_queries} to be true.
+     *
+     * This sets "profiling=1" for the session and queries "SHOW PROFILE" after
+     * each query.
+     *
+     * @var boolean
+     */
+    public $debug_profile_queries = false;
 
-		// Optional parameters (Allow overriding through $params):
-		if( isset( $params['name'] ) ) $this->dbname = $params['name'];
-		if( isset( $params['host'] ) ) $this->dbhost = $params['host'];
-		if( isset( $params['show_errors'] ) ) $this->show_errors = $params['show_errors'];
-		if( isset( $params['halt_on_error'] ) ) $this->halt_on_error = $params['halt_on_error'];
-		if( isset( $params['table_options'] ) ) $this->table_options = $params['table_options'];
-		if( isset( $params['use_transactions'] ) ) $this->use_transactions = $params['use_transactions'];
-		if( isset( $params['debug_dump_rows'] ) ) $this->debug_dump_rows = $params['debug_dump_rows']; // Nb of rows to dump
-		if( isset( $params['debug_explain_joins'] ) ) $this->debug_explain_joins = $params['debug_explain_joins'];
-		if( isset( $params['debug_profile_queries'] ) ) $this->debug_profile_queries = $params['debug_profile_queries'];
-		if( isset( $params['debug_dump_function_trace_for_queries'] ) ) $this->debug_dump_function_trace_for_queries = $params['debug_dump_function_trace_for_queries'];
-		if( isset( $params['log_queries'] ) )
-		{
-			$this->log_queries = $debug && $params['log_queries'];
-		}
-		elseif( isset( $debug ) && ! isset( $this->log_queries ) )
-		{ // $log_queries follows $debug and respects subclasses, which may define it:
-			$this->log_queries = ( bool ) $debug;
-		}
+    /**
+     * Do we want to output a function backtrace for every query?
+     * Number of stack entries to show (from last to first) (Default: 0); true means 'all'.
+     *
+     * This requires {@link DB::$log_queries} to be true.
+     *
+     * @var integer
+     */
+    public $debug_dump_function_trace_for_queries = 0;
 
-		if( ! extension_loaded( 'mysqli' ) )
-		{ // The mysql extension is not loaded, try to dynamically load it:
-			$mysql_ext_file = is_windows() ? 'php_mysqli.dll' : 'mysqli.so';
-			if( function_exists( 'dl' ) )
-			{
-				if( version_compare( PHP_VERSION, '7.2', '>=' ) )
-				{
-					error_clear_last();
-				}
-				else
-				{
-					$php_errormsg = null;
-					$old_track_errors = @ini_set( 'track_errors', 1 );
-				}
-				$old_html_errors = @ini_set( 'html_errors', 0 );
-				@dl( $mysql_ext_file );
-				if( version_compare( PHP_VERSION, '7.2', '>=' ) )
-				{
-					$error_msg = error_get_last();
-					if( isset( $error_msg['message'] ) )
-					{
-						$error_msg = $error_msg['message'];
-					}
-				}
-				else
-				{
-					$error_msg = $php_errormsg;
-					if( $old_track_errors !== false ) @ini_set( 'track_errors', $old_track_errors );
-				}
-				if( $old_html_errors !== false ) @ini_set( 'html_errors', $old_html_errors );
-			}
-			else
-			{
-				$error_msg = 'The PHP mysqli extension is not installed and we cannot load it dynamically.';
-			}
-			if( ! extension_loaded( 'mysqli' ) )
-			{ // Still not loaded:
-				$this->print_error( 'The PHP MySQL Improved module could not be loaded.', '
+    /**
+     * Number of rows we want to dump in debug output (0 disables it)
+     * This requires {@link DB::$log_queries} to be true.
+     * @var integer
+     */
+    public $debug_dump_rows = 0;
+
+    /**
+     * Time in seconds that is considered a fast query (green).
+     * @var float
+     * @see dump_queries()
+     */
+    public $query_duration_fast = 0.05;
+
+    /**
+     * Time in seconds that is considered a slow query (red).
+     * @var float
+     * @see dump_queries()
+     */
+    public $query_duration_slow = 0.3;
+
+    /**
+     * DB Constructor
+     *
+     * Connects to the server and selects a database.
+     *
+     * @param array An array of parameters.
+     *   Manadatory:
+     *    - 'user': username to connect with
+     *    - 'password': password to connect with
+     *    OR
+     *    - 'handle': a MySQL Database handle (from a previous {@link mysqli::__construct()})
+     *   Optional:
+     *    - 'name': the name of the default database, see {@link DB::select()}
+     *    - 'host': host of the database; Default: 'localhost'
+     *    - 'port': the port on which the database listens
+     *    - 'socket': the MySQL socket file
+     *    - 'show_errors': Display SQL errors? (true/false); Default: don't change member default ({@link $show_errors})
+     *    - 'halt_on_error': Halt on error? (true/false); Default: don't change member default ({@link $halt_on_error})
+     *    - 'table_options': sets {@link $table_options}
+     *    - 'use_transactions': sets {@link $use_transactions}
+     *    - 'aliases': Aliases for tables (array( alias => table name )); Default: no aliases.
+     *    - 'use_persistent': use a persistent connection
+     *    - 'client_flags': optional settings like compression or SSL encryption. See {@link http://www.php.net/manual/en/mysqli.constants.php}.
+     *       (requires PHP 4.3)
+     *    - 'log_queries': should queries get logged internally? (follows $debug by default, and requires it to be enabled otherwise)
+     *      This is a requirement for the following options:
+     *    - 'debug_dump_rows': Number of rows to dump
+     *    - 'debug_explain_joins': Explain JOINS? (calls "EXPLAIN $query")
+     *    - 'debug_profile_queries': Profile queries? (calls "SHOW PROFILE" after each query)
+     *    - 'debug_dump_function_trace_for_queries': Collect call stack for queries? (showing where queries have been called)
+     */
+    public function __construct($params)
+    {
+        global $debug, $evo_charset;
+
+        // Mandatory parameters:
+        if (isset($params['handle'])) { // DB-Link provided:
+            $this->dbhandle = $params['handle'];
+        } else {
+            $this->dbuser = $params['user'];
+            $this->dbpassword = $params['password'];
+        }
+
+        // Optional parameters (Allow overriding through $params):
+        if (isset($params['name'])) {
+            $this->dbname = $params['name'];
+        }
+        if (isset($params['host'])) {
+            $this->dbhost = $params['host'];
+        }
+        if (isset($params['show_errors'])) {
+            $this->show_errors = $params['show_errors'];
+        }
+        if (isset($params['halt_on_error'])) {
+            $this->halt_on_error = $params['halt_on_error'];
+        }
+        if (isset($params['table_options'])) {
+            $this->table_options = $params['table_options'];
+        }
+        if (isset($params['use_transactions'])) {
+            $this->use_transactions = $params['use_transactions'];
+        }
+        if (isset($params['debug_dump_rows'])) {
+            $this->debug_dump_rows = $params['debug_dump_rows'];
+        } // Nb of rows to dump
+        if (isset($params['debug_explain_joins'])) {
+            $this->debug_explain_joins = $params['debug_explain_joins'];
+        }
+        if (isset($params['debug_profile_queries'])) {
+            $this->debug_profile_queries = $params['debug_profile_queries'];
+        }
+        if (isset($params['debug_dump_function_trace_for_queries'])) {
+            $this->debug_dump_function_trace_for_queries = $params['debug_dump_function_trace_for_queries'];
+        }
+        if (isset($params['log_queries'])) {
+            $this->log_queries = $debug && $params['log_queries'];
+        } elseif (isset($debug) && ! isset($this->log_queries)) { // $log_queries follows $debug and respects subclasses, which may define it:
+            $this->log_queries = (bool) $debug;
+        }
+
+        if (! extension_loaded('mysqli')) { // The mysql extension is not loaded, try to dynamically load it:
+            $mysql_ext_file = is_windows() ? 'php_mysqli.dll' : 'mysqli.so';
+            if (function_exists('dl')) {
+                if (version_compare(PHP_VERSION, '7.2', '>=')) {
+                    error_clear_last();
+                } else {
+                    $php_errormsg = null;
+                    $old_track_errors = @ini_set('track_errors', 1);
+                }
+                $old_html_errors = @ini_set('html_errors', 0);
+                @dl($mysql_ext_file);
+                if (version_compare(PHP_VERSION, '7.2', '>=')) {
+                    $error_msg = error_get_last();
+                    if (isset($error_msg['message'])) {
+                        $error_msg = $error_msg['message'];
+                    }
+                } else {
+                    $error_msg = $php_errormsg;
+                    if ($old_track_errors !== false) {
+                        @ini_set('track_errors', $old_track_errors);
+                    }
+                }
+                if ($old_html_errors !== false) {
+                    @ini_set('html_errors', $old_html_errors);
+                }
+            } else {
+                $error_msg = 'The PHP mysqli extension is not installed and we cannot load it dynamically.';
+            }
+            if (! extension_loaded('mysqli')) { // Still not loaded:
+                $this->print_error('The PHP MySQL Improved module could not be loaded.', '
 					<div class="alert alert-danger">
-					<p><strong>Error:</strong> '.$error_msg.'</p>
-					<p>You probably have to edit your php configuration (php.ini) and enable this module ('.$mysql_ext_file.').</p>
+					<p><strong>Error:</strong> ' . $error_msg . '</p>
+					<p>You probably have to edit your php configuration (php.ini) and enable this module (' . $mysql_ext_file . ').</p>
 					<p>Do not forget to restart your webserver (if necessary) after editing the PHP conf.</p>
-					</div>', false );
-				return;
-			}
-		}
+					</div>', false);
+                return;
+            }
+        }
 
-		$port = isset( $params['port'] ) ? $params['port'] : ini_get( 'mysqli.default_port' );
-		$socket = isset( $params['socket'] ) ? $params['socket'] : ini_get( 'mysqli.default_socket' );
-		$client_flags = isset( $params['client_flags'] ) ? $params['client_flags'] : 0;
+        $port = isset($params['port']) ? $params['port'] : ini_get('mysqli.default_port');
+        $socket = isset($params['socket']) ? $params['socket'] : ini_get('mysqli.default_socket');
+        $client_flags = isset($params['client_flags']) ? $params['client_flags'] : 0;
 
-		$this->use_persistent = isset( $params['use_persistent'] ) ? $params['use_persistent'] : true;
+        $this->use_persistent = isset($params['use_persistent']) ? $params['use_persistent'] : true;
 
-		if( ! $this->dbhandle )
-		{ // Connect to the Database:
-			// echo "mysqli::real_connect( $this->dbhost, $this->dbuser, $this->dbpassword, $this->dbname, port, $socket, $client_flags )";
-			// mysqli::$connect_error is tied to an established connection
-			// if the connection fails we need a different method to get the error message
-			if( version_compare( PHP_VERSION, '7.2', '>=' ) )
-			{
-				error_clear_last();
-			}
-			else
-			{
-				$php_errormsg = null;
-				$old_track_errors = @ini_set( 'track_errors', 1 );
-			}
-			$old_html_errors = @ini_set( 'html_errors', 0 );
-			$this->dbhandle = new mysqli();
-			@$this->dbhandle->real_connect( $this->use_persistent ? 'p:'.$this->dbhost : $this->dbhost,
-				$this->dbuser, $this->dbpassword, '', $port, $socket, $client_flags );
-			if( version_compare( PHP_VERSION, '7.2', '>=' ) )
-			{
-				$mysql_error = error_get_last();
-				if( isset( $mysql_error['message'] ) )
-				{
-					$mysql_error = $mysql_error['message'];
-				}
-			}
-			else
-			{
-				$mysql_error = $php_errormsg;
-				if( $old_track_errors !== false ) @ini_set( 'track_errors', $old_track_errors );
-			}
-			if( $old_html_errors !== false ) @ini_set( 'html_errors', $old_html_errors );
-		}
+        if (! $this->dbhandle) { // Connect to the Database:
+            // echo "mysqli::real_connect( $this->dbhost, $this->dbuser, $this->dbpassword, $this->dbname, port, $socket, $client_flags )";
+            // mysqli::$connect_error is tied to an established connection
+            // if the connection fails we need a different method to get the error message
+            if (version_compare(PHP_VERSION, '7.2', '>=')) {
+                error_clear_last();
+            } else {
+                $php_errormsg = null;
+                $old_track_errors = @ini_set('track_errors', 1);
+            }
+            $old_html_errors = @ini_set('html_errors', 0);
+            $this->dbhandle = new mysqli();
+            @$this->dbhandle->real_connect(
+                $this->use_persistent ? 'p:' . $this->dbhost : $this->dbhost,
+                $this->dbuser,
+                $this->dbpassword,
+                '',
+                $port,
+                $socket,
+                $client_flags
+            );
+            if (version_compare(PHP_VERSION, '7.2', '>=')) {
+                $mysql_error = error_get_last();
+                if (isset($mysql_error['message'])) {
+                    $mysql_error = $mysql_error['message'];
+                }
+            } else {
+                $mysql_error = $php_errormsg;
+                if ($old_track_errors !== false) {
+                    @ini_set('track_errors', $old_track_errors);
+                }
+            }
+            if ($old_html_errors !== false) {
+                @ini_set('html_errors', $old_html_errors);
+            }
+        }
 
-		if( 0 != $this->dbhandle->connect_errno )
-		{
-			$this->print_error( 'Error establishing a database connection!',
-				( $mysql_error ? '<p>('.$mysql_error.')</p>' : '' ).'
+        if (0 != $this->dbhandle->connect_errno) {
+            $this->print_error(
+                'Error establishing a database connection!',
+                ($mysql_error ? '<p>(' . $mysql_error . ')</p>' : '') . '
 				<div class="alert alert-danger">
 				We could not connect to the database. Please check the following:
 				<ol>
@@ -458,117 +475,104 @@ class DB
 					<li>Are you sure that you have typed the correct hostname?</li>
 					<li>Are you sure that the database server is running?</li>
 				</ol>
-				</div>', false );
-			return;
-		}
-		elseif( isset( $this->dbname ) )
-		{
-			$this->select( $this->dbname );
-		}
+				</div>',
+                false
+            );
+            return;
+        } elseif (isset($this->dbname)) {
+            $this->select($this->dbname);
+        }
 
-		if( ! empty( $params['connection_charset'] ) )
-		{ // Specify which charset we are using on the client:
-			$this->set_connection_charset( $params['connection_charset'] );
-		}
-		elseif( ! empty( $evo_charset ) )
-		{ // Use the internal charset if it is defined
-			$this->set_connection_charset( $evo_charset, true );
-		}
+        if (! empty($params['connection_charset'])) { // Specify which charset we are using on the client:
+            $this->set_connection_charset($params['connection_charset']);
+        } elseif (! empty($evo_charset)) { // Use the internal charset if it is defined
+            $this->set_connection_charset($evo_charset, true);
+        }
 
-		/*
-		echo '<br />Server: '.$this->get_var( 'SELECT @@character_set_server' );
-		echo '<br />Database: '.$this->get_var( 'SELECT @@character_set_database' );
-		echo '<br />Connection: '.$this->get_var( 'SELECT @@character_set_connection' );
-		echo '<br />Client: '.$this->get_var( 'SELECT @@character_set_client' );
-		echo '<br />Results: '.$this->get_var( 'SELECT @@character_set_results' );
-		*/
+        /*
+        echo '<br />Server: '.$this->get_var( 'SELECT @@character_set_server' );
+        echo '<br />Database: '.$this->get_var( 'SELECT @@character_set_database' );
+        echo '<br />Connection: '.$this->get_var( 'SELECT @@character_set_connection' );
+        echo '<br />Client: '.$this->get_var( 'SELECT @@character_set_client' );
+        echo '<br />Results: '.$this->get_var( 'SELECT @@character_set_results' );
+        */
 
+        if (isset($params['aliases'])) { // Prepare aliases for replacements:
+            foreach ($params['aliases'] as $dbalias => $dbreplace) {
+                $this->dbaliases[] = '#\b' . $dbalias . '\b#'; // \b = word boundary
+                $this->dbreplaces[] = $dbreplace;
+                // echo '<br />'.'#\b'.$dbalias.'\b#';
+            }
+            // echo count($this->dbaliases);
+        }
 
-		if( isset( $params['aliases'] ) )
-		{ // Prepare aliases for replacements:
-			foreach( $params['aliases'] as $dbalias => $dbreplace )
-			{
-				$this->dbaliases[] = '#\b'.$dbalias.'\b#'; // \b = word boundary
-				$this->dbreplaces[] = $dbreplace;
-				// echo '<br />'.'#\b'.$dbalias.'\b#';
-			}
-			// echo count($this->dbaliases);
-		}
+        // Force MySQL strict mode
+        $this->query('SET sql_mode = "TRADITIONAL"', 'Force MySQL "strict" mode (and make sure server is not configured with a weird incompatible mode)');
 
-		// Force MySQL strict mode
-		$this->query( 'SET sql_mode = "TRADITIONAL"', 'Force MySQL "strict" mode (and make sure server is not configured with a weird incompatible mode)' );
+        // Support 4-byte chars:
+        $this->query('SET NAMES utf8mb4');
 
-		// Support 4-byte chars:
-		$this->query( 'SET NAMES utf8mb4' );
+        if ($this->debug_profile_queries) {
+            // dh> this will fail, if it is not supported, but has to be enabled manually anyway.
+            $this->query('SET profiling = 1'); // Requires 5.0.37.
+        }
+    }
 
-		if( $this->debug_profile_queries )
-		{
-			// dh> this will fail, if it is not supported, but has to be enabled manually anyway.
-			$this->query('SET profiling = 1'); // Requires 5.0.37.
-		}
-	}
+    public function __destruct()
+    {
+        @$this->flush();
+        if (! $this->dbhandle) {	// No handler to kill and close
+            return;
+        }
+        if (! $this->use_persistent) {
+            @$this->dbhandle->kill($this->dbhandle->thread_id);
+        }
+        @$this->dbhandle->close();
+    }
 
+    public function __get($name)
+    {
+        if ('connection_charset' == $name) {
+            return $this->dbhandle->character_set_name();
+        } elseif ('dbhandle' == $name || 'result' == $name || 'use_persistent' == $name) {
+            throw new Exception("You're not allowed to access property $name");
+        } elseif ('version' == $name) {
+            return $this->get_version();
+        } elseif ('version_long' == $name) {
+            $this->get_version();
+            return $this->version_long;
+        } elseif (property_exists($this, $name)) {
+            return $this->{$name};
+        } else {
+            throw new Exception("Property $name doesn't exist");
+        }
+    }
 
-	function __destruct()
-	{
-		@$this->flush();
-		if( ! $this->dbhandle )
-		{	// No handler to kill and close
-			return;
-		}
-		if (!$this->use_persistent)
-			@$this->dbhandle->kill($this->dbhandle->thread_id);
-		@$this->dbhandle->close();
-	}
+    public function __set($name, $value)
+    {
+        if ('connection_charset' == $name) {
+            $this->set_connection_charset($value);
+        } elseif ('dbhandle' == $name || 'result' == $name || 'use_persistent' == $name ||
+            'version' == $name || 'version_long' == $name) {
+            throw new Exception("You're not allowed to access property $name");
+        } elseif (property_exists($this, $name)) {
+            $this->{$name} = $value;
+        } else {
+            throw new Exception("Property $name doesn't exist");
+        }
+    }
 
+    /**
+     * Select a DB (if another one needs to be selected)
+     */
+    public function select($db)
+    {
+        if (! $this->dbhandle || $this->dbhandle->connect_errno != 0) {	// Don't try to select database with wrong connection:
+            return false;
+        }
 
-	function __get($name)
-	{
-		if ('connection_charset' == $name)
-			return $this->dbhandle->character_set_name();
-		elseif ('dbhandle' == $name || 'result' == $name || 'use_persistent' == $name)
-			throw new Exception("You're not allowed to access property $name");
-		elseif ('version' == $name)
-			return $this->get_version();
-		elseif ('version_long' == $name)
-		{
-			$this->get_version();
-			return $this->version_long;
-		}
-		elseif (property_exists($this, $name))
-			return $this->{$name};
-		else
-			throw new Exception("Property $name doesn't exist");
-	}
-
-
-	function __set($name, $value)
-	{
-		if ('connection_charset' == $name)
-			$this->set_connection_charset($value);
-		elseif ('dbhandle' == $name || 'result' == $name || 'use_persistent' == $name ||
-			'version' == $name || 'version_long' == $name)
-				throw new Exception("You're not allowed to access property $name");
-		elseif (property_exists($this, $name))
-			$this->{$name} = $value;
-		else
-			throw new Exception("Property $name doesn't exist");
-	}
-
-
-	/**
-	 * Select a DB (if another one needs to be selected)
-	 */
-	function select($db)
-	{
-		if( ! $this->dbhandle || $this->dbhandle->connect_errno != 0 )
-		{	// Don't try to select database with wrong connection:
-			return false;
-		}
-
-		if( !@$this->dbhandle->select_db($db) )
-		{
-			$this->print_error( 'Error selecting database ['.$db.']!', '
+        if (! @$this->dbhandle->select_db($db)) {
+            $this->print_error('Error selecting database [' . $db . ']!', '
 				<div class="alert alert-danger">
 				We could not select the database. Please check the following:
 				<ol>
@@ -576,1404 +580,1180 @@ class DB
 					<li>Are you sure the DB user is allowed to use that database?</li>
 					<li>Are you sure there is a valid database connection?</li>
 				</ol>
-				</div>', false );
-			return false;
-		}
-		$this->dbname = $db;
-
-		return true;
-	}
-
-
-	/**
-	 * @return Is there a valid result available?
-	 */
-	function has_result()
-	{
-		return isset($this->result) && is_object($this->result);
-	}
-
-
-	/**
-	 * @return boolean Is the database open?
-	 */
-	function is_open()
-	{
-		return is_object($this->dbhandle);
-	}
-
-
-	/**
-	 * Escapes text for SQL LIKE special characters % and _
-	 */
-	function like_escape($str)
-	{
-		$str = str_replace( array('%', '_'), array('\\%', '\\_'), $str );
-		return $this->escape($str);
-	}
-
-
-	/**
-	 * Format a string correctly for safe insert under all PHP conditions
-	 */
-	function escape($str)
-	{
-		return $this->dbhandle->real_escape_string($str);
-	}
-
-
-	/**
-	 * Quote a value, either in single quotes (and escaped) or if it's NULL as 'NULL'.
-	 *
-	 * @param string|array|null
-	 * @return string Quoted (and escaped) value or 'NULL'.
-	 */
-	function quote($str)
-	{
-		if( is_null( $str ) )
-		{
-			return 'NULL';
-		}
-		elseif( is_array( $str ) )
-		{
-			$r = '';
-			foreach( $str as $elt )
-			{
-				$r .= $this->quote($elt).',';
-			}
-			return substr( $r, 0, -1 );  // remove last ,
-		}
-		else
-		{
-			return "'".$this->escape($str)."'";
-		}
-	}
-
-
-	/**
-	 * @return string Return the given value or 'NULL', if it's === NULL.
-	 */
-	function null($val)
-	{
-		if( $val === NULL )
-			return 'NULL';
-		else
-			return $val;
-	}
-
-
-	/**
-	 * Returns the correct WEEK() function to get the week number for the given date.
-	 *
-	 * @link http://dev.mysql.com/doc/mysql/en/date-and-time-functions.html
-	 *
-	 * @todo disable when MySQL < 4
-	 * @param string will be used as is
-	 * @param integer 0 for sunday, 1 for monday
-	 */
-	function week( $date, $startofweek )
-	{
-		if( $startofweek == 1 )
-		{ // Week starts on Monday, week 1 must have a monday in this year:
-			return ' WEEK( '.$date.', 5 ) ';
-		}
-
-		// Week starts on Sunday, week 1 must have a sunday in this year:
-		return ' WEEK( '.$date.', 0 ) ';
-	}
-
-
-	/**
-	 * Print SQL/DB error.
-	 *
-	 * TODO: fp> bloated: it probably doesn't make sense to display errors if we don't stop. Any use case?
-	 *       dh> Sure. Local testing (and test cases).
-	 *
-	 * @param string Short error (no HTML)
-	 * @param string Extended description/help for the error (for HTML)
-	 * @param string|false Query title; false if {@link DB::$last_nuery} should not get displayed
-	 */
-	function print_error( $title = '', $html_str = '', $query_title = '' )
-	{
-		// All errors go to the global error array $EZSQL_ERROR..
-		global $EZSQL_ERROR, $is_cli;
-
-		$this->error = true;
-
-		// If no special error string then use mysql default..
-		if( ! strlen($title) )
-		{
-			if( $this->is_open() )
-			{ // use mysqli::error:
-				$this->last_error = $this->dbhandle->error.'(Errno='.$this->dbhandle->errno.')';
-			}
-			else
-			{
-				$this->last_error = 'Unknown (and no $dbhandle available)';
-			}
-		}
-		else
-		{
-			$this->last_error = $title;
-		}
-
-		// Log this error to the global array..
-		$EZSQL_ERROR[] = array(
-			'query' => $this->last_query,
-			'error_str'  => $this->last_error
-		);
-
-
-		// Send error to PHP's system logger.
-		if( $this->log_errors )
-		{
-			// TODO: dh> respect $log_app_errors? Create a wrapper, e.g. evo_error_log, which can be used later to write into e.g. a DB table?!
-			if( isset($_SERVER['REQUEST_URI']) )
-			{
-				$req_url = ( (isset($_SERVER['HTTPS']) && ( $_SERVER['HTTPS'] != 'off' ) ) ? 'https://' : 'http://' )
-					.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-			}
-			else
-			{
-				$req_url = '-';
-			}
-			$error_text = 'SQL ERROR: '. $this->last_error
-					. ', QUERY: "'.trim($this->last_query).'"'
-					. ', BACKTRACE: '.trim(strip_tags(debug_get_backtrace()))
-					. ', URL: '.$req_url;
-			error_log( preg_replace( '#\s+#', ' ', $error_text ) );
-		}
-
-
-		if( ! ( $this->halt_on_error || $this->show_errors ) )
-		{ // no reason to generate a nice message:
-			return;
-		}
-
-		if( $this->halt_on_error && ! $this->show_errors )
-		{ // do not show errors, just die:
-			die();
-		}
-
-		if( $is_cli )
-		{ // Clean error message for command line interface:
-			$err_msg = "MySQL error!\n{$this->last_error}\n";
-			if( ! empty($this->last_query) && $query_title !== false )
-			{
-				$err_msg .= "Your query: $query_title\n";
-				$err_msg .= $this->format_query( $this->last_query, false );
-			}
-		}
-		else
-		{
-			$err_msg = '<p class="error">MySQL error!</p>'."\n";
-			$err_msg .= "<div><p><strong>{$this->last_error}</strong></p>\n";
-			$err_msg .= $html_str;
-			if( !empty($this->last_query) && $query_title !== false )
-			{
-				$err_msg .= '<p class="error">Your query: '.$query_title.'</p>';
-				$err_msg .= '<pre>';
-				$err_msg .= $this->format_query( $this->last_query, ! $is_cli );
-				$err_msg .= '</pre>';
-			}
-			$err_msg .= "</div>\n";
-		}
-
-		if( $this->halt_on_error === 'throw' )
-		{	// Throw SQL error into Exception:
-			throw new Exception( $err_msg );
-		}
-		elseif( $this->halt_on_error )
-		{
-			if( function_exists('debug_die') )
-			{
-				debug_die( $err_msg );
-			}
-			else
-			{
-				die( $err_msg );
-			}
-		}
-		elseif( $this->show_errors )
-		{ // If there is an error then take note of it
-			echo '<div class="error">';
-			echo $err_msg;
-			echo '</div>';
-		}
-	}
-
-
-	/**
-	 * Kill cached query results
-	 */
-	function flush()
-	{
-		if( $this->has_result() )
-		{ // Free last result
-			$this->result->free();
-		}
-		$this->result = NULL;
-		$this->last_query = NULL;
-		$this->num_rows = 0;
-	}
-
-
-	/**
-	 * Get MYSQL version
-	 */
-	protected function get_version()
-	{
-		if( isset( $this->version ) )
-		{
-			return $this->version;
-		}
-
-		$this->version_long = $this->dbhandle->server_info;
-		$this->version = preg_replace( '~-.*~', '', $this->version_long );
-		return $this->version;
-	}
-
-
-	/**
-	 * Save the vars responsible for error handling.
-	 * This can be chained.
-	 * @see DB::restore_error_state()
-	 */
-	function save_error_state()
-	{
-		$this->saved_error_states[] = array(
-			'show_errors'   => $this->show_errors,
-			'halt_on_error' => $this->halt_on_error,
-			'last_error'    => $this->last_error,
-			'error'         => $this->error,
-			'log_errors'    => $this->log_errors,
-		);
-	}
-
-	/**
-	 * Call this after {@link save_halt_on_error()} to
-	 * restore the previous error state.
-	 * This can be chained.
-	 * @see DB::save_error_state()
-	 */
-	function restore_error_state()
-	{
-		if( empty($this->saved_error_states)
-			|| ! is_array($this->saved_error_states) )
-		{
-			return false;
-		}
-		$state = array_pop($this->saved_error_states);
-
-		foreach( $state as $k => $v )
-			$this->$k = $v;
-	}
-
-
-	/**
-	 * Basic Query
-	 *
-	 * @param string|object SQL query string or SQL object
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @return mixed # of rows affected or false if error
-	 */
-	function query( $query_SQL, $title = '' )
-	{
-		global $Timer;
-
-		if( $query_SQL instanceof SQL )
-		{	// Get SQL query string from provided object:
-			$query = $query_SQL->get();
-			if( empty( $title ) && $query_SQL->title !== NULL )
-			{	// Use title from SQL object if given function param is not provided:
-				$title = $query_SQL->title;
-			}
-		}
-		else
-		{	// Use SQL query from given function param because it is already a string:
-			$query = $query_SQL;
-		}
-
-		// initialise return
-		$return_val = 0;
-
-		// Flush cached values..
-		$this->flush();
-
-		// Replace aliases:
-		if( ! empty($this->dbaliases) )
-		{
-			// TODO: this should only replace the table name part(s), not the whole query!
-			// blueyed> I've changed it to replace in table name parts for UPDATE, INSERT and REPLACE, because
-			//          it corrupted serialized data..
-			//          IMHO, a cleaner solution would be to use {T_xxx} in the queries and replace it here. In object properties (e.g. DataObject::$dbtablename), only "T_xxx" would get used and surrounded by "{..}" in the queries it creates.
-
-			if( preg_match( '~^\s*(UPDATE\s+)(.*?)(\sSET\s.*)$~is', $query, $match ) )
-			{ // replace only between UPDATE and SET, but check subqueries:
-				$subquery_result = '';
-				while( preg_match( '~^(.*SELECT.*FROM\s+)(.*?)(\s.*)$~is', $match[3], $subquery_match ) )
-				{ // replace in subquery
-					$match[3] = $subquery_match[1];
-					$subquery_result = preg_replace( $this->dbaliases, $this->dbreplaces, $subquery_match[2] ).$subquery_match[3].$subquery_result;
-				}
-				$match[3] = $match[3].$subquery_result;
-				if( preg_match( '~^(.*SELECT.*JOIN\s+)(.*?)(\s.*)$~is', $match[3], $subquery_match ) )
-				{ // replace in whole subquery, there can be any number of JOIN:
-					$match[3] = preg_replace( $this->dbaliases, $this->dbreplaces, $match[3] );
-				}
-				$query = $match[1].preg_replace( $this->dbaliases, $this->dbreplaces, $match[2] ).$match[3];
-			}
-			elseif( preg_match( '~^\s*(INSERT|REPLACE\s+)(.*?)(\s(VALUES|SET)\s.*)$~is', $query, $match ) )
-			{ // replace only between INSERT|REPLACE and VALUES|SET:
-				$query = $match[1].preg_replace( $this->dbaliases, $this->dbreplaces, $match[2] ).$match[3];
-			}
-			else
-			{ // replace in whole query:
-				$query = preg_replace( $this->dbaliases, $this->dbreplaces, $query );
-
-				if( ! empty($this->table_options) && preg_match( '#^ \s* create \s* table \s #ix', $query) )
-				{ // Query is a table creation, we add table options:
-					$query = preg_replace( '~;\s*$~', '', $query ); // remove any ";" at the end
-					$query .= ' '.$this->table_options;
-				}
-			}
-		}
-		elseif( ! empty($this->table_options) )
-		{ // No aliases, but table_options:
-			if( preg_match( '#^ \s* create \s* table \s #ix', $query) )
-			{ // Query is a table creation, we add table options:
-				$query = preg_replace( '~;\s*$~', '', $query ); // remove any ";" at the end
-				$query .= $this->table_options;
-			}
-		}
-		// echo '<p>'.$query.'</p>';
-
-		// Keep track of the last query for debug..
-		$this->last_query = $query;
-
-		// Perform the query via std mysqli::query method.
-		$this->num_queries++;
-
-		if( $this->log_queries )
-		{	// We want to log queries:
-			$this->queries[ $this->num_queries - 1 ] = array(
-				'title' => $title,
-				'sql' => $query,
-				'rows' => -1,
-				'time' => 'unknown',
-				'results' => 'unknown' );
-		}
-
-		if( is_object($Timer) )
-		{
-			// Resume global query timer
-			$Timer->resume( 'SQL QUERIES' , false );
-			// Start a timer for this particular query:
-			$Timer->start( 'sql_query', false );
-
-			// Run query:
-			$this->result = @$this->dbhandle->query( $query );
-
-			if( $this->log_queries )
-			{	// We want to log queries:
-				// Get duration for last query:
-				$this->queries[ $this->num_queries - 1 ]['time'] = $Timer->get_duration( 'sql_query', 10 );
-			}
-
-			// Pause global query timer:
-			$Timer->pause( 'SQL QUERIES' , false );
-		}
-		else
-		{
-			// Run query:
-			$this->result = @$this->dbhandle->query( $query );
-		}
-
-		// If there is an error then take note of it..
-		if( $this->is_open() && $this->dbhandle->errno != 0 )
-		{
-			if( $this->has_result() )
-			{
-				$this->result->free();
-			}
-			$last_errno = $this->dbhandle->errno;
-			if( $this->use_transactions && ( $this->transaction_isolation_level == 'SERIALIZABLE' ) && ( 1213 == $last_errno ) )
-			{ // deadlock exception occured, transaction must be rolled back
-				$this->rollback_nested_transaction = true;
-				return false;
-			}
-			$this->print_error( '', '', $title );
-			return false;
-		}
-
-		if( preg_match( '#^\s*(INSERT|DELETE|UPDATE|REPLACE)\s#i', $query, $match ) )
-		{ // Query was an insert, delete, update, replace:
-
-			$this->rows_affected = $this->dbhandle->affected_rows;
-			if( $this->log_queries )
-			{	// We want to log queries:
-				$this->queries[ $this->num_queries - 1 ]['rows'] = $this->rows_affected;
-			}
-
-			// Take note of the insert_id, for INSERT and REPLACE:
-			$match[1] = strtoupper($match[1]);
-			if( $match[1] == 'INSERT' || $match[1] == 'REPLACE' )
-			{
-				$this->insert_id = $this->dbhandle->insert_id;
-			}
-
-			// Return number of rows affected
-			$return_val = $this->rows_affected;
-		}
-		else
-		{ // Query was a select, alter, etc...:
-			if( $this->has_result() )
-			{ // There's no result for CREATE or DROP for example and can even trigger a fatal error (see http://forums.b2evolution.net//viewtopic.php?t=9529)
-				$this->num_rows = $this->result->num_rows;
-			}
-
-			if( $this->log_queries )
-			{	// We want to log queries:
-				$this->queries[ $this->num_queries - 1 ]['rows'] = $this->num_rows;
-			}
-
-			// Return number of rows selected
-			$return_val = $this->num_rows;
-		}
-		if( $this->log_queries )
-		{	// We want to log queries:
-			if( $this->debug_dump_function_trace_for_queries )
-			{
-				$this->queries[ $this->num_queries - 1 ]['function_trace'] = debug_get_backtrace( $this->debug_dump_function_trace_for_queries, array( array( 'class' => 'DB' ) ), 1 ); // including first stack entry from class DB
-			}
-
-			if( $this->debug_dump_rows && $this->num_rows )
-			{
-				$this->queries[ $this->num_queries - 1 ]['results'] = $this->debug_get_rows_table( $this->debug_dump_rows );
-			}
-
-			// Profile queries
-			if( $this->debug_profile_queries )
-			{
-				// save values:
-				$saved_last_result = $this->result;
-				$saved_num_rows = $this->num_rows;
-
-				$this->num_rows = 0;
-
-				$this->result = @$this->dbhandle->query( 'SHOW PROFILE' );
-				$this->num_rows = $this->result->num_rows;
-
-				if( $this->num_rows )
-				{
-					$this->queries[$this->num_queries-1]['profile'] = $this->debug_get_rows_table( 100, true );
-
-					// Get time information from PROFILING table (which corresponds to "SHOW PROFILE")
-					$this->result = $this->dbhandle->query( 'SELECT FORMAT(SUM(DURATION), 6) AS DURATION FROM INFORMATION_SCHEMA.PROFILING GROUP BY QUERY_ID ORDER BY QUERY_ID DESC LIMIT 1' );
-					$time_profile_durations = $this->result->fetch_row();
-					$this->queries[$this->num_queries-1]['time_profile'] = array_shift( $time_profile_durations );
-				}
-
-				// Free "PROFILE" result:
-				$this->result->free();
-
-
-				// Restore:
-				$this->result = $saved_last_result;
-				$this->num_rows = $saved_num_rows;
-			}
-		}
-		return $return_val;
-	}
-
-
-	/**
-	 * Get one variable from the DB - see docs for more detail
-	 *
-	 * Note: To be sure that you received NULL from the DB and not "no rows" check
-	 *       for {@link $num_rows}.
-	 *
-	 * @param string|object|NULL Optional SQL query string or SQL object to execute (or NULL for previous query)
-	 * @param integer Column number (starting at and defaulting to 0)
-	 * @param integer Row (defaults to NULL for "next"/"do not seek")
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @return mixed NULL if not found, the value otherwise (which may also be NULL).
-	 */
-	function get_var( $query_SQL = NULL, $x = 0, $y = NULL, $title = '' )
-	{
-		// If there is a query then perform it if not then use cached results..
-		if( $query_SQL )
-		{
-			$this->query( $query_SQL, $title );
-		}
-
-		if( $this->num_rows
-			&& ( $y === NULL || $this->result->data_seek( $y) ) )
-		{
-			$row = $this->result->fetch_row();
-
-			if( isset($row[$x]) )
-			{
-				return $row[$x];
-			}
-		}
-
-		return NULL;
-	}
-
-
-	/**
-	 * Get one row from the DB.
-	 *
-	 * @param string|object|NULL Optional SQL query string or SQL object to execute (or NULL for previous query)
-	 * @param string Output type (OBJECT, ARRAY_A, ARRAY_N)
-	 * @param int Row to fetch (or NULL for next - useful with $query=NULL)
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @return mixed
-	 */
-	function get_row( $query_SQL = NULL, $output = OBJECT, $y = NULL, $title = '' )
-	{
-		// If there is a query then perform it if not then use cached results..
-		if( $query_SQL )
-		{
-			$this->query( $query_SQL, $title );
-		}
-
-		if( ! $this->num_rows
-			|| ( isset( $y ) && ! $this->result->data_seek( $y ) ) )
-		{
-			if( $output == OBJECT )
-				return NULL;
-			else
-				return array();
-		}
-
-		// If the output is an object then return object using the row offset..
-		switch( $output )
-		{
-		case OBJECT:
-			return $this->result->fetch_object();
-
-		case ARRAY_A:
-			return $this->result->fetch_assoc();
-
-		case ARRAY_N:
-			return $this->result->fetch_row();
-
-		default:
-			$this->print_error('DB::get_row(string query, output type, int offset) -- Output type must be one of: OBJECT, ARRAY_A, ARRAY_N', '', false);
-			break;
-		}
-	}
-
-
-	/**
-	 * Function to get 1 column from the cached result set based on X index
-	 * see docs for usage and info
-	 *
-	 * @param string|object|NULL Optional SQL query string or SQL object to execute (or NULL for previous query)
-	 * @param integer Column number
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @return array
-	 */
-	function get_col( $query_SQL = NULL, $x = 0, $title = '' )
-	{
-		// If there is a query then perform it if not then use cached results..
-		if( $query_SQL )
-		{
-			$this->query( $query_SQL, $title );
-		}
-
-		// Extract the column values
-		$new_array = array();
-		for( $i = 0; $i < $this->num_rows; $i++ )
-		{
-			$new_array[$i] = $this->get_var( NULL, $x, $i );
-		}
-
-		return $new_array;
-	}
-
-
-	/**
-	 * Function to get the second column from the cached result indexed by the first column
-	 *
-	 * @param string|object|NULL Optional SQL query string or SQL object to execute (or NULL for previous query)
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @return array [col_0] => col_1
-	 */
-	function get_assoc( $query_SQL = NULL, $title = '' )
-	{
-		// If there is a query then perform it if not then use cached results..
-		if( $query_SQL )
-		{
-			$this->query( $query_SQL, $title );
-		}
-
-		// Extract the column values
-		$new_array = array();
-		for( $i = 0; $i < $this->num_rows; $i++ )
-		{
-			$key = $this->get_var( NULL, 0, $i );
-
-			$new_array[$key] = $this->get_var( NULL, 1, $i );
-		}
-
-		return $new_array;
-	}
-
-
-	/**
-	 * Return the the query as a result set - see docs for more details
-	 *
-	 * @param string|object|NULL Optional SQL query string or SQL object to execute (or NULL for previous query)
-	 * @param string Output type (OBJECT, ARRAY_A, ARRAY_N)
-	 * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
-	 * @param string Column name to use as array key, NULL to use auto incremented number key
-	 * @return mixed
-	 */
-	function get_results( $query_SQL = NULL, $output = OBJECT, $title = '', $array_key = NULL )
-	{
-		// If there is a query then perform it if not then use cached results..
-		if( $query_SQL )
-		{
-			$this->query( $query_SQL, $title );
-		}
-
-		$r = array();
-
-		if( $this->num_rows )
-		{
-			$this->result->data_seek(0);
-			switch( $output )
-			{
-			case OBJECT:
-				while( $row = $this->result->fetch_object() )
-				{
-					if( $array_key === NULL || ! isset( $row->$array_key ) )
-					{	// Use auto incremented number key:
-						$r[] = $row;
-					}
-					else
-					{	// Use custom key:
-						$r[ $row->$array_key ] = $row;
-					}
-				}
-				break;
-
-			case ARRAY_A:
-				while( $row = $this->result->fetch_assoc() )
-				{
-					if( $array_key === NULL || ! isset( $row[ $array_key ] ) )
-					{	// Use auto incremented number key:
-						$r[] = $row;
-					}
-					else
-					{	// Use custom key:
-						$r[ $row[ $array_key ] ] = $row;
-					}
-				}
-				break;
-
-			case ARRAY_N:
-				while( $row = $this->result->fetch_row() )
-				{
-					if( $array_key === NULL || ! isset( $row[ $array_key ] ) )
-					{	// Use auto incremented number key:
-						$r[] = $row;
-					}
-					else
-					{	// Use custom key:
-						$r[ $row[ $array_key ] ] = $row;
-					}
-				}
-				break;
-			}
-		}
-		return $r;
-	}
-
-
-	/**
-	 * Get a table (or "<p>No Results.</p>") for the SELECT query results.
-	 *
-	 * @return string HTML table or "No Results" if the
-	 */
-	function debug_get_rows_table( $max_lines, $break_at_comma = false )
-	{
-		$r = '';
-
-		if( ! $this->result || ! $this->num_rows )
-		{
-			return '<p>No Results.</p>';
-		}
-
-		// Get column info:
-		$col_info = array();
-		$n = $this->result->field_count;
-		$i = 0;
-		while( $i < $n )
-		{
-			$col_info[$i] = $this->result->fetch_field();
-			$i++;
-		}
-
-		// =====================================================
-		// Results top rows
-		$r .= '<table cellspacing="0" summary="Results for query"><tr>';
-		for( $i = 0, $count = count($col_info); $i < $count; $i++ )
-		{
-			$r .= '<th><span class="type">'.$col_info[$i]->type.' '.$col_info[$i]->max_length.'</span><br />'
-						.$col_info[$i]->name.'</th>';
-		}
-		$r .= '</tr>';
-
-
-		// ======================================================
-		// print main results
-		$i=0;
-		// fp> TODO: this should NOT try to print binary fields, eg: file hashes in the files table
-		// Rewind to first row (should be there already).
-		$this->result->data_seek(0);
-		while( $one_row = $this->get_row(NULL, ARRAY_N) )
-		{
-			$i++;
-			if( $i >= $max_lines )
-			{
-				break;
-			}
-			$r .= '<tr>';
-			foreach( $one_row as $item )
-			{
-				if( $i % 2 )
-				{
-					$r .= '<td class="odd">';
-				}
-				else
-				{
-					$r .= '<td>';
-				}
-
-				if( $break_at_comma )
-				{
-					$item = str_replace( ',', '<br />', $item );
-					$item = str_replace( ';', '<br />', $item );
-					$r .= $item;
-				}
-				else
-				{
-					$r .= strmaxlen($item, 50, NULL, 'htmlspecialchars');
-				}
-				$r .= '</td>';
-			}
-
-			$r .= '</tr>';
-		}
-		// Rewind to first row again.
-		$this->result->data_seek(0);
-		if( $i >= $max_lines )
-		{
-			$r .= '<tr><td colspan="'.(count($col_info)+1).'">Max number of dumped rows has been reached.</td></tr>';
-		}
-
-		$r .= '</table>';
-
-		return $r;
-	}
-
-
-	/**
-	 * Callback for preg_replace_callback in format_query()
-	 */
-	private static function _format_query_callback( $matches )
-	{
-		return str_replace( " ", "&nbsp;", $matches[1] );
-	}
-
-
-	/**
-	 * Format a SQL query
-	 *
-	 * @param string SQL
-	 * @param boolean Format with/for HTML?
-	 */
-	static function format_query( $sql, $html = true, $maxlen = NULL )
-	{
-		$sql = trim( str_replace("\t", '  ', $sql ) );
-		if( $maxlen )
-		{
-			$sql = strmaxlen($sql, $maxlen, '...');
-		}
-
-		$new = '';
-		$word = '';
-		$in_comment = false;
-		$in_literal = false;
-		for( $i = 0, $n = strlen($sql); $i < $n; $i++ )
-		{
-			$c = $sql[$i];
-			if( $in_comment )
-			{
-				if( $in_comment === '/*' && substr($sql, $i, 2) == '*/' )
-					$in_comment = false;
-				elseif( $c == "\n" )
-					$in_comment = false;
-			}
-			elseif( $in_literal )
-			{
-				if( $c == $in_literal )
-					$in_literal = false;
-			}
-			elseif( $c == '#' || ($c == '-' && substr($sql, $i, 3) == '-- ') )
-			{
-				$in_comment = true;
-			}
-			elseif( ctype_space($c) )
-			{
-				$uword = strtoupper($word);
-				if( in_array($uword, array('SELECT', 'FROM', 'WHERE', 'GROUP', 'ORDER', 'LIMIT', 'VALUES', 'AND', 'OR', 'LEFT', 'RIGHT', 'INNER')) )
-				{
-					$new = rtrim($new)."\n".str_pad($word, 6, ' ', STR_PAD_LEFT).' ';
-					# Remove any trailing whitespace after keywords
-					while( ctype_space($sql[$i+1]) ) {
-						++$i;
-					}
-				}
-				else
-				{
-					$new .= $word.$c;
-				}
-				$word = '';
-				continue;
-			}
-			$word .= $c;
-		}
-		$sql = trim($new.$word);
-
-		if( $html )
-		{ // poor man's indent
-			$sql = htmlspecialchars( $sql );
-			$sql = preg_replace_callback("~^(\s+)~m", array( 'DB', '_format_query_callback' ), $sql);
-			$sql = nl2br($sql);
-		}
-		return $sql;
-	}
-
-
-	/**
-	 * Displays all queries that have been executed
-	 *
-	 * @param boolean Use HTML.
-	 */
-	function dump_queries( $html = true )
-	{
-		if ( $html )
-		{
-			echo '<strong>DB queries:</strong> '.$this->num_queries."<br />\n";
-		}
-		else
-		{
-			echo 'DB queries: '.$this->num_queries."\n\n";
-		}
-
-		if( ! $this->log_queries )
-		{ // nothing more to do here..
-			return;
-		}
-
-		global $Timer;
-		if( is_object( $Timer ) )
-		{
-			$time_queries = $Timer->get_duration( 'SQL QUERIES' , 4 );
-		}
-		else
-		{
-			$time_queries = 0;
-		}
-
-		$count_queries = 0;
-		$count_rows = 0;
-		$time_queries_profiled = 0;
-
-		if( $html )
-		{ // Javascript function to toggle DIVs (EXPLAIN, results, backtraces).
-			$relative_to = ( is_admin_page() ? 'rsc_url' : 'blog' );
-			require_js( 'debug.js', $relative_to, false, true );
-		}
-
-		foreach( $this->queries as $i => $query )
-		{
-			$count_queries++;
-
-			if ( $html )
-			{
-				echo '<h4>Query #'.$count_queries.': '.$query['title']."</h4>\n";
-
-				$div_id = 'db_query_sql_'.$i.'_'.$this->_get_md5_query();
-				if( strlen($query['sql']) > 512 )
-				{
-					$sql_short = DB::format_query( $query['sql'], true, 512 );
-					$sql = DB::format_query( $query['sql'], true );
-
-					echo '<code id="'.$div_id.'" style="display:none">'.$sql_short.'</code>';
-					echo '<code id="'.$div_id.'_full">'.$sql.'</code>';
-					echo '<script>debug_onclick_toggle_div("'.$div_id.','.$div_id.'_full", "Show less", "Show more", false);</script>';
-				}
-				else
-				{
-					echo '<code>'.DB::format_query( $query['sql'] ).'</code>';
-				}
-				echo "\n";
-			}
-			else
-			{
-				echo '= Query #'.$count_queries.': '.$query['title']." =\n";
-				echo DB::format_query( $query['sql'], false )."\n\n";
-			}
-
-			// Color-Format duration: long => red, fast => green, normal => black
-			if( $query['time'] > $this->query_duration_slow )
-			{
-				$style_time_text = 'color:red;font-weight:bold;';
-				$style_time_graph = 'background-color:red;';
-				$plain_time_text = ' [slow]';
-			}
-			elseif( $query['time'] < $this->query_duration_fast )
-			{
-				$style_time_text = 'color:green;';
-				$style_time_graph = 'background-color:green;';
-				$plain_time_text = ' [fast]';
-			}
-			else
-			{
-				$style_time_text = '';
-				$style_time_graph = 'background-color:black;';
-				$plain_time_text = '';
-			}
-
-			// Number of rows with time (percentage and graph, if total time available)
-			if ( $html )
-			{
-				echo '<div class="query_info">';
-				echo 'Rows: '.$query['rows'];
-
-				echo ' &ndash; Time: ';
-			}
-			else
-			{
-				echo 'Rows: '.$query['rows'].' - Time: ';
-			}
-
-			if( $html && $style_time_text )
-			{
-				echo '<span style="'.$style_time_text.'">';
-			}
-			echo number_format( $query['time'], 4 ).'s';
-
-			if( $time_queries > 0 )
-			{ // We have a total time we can use to calculate percentage:
-				echo ' ('.number_format( 100/$time_queries * $query['time'], 2 ).'%)';
-			}
-
-			if( isset($query['time_profile']) )
-			{
-				echo ' (real: '.number_format($query['time_profile'], 4).'s)';
-				$time_queries_profiled += $query['time_profile'];
-			}
-
-			if( $style_time_text || $plain_time_text )
-			{
-				echo $html ? '</span>' : $plain_time_text;
-			}
-
-			if( $time_queries > 0 )
-			{ // We have a total time we can use to display a graph/bar:
-				$perc = round( 100/$time_queries * $query['time'] );
-
-				if ( $html )
-				{
-					echo '<div style="margin:0; padding:0; height:12px; width:'.$perc.'%;'.$style_time_graph.'"></div>';
-				}
-				else
-				{	// display an ASCII bar
-					printf( "\n".'[%-50s]', str_repeat( '=', $perc / 2 ) );
-				}
-			}
-			echo $html ? '</div>' : "\n\n";
-
-			// EXPLAIN JOINS ??
-			if( $this->debug_explain_joins && preg_match( '#^ [\s(]* SELECT \s #ix', $query['sql']) )
-			{ // Query was a select, let's try to explain joins...
-
-				$this->result = $this->dbhandle->query( 'EXPLAIN '.$query['sql'] );
-				if( $this->has_result() )
-				{
-					$this->num_rows = $this->result->num_rows;
-
-					if( $html )
-					{
-						$div_id = 'db_query_explain_'.$i.'_'.$this->_get_md5_query();
-						echo '<div id="'.$div_id.'">';
-						echo $this->debug_get_rows_table( 100, true );
-						echo '</div>';
-						echo '<script>debug_onclick_toggle_div("'.$div_id.'", "Show EXPLAIN", "Hide EXPLAIN");</script>';
-					}
-					else
-					{ // TODO: dh> contains html.
-						echo $this->debug_get_rows_table( 100, true );
-					}
-				}
-				$this->flush();
-			}
-
-			// Profile:
-			if( isset($query['profile']) )
-			{
-				if( $html )
-				{
-					$div_id = 'db_query_profile_'.$i.'_'.$this->_get_md5_query();
-					echo '<div id="'.$div_id.'">';
-					echo $query['profile'];
-					echo '</div>';
-					echo '<script>debug_onclick_toggle_div("'.$div_id.'", "Show PROFILE", "Hide PROFILE");</script>';
-				}
-				else
-				{ // TODO: dh> contains html.
-					echo $this->debug_get_rows_table( 100, true );
-				}
-			}
-
-			// Results:
-			if( $query['results'] != 'unknown' )
-			{
-				if( $html )
-				{
-					$div_id = 'db_query_results_'.$i.'_'.$this->_get_md5_query();
-					echo '<div id="'.$div_id.'">';
-					echo $query['results'];
-					echo '</div>';
-					echo '<script>debug_onclick_toggle_div("'.$div_id.'", "Show results", "Hide results");</script>';
-				}
-				else
-				{ // TODO: dh> contains html.
-					echo $query['results'];
-				}
-			}
-
-			// Function trace:
-			if( isset($query['function_trace']) )
-			{
-				if( $html )
-				{
-					$div_id = 'db_query_backtrace_'.$i.'_'.$this->_get_md5_query();
-					echo '<div id="'.$div_id.'">';
-					echo $query['function_trace'];
-					echo '</div>';
-					echo '<script>debug_onclick_toggle_div("'.$div_id.'", "Show function trace", "Hide function trace");</script>';
-				}
-				else
-				{ // TODO: dh> contains html.
-					echo $query['function_trace'];
-				}
-			}
-
-			echo $html ? '<hr />' : "=============================================\n";
-
-			$count_rows += $query['rows'];
-		}
-
-		$time_queries_profiled = number_format($time_queries_profiled, 4);
-		$time_diff_percentage = $time_queries_profiled != 0 ? round($time_queries / $time_queries_profiled * 100) : false;
-		if ( $html )
-		{
-			echo "\nTotal rows: $count_rows<br />\n";
-			echo "\nMeasured time: {$time_queries}s<br />\n";
-			echo "\nProfiled time: {$time_queries_profiled}s<br />\n";
-			if( $time_diff_percentage !== false )
-			{
-				echo "\nTime difference: {$time_diff_percentage}%<br />\n";
-			}
-		}
-		else
-		{
-			echo 'Total rows: '.$count_rows."\n";
-			echo "Measured time: {$time_queries}s\n";
-			echo "Profiled time: {$time_queries_profiled}s\n";
-			if( $time_diff_percentage !== false )
-			{
-				echo "Time difference: {$time_diff_percentage}%\n";
-			}
-		}
-	}
-
-
-	/**
-	 * Generate MD5 of query
-	 */
-	private static function _get_md5_query()
-	{
-		static $r;
-
-		if( isset( $r ) ) return $r;
-
-		global $query;
-		$r = md5( serialize( $query ) )."-".rand();
-		return $r;
-	}
-
-
-	/**
-	 * BEGIN A TRANSACTION
-	 *
-	 * Note:  By default, MySQL runs with autocommit mode enabled.
-	 * This means that as soon as you execute a statement that updates (modifies)
-	 * a table, MySQL stores the update on disk.
-	 * Once you execute a BEGIN, the updates are "pending" until you execute a
-	 * {@link DB::commit() COMMIT} or a {@link DB:rollback() ROLLBACK}
-	 *
-	 * Note 2: standard syntax would be START TRANSACTION but it's not supported by older
-	 * MySQL versions whereas BEGIN is...
-	 *
-	 * Note 3: The default isolation level is REPEATABLE READ (Default for InnoDB)
-	 *
-	 * - REPEATABLE READ: (most frequent use) several SELECTs in the same transaction will always return identical values
-	 * - READ COMMITTED: no good use?
-	 * - READ UNCOMMITED: dirty reads - no good use?
-	 * - SERIALIZABLE: (less frequent use) all SELECTs are automatically changed to SELECT .. LOCK IN SHARE MODE
-	 * IMPORTANT: SERIALIZABLE does NOT use the max isolation level which would be SELECT ... LOCK FOR UPDATE which you cna only do by manually changing the SELECTs
-	 * ex: SELECT counter_field FROM child_codes FOR UPDATE;
-	 *     UPDATE child_codes SET counter_field = counter_field + 1;
-	 */
-	function begin( $transaction_isolation_level = 'REPEATABLE READ' )
-	{
-		if( !$this->use_transactions )
-		{ // don't use transactions at all
-			return;
-		}
-
-		$transaction_isolation_level = strtoupper( $transaction_isolation_level );
-		if( !in_array( $transaction_isolation_level, array( 'REPEATABLE READ', 'READ COMMITTED', 'READ UNCOMMITTED', 'SERIALIZABLE' ) ) )
-		{
-			debug_die( 'Invalid transaction isolation level!' );
-		}
-
-		if( ( $this->transaction_isolation_level != $transaction_isolation_level ) && ( ( !$this->transaction_nesting_level ) || ( $transaction_isolation_level == 'SERIALIZABLE' ) ) )
-		{ // The isolation level was changed and it is the beggining of a new transaction or this is a nested transaction but it needs 'SERIALIZABLE' isolation level
-			// Note: We change the transaction isolation level for nested transactions only if the requested isolation level is 'SERIALIZABLE'
-			// Set session transaction isolation level to the new value
-			$this->transaction_isolation_level = $transaction_isolation_level;
-			$this->query( 'SET SESSION TRANSACTION ISOLATION LEVEL '.$transaction_isolation_level, 'Set transaction isolation level' );
-		}
-
-		if( !$this->transaction_nesting_level )
-		{ // Start a new transaction
-			$this->query( 'BEGIN', 'BEGIN transaction' );
-		}
-
-		$this->transaction_nesting_level++;
-	}
-
-
-	/**
-	 * Commit current transaction
-	 *
-	 * @return boolean true on success, false otherwise - when a nested transaction called rollback
-	 */
-	function commit()
-	{
-		if( !$this->use_transactions )
-		{ // don't use transactions at all
-			return true;
-		}
-
-		$result = true;
-		if( $this->transaction_nesting_level == 1 )
-		{ // Only COMMIT if there are no remaining nested transactions:
-			if( $this->rollback_nested_transaction )
-			{
-				$this->query( 'ROLLBACK', 'ROLLBACK transaction because there was a failure somewhere in the nesting of transactions' );
-				$result = false;
-			}
-			else
-			{
-				$this->query( 'COMMIT', 'COMMIT transaction' );
-			}
-			$this->rollback_nested_transaction = false;
-		}
-
-		if( $this->transaction_nesting_level )
-		{ // decrease transaction nesting level
-			$this->transaction_nesting_level--;
-		}
-
-		return $result;
-	}
-
-
-	/**
-	 * Rollback current transaction
-	 */
-	function rollback()
-	{
-		if( !$this->use_transactions )
-		{ // don't use transactions at all
-			return;
-		}
-
-		if( $this->transaction_nesting_level == 1 )
-		{ // Only ROLLBACK if there are no remaining nested transactions:
-			$this->query( 'ROLLBACK', 'ROLLBACK transaction' );
-			$this->rollback_nested_transaction = false;
-		}
-		else
-		{ // Remember we'll have to roll back at the end!
-			$this->rollback_nested_transaction = true;
-		}
-		if( $this->transaction_nesting_level )
-		{
-			$this->transaction_nesting_level--;
-		}
-	}
-
-
-	/**
-	 * Check if some nesed transaction failed
-	 */
-	function has_failed_transaction()
-	{
-		return $this->rollback_nested_transaction;
-	}
-
-
-	/**
-	 * Convert a PHP charset to its MySQL equivalent.
-	 *
-	 * @param string PHP charset
-	 * @return string MYSQL charset or unchanged
-	 */
-	static function php_to_mysql_charmap( $php_charset )
-	{
-		$php_charset = strtolower( $php_charset );
-
-		/**
-		 * This is taken from phpMyAdmin (libraries/select_lang.lib.php).
-		 */
-		static $mysql_charset_map = array(
-				'big5'         => 'big5',
-				'cp-866'       => 'cp866',
-				'euc-jp'       => 'ujis',
-				'euc-kr'       => 'euckr',
-				'gb2312'       => 'gb2312',
-				'gbk'          => 'gbk',
-				'iso-8859-1'   => 'latin1',
-				'iso-8859-2'   => 'latin2',
-				'iso-8859-7'   => 'greek',
-				'iso-8859-8'   => 'hebrew',
-				'iso-8859-8-i' => 'hebrew',
-				'iso-8859-9'   => 'latin5',
-				'iso-8859-13'  => 'latin7',
-				'iso-8859-15'  => 'latin1',
-				'koi8-r'       => 'koi8r',
-				'shift_jis'    => 'sjis',
-				'tis-620'      => 'tis620',
-				'utf-8'        => 'utf8',
-				'windows-1250' => 'cp1250',
-				'windows-1251' => 'cp1251',
-				'windows-1252' => 'latin1',
-				'windows-1256' => 'cp1256',
-				'windows-1257' => 'cp1257',
-			);
-
-		if( isset( $mysql_charset_map[ $php_charset ] ) )
-		{
-			return $mysql_charset_map[ $php_charset ];
-		}
-
-		// for lack of a better answer:
-		return $php_charset;
-	}
-
-	/**
-	 * Set the charset of the connection.
-	 *
-	 * @staticvar array "regular charset => mysql charset map"
-	 * @param string Charset
-	 * @param boolean Use the "regular charset => mysql charset map"?
-	 * @return boolean true on success, false on failure
-	 */
-	public function set_connection_charset( $charset )
-	{
-		global $Debuglog;
-
-		// pre_dump( 'set_connection_charset', $charset );
-
-		$charset = strtolower($charset);
-		$charset = self::php_to_mysql_charmap( $charset );
-
-		$r = true;
-		if( $charset != $this->connection_charset )
-		{
-			$save_show_errors = $this->show_errors;
-			$save_halt_on_error = $this->halt_on_error;
-			$this->show_errors = false;
-			$this->halt_on_error = false;
-			$last_error = $this->last_error;
-			$error = $this->error;
-			if( $this->dbhandle->errno != 0 || $this->dbhandle->set_charset($charset) === false )
-			{
-				$Debuglog->add( 'Could not set DB connection charset: '.$charset.'"! (MySQL error: '.strip_tags($this->last_error).')', 'locale' );
-
-				$r = false;
-			}
-			else
-			{
-				$Debuglog->add( 'Set DB connection charset: '.$charset, 'locale' );
-
-				$this->connection_charset = $charset;
-			}
-			$this->show_errors = $save_show_errors;
-			$this->halt_on_error = $save_halt_on_error;
-			// Blatantly ignore any error generated by mysqli::set_charset...
-			$this->last_error = $last_error;
-			$this->error = $error;
-		}
-
-		return $r;
-	}
-
-
-	/**
-	 * Get the charset of the connection.
-	 *
-	 * @return string
-	 */
-	public function get_connection_charset()
-	{
-		return $this->connection_charset;
-	}
-
-
-	/**
-	 * Check if the charset is currently used as connection charset
-	 *
-	 * @param string Expected connection charset
-	 * @return boolean
-	 */
-	public function is_expected_connection_charset( $expected_charset )
-	{
-		// Convert to proper mysql charset:
-		$expected_charset = self::php_to_mysql_charmap( $expected_charset );
-
-		if( $this->get_connection_charset() == $expected_charset )
-		{	// Current connection charset exactly matches to the expected charset:
-			return true;
-		}
-
-		// Also compare if current charset is extended version of the expected charset,
-		// e.g. if 'utf8mb4' is using currently then consider 'utf8' correct as well:
-		return ( stripos( $this->get_connection_charset(), $expected_charset ) === 0 );
-	}
-
+				</div>', false);
+            return false;
+        }
+        $this->dbname = $db;
+
+        return true;
+    }
+
+    /**
+     * @return Is there a valid result available?
+     */
+    public function has_result()
+    {
+        return isset($this->result) && is_object($this->result);
+    }
+
+    /**
+     * @return boolean Is the database open?
+     */
+    public function is_open()
+    {
+        return is_object($this->dbhandle);
+    }
+
+    /**
+     * Escapes text for SQL LIKE special characters % and _
+     */
+    public function like_escape($str)
+    {
+        $str = str_replace(['%', '_'], ['\\%', '\\_'], $str);
+        return $this->escape($str);
+    }
+
+    /**
+     * Format a string correctly for safe insert under all PHP conditions
+     */
+    public function escape($str)
+    {
+        return $this->dbhandle->real_escape_string($str);
+    }
+
+    /**
+     * Quote a value, either in single quotes (and escaped) or if it's NULL as 'NULL'.
+     *
+     * @param string|array|null
+     * @return string Quoted (and escaped) value or 'NULL'.
+     */
+    public function quote($str)
+    {
+        if (is_null($str)) {
+            return 'NULL';
+        } elseif (is_array($str)) {
+            $r = '';
+            foreach ($str as $elt) {
+                $r .= $this->quote($elt) . ',';
+            }
+            return substr($r, 0, -1);  // remove last ,
+        } else {
+            return "'" . $this->escape($str) . "'";
+        }
+    }
+
+    /**
+     * @return string Return the given value or 'NULL', if it's === NULL.
+     */
+    public function null($val)
+    {
+        if ($val === null) {
+            return 'NULL';
+        } else {
+            return $val;
+        }
+    }
+
+    /**
+     * Returns the correct WEEK() function to get the week number for the given date.
+     *
+     * @link http://dev.mysql.com/doc/mysql/en/date-and-time-functions.html
+     *
+     * @todo disable when MySQL < 4
+     * @param string will be used as is
+     * @param integer 0 for sunday, 1 for monday
+     */
+    public function week($date, $startofweek)
+    {
+        if ($startofweek == 1) { // Week starts on Monday, week 1 must have a monday in this year:
+            return ' WEEK( ' . $date . ', 5 ) ';
+        }
+
+        // Week starts on Sunday, week 1 must have a sunday in this year:
+        return ' WEEK( ' . $date . ', 0 ) ';
+    }
+
+    /**
+     * Print SQL/DB error.
+     *
+     * TODO: fp> bloated: it probably doesn't make sense to display errors if we don't stop. Any use case?
+     *       dh> Sure. Local testing (and test cases).
+     *
+     * @param string Short error (no HTML)
+     * @param string Extended description/help for the error (for HTML)
+     * @param string|false Query title; false if {@link DB::$last_nuery} should not get displayed
+     */
+    public function print_error($title = '', $html_str = '', $query_title = '')
+    {
+        // All errors go to the global error array $EZSQL_ERROR..
+        global $EZSQL_ERROR, $is_cli;
+
+        $this->error = true;
+
+        // If no special error string then use mysql default..
+        if (! strlen($title)) {
+            if ($this->is_open()) { // use mysqli::error:
+                $this->last_error = $this->dbhandle->error . '(Errno=' . $this->dbhandle->errno . ')';
+            } else {
+                $this->last_error = 'Unknown (and no $dbhandle available)';
+            }
+        } else {
+            $this->last_error = $title;
+        }
+
+        // Log this error to the global array..
+        $EZSQL_ERROR[] = [
+            'query' => $this->last_query,
+            'error_str' => $this->last_error,
+        ];
+
+        // Send error to PHP's system logger.
+        if ($this->log_errors) {
+            // TODO: dh> respect $log_app_errors? Create a wrapper, e.g. evo_error_log, which can be used later to write into e.g. a DB table?!
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $req_url = ((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off')) ? 'https://' : 'http://')
+                    . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            } else {
+                $req_url = '-';
+            }
+            $error_text = 'SQL ERROR: ' . $this->last_error
+                    . ', QUERY: "' . trim($this->last_query) . '"'
+                    . ', BACKTRACE: ' . trim(strip_tags(debug_get_backtrace()))
+                    . ', URL: ' . $req_url;
+            error_log(preg_replace('#\s+#', ' ', $error_text));
+        }
+
+        if (! ($this->halt_on_error || $this->show_errors)) { // no reason to generate a nice message:
+            return;
+        }
+
+        if ($this->halt_on_error && ! $this->show_errors) { // do not show errors, just die:
+            die();
+        }
+
+        if ($is_cli) { // Clean error message for command line interface:
+            $err_msg = "MySQL error!\n{$this->last_error}\n";
+            if (! empty($this->last_query) && $query_title !== false) {
+                $err_msg .= "Your query: $query_title\n";
+                $err_msg .= $this->format_query($this->last_query, false);
+            }
+        } else {
+            $err_msg = '<p class="error">MySQL error!</p>' . "\n";
+            $err_msg .= "<div><p><strong>{$this->last_error}</strong></p>\n";
+            $err_msg .= $html_str;
+            if (! empty($this->last_query) && $query_title !== false) {
+                $err_msg .= '<p class="error">Your query: ' . $query_title . '</p>';
+                $err_msg .= '<pre>';
+                $err_msg .= $this->format_query($this->last_query, ! $is_cli);
+                $err_msg .= '</pre>';
+            }
+            $err_msg .= "</div>\n";
+        }
+
+        if ($this->halt_on_error === 'throw') {	// Throw SQL error into Exception:
+            throw new Exception($err_msg);
+        } elseif ($this->halt_on_error) {
+            if (function_exists('debug_die')) {
+                debug_die($err_msg);
+            } else {
+                die($err_msg);
+            }
+        } elseif ($this->show_errors) { // If there is an error then take note of it
+            echo '<div class="error">';
+            echo $err_msg;
+            echo '</div>';
+        }
+    }
+
+    /**
+     * Kill cached query results
+     */
+    public function flush()
+    {
+        if ($this->has_result()) { // Free last result
+            $this->result->free();
+        }
+        $this->result = null;
+        $this->last_query = null;
+        $this->num_rows = 0;
+    }
+
+    /**
+     * Get MYSQL version
+     */
+    protected function get_version()
+    {
+        if (isset($this->version)) {
+            return $this->version;
+        }
+
+        $this->version_long = $this->dbhandle->server_info;
+        $this->version = preg_replace('~-.*~', '', $this->version_long);
+        return $this->version;
+    }
+
+    /**
+     * Save the vars responsible for error handling.
+     * This can be chained.
+     * @see DB::restore_error_state()
+     */
+    public function save_error_state()
+    {
+        $this->saved_error_states[] = [
+            'show_errors' => $this->show_errors,
+            'halt_on_error' => $this->halt_on_error,
+            'last_error' => $this->last_error,
+            'error' => $this->error,
+            'log_errors' => $this->log_errors,
+        ];
+    }
+
+    /**
+     * Call this after {@link save_halt_on_error()} to
+     * restore the previous error state.
+     * This can be chained.
+     * @see DB::save_error_state()
+     */
+    public function restore_error_state()
+    {
+        if (empty($this->saved_error_states)
+            || ! is_array($this->saved_error_states)) {
+            return false;
+        }
+        $state = array_pop($this->saved_error_states);
+
+        foreach ($state as $k => $v) {
+            $this->$k = $v;
+        }
+    }
+
+    /**
+     * Basic Query
+     *
+     * @param string|object SQL query string or SQL object
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @return mixed # of rows affected or false if error
+     */
+    public function query($query_SQL, $title = '')
+    {
+        global $Timer;
+
+        if ($query_SQL instanceof SQL) {	// Get SQL query string from provided object:
+            $query = $query_SQL->get();
+            if (empty($title) && $query_SQL->title !== null) {	// Use title from SQL object if given function param is not provided:
+                $title = $query_SQL->title;
+            }
+        } else {	// Use SQL query from given function param because it is already a string:
+            $query = $query_SQL;
+        }
+
+        // initialise return
+        $return_val = 0;
+
+        // Flush cached values..
+        $this->flush();
+
+        // Replace aliases:
+        if (! empty($this->dbaliases)) {
+            // TODO: this should only replace the table name part(s), not the whole query!
+            // blueyed> I've changed it to replace in table name parts for UPDATE, INSERT and REPLACE, because
+            //          it corrupted serialized data..
+            //          IMHO, a cleaner solution would be to use {T_xxx} in the queries and replace it here. In object properties (e.g. DataObject::$dbtablename), only "T_xxx" would get used and surrounded by "{..}" in the queries it creates.
+
+            if (preg_match('~^\s*(UPDATE\s+)(.*?)(\sSET\s.*)$~is', $query, $match)) { // replace only between UPDATE and SET, but check subqueries:
+                $subquery_result = '';
+                while (preg_match('~^(.*SELECT.*FROM\s+)(.*?)(\s.*)$~is', $match[3], $subquery_match)) { // replace in subquery
+                    $match[3] = $subquery_match[1];
+                    $subquery_result = preg_replace($this->dbaliases, $this->dbreplaces, $subquery_match[2]) . $subquery_match[3] . $subquery_result;
+                }
+                $match[3] = $match[3] . $subquery_result;
+                if (preg_match('~^(.*SELECT.*JOIN\s+)(.*?)(\s.*)$~is', $match[3], $subquery_match)) { // replace in whole subquery, there can be any number of JOIN:
+                    $match[3] = preg_replace($this->dbaliases, $this->dbreplaces, $match[3]);
+                }
+                $query = $match[1] . preg_replace($this->dbaliases, $this->dbreplaces, $match[2]) . $match[3];
+            } elseif (preg_match('~^\s*(INSERT|REPLACE\s+)(.*?)(\s(VALUES|SET)\s.*)$~is', $query, $match)) { // replace only between INSERT|REPLACE and VALUES|SET:
+                $query = $match[1] . preg_replace($this->dbaliases, $this->dbreplaces, $match[2]) . $match[3];
+            } else { // replace in whole query:
+                $query = preg_replace($this->dbaliases, $this->dbreplaces, $query);
+
+                if (! empty($this->table_options) && preg_match('#^ \s* create \s* table \s #ix', $query)) { // Query is a table creation, we add table options:
+                    $query = preg_replace('~;\s*$~', '', $query); // remove any ";" at the end
+                    $query .= ' ' . $this->table_options;
+                }
+            }
+        } elseif (! empty($this->table_options)) { // No aliases, but table_options:
+            if (preg_match('#^ \s* create \s* table \s #ix', $query)) { // Query is a table creation, we add table options:
+                $query = preg_replace('~;\s*$~', '', $query); // remove any ";" at the end
+                $query .= $this->table_options;
+            }
+        }
+        // echo '<p>'.$query.'</p>';
+
+        // Keep track of the last query for debug..
+        $this->last_query = $query;
+
+        // Perform the query via std mysqli::query method.
+        $this->num_queries++;
+
+        if ($this->log_queries) {	// We want to log queries:
+            $this->queries[$this->num_queries - 1] = [
+                'title' => $title,
+                'sql' => $query,
+                'rows' => -1,
+                'time' => 'unknown',
+                'results' => 'unknown',
+            ];
+        }
+
+        if (is_object($Timer)) {
+            // Resume global query timer
+            $Timer->resume('SQL QUERIES', false);
+            // Start a timer for this particular query:
+            $Timer->start('sql_query', false);
+
+            // Run query:
+            $this->result = @$this->dbhandle->query($query);
+
+            if ($this->log_queries) {	// We want to log queries:
+                // Get duration for last query:
+                $this->queries[$this->num_queries - 1]['time'] = $Timer->get_duration('sql_query', 10);
+            }
+
+            // Pause global query timer:
+            $Timer->pause('SQL QUERIES', false);
+        } else {
+            // Run query:
+            $this->result = @$this->dbhandle->query($query);
+        }
+
+        // If there is an error then take note of it..
+        if ($this->is_open() && $this->dbhandle->errno != 0) {
+            if ($this->has_result()) {
+                $this->result->free();
+            }
+            $last_errno = $this->dbhandle->errno;
+            if ($this->use_transactions && ($this->transaction_isolation_level == 'SERIALIZABLE') && (1213 == $last_errno)) { // deadlock exception occured, transaction must be rolled back
+                $this->rollback_nested_transaction = true;
+                return false;
+            }
+            $this->print_error('', '', $title);
+            return false;
+        }
+
+        if (preg_match('#^\s*(INSERT|DELETE|UPDATE|REPLACE)\s#i', $query, $match)) { // Query was an insert, delete, update, replace:
+            $this->rows_affected = $this->dbhandle->affected_rows;
+            if ($this->log_queries) {	// We want to log queries:
+                $this->queries[$this->num_queries - 1]['rows'] = $this->rows_affected;
+            }
+
+            // Take note of the insert_id, for INSERT and REPLACE:
+            $match[1] = strtoupper($match[1]);
+            if ($match[1] == 'INSERT' || $match[1] == 'REPLACE') {
+                $this->insert_id = $this->dbhandle->insert_id;
+            }
+
+            // Return number of rows affected
+            $return_val = $this->rows_affected;
+        } else { // Query was a select, alter, etc...:
+            if ($this->has_result()) { // There's no result for CREATE or DROP for example and can even trigger a fatal error (see http://forums.b2evolution.net//viewtopic.php?t=9529)
+                $this->num_rows = $this->result->num_rows;
+            }
+
+            if ($this->log_queries) {	// We want to log queries:
+                $this->queries[$this->num_queries - 1]['rows'] = $this->num_rows;
+            }
+
+            // Return number of rows selected
+            $return_val = $this->num_rows;
+        }
+        if ($this->log_queries) {	// We want to log queries:
+            if ($this->debug_dump_function_trace_for_queries) {
+                $this->queries[$this->num_queries - 1]['function_trace'] = debug_get_backtrace($this->debug_dump_function_trace_for_queries, [[
+                    'class' => 'DB',
+                ]], 1); // including first stack entry from class DB
+            }
+
+            if ($this->debug_dump_rows && $this->num_rows) {
+                $this->queries[$this->num_queries - 1]['results'] = $this->debug_get_rows_table($this->debug_dump_rows);
+            }
+
+            // Profile queries
+            if ($this->debug_profile_queries) {
+                // save values:
+                $saved_last_result = $this->result;
+                $saved_num_rows = $this->num_rows;
+
+                $this->num_rows = 0;
+
+                $this->result = @$this->dbhandle->query('SHOW PROFILE');
+                $this->num_rows = $this->result->num_rows;
+
+                if ($this->num_rows) {
+                    $this->queries[$this->num_queries - 1]['profile'] = $this->debug_get_rows_table(100, true);
+
+                    // Get time information from PROFILING table (which corresponds to "SHOW PROFILE")
+                    $this->result = $this->dbhandle->query('SELECT FORMAT(SUM(DURATION), 6) AS DURATION FROM INFORMATION_SCHEMA.PROFILING GROUP BY QUERY_ID ORDER BY QUERY_ID DESC LIMIT 1');
+                    $time_profile_durations = $this->result->fetch_row();
+                    $this->queries[$this->num_queries - 1]['time_profile'] = array_shift($time_profile_durations);
+                }
+
+                // Free "PROFILE" result:
+                $this->result->free();
+
+                // Restore:
+                $this->result = $saved_last_result;
+                $this->num_rows = $saved_num_rows;
+            }
+        }
+        return $return_val;
+    }
+
+    /**
+     * Get one variable from the DB - see docs for more detail
+     *
+     * Note: To be sure that you received NULL from the DB and not "no rows" check
+     *       for {@link $num_rows}.
+     *
+     * @param string|object|null Optional SQL query string or SQL object to execute (or NULL for previous query)
+     * @param integer Column number (starting at and defaulting to 0)
+     * @param integer Row (defaults to NULL for "next"/"do not seek")
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @return mixed NULL if not found, the value otherwise (which may also be NULL).
+     */
+    public function get_var($query_SQL = null, $x = 0, $y = null, $title = '')
+    {
+        // If there is a query then perform it if not then use cached results..
+        if ($query_SQL) {
+            $this->query($query_SQL, $title);
+        }
+
+        if ($this->num_rows
+            && ($y === null || $this->result->data_seek($y))) {
+            $row = $this->result->fetch_row();
+
+            if (isset($row[$x])) {
+                return $row[$x];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get one row from the DB.
+     *
+     * @param string|object|null Optional SQL query string or SQL object to execute (or NULL for previous query)
+     * @param string Output type (OBJECT, ARRAY_A, ARRAY_N)
+     * @param int Row to fetch (or NULL for next - useful with $query=NULL)
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @return mixed
+     */
+    public function get_row($query_SQL = null, $output = OBJECT, $y = null, $title = '')
+    {
+        // If there is a query then perform it if not then use cached results..
+        if ($query_SQL) {
+            $this->query($query_SQL, $title);
+        }
+
+        if (! $this->num_rows
+            || (isset($y) && ! $this->result->data_seek($y))) {
+            if ($output == OBJECT) {
+                return null;
+            } else {
+                return [];
+            }
+        }
+
+        // If the output is an object then return object using the row offset..
+        switch ($output) {
+            case OBJECT:
+                return $this->result->fetch_object();
+
+            case ARRAY_A:
+                return $this->result->fetch_assoc();
+
+            case ARRAY_N:
+                return $this->result->fetch_row();
+
+            default:
+                $this->print_error('DB::get_row(string query, output type, int offset) -- Output type must be one of: OBJECT, ARRAY_A, ARRAY_N', '', false);
+                break;
+        }
+    }
+
+    /**
+     * Function to get 1 column from the cached result set based on X index
+     * see docs for usage and info
+     *
+     * @param string|object|null Optional SQL query string or SQL object to execute (or NULL for previous query)
+     * @param integer Column number
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @return array
+     */
+    public function get_col($query_SQL = null, $x = 0, $title = '')
+    {
+        // If there is a query then perform it if not then use cached results..
+        if ($query_SQL) {
+            $this->query($query_SQL, $title);
+        }
+
+        // Extract the column values
+        $new_array = [];
+        for ($i = 0; $i < $this->num_rows; $i++) {
+            $new_array[$i] = $this->get_var(null, $x, $i);
+        }
+
+        return $new_array;
+    }
+
+    /**
+     * Function to get the second column from the cached result indexed by the first column
+     *
+     * @param string|object|null Optional SQL query string or SQL object to execute (or NULL for previous query)
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @return array [col_0] => col_1
+     */
+    public function get_assoc($query_SQL = null, $title = '')
+    {
+        // If there is a query then perform it if not then use cached results..
+        if ($query_SQL) {
+            $this->query($query_SQL, $title);
+        }
+
+        // Extract the column values
+        $new_array = [];
+        for ($i = 0; $i < $this->num_rows; $i++) {
+            $key = $this->get_var(null, 0, $i);
+
+            $new_array[$key] = $this->get_var(null, 1, $i);
+        }
+
+        return $new_array;
+    }
+
+    /**
+     * Return the the query as a result set - see docs for more details
+     *
+     * @param string|object|null Optional SQL query string or SQL object to execute (or NULL for previous query)
+     * @param string Output type (OBJECT, ARRAY_A, ARRAY_N)
+     * @param string Optional title of query for debugging(If empty then $query_SQL->title is used instead)
+     * @param string Column name to use as array key, NULL to use auto incremented number key
+     * @return mixed
+     */
+    public function get_results($query_SQL = null, $output = OBJECT, $title = '', $array_key = null)
+    {
+        // If there is a query then perform it if not then use cached results..
+        if ($query_SQL) {
+            $this->query($query_SQL, $title);
+        }
+
+        $r = [];
+
+        if ($this->num_rows) {
+            $this->result->data_seek(0);
+            switch ($output) {
+                case OBJECT:
+                    while ($row = $this->result->fetch_object()) {
+                        if ($array_key === null || ! isset($row->$array_key)) {	// Use auto incremented number key:
+                            $r[] = $row;
+                        } else {	// Use custom key:
+                            $r[$row->$array_key] = $row;
+                        }
+                    }
+                    break;
+
+                case ARRAY_A:
+                    while ($row = $this->result->fetch_assoc()) {
+                        if ($array_key === null || ! isset($row[$array_key])) {	// Use auto incremented number key:
+                            $r[] = $row;
+                        } else {	// Use custom key:
+                            $r[$row[$array_key]] = $row;
+                        }
+                    }
+                    break;
+
+                case ARRAY_N:
+                    while ($row = $this->result->fetch_row()) {
+                        if ($array_key === null || ! isset($row[$array_key])) {	// Use auto incremented number key:
+                            $r[] = $row;
+                        } else {	// Use custom key:
+                            $r[$row[$array_key]] = $row;
+                        }
+                    }
+                    break;
+            }
+        }
+        return $r;
+    }
+
+    /**
+     * Get a table (or "<p>No Results.</p>") for the SELECT query results.
+     *
+     * @return string HTML table or "No Results" if the
+     */
+    public function debug_get_rows_table($max_lines, $break_at_comma = false)
+    {
+        $r = '';
+
+        if (! $this->result || ! $this->num_rows) {
+            return '<p>No Results.</p>';
+        }
+
+        // Get column info:
+        $col_info = [];
+        $n = $this->result->field_count;
+        $i = 0;
+        while ($i < $n) {
+            $col_info[$i] = $this->result->fetch_field();
+            $i++;
+        }
+
+        // =====================================================
+        // Results top rows
+        $r .= '<table cellspacing="0" summary="Results for query"><tr>';
+        for ($i = 0, $count = count($col_info); $i < $count; $i++) {
+            $r .= '<th><span class="type">' . $col_info[$i]->type . ' ' . $col_info[$i]->max_length . '</span><br />'
+                        . $col_info[$i]->name . '</th>';
+        }
+        $r .= '</tr>';
+
+        // ======================================================
+        // print main results
+        $i = 0;
+        // fp> TODO: this should NOT try to print binary fields, eg: file hashes in the files table
+        // Rewind to first row (should be there already).
+        $this->result->data_seek(0);
+        while ($one_row = $this->get_row(null, ARRAY_N)) {
+            $i++;
+            if ($i >= $max_lines) {
+                break;
+            }
+            $r .= '<tr>';
+            foreach ($one_row as $item) {
+                if ($i % 2) {
+                    $r .= '<td class="odd">';
+                } else {
+                    $r .= '<td>';
+                }
+
+                if ($break_at_comma) {
+                    $item = str_replace(',', '<br />', $item);
+                    $item = str_replace(';', '<br />', $item);
+                    $r .= $item;
+                } else {
+                    $r .= strmaxlen($item, 50, null, 'htmlspecialchars');
+                }
+                $r .= '</td>';
+            }
+
+            $r .= '</tr>';
+        }
+        // Rewind to first row again.
+        $this->result->data_seek(0);
+        if ($i >= $max_lines) {
+            $r .= '<tr><td colspan="' . (count($col_info) + 1) . '">Max number of dumped rows has been reached.</td></tr>';
+        }
+
+        $r .= '</table>';
+
+        return $r;
+    }
+
+    /**
+     * Callback for preg_replace_callback in format_query()
+     */
+    private static function _format_query_callback($matches)
+    {
+        return str_replace(" ", "&nbsp;", $matches[1]);
+    }
+
+    /**
+     * Format a SQL query
+     *
+     * @param string SQL
+     * @param boolean Format with/for HTML?
+     */
+    public static function format_query($sql, $html = true, $maxlen = null)
+    {
+        $sql = trim(str_replace("\t", '  ', $sql));
+        if ($maxlen) {
+            $sql = strmaxlen($sql, $maxlen, '...');
+        }
+
+        $new = '';
+        $word = '';
+        $in_comment = false;
+        $in_literal = false;
+        for ($i = 0, $n = strlen($sql); $i < $n; $i++) {
+            $c = $sql[$i];
+            if ($in_comment) {
+                if ($in_comment === '/*' && substr($sql, $i, 2) == '*/') {
+                    $in_comment = false;
+                } elseif ($c == "\n") {
+                    $in_comment = false;
+                }
+            } elseif ($in_literal) {
+                if ($c == $in_literal) {
+                    $in_literal = false;
+                }
+            } elseif ($c == '#' || ($c == '-' && substr($sql, $i, 3) == '-- ')) {
+                $in_comment = true;
+            } elseif (ctype_space($c)) {
+                $uword = strtoupper($word);
+                if (in_array($uword, ['SELECT', 'FROM', 'WHERE', 'GROUP', 'ORDER', 'LIMIT', 'VALUES', 'AND', 'OR', 'LEFT', 'RIGHT', 'INNER'])) {
+                    $new = rtrim($new) . "\n" . str_pad($word, 6, ' ', STR_PAD_LEFT) . ' ';
+                    # Remove any trailing whitespace after keywords
+                    while (ctype_space($sql[$i + 1])) {
+                        ++$i;
+                    }
+                } else {
+                    $new .= $word . $c;
+                }
+                $word = '';
+                continue;
+            }
+            $word .= $c;
+        }
+        $sql = trim($new . $word);
+
+        if ($html) { // poor man's indent
+            $sql = htmlspecialchars($sql);
+            $sql = preg_replace_callback("~^(\s+)~m", ['DB', '_format_query_callback'], $sql);
+            $sql = nl2br($sql);
+        }
+        return $sql;
+    }
+
+    /**
+     * Displays all queries that have been executed
+     *
+     * @param boolean Use HTML.
+     */
+    public function dump_queries($html = true)
+    {
+        if ($html) {
+            echo '<strong>DB queries:</strong> ' . $this->num_queries . "<br />\n";
+        } else {
+            echo 'DB queries: ' . $this->num_queries . "\n\n";
+        }
+
+        if (! $this->log_queries) { // nothing more to do here..
+            return;
+        }
+
+        global $Timer;
+        if (is_object($Timer)) {
+            $time_queries = $Timer->get_duration('SQL QUERIES', 4);
+        } else {
+            $time_queries = 0;
+        }
+
+        $count_queries = 0;
+        $count_rows = 0;
+        $time_queries_profiled = 0;
+
+        if ($html) { // Javascript function to toggle DIVs (EXPLAIN, results, backtraces).
+            $relative_to = (is_admin_page() ? 'rsc_url' : 'blog');
+            require_js('debug.js', $relative_to, false, true);
+        }
+
+        foreach ($this->queries as $i => $query) {
+            $count_queries++;
+
+            if ($html) {
+                echo '<h4>Query #' . $count_queries . ': ' . $query['title'] . "</h4>\n";
+
+                $div_id = 'db_query_sql_' . $i . '_' . $this->_get_md5_query();
+                if (strlen($query['sql']) > 512) {
+                    $sql_short = DB::format_query($query['sql'], true, 512);
+                    $sql = DB::format_query($query['sql'], true);
+
+                    echo '<code id="' . $div_id . '" style="display:none">' . $sql_short . '</code>';
+                    echo '<code id="' . $div_id . '_full">' . $sql . '</code>';
+                    echo '<script>debug_onclick_toggle_div("' . $div_id . ',' . $div_id . '_full", "Show less", "Show more", false);</script>';
+                } else {
+                    echo '<code>' . DB::format_query($query['sql']) . '</code>';
+                }
+                echo "\n";
+            } else {
+                echo '= Query #' . $count_queries . ': ' . $query['title'] . " =\n";
+                echo DB::format_query($query['sql'], false) . "\n\n";
+            }
+
+            // Color-Format duration: long => red, fast => green, normal => black
+            if ($query['time'] > $this->query_duration_slow) {
+                $style_time_text = 'color:red;font-weight:bold;';
+                $style_time_graph = 'background-color:red;';
+                $plain_time_text = ' [slow]';
+            } elseif ($query['time'] < $this->query_duration_fast) {
+                $style_time_text = 'color:green;';
+                $style_time_graph = 'background-color:green;';
+                $plain_time_text = ' [fast]';
+            } else {
+                $style_time_text = '';
+                $style_time_graph = 'background-color:black;';
+                $plain_time_text = '';
+            }
+
+            // Number of rows with time (percentage and graph, if total time available)
+            if ($html) {
+                echo '<div class="query_info">';
+                echo 'Rows: ' . $query['rows'];
+
+                echo ' &ndash; Time: ';
+            } else {
+                echo 'Rows: ' . $query['rows'] . ' - Time: ';
+            }
+
+            if ($html && $style_time_text) {
+                echo '<span style="' . $style_time_text . '">';
+            }
+            echo number_format($query['time'], 4) . 's';
+
+            if ($time_queries > 0) { // We have a total time we can use to calculate percentage:
+                echo ' (' . number_format(100 / $time_queries * $query['time'], 2) . '%)';
+            }
+
+            if (isset($query['time_profile'])) {
+                echo ' (real: ' . number_format($query['time_profile'], 4) . 's)';
+                $time_queries_profiled += $query['time_profile'];
+            }
+
+            if ($style_time_text || $plain_time_text) {
+                echo $html ? '</span>' : $plain_time_text;
+            }
+
+            if ($time_queries > 0) { // We have a total time we can use to display a graph/bar:
+                $perc = round(100 / $time_queries * $query['time']);
+
+                if ($html) {
+                    echo '<div style="margin:0; padding:0; height:12px; width:' . $perc . '%;' . $style_time_graph . '"></div>';
+                } else {	// display an ASCII bar
+                    printf("\n" . '[%-50s]', str_repeat('=', $perc / 2));
+                }
+            }
+            echo $html ? '</div>' : "\n\n";
+
+            // EXPLAIN JOINS ??
+            if ($this->debug_explain_joins && preg_match('#^ [\s(]* SELECT \s #ix', $query['sql'])) { // Query was a select, let's try to explain joins...
+                $this->result = $this->dbhandle->query('EXPLAIN ' . $query['sql']);
+                if ($this->has_result()) {
+                    $this->num_rows = $this->result->num_rows;
+
+                    if ($html) {
+                        $div_id = 'db_query_explain_' . $i . '_' . $this->_get_md5_query();
+                        echo '<div id="' . $div_id . '">';
+                        echo $this->debug_get_rows_table(100, true);
+                        echo '</div>';
+                        echo '<script>debug_onclick_toggle_div("' . $div_id . '", "Show EXPLAIN", "Hide EXPLAIN");</script>';
+                    } else { // TODO: dh> contains html.
+                        echo $this->debug_get_rows_table(100, true);
+                    }
+                }
+                $this->flush();
+            }
+
+            // Profile:
+            if (isset($query['profile'])) {
+                if ($html) {
+                    $div_id = 'db_query_profile_' . $i . '_' . $this->_get_md5_query();
+                    echo '<div id="' . $div_id . '">';
+                    echo $query['profile'];
+                    echo '</div>';
+                    echo '<script>debug_onclick_toggle_div("' . $div_id . '", "Show PROFILE", "Hide PROFILE");</script>';
+                } else { // TODO: dh> contains html.
+                    echo $this->debug_get_rows_table(100, true);
+                }
+            }
+
+            // Results:
+            if ($query['results'] != 'unknown') {
+                if ($html) {
+                    $div_id = 'db_query_results_' . $i . '_' . $this->_get_md5_query();
+                    echo '<div id="' . $div_id . '">';
+                    echo $query['results'];
+                    echo '</div>';
+                    echo '<script>debug_onclick_toggle_div("' . $div_id . '", "Show results", "Hide results");</script>';
+                } else { // TODO: dh> contains html.
+                    echo $query['results'];
+                }
+            }
+
+            // Function trace:
+            if (isset($query['function_trace'])) {
+                if ($html) {
+                    $div_id = 'db_query_backtrace_' . $i . '_' . $this->_get_md5_query();
+                    echo '<div id="' . $div_id . '">';
+                    echo $query['function_trace'];
+                    echo '</div>';
+                    echo '<script>debug_onclick_toggle_div("' . $div_id . '", "Show function trace", "Hide function trace");</script>';
+                } else { // TODO: dh> contains html.
+                    echo $query['function_trace'];
+                }
+            }
+
+            echo $html ? '<hr />' : "=============================================\n";
+
+            $count_rows += $query['rows'];
+        }
+
+        $time_queries_profiled = number_format($time_queries_profiled, 4);
+        $time_diff_percentage = $time_queries_profiled != 0 ? round($time_queries / $time_queries_profiled * 100) : false;
+        if ($html) {
+            echo "\nTotal rows: $count_rows<br />\n";
+            echo "\nMeasured time: {$time_queries}s<br />\n";
+            echo "\nProfiled time: {$time_queries_profiled}s<br />\n";
+            if ($time_diff_percentage !== false) {
+                echo "\nTime difference: {$time_diff_percentage}%<br />\n";
+            }
+        } else {
+            echo 'Total rows: ' . $count_rows . "\n";
+            echo "Measured time: {$time_queries}s\n";
+            echo "Profiled time: {$time_queries_profiled}s\n";
+            if ($time_diff_percentage !== false) {
+                echo "Time difference: {$time_diff_percentage}%\n";
+            }
+        }
+    }
+
+    /**
+     * Generate MD5 of query
+     */
+    private static function _get_md5_query()
+    {
+        static $r;
+
+        if (isset($r)) {
+            return $r;
+        }
+
+        global $query;
+        $r = md5(serialize($query)) . "-" . rand();
+        return $r;
+    }
+
+    /**
+     * BEGIN A TRANSACTION
+     *
+     * Note:  By default, MySQL runs with autocommit mode enabled.
+     * This means that as soon as you execute a statement that updates (modifies)
+     * a table, MySQL stores the update on disk.
+     * Once you execute a BEGIN, the updates are "pending" until you execute a
+     * {@link DB::commit() COMMIT} or a {@link DB:rollback() ROLLBACK}
+     *
+     * Note 2: standard syntax would be START TRANSACTION but it's not supported by older
+     * MySQL versions whereas BEGIN is...
+     *
+     * Note 3: The default isolation level is REPEATABLE READ (Default for InnoDB)
+     *
+     * - REPEATABLE READ: (most frequent use) several SELECTs in the same transaction will always return identical values
+     * - READ COMMITTED: no good use?
+     * - READ UNCOMMITED: dirty reads - no good use?
+     * - SERIALIZABLE: (less frequent use) all SELECTs are automatically changed to SELECT .. LOCK IN SHARE MODE
+     * IMPORTANT: SERIALIZABLE does NOT use the max isolation level which would be SELECT ... LOCK FOR UPDATE which you cna only do by manually changing the SELECTs
+     * ex: SELECT counter_field FROM child_codes FOR UPDATE;
+     *     UPDATE child_codes SET counter_field = counter_field + 1;
+     */
+    public function begin($transaction_isolation_level = 'REPEATABLE READ')
+    {
+        if (! $this->use_transactions) { // don't use transactions at all
+            return;
+        }
+
+        $transaction_isolation_level = strtoupper($transaction_isolation_level);
+        if (! in_array($transaction_isolation_level, ['REPEATABLE READ', 'READ COMMITTED', 'READ UNCOMMITTED', 'SERIALIZABLE'])) {
+            debug_die('Invalid transaction isolation level!');
+        }
+
+        if (($this->transaction_isolation_level != $transaction_isolation_level) && ((! $this->transaction_nesting_level) || ($transaction_isolation_level == 'SERIALIZABLE'))) { // The isolation level was changed and it is the beggining of a new transaction or this is a nested transaction but it needs 'SERIALIZABLE' isolation level
+            // Note: We change the transaction isolation level for nested transactions only if the requested isolation level is 'SERIALIZABLE'
+            // Set session transaction isolation level to the new value
+            $this->transaction_isolation_level = $transaction_isolation_level;
+            $this->query('SET SESSION TRANSACTION ISOLATION LEVEL ' . $transaction_isolation_level, 'Set transaction isolation level');
+        }
+
+        if (! $this->transaction_nesting_level) { // Start a new transaction
+            $this->query('BEGIN', 'BEGIN transaction');
+        }
+
+        $this->transaction_nesting_level++;
+    }
+
+    /**
+     * Commit current transaction
+     *
+     * @return boolean true on success, false otherwise - when a nested transaction called rollback
+     */
+    public function commit()
+    {
+        if (! $this->use_transactions) { // don't use transactions at all
+            return true;
+        }
+
+        $result = true;
+        if ($this->transaction_nesting_level == 1) { // Only COMMIT if there are no remaining nested transactions:
+            if ($this->rollback_nested_transaction) {
+                $this->query('ROLLBACK', 'ROLLBACK transaction because there was a failure somewhere in the nesting of transactions');
+                $result = false;
+            } else {
+                $this->query('COMMIT', 'COMMIT transaction');
+            }
+            $this->rollback_nested_transaction = false;
+        }
+
+        if ($this->transaction_nesting_level) { // decrease transaction nesting level
+            $this->transaction_nesting_level--;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Rollback current transaction
+     */
+    public function rollback()
+    {
+        if (! $this->use_transactions) { // don't use transactions at all
+            return;
+        }
+
+        if ($this->transaction_nesting_level == 1) { // Only ROLLBACK if there are no remaining nested transactions:
+            $this->query('ROLLBACK', 'ROLLBACK transaction');
+            $this->rollback_nested_transaction = false;
+        } else { // Remember we'll have to roll back at the end!
+            $this->rollback_nested_transaction = true;
+        }
+        if ($this->transaction_nesting_level) {
+            $this->transaction_nesting_level--;
+        }
+    }
+
+    /**
+     * Check if some nesed transaction failed
+     */
+    public function has_failed_transaction()
+    {
+        return $this->rollback_nested_transaction;
+    }
+
+    /**
+     * Convert a PHP charset to its MySQL equivalent.
+     *
+     * @param string PHP charset
+     * @return string MYSQL charset or unchanged
+     */
+    public static function php_to_mysql_charmap($php_charset)
+    {
+        $php_charset = strtolower($php_charset);
+
+        /**
+         * This is taken from phpMyAdmin (libraries/select_lang.lib.php).
+         */
+        static $mysql_charset_map = [
+            'big5' => 'big5',
+            'cp-866' => 'cp866',
+            'euc-jp' => 'ujis',
+            'euc-kr' => 'euckr',
+            'gb2312' => 'gb2312',
+            'gbk' => 'gbk',
+            'iso-8859-1' => 'latin1',
+            'iso-8859-2' => 'latin2',
+            'iso-8859-7' => 'greek',
+            'iso-8859-8' => 'hebrew',
+            'iso-8859-8-i' => 'hebrew',
+            'iso-8859-9' => 'latin5',
+            'iso-8859-13' => 'latin7',
+            'iso-8859-15' => 'latin1',
+            'koi8-r' => 'koi8r',
+            'shift_jis' => 'sjis',
+            'tis-620' => 'tis620',
+            'utf-8' => 'utf8',
+            'windows-1250' => 'cp1250',
+            'windows-1251' => 'cp1251',
+            'windows-1252' => 'latin1',
+            'windows-1256' => 'cp1256',
+            'windows-1257' => 'cp1257',
+        ];
+
+        if (isset($mysql_charset_map[$php_charset])) {
+            return $mysql_charset_map[$php_charset];
+        }
+
+        // for lack of a better answer:
+        return $php_charset;
+    }
+
+    /**
+     * Set the charset of the connection.
+     *
+     * @staticvar array "regular charset => mysql charset map"
+     * @param string Charset
+     * @param boolean Use the "regular charset => mysql charset map"?
+     * @return boolean true on success, false on failure
+     */
+    public function set_connection_charset($charset)
+    {
+        global $Debuglog;
+
+        // pre_dump( 'set_connection_charset', $charset );
+
+        $charset = strtolower($charset);
+        $charset = self::php_to_mysql_charmap($charset);
+
+        $r = true;
+        if ($charset != $this->connection_charset) {
+            $save_show_errors = $this->show_errors;
+            $save_halt_on_error = $this->halt_on_error;
+            $this->show_errors = false;
+            $this->halt_on_error = false;
+            $last_error = $this->last_error;
+            $error = $this->error;
+            if ($this->dbhandle->errno != 0 || $this->dbhandle->set_charset($charset) === false) {
+                $Debuglog->add('Could not set DB connection charset: ' . $charset . '"! (MySQL error: ' . strip_tags($this->last_error) . ')', 'locale');
+
+                $r = false;
+            } else {
+                $Debuglog->add('Set DB connection charset: ' . $charset, 'locale');
+
+                $this->connection_charset = $charset;
+            }
+            $this->show_errors = $save_show_errors;
+            $this->halt_on_error = $save_halt_on_error;
+            // Blatantly ignore any error generated by mysqli::set_charset...
+            $this->last_error = $last_error;
+            $this->error = $error;
+        }
+
+        return $r;
+    }
+
+    /**
+     * Get the charset of the connection.
+     *
+     * @return string
+     */
+    public function get_connection_charset()
+    {
+        return $this->connection_charset;
+    }
+
+    /**
+     * Check if the charset is currently used as connection charset
+     *
+     * @param string Expected connection charset
+     * @return boolean
+     */
+    public function is_expected_connection_charset($expected_charset)
+    {
+        // Convert to proper mysql charset:
+        $expected_charset = self::php_to_mysql_charmap($expected_charset);
+
+        if ($this->get_connection_charset() == $expected_charset) {	// Current connection charset exactly matches to the expected charset:
+            return true;
+        }
+
+        // Also compare if current charset is extended version of the expected charset,
+        // e.g. if 'utf8mb4' is using currently then consider 'utf8' correct as well:
+        return (stripos($this->get_connection_charset(), $expected_charset) === 0);
+    }
 }
-
-?>

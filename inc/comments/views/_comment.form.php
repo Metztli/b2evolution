@@ -11,7 +11,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var Blog
@@ -21,54 +23,68 @@ global $Collection, $Blog;
  * @var Comment
  */
 global $edited_Comment;
-/**
- *
- */
+
 global $Plugins;
 
 global $mode, $month, $tab, $redirect_to, $comment_content;
 
-$Form = new Form( NULL, 'comment_checkchanges', 'post' );
+$Form = new Form(null, 'comment_checkchanges', 'post');
 $Form->switch_template_parts(
-	array(
-		'labelclass' => 'control-label col-lg-3 col-md-3 col-sm-3',
-		'inputstart' => '<div class="controls col-lg-8 col-md-9 col-sm-9">',
-		'infostart' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div class="form-control-static">',
-		'inputstart_checkbox' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div class="checkbox"><label>' )
+    [
+        'labelclass' => 'control-label col-lg-3 col-md-3 col-sm-3',
+        'inputstart' => '<div class="controls col-lg-8 col-md-9 col-sm-9">',
+        'infostart' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div class="form-control-static">',
+        'inputstart_checkbox' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div class="checkbox"><label>',
+    ]
 );
 
-$link_attribs = array( 'style' => 'margin-left:1ex', 'class' => 'btn btn-sm btn-default' ); // Avoid misclicks by all means!
-if( check_user_perm( 'blog_post!draft', 'edit', false, $Blog->ID ) )
-{
-	$Form->global_icon( TB_( 'Post as a quote' ), 'elevate', '?ctrl=comments&amp;action=elevate&amp;type=quote&amp;comment_ID='.$edited_Comment->ID.'&amp;'.url_crumb('comment'),
-				TB_( 'Post as a quote' ), 4, 3, $link_attribs, 'elevate' );
-	$Form->global_icon( TB_( 'Post as original user' ), 'elevate', '?ctrl=comments&amp;action=elevate&amp;type=original&amp;comment_ID='.$edited_Comment->ID.'&amp;'.url_crumb('comment'),
-				TB_( 'Post as original user' ), 4, 3, $link_attribs, 'elevate' );
+$link_attribs = [
+    'style' => 'margin-left:1ex',
+    'class' => 'btn btn-sm btn-default',
+]; // Avoid misclicks by all means!
+if (check_user_perm('blog_post!draft', 'edit', false, $Blog->ID)) {
+    $Form->global_icon(
+        TB_('Post as a quote'),
+        'elevate',
+        '?ctrl=comments&amp;action=elevate&amp;type=quote&amp;comment_ID=' . $edited_Comment->ID . '&amp;' . url_crumb('comment'),
+        TB_('Post as a quote'),
+        4,
+        3,
+        $link_attribs,
+        'elevate'
+    );
+    $Form->global_icon(
+        TB_('Post as original user'),
+        'elevate',
+        '?ctrl=comments&amp;action=elevate&amp;type=original&amp;comment_ID=' . $edited_Comment->ID . '&amp;' . url_crumb('comment'),
+        TB_('Post as original user'),
+        4,
+        3,
+        $link_attribs,
+        'elevate'
+    );
 }
 
-$delete_url = '?ctrl=comments&amp;action=delete&amp;comment_ID='.$edited_Comment->ID.'&amp;'.url_crumb('comment');
-if( $edited_Comment->status == 'trash' )
-{
-	$delete_title = TB_('Delete this comment');
-	$delete_text = TB_('delete');
-	$link_attribs['onclick'] = 'return confirm(\''.TS_('You are about to delete this comment!\\nThis cannot be undone!').'\')';
+$delete_url = '?ctrl=comments&amp;action=delete&amp;comment_ID=' . $edited_Comment->ID . '&amp;' . url_crumb('comment');
+if ($edited_Comment->status == 'trash') {
+    $delete_title = TB_('Delete this comment');
+    $delete_text = TB_('delete');
+    $link_attribs['onclick'] = 'return confirm(\'' . TS_('You are about to delete this comment!\\nThis cannot be undone!') . '\')';
+} else {
+    $delete_title = TB_('Recycle this comment');
+    $delete_text = TB_('recycle');
 }
-else
-{
-	$delete_title = TB_('Recycle this comment');
-	$delete_text = TB_('recycle');
-}
-$Form->global_icon( $delete_title, 'recycle', $delete_url, $delete_text, 4, 3, $link_attribs );
+$Form->global_icon($delete_title, 'recycle', $delete_url, $delete_text, 4, 3, $link_attribs);
 
-$Form->global_icon( TB_('Cancel editing').'!', 'close', str_replace( '&', '&amp;', $redirect_to), TB_('cancel'), 4, 1, $link_attribs );
+$Form->global_icon(TB_('Cancel editing') . '!', 'close', str_replace('&', '&amp;', $redirect_to), TB_('cancel'), 4, 1, $link_attribs);
 
-$Form->begin_form( 'eform' );
+$Form->begin_form('eform');
 
-$Form->add_crumb( 'comment' );
-$Form->hidden( 'ctrl', 'comments' );
-$Form->hidden( 'redirect_to', $redirect_to );
-$Form->hidden( 'comment_ID', $edited_Comment->ID );
-$Form->hidden( 'from', 'backoffice' );
+$Form->add_crumb('comment');
+$Form->hidden('ctrl', 'comments');
+$Form->hidden('redirect_to', $redirect_to);
+$Form->hidden('comment_ID', $edited_Comment->ID);
+$Form->hidden('from', 'backoffice');
 ?>
 
 <div class="row">
@@ -77,93 +93,105 @@ $Form->hidden( 'from', 'backoffice' );
 
 
 	<?php
-	$Form->begin_fieldset( sprintf( TB_('Comment #%s'), $edited_Comment->ID ).get_manual_link( 'editing-comments' ) );
+    $Form->begin_fieldset(sprintf(TB_('Comment #%s'), $edited_Comment->ID) . get_manual_link('editing-comments'));
 
-	echo '<div class="row">';
-		echo '<div class="col-sm-12">';
+echo '<div class="row">';
+echo '<div class="col-sm-12">';
 
-		$comment_Item = & $edited_Comment->get_Item();
-		$form_infostart = $Form->infostart;
-		$Form->switch_template_parts( array(
-			'infostart' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div>',
-		));
-		$Form->info( TB_('In response to'), $comment_Item->get_title( array(
-				'link_type'  => 'admin_view',
-				'link_class' => 'comment_item_title',
-			) ),
-			'<button type="button" class="btn btn-default btn-sm" data-func="evo_comment_change_item_load_window|'.$comment_Item->ID.'">'.TB_('Link to Another Post').'...</button>' );
-		echo '</div>';
-		echo '<div class="col-sm-12">';
+$comment_Item = &$edited_Comment->get_Item();
+$form_infostart = $Form->infostart;
+$Form->switch_template_parts([
+    'infostart' => '<div class="controls col-lg-8 col-md-8 col-sm-9"><div>',
+]);
+$Form->info(
+    TB_('In response to'),
+    $comment_Item->get_title([
+        'link_type' => 'admin_view',
+        'link_class' => 'comment_item_title',
+    ]),
+    '<button type="button" class="btn btn-default btn-sm" data-func="evo_comment_change_item_load_window|' . $comment_Item->ID . '">' . TB_('Link to Another Post') . '...</button>'
+);
+echo '</div>';
+echo '<div class="col-sm-12">';
 
-		$Blog_owner_User = & $Blog->get_owner_User();
-		if( ( $Blog_owner_User->ID == $current_User->ID ) || check_user_perm( 'blog_admin', 'edit', false, $Blog->ID ) )
-		{	// User has permission to change comment's post, because user is the owner of the current blog, or user has admin full access permission for current blog
-			$Form->hidden( 'moveto_post', $comment_Item->ID );
-		}
+$Blog_owner_User = &$Blog->get_owner_User();
+if (($Blog_owner_User->ID == $current_User->ID) || check_user_perm('blog_admin', 'edit', false, $Blog->ID)) {	// User has permission to change comment's post, because user is the owner of the current blog, or user has admin full access permission for current blog
+    $Form->hidden('moveto_post', $comment_Item->ID);
+}
 
-		echo '</div>';
-	echo '</div>';
+echo '</div>';
+echo '</div>';
 
-	echo '<div class="row">';
-		echo '<div class="col-sm-12">';
+echo '<div class="row">';
+echo '<div class="col-sm-12">';
 
-		if( $Blog->get_setting( 'threaded_comments' ) )
-		{	// Display a reply comment ID only when this feature is enabled in blog settings:
-			$Form->text_input( 'in_reply_to_cmt_ID', $edited_Comment->in_reply_to_cmt_ID, 10, TB_('In reply to comment ID'), TB_('(leave blank for normal comments)') );
-		}
+if ($Blog->get_setting('threaded_comments')) {	// Display a reply comment ID only when this feature is enabled in blog settings:
+    $Form->text_input('in_reply_to_cmt_ID', $edited_Comment->in_reply_to_cmt_ID, 10, TB_('In reply to comment ID'), TB_('(leave blank for normal comments)'));
+}
 
-		if( $edited_Comment->get_author_User() )
-		{	// This comment has been created by member
-			if( check_user_perm( 'users', 'edit' ) )
-			{	// Allow to change an author if current user has a permission:
-				$Form->username( 'comment_author_login', $edited_Comment->get_author_User(), TB_('Author'), '' );
-			}
-			else
-			{	// Current user has no permission to edit a comment author
-				$Form->info( TB_('Author'), $edited_Comment->get_author( array(
-						'before'    => '',
-						'link_to'   => '',
-						'link_text' => 'name',
-					) ) );
-			}
-		}
-		else
-		{	// This is not a member comment
-			$Form->text_input( 'newcomment_author', $edited_Comment->author, 20, TB_('Author'), '', array( 'maxlength' => 100, 'style' => 'width:100%' ) );
-			$Form->email_input( 'newcomment_author_email', $edited_Comment->author_email, 20, TB_('Email'), array( 'maxlength' => 255, 'style' => 'width:100%' ) );
-			$Form->checkbox( 'comment_allow_msgform', $edited_Comment->allow_msgform, TB_('Allow contact'), TB_('If checked, the comment author can be contacted through a form that will send him an email.') );
-			$Form->checkbox( 'comment_anon_notify', $edited_Comment->anon_notify, TB_('Notify me of replies') );
-			$Form->text_input( 'newcomment_author_url', $edited_Comment->author_url, 20, TB_('Website URL'),
-				'<label><input type="checkbox" name="comment_author_url_nofollow" value="1"'.( $edited_Comment->author_url_nofollow ? ' checked="checked"' : '' ).' /> Nofollow</label> &nbsp; '.
-				'<label><input type="checkbox" name="comment_author_url_ugc" value="1"'.( $edited_Comment->author_url_ugc ? ' checked="checked"' : '' ).' /> UGC</label> &nbsp; '.
-				'<label><input type="checkbox" name="comment_author_url_sponsored" value="1"'.( $edited_Comment->author_url_sponsored ? ' checked="checked"' : '' ).' /> Sponsored</label>',
-				array( 'maxlength' => 255, 'style' => 'width:100%' ) );
-		}
+if ($edited_Comment->get_author_User()) {	// This comment has been created by member
+    if (check_user_perm('users', 'edit')) {	// Allow to change an author if current user has a permission:
+        $Form->username('comment_author_login', $edited_Comment->get_author_User(), TB_('Author'), '');
+    } else {	// Current user has no permission to edit a comment author
+        $Form->info(TB_('Author'), $edited_Comment->get_author([
+            'before' => '',
+            'link_to' => '',
+            'link_text' => 'name',
+        ]));
+    }
+} else {	// This is not a member comment
+    $Form->text_input('newcomment_author', $edited_Comment->author, 20, TB_('Author'), '', [
+        'maxlength' => 100,
+        'style' => 'width:100%',
+    ]);
+    $Form->email_input('newcomment_author_email', $edited_Comment->author_email, 20, TB_('Email'), [
+        'maxlength' => 255,
+        'style' => 'width:100%',
+    ]);
+    $Form->checkbox('comment_allow_msgform', $edited_Comment->allow_msgform, TB_('Allow contact'), TB_('If checked, the comment author can be contacted through a form that will send him an email.'));
+    $Form->checkbox('comment_anon_notify', $edited_Comment->anon_notify, TB_('Notify me of replies'));
+    $Form->text_input(
+        'newcomment_author_url',
+        $edited_Comment->author_url,
+        20,
+        TB_('Website URL'),
+        '<label><input type="checkbox" name="comment_author_url_nofollow" value="1"' . ($edited_Comment->author_url_nofollow ? ' checked="checked"' : '') . ' /> Nofollow</label> &nbsp; ' .
+        '<label><input type="checkbox" name="comment_author_url_ugc" value="1"' . ($edited_Comment->author_url_ugc ? ' checked="checked"' : '') . ' /> UGC</label> &nbsp; ' .
+        '<label><input type="checkbox" name="comment_author_url_sponsored" value="1"' . ($edited_Comment->author_url_sponsored ? ' checked="checked"' : '') . ' /> Sponsored</label>',
+        [
+            'maxlength' => 255,
+            'style' => 'width:100%',
+        ]
+    );
+}
 
-		echo '</div>';
-	echo '</div>';
-	?>
+echo '</div>';
+echo '</div>';
+?>
 
 	<div class="edit_toolbars">
 	<?php // --------------------------- TOOLBARS ------------------------------------
-		// CALL PLUGINS NOW:
-		$Plugins->trigger_event( 'DisplayCommentToolbar', array( 'Comment' => & $edited_Comment, 'Item' => & $comment_Item ) );
-	?>
+    // CALL PLUGINS NOW:
+    $Plugins->trigger_event('DisplayCommentToolbar', [
+        'Comment' => &$edited_Comment,
+        'Item' => &$comment_Item,
+    ]);
+?>
 	</div>
 
 	<?php // ---------------------------- TEXTAREA -------------------------------------
-	$content = $comment_content;
-	$Form->fieldstart = '<div class="edit_area">';
-	$Form->fieldend = "</div>\n";
-	$Form->textarea_input( 'content', $content, 16, '', array(
-			'cols' => 40 ,
-			'id' => 'commentform_post_content',
-			'class' => ( check_autocomplete_usernames( $edited_Comment ) ? 'autocomplete_usernames ' : '' ).'link_attachment_dropzone',
-			'maxlength' => ( $edited_Comment->is_meta() ? '' : $Blog->get_setting( 'comment_maxlen' ) ),
-		) );
-	$Form->fieldstart = '<div class="tile">';
-	$Form->fieldend = '</div>';
-	?>
+$content = $comment_content;
+$Form->fieldstart = '<div class="edit_area">';
+$Form->fieldend = "</div>\n";
+$Form->textarea_input('content', $content, 16, '', [
+    'cols' => 40,
+    'id' => 'commentform_post_content',
+    'class' => (check_autocomplete_usernames($edited_Comment) ? 'autocomplete_usernames ' : '') . 'link_attachment_dropzone',
+    'maxlength' => ($edited_Comment->is_meta() ? '' : $Blog->get_setting('comment_maxlen')),
+]);
+$Form->fieldstart = '<div class="tile">';
+$Form->fieldend = '</div>';
+?>
 	<script>
 		<!--
 		// This is for toolbar plugins
@@ -174,137 +202,156 @@ $Form->hidden( 'from', 'backoffice' );
 	<div class="edit_actions">
 
 	<?php
-	// ---------- DELETE ----------
-	if( $edited_Comment->status == 'trash' && ( $action == 'edit' || $action == 'update_edit' ) )
-	{ // Editing comment
-		// Display delete button if user has permission to:
-		$edited_Comment->delete_link( ' ', ' ', '#', '#', 'DeleteButton btn btn-danger', true );
-	}
+    // ---------- DELETE ----------
+if ($edited_Comment->status == 'trash' && ($action == 'edit' || $action == 'update_edit')) { // Editing comment
+    // Display delete button if user has permission to:
+    $edited_Comment->delete_link(' ', ' ', '#', '#', 'DeleteButton btn btn-danger', true);
+}
 
-	// CALL PLUGINS NOW:
-	ob_start();
-	$Plugins->trigger_event( 'AdminDisplayEditorButton', array(
-			'target_type'   => 'Comment',
-			'target_object' => $edited_Comment,
-			'content_id'    => 'commentform_post_content',
-			'edit_layout'   => NULL
-		) );
-	$quick_setting_switch = ob_get_flush();
+// CALL PLUGINS NOW:
+ob_start();
+$Plugins->trigger_event('AdminDisplayEditorButton', [
+    'target_type' => 'Comment',
+    'target_object' => $edited_Comment,
+    'content_id' => 'commentform_post_content',
+    'edit_layout' => null,
+]);
+$quick_setting_switch = ob_get_flush();
 
-	echo '<div class="pull-right">';
-	echo_comment_buttons( $Form, $edited_Comment );
-	echo '</div>';
+echo '<div class="pull-right">';
+echo_comment_buttons($Form, $edited_Comment);
+echo '</div>';
 
-	?>
+?>
 	</div>
 
 	<?php
-	$Form->end_fieldset();
+$Form->end_fieldset();
 
-	// ####################### ATTACHMENTS/LINKS #########################
-	$Form->attachments_fieldset( $edited_Comment, true );
+// ####################### ATTACHMENTS/LINKS #########################
+$Form->attachments_fieldset($edited_Comment, true);
 
-	// ####################### PLUGIN FIELDSETS #########################
-	$Plugins->trigger_event( 'AdminDisplayCommentFormFieldset', array( 'Form' => & $Form, 'Comment' => & $edited_Comment, 'edit_layout' => NULL ) );
-	?>
+// ####################### PLUGIN FIELDSETS #########################
+$Plugins->trigger_event('AdminDisplayCommentFormFieldset', [
+    'Form' => &$Form,
+    'Comment' => &$edited_Comment,
+    'edit_layout' => null,
+]);
+?>
 
 </div>
 
 <div class="right_col col-md-3">
 
 <?php
-	// ####################### RATING #########################
-	if( ! $edited_Comment->is_meta() &&
-	    ( $comment_Item->can_rate() || !empty( $edited_Comment->rating ) ) )
-	{	// Rating is editable
-		$Form->begin_fieldset( TB_('Rating'), array( 'id' => 'cmntform_rating', 'fold' => true ) );
+// ####################### RATING #########################
+if (! $edited_Comment->is_meta() &&
+    ($comment_Item->can_rate() || ! empty($edited_Comment->rating))) {	// Rating is editable
+    $Form->begin_fieldset(TB_('Rating'), [
+        'id' => 'cmntform_rating',
+        'fold' => true,
+    ]);
 
-		echo '<p>';
-		$edited_Comment->rating_input( array( 'reset' => true ) );
-		echo '</p>';
+    echo '<p>';
+    $edited_Comment->rating_input([
+        'reset' => true,
+    ]);
+    echo '</p>';
 
-		$Form->end_fieldset();
-	}
-	else
-	{
-		$Form->hidden( 'comment_rating', 0 );
-	}
+    $Form->end_fieldset();
+} else {
+    $Form->hidden('comment_rating', 0);
+}
 
-	// ####################### ADVANCED PROPERTIES #########################
-	if( check_user_perm( 'blog_edit_ts', 'edit', false, $Blog->ID ) )
-	{ // ------------------------------------ TIME STAMP -------------------------------------
-		$Form->begin_fieldset( TB_('Date & Time'), array( 'id' => 'cmntform_datetime', 'fold' => true ) );
+    // ####################### ADVANCED PROPERTIES #########################
+if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) { // ------------------------------------ TIME STAMP -------------------------------------
+    $Form->begin_fieldset(TB_('Date & Time'), [
+        'id' => 'cmntform_datetime',
+        'fold' => true,
+    ]);
 
-		$Form->switch_layout( 'fieldset' );
+    $Form->switch_layout('fieldset');
 
-		echo '<div id="commentform_edit_timestamp">';
-		$Form->date_input( 'comment_issue_date', $edited_Comment->date, TB_('Date'), array( 'add_date_format_note' => true ) );
-		$Form->time( 'comment_issue_time', $edited_Comment->date, TB_('Time') );
-		echo '</div>';
+    echo '<div id="commentform_edit_timestamp">';
+    $Form->date_input('comment_issue_date', $edited_Comment->date, TB_('Date'), [
+        'add_date_format_note' => true,
+    ]);
+    $Form->time('comment_issue_time', $edited_Comment->date, TB_('Time'));
+    echo '</div>';
 
-		$Form->switch_layout( NULL );
+    $Form->switch_layout(null);
 
-		$Form->end_fieldset();
-	}
+    $Form->end_fieldset();
+}
 
 
-	// ####################### FEEDBACK INFO #########################
-	$Form->begin_fieldset( TB_('Feedback info'), array( 'id' => 'cmntform_info', 'fold' => true ) );
+// ####################### FEEDBACK INFO #########################
+$Form->begin_fieldset(TB_('Feedback info'), [
+    'id' => 'cmntform_info',
+    'fold' => true,
+]);
 ?>
 
 	<p><strong><?php echo TB_('Type') ?>:</strong> <?php echo $edited_Comment->type; ?></p>
 	<p><strong><?php echo TB_('IP address') ?>:</strong> <?php
-		// Display IP address and allow plugins to filter it, e.g. the DNSBL plugin will add a link to check the IP:
-		echo $Plugins->get_trigger_event( 'FilterIpAddress', array('format'=>'htmlbody', 'data'=>$edited_Comment->author_IP), 'data' ); ?>
+        // Display IP address and allow plugins to filter it, e.g. the DNSBL plugin will add a link to check the IP:
+        echo $Plugins->get_trigger_event('FilterIpAddress', [
+            'format' => 'htmlbody',
+            'data' => $edited_Comment->author_IP,
+        ], 'data'); ?>
 		<?php $edited_Comment->ip_country(); ?>
 	</p>
 	<p><strong><?php echo TB_('Spam Karma') ?>:</strong> <?php $edited_Comment->spam_karma(); ?></p>
 
 	<?php
-	$Form->end_fieldset();
+    $Form->end_fieldset();
 
-	// ####################### TEXT RENDERERS #########################
-	global $Plugins;
-	$Form->begin_fieldset( TB_('Text Renderers'), array( 'id' => 'cmntform_renderers', 'fold' => true  ) );
-	$edited_Comment->renderer_checkboxes();
-	$Form->end_fieldset();
+// ####################### TEXT RENDERERS #########################
+global $Plugins;
+$Form->begin_fieldset(TB_('Text Renderers'), [
+    'id' => 'cmntform_renderers',
+    'fold' => true,
+]);
+$edited_Comment->renderer_checkboxes();
+$Form->end_fieldset();
 
 
-	// ################### NOTIFICATIONS ###################
+// ################### NOTIFICATIONS ###################
 
-	$Form->begin_fieldset( TB_('Notifications'), array( 'id' => 'cmntform_notifications', 'fold' => true ) );
+$Form->begin_fieldset(TB_('Notifications'), [
+    'id' => 'cmntform_notifications',
+    'fold' => true,
+]);
 
-		$Form->info( TB_('Moderators'), $edited_Comment->check_notifications_flags( 'moderators_notified' ) ? TB_('Notified at least once') : TB_('Not notified yet') );
+$Form->info(TB_('Moderators'), $edited_Comment->check_notifications_flags('moderators_notified') ? TB_('Notified at least once') : TB_('Not notified yet'));
 
-		$notify_types = array(
-				'members_notified'   => TB_('Members'),
-				'community_notified' => TB_('Community'),
-		);
+$notify_types = [
+    'members_notified' => TB_('Members'),
+    'community_notified' => TB_('Community'),
+];
 
-		foreach( $notify_types as $notify_type => $notify_title )
-		{
-			if( $edited_Comment->check_notifications_flags( $notify_type ) )
-			{	// Nofications were sent:
-				$notify_status = TB_('Notified');
-				$notify_select_options = array(
-						''      => TB_('Done'),
-						'force' => TB_('Notify again')
-					);
-			}
-			else
-			{	// Nofications are not sent yet:
-				$notify_status = TB_('To be notified');
-				$notify_select_options = array(
-						''     => TB_('Notify on next save'),
-						'skip' => TB_('Skip on next save'),
-						'mark' => TB_('Mark as Notified')
-					);
-			}
-			$Form->select_input_array( 'comment_'.$notify_type, get_param( 'comment_'.$notify_type ), $notify_select_options, $notify_title, NULL, array( 'input_prefix' => $notify_status.' &nbsp; &nbsp; ' ) );
-		}
+foreach ($notify_types as $notify_type => $notify_title) {
+    if ($edited_Comment->check_notifications_flags($notify_type)) {	// Nofications were sent:
+        $notify_status = TB_('Notified');
+        $notify_select_options = [
+            '' => TB_('Done'),
+            'force' => TB_('Notify again'),
+        ];
+    } else {	// Nofications are not sent yet:
+        $notify_status = TB_('To be notified');
+        $notify_select_options = [
+            '' => TB_('Notify on next save'),
+            'skip' => TB_('Skip on next save'),
+            'mark' => TB_('Mark as Notified'),
+        ];
+    }
+    $Form->select_input_array('comment_' . $notify_type, get_param('comment_' . $notify_type), $notify_select_options, $notify_title, null, [
+        'input_prefix' => $notify_status . ' &nbsp; &nbsp; ',
+    ]);
+}
 
-	$Form->end_fieldset();
-	?>
+$Form->end_fieldset();
+?>
 </div>
 
 <div class="clearfix"></div>
@@ -315,7 +362,7 @@ $Form->hidden( 'from', 'backoffice' );
 $Form->end_form();
 
 // JS code for status dropdown select button
-echo_status_dropdown_button_js( 'comment' );
+echo_status_dropdown_button_js('comment');
 // JS code for fieldset folding:
 echo_fieldset_folding_js();
 // JS code for inserting preview image

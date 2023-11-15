@@ -12,23 +12,28 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Check minimum permission:
-check_user_perm( 'admin', 'normal', true );
-check_user_perm( 'options', 'edit', true );
+check_user_perm('admin', 'normal', true);
+check_user_perm('options', 'edit', true);
 
 // Set options path:
-$AdminUI->set_path( 'options', 'syslog' );
+$AdminUI->set_path('options', 'syslog');
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( TB_('System'), $admin_url.'?ctrl=system',
-		TB_('Global settings are shared between all blogs; see Blog settings for more granular settings.') );
-$AdminUI->breadcrumbpath_add( TB_('System log'), $admin_url.'?ctrl=syslog' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add(
+    TB_('System'),
+    $admin_url . '?ctrl=system',
+    TB_('Global settings are shared between all blogs; see Blog settings for more granular settings.')
+);
+$AdminUI->breadcrumbpath_add(TB_('System log'), $admin_url . '?ctrl=syslog');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'system-log-tab' );
+$AdminUI->set_page_manual_link('system-log-tab');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -42,11 +47,9 @@ $AdminUI->disp_body_top();
 $AdminUI->disp_payload_begin();
 
 // Display system log list:
-$AdminUI->disp_view( 'tools/views/_syslog_list.view.php' );
+$AdminUI->disp_view('tools/views/_syslog_list.view.php');
 
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

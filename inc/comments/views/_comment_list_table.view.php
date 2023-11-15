@@ -13,7 +13,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var Blog
@@ -30,21 +32,18 @@ global $CommentList;
 $CommentList->query();
 
 // Dispay a form to mass delete the comments:
-display_comment_mass_delete( $CommentList );
+display_comment_mass_delete($CommentList);
 
 // Display title depending on selection params:
-echo $CommentList->get_filter_title( '<h2 class="page-title">', '</h2>', '<br />', NULL, 'htmlbody' );
+echo $CommentList->get_filter_title('<h2 class="page-title">', '</h2>', '<br />', null, 'htmlbody');
 
-$CommentList->title = T_('Comment List').get_manual_link( 'comments-list-view' );
+$CommentList->title = T_('Comment List') . get_manual_link('comments-list-view');
 
-if( check_comment_mass_delete( $CommentList ) )
-{	// A form for mass deleting is availabl, Display link
-	$CommentList->global_icon( T_('Delete all comments!'), 'recycle', regenerate_url( 'action', 'action=mass_delete' ), T_('Mass delete...'), 3, 3 );
+if (check_comment_mass_delete($CommentList)) {	// A form for mass deleting is availabl, Display link
+    $CommentList->global_icon(T_('Delete all comments!'), 'recycle', regenerate_url('action', 'action=mass_delete'), T_('Mass delete...'), 3, 3);
 }
 
 // Initialize Results object
-comments_results( $CommentList );
+comments_results($CommentList);
 
-$CommentList->display( NULL, 'session' );
-
-?>
+$CommentList->display(null, 'session');

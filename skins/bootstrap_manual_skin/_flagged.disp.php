@@ -14,25 +14,26 @@
  * @package evoskins
  * @subpackage bootstrap_manual_skin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // -------------------- PREV/NEXT PAGE LINKS (POST LIST MODE) --------------------
-mainlist_page_links( $params['pagination'] );
+mainlist_page_links($params['pagination']);
 // ------------------------- END OF PREV/NEXT PAGE LINKS -------------------------
 ?>
 <ul class="posts_list">
 <?php
-	while( $Item = & mainlist_get_item() )
-	{	// For each blog post, do everything below up to the closing curly brace "}"
-		// ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-		skin_include( '_item_list.inc.php' );
-		// ----------------------------END ITEM BLOCK  ----------------------------
-	}
+    while ($Item = &mainlist_get_item()) {	// For each blog post, do everything below up to the closing curly brace "}"
+        // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+        skin_include('_item_list.inc.php');
+        // ----------------------------END ITEM BLOCK  ----------------------------
+    }
 ?>
 </ul>
 <?php
 // -------------------- PREV/NEXT PAGE LINKS (POST LIST MODE) --------------------
-mainlist_page_links( $params['pagination'] );
+mainlist_page_links($params['pagination']);
 // ------------------------- END OF PREV/NEXT PAGE LINKS -------------------------
 ?>

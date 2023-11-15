@@ -13,75 +13,84 @@
  * @package admin
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $admin_url, $media_subdir, $media_path, $Session;
 
-$Form = new Form( NULL, '', 'post', NULL, 'multipart/form-data' );
+$Form = new Form(null, '', 'post', null, 'multipart/form-data');
 
-$Form->begin_form( 'fform', TB_('WordPress XML Importer') );
+$Form->begin_form('fform', TB_('WordPress XML Importer'));
 
-$Form->add_crumb( 'wpxml' );
+$Form->add_crumb('wpxml');
 $Form->hidden_ctrl();
-$Form->hidden( 'action', 'confirm' );
+$Form->hidden('action', 'confirm');
 
 // Display a panel to upload files before import:
-$import_files = display_importer_upload_panel( array(
-		'allowed_extensions'  => 'xml|txt|zip',
-		'infolder_extensions' => 'xml|txt',
-		'find_attachments'    => true,
-		'display_type'        => true,
-		'help_slug'           => 'xml-importer',
-		'refresh_url'         => $admin_url.'?ctrl=wpimportxml',
-	) );
+$import_files = display_importer_upload_panel([
+    'allowed_extensions' => 'xml|txt|zip',
+    'infolder_extensions' => 'xml|txt',
+    'find_attachments' => true,
+    'display_type' => true,
+    'help_slug' => 'xml-importer',
+    'refresh_url' => $admin_url . '?ctrl=wpimportxml',
+]);
 
-if( ! empty( $import_files ) )
-{
-	$import_type = param( 'import_type', 'string', 'append' );
+if (! empty($import_files)) {
+    $import_type = param('import_type', 'string', 'append');
 
-	$Form->begin_fieldset( TB_('Destination collection') );
+    $Form->begin_fieldset(TB_('Destination collection'));
 
-	$BlogCache = & get_BlogCache();
-	$BlogCache->load_all( 'shortname,name', 'ASC' );
-	$BlogCache->none_option_text = TB_('Please select...');
+    $BlogCache = &get_BlogCache();
+    $BlogCache->load_all('shortname,name', 'ASC');
+    $BlogCache->none_option_text = TB_('Please select...');
 
-	$Form->select_input_object( 'wp_blog_ID', $Session->get( 'last_import_coll_ID' ), $BlogCache, TB_('Destination collection'), array(
-			'note' => TB_('This blog will be used for import.').' <a href="'.$admin_url.'?ctrl=collections&action=new">'.TB_('Create new blog').' &raquo;</a>',
-			'allow_none' => true,
-			'required' => true,
-			'loop_object_method' => 'get_extended_name' ) );
+    $Form->select_input_object('wp_blog_ID', $Session->get('last_import_coll_ID'), $BlogCache, TB_('Destination collection'), [
+        'note' => TB_('This blog will be used for import.') . ' <a href="' . $admin_url . '?ctrl=collections&action=new">' . TB_('Create new blog') . ' &raquo;</a>',
+        'allow_none' => true,
+        'required' => true,
+        'loop_object_method' => 'get_extended_name',
+    ]);
 
-	$Form->radio_input( 'import_type', $import_type, array(
-				array(
-					'value' => 'append',
-					'label' => TB_('Append to existing contents'),
-					'id'    => 'import_type_append' ),
-			), TB_('Import mode'), array( 'lines' => true ) );
+    $Form->radio_input('import_type', $import_type, [
+        [
+            'value' => 'append',
+            'label' => TB_('Append to existing contents'),
+            'id' => 'import_type_append',
+        ],
+    ], TB_('Import mode'), [
+        'lines' => true,
+    ]);
 
-	$Form->radio_input( 'import_type', $import_type, array(
-				array(
-					'value' => 'delete',
-					'label' => TB_('Replace existing contents'),
-					'note'  => TB_('WARNING: this option will permanently remove existing posts, comments, categories and tags from the selected collection.'),
-					'id'    => 'import_type_delete' ),
-			), '', array( 'lines' => true ) );
+    $Form->radio_input('import_type', $import_type, [
+        [
+            'value' => 'delete',
+            'label' => TB_('Replace existing contents'),
+            'note' => TB_('WARNING: this option will permanently remove existing posts, comments, categories and tags from the selected collection.'),
+            'id' => 'import_type_delete',
+        ],
+    ], '', [
+        'lines' => true,
+    ]);
 
-	echo '<div id="checkbox_delete_files"'.( $import_type == 'delete' ? '' : ' style="display:none"' ).'>';
-	$Form->checkbox_input( 'delete_files', param( 'delete_files', 'integer', 0 ), '', array(
-		'input_suffix' => '<label for="delete_files" style="padding-left:0">'.TB_(' Also delete media files that will no longer be referenced in the destination collection after replacing its contents').'</label>',
-		'input_prefix' => '<span style="margin-left:25px"></span>') );
-	echo '</div>';
+    echo '<div id="checkbox_delete_files"' . ($import_type == 'delete' ? '' : ' style="display:none"') . '>';
+    $Form->checkbox_input('delete_files', param('delete_files', 'integer', 0), '', [
+        'input_suffix' => '<label for="delete_files" style="padding-left:0">' . TB_(' Also delete media files that will no longer be referenced in the destination collection after replacing its contents') . '</label>',
+        'input_prefix' => '<span style="margin-left:25px"></span>',
+    ]);
+    echo '</div>';
 
-	$Form->checklist( array(
-			array( 'import_img', 1, sprintf( TB_('Try to replace %s tags with imported attachments based on filename'), '<code>&lt;img src="...&gt;</code>' ), param( 'import_img', 'integer', 1 ) ),
-			array( 'stop_error_enabled', 1, sprintf( TB_('Stop import after %s errors'), '<input type="text" name="stop_error_num" class="form-control" size="6" value="'.param( 'stop_error_num', 'integer', 100 ).'" />' ), param( 'stop_error_enabled', 'integer', 1 ), '', '', 'checkbox_with_input' ),
-			array( 'convert_links', 1, sprintf( TB_('Convert wp links like %s or %s to b2evo shortlinks'), '<code>?p=</code>', '<code>?page_id=</code>' ), param( 'convert_links', 'integer', 1 ) ),
-			array( 'use_yoast_cover', 1, TB_('Use Yoast opengraph or twitter image as Cover image if available'), param( 'use_yoast_cover', 'integer', 1 ) ),
-		), 'perm_management', TB_('Options') );
+    $Form->checklist([
+        ['import_img', 1, sprintf(TB_('Try to replace %s tags with imported attachments based on filename'), '<code>&lt;img src="...&gt;</code>'), param('import_img', 'integer', 1)],
+        ['stop_error_enabled', 1, sprintf(TB_('Stop import after %s errors'), '<input type="text" name="stop_error_num" class="form-control" size="6" value="' . param('stop_error_num', 'integer', 100) . '" />'), param('stop_error_enabled', 'integer', 1), '', '', 'checkbox_with_input'],
+        ['convert_links', 1, sprintf(TB_('Convert wp links like %s or %s to b2evo shortlinks'), '<code>?p=</code>', '<code>?page_id=</code>'), param('convert_links', 'integer', 1)],
+        ['use_yoast_cover', 1, TB_('Use Yoast opengraph or twitter image as Cover image if available'), param('use_yoast_cover', 'integer', 1)],
+    ], 'perm_management', TB_('Options'));
 
-	$Form->end_fieldset();
+    $Form->end_fieldset();
 
-	$Form->buttons( array( array( 'submit', 'submit', TB_('Continue').'!', 'SaveButton' ) ) );
+    $Form->buttons([['submit', 'submit', TB_('Continue') . '!', 'SaveButton']]);
 }
 
 $Form->end_form();

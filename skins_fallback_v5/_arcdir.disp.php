@@ -13,13 +13,15 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Call the Archives plugin WITH NO LIMIT & NO MORE LINK:
-$Plugins->call_by_code( 'evo_Arch', array( 'title'=>'',
-	                                          'block_start'=>'',
-	                                          'block_end'=>'',
-	                                          'limit'=>'',
-	                                          'more_link'=>'' ) );
-
-?>
+$Plugins->call_by_code('evo_Arch', [
+    'title' => '',
+    'block_start' => '',
+    'block_end' => '',
+    'limit' => '',
+    'more_link' => '',
+]);

@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'settings/model/_abstractsettings.class.php', 'AbstractSettings' );
+load_class('settings/model/_abstractsettings.class.php', 'AbstractSettings');
 
 /**
  * Class to handle the global settings.
@@ -23,222 +25,223 @@ load_class( 'settings/model/_abstractsettings.class.php', 'AbstractSettings' );
  */
 class GeneralSettings extends AbstractSettings
 {
-	/**
-	 * The default settings to use, when a setting is not given
-	 * in the database.
-	 *
-	 * @todo Allow overriding from /conf/_config_TEST.php?
-	 * @access protected
-	 * @var array
-	 */
-	var $_defaults = array(
-		'admin_skin' => 'bootstrap',
+    /**
+     * The default settings to use, when a setting is not given
+     * in the database.
+     *
+     * @todo Allow overriding from /conf/_config_TEST.php?
+     * @access protected
+     * @var array
+     */
+    public $_defaults = [
+        'admin_skin' => 'bootstrap',
 
-		'antispam_last_update' => '2000-01-01 00:00:00',
-		'antispam_threshold_publish' => '-90',
-		'antispam_threshold_delete' => '100', // do not delete by default!
-		'antispam_block_contact_form' => '1',	// Block spam words on contact form by antispam blacklist
-		'antispam_block_spam_referers' => '0',	// By default, let spam referers go in silently (just don't log them). This is in case the blacklist is too paranoid (social media, etc.)
-		'antispam_report_to_central' => '1',
+        'antispam_last_update' => '2000-01-01 00:00:00',
+        'antispam_threshold_publish' => '-90',
+        'antispam_threshold_delete' => '100', // do not delete by default!
+        'antispam_block_contact_form' => '1',	// Block spam words on contact form by antispam blacklist
+        'antispam_block_spam_referers' => '0',	// By default, let spam referers go in silently (just don't log them). This is in case the blacklist is too paranoid (social media, etc.)
+        'antispam_report_to_central' => '1',
 
-		'evonet_last_update' => '1196000000',		// just around the time we implemented this ;)
-		'evonet_last_attempt' => '1196000000',		// just around the time we implemented this ;)
+        'evonet_last_update' => '1196000000',		// just around the time we implemented this ;)
+        'evonet_last_attempt' => '1196000000',		// just around the time we implemented this ;)
 
-		'log_public_hits' => '1',
-		'log_admin_hits' => '0',
-		'log_spam_hits' => '0',
-		'auto_prune_stats_mode' => 'page',  // 'page' is the safest mode for average installs (may be "off", "page" or "cron")
-		'auto_prune_stats' => '15',         // days (T_hitlog and T_sessions)
-		'auto_empty_trash' => '15',         // days (How many days to keep recycled comments)
+        'log_public_hits' => '1',
+        'log_admin_hits' => '0',
+        'log_spam_hits' => '0',
+        'auto_prune_stats_mode' => 'page',  // 'page' is the safest mode for average installs (may be "off", "page" or "cron")
+        'auto_prune_stats' => '15',         // days (T_hitlog and T_sessions)
+        'auto_empty_trash' => '15',         // days (How many days to keep recycled comments)
 
-		'cleanup_jobs_threshold' => 30, // days (Cleanup successfully finished scheduled jobs threshold)
-		'cleanup_jobs_threshold_failed' => 90, // days (Cleanup failed scheduled jobs threshold)
-		'cleanup_email_logs_threshold' => 59616000, // seconds (Cleanup email logs threshold)
-		'activate_account_reminder_threshold' => 86400, // seconds (Account activation reminder threshold)
-		'activate_account_reminder_config' => '86400,129600,345600,604800,0,0', // seconds (Account activation reminder settings), Defaults: one day, 1.5 days, 4 days, 7 days, "Don't send", "Don't delete"
-		'inactive_account_reminder_threshold' => 31536000, // seconds (Inactive account reminder threshold)
-		'comment_moderation_reminder_threshold' => 86400, // seconds (Comment moderation reminder threshold)
-		'post_moderation_reminder_threshold' => 86400, // seconds (Post moderation reminder threshold)
-		'unread_message_reminder_threshold' => 86400, // seconds (Unread private messages reminder threshold)
-		'unread_message_reminder_delay' => '10:3,30:6,90:15,180:30,365:60,730:120',// Unread message reminder is sent in every y days in case when a user last logged in date is below x days.
-			/* The default values are in x:y format:
-				less than 10 days ->   3 days spacing
-				   10 to  30 days ->   6 days spacing
-				   30 to  90 days ->  15 days spacing
-				   90 to 180 days ->  30 days spacing
-				  180 to 365 days ->  60 days spacing
-				  365 to 730 days -> 120 days spacing
-				more => "The user has not logged in for x days, so we will not send him notifications any more"*/
-		// Manage email address statuses:
-		'manage_email_statuses_min_delay' => 259200, // seconds, Minimum 3 days delay since last error
-		'manage_email_statuses_min_sends' => 3, // Number of minimum sends since last error
+        'cleanup_jobs_threshold' => 30, // days (Cleanup successfully finished scheduled jobs threshold)
+        'cleanup_jobs_threshold_failed' => 90, // days (Cleanup failed scheduled jobs threshold)
+        'cleanup_email_logs_threshold' => 59616000, // seconds (Cleanup email logs threshold)
+        'activate_account_reminder_threshold' => 86400, // seconds (Account activation reminder threshold)
+        'activate_account_reminder_config' => '86400,129600,345600,604800,0,0', // seconds (Account activation reminder settings), Defaults: one day, 1.5 days, 4 days, 7 days, "Don't send", "Don't delete"
+        'inactive_account_reminder_threshold' => 31536000, // seconds (Inactive account reminder threshold)
+        'comment_moderation_reminder_threshold' => 86400, // seconds (Comment moderation reminder threshold)
+        'post_moderation_reminder_threshold' => 86400, // seconds (Post moderation reminder threshold)
+        'unread_message_reminder_threshold' => 86400, // seconds (Unread private messages reminder threshold)
+        'unread_message_reminder_delay' => '10:3,30:6,90:15,180:30,365:60,730:120',
+        // Unread message reminder is sent in every y days in case when a user last logged in date is below x days.
+        /* The default values are in x:y format:
+                less than 10 days ->   3 days spacing
+                   10 to  30 days ->   6 days spacing
+                   30 to  90 days ->  15 days spacing
+                   90 to 180 days ->  30 days spacing
+                  180 to 365 days ->  60 days spacing
+                  365 to 730 days -> 120 days spacing
+                more => "The user has not logged in for x days, so we will not send him notifications any more"*/
+        // Manage email address statuses:
+        'manage_email_statuses_min_delay' => 259200, // seconds, Minimum 3 days delay since last error
+        'manage_email_statuses_min_sends' => 3, // Number of minimum sends since last error
 
-		'email_service' => 'mail', // Preferred email service: 'mail', 'smtp'
-		'force_email_sending' => '0', // Force email sending
+        'email_service' => 'mail', // Preferred email service: 'mail', 'smtp'
+        'force_email_sending' => '0', // Force email sending
 
-		'sendmail_params' => 'return', // Sendmail additional params: 'return', 'from', 'custom'
+        'sendmail_params' => 'return', // Sendmail additional params: 'return', 'from', 'custom'
 
-		'outbound_notifications_mode' => 'immediate', // 'immediate' is the safest mode for average installs (may be "off", "immediate" or "cron")
-		'notification_sender_email' => '', // notification emails will be sent from this email. The real default value is set in the constructor.
-		'notification_return_path' => '', // erroneous emails will be sent to this email address. The real default value is set in the constructor.
-		'notification_sender_name' => 'b2evo mailer', // notification emails will be sent with this sender name
-		'notification_short_name' => 'This site', // notification emails will use this as short site name
-		'notification_long_name' => '', // notification emails will use this as long site name
-		'notification_logo_file_ID' => '', // notification emails will use this as url to site logo
-		'social_media_image_file_ID' => '', // social media tags will use this as the default as image
+        'outbound_notifications_mode' => 'immediate', // 'immediate' is the safest mode for average installs (may be "off", "immediate" or "cron")
+        'notification_sender_email' => '', // notification emails will be sent from this email. The real default value is set in the constructor.
+        'notification_return_path' => '', // erroneous emails will be sent to this email address. The real default value is set in the constructor.
+        'notification_sender_name' => 'b2evo mailer', // notification emails will be sent with this sender name
+        'notification_short_name' => 'This site', // notification emails will use this as short site name
+        'notification_long_name' => '', // notification emails will use this as long site name
+        'notification_logo_file_ID' => '', // notification emails will use this as url to site logo
+        'social_media_image_file_ID' => '', // social media tags will use this as the default as image
 
-		'email_campaign_send_mode' => 'immediate', // Sending mode for campaign
-		'email_campaign_chunk_size' => 50, // Chunk size of emails to send a campaign at a time
-		'email_campaign_cron_repeat' => 300, // 5 minutes: Delay between chunks on scheduled campaign job runs
-		'email_campaign_cron_limited' => 21600, // 6 hours: Delay between chunks on scheduled campaign job runs in case all remaining recipients have reached max # of emails for the current day
-		'email_campaign_max_domain' => 20, // Max emails to same domain
+        'email_campaign_send_mode' => 'immediate', // Sending mode for campaign
+        'email_campaign_chunk_size' => 50, // Chunk size of emails to send a campaign at a time
+        'email_campaign_cron_repeat' => 300, // 5 minutes: Delay between chunks on scheduled campaign job runs
+        'email_campaign_cron_limited' => 21600, // 6 hours: Delay between chunks on scheduled campaign job runs in case all remaining recipients have reached max # of emails for the current day
+        'email_campaign_max_domain' => 20, // Max emails to same domain
 
-		'fm_enable_create_dir' => '1',
-		'fm_enable_create_file' => '1',
-		'fm_enable_roots_blog' => '1',
-		'fm_enable_roots_user' => '1',
-		'fm_enable_roots_shared' => '1',
-		'fm_enable_roots_skins' => '1',
-		'fm_enable_roots_plugins' => '1',
+        'fm_enable_create_dir' => '1',
+        'fm_enable_create_file' => '1',
+        'fm_enable_roots_blog' => '1',
+        'fm_enable_roots_user' => '1',
+        'fm_enable_roots_shared' => '1',
+        'fm_enable_roots_skins' => '1',
+        'fm_enable_roots_plugins' => '1',
 
-		'fm_showtypes' => '0',
-		'fm_showfsperms' => '0',
+        'fm_showtypes' => '0',
+        'fm_showfsperms' => '0',
 
-		'fm_default_chmod_file' => '664',
-		'fm_default_chmod_dir' => '775',
+        'fm_default_chmod_file' => '664',
+        'fm_default_chmod_dir' => '775',
 
-		// Image options
-		'exif_orientation' => '1',
-		'fm_resize_enable' => '0',
-		'fm_resize_width' => '2880',
-		'fm_resize_height' => '1800',
-		'fm_resize_quality' => '95',
+        // Image options
+        'exif_orientation' => '1',
+        'fm_resize_enable' => '0',
+        'fm_resize_width' => '2880',
+        'fm_resize_height' => '1800',
+        'fm_resize_quality' => '95',
 
-		'newusers_canregister' => 'no',
-		'registration_is_public' => '1',
-		'quick_registration' => '0',
-		'newusers_mustvalidate' => '1',
-		'newusers_revalidate_emailchg' => '1',
-		'validation_process' => 'easy',
-		'activate_requests_limit' => '300', // Only one activation email can be sent to the same email address in the given interval ( value is in seconds )
-		'newusers_findcomments' => '1',
-		'after_email_validation' => 'return_to_original', // where to redirect after account activation. Values: return_to_original, or the previously set specific url
-		'after_registration' => 'return_to_original', // where to redirect after new user registration. Values: 'return_to_original' redirect_to url, or 'slug', or return to the previously set specific url
-		'after_registration_slug' => '', // Slug value for after_registration == 'slug'
-		'newusers_level' => '1',
-		'registration_master_template' => 'registration_master_standard',
-		'registration_after_quick' => 'regform',
-		'registration_no_username' => 'firstname',
-		'pass_after_quick_reg' => '1',
+        'newusers_canregister' => 'no',
+        'registration_is_public' => '1',
+        'quick_registration' => '0',
+        'newusers_mustvalidate' => '1',
+        'newusers_revalidate_emailchg' => '1',
+        'validation_process' => 'easy',
+        'activate_requests_limit' => '300', // Only one activation email can be sent to the same email address in the given interval ( value is in seconds )
+        'newusers_findcomments' => '1',
+        'after_email_validation' => 'return_to_original', // where to redirect after account activation. Values: return_to_original, or the previously set specific url
+        'after_registration' => 'return_to_original', // where to redirect after new user registration. Values: 'return_to_original' redirect_to url, or 'slug', or return to the previously set specific url
+        'after_registration_slug' => '', // Slug value for after_registration == 'slug'
+        'newusers_level' => '1',
+        'registration_master_template' => 'registration_master_standard',
+        'registration_after_quick' => 'regform',
+        'registration_no_username' => 'firstname',
+        'pass_after_quick_reg' => '1',
 
-		// Default user settings
-		'def_enable_PM' => '1',
-		'def_enable_email' => '0',
-		'def_notify_messages' => '1',
-		'def_notify_unread_messages' => '1',
-		'def_notify_comment_mentioned' => '1',
-		'def_notify_published_comments' => '1',
-		'def_notify_comment_moderation' => '1',
-		'def_notify_edit_cmt_moderation' => '1',
-		'def_notify_spam_cmt_moderation' => '1',
-		'def_notify_meta_comment_mentioned' => '1',
-		'def_notify_meta_comments' => '1',
-		'def_notify_post_mentioned' => '1',
-		'def_notify_post_moderation' => '1',
-		'def_notify_edit_pst_moderation' => '1',
-		'def_notify_post_proposed' => '1',
-		'def_notify_post_assignment' => '1',
-		'def_newsletters' => '1',
-		'def_notification_email_limit' => '3',
-		'def_newsletter_limit' => '3',
+        // Default user settings
+        'def_enable_PM' => '1',
+        'def_enable_email' => '0',
+        'def_notify_messages' => '1',
+        'def_notify_unread_messages' => '1',
+        'def_notify_comment_mentioned' => '1',
+        'def_notify_published_comments' => '1',
+        'def_notify_comment_moderation' => '1',
+        'def_notify_edit_cmt_moderation' => '1',
+        'def_notify_spam_cmt_moderation' => '1',
+        'def_notify_meta_comment_mentioned' => '1',
+        'def_notify_meta_comments' => '1',
+        'def_notify_post_mentioned' => '1',
+        'def_notify_post_moderation' => '1',
+        'def_notify_edit_pst_moderation' => '1',
+        'def_notify_post_proposed' => '1',
+        'def_notify_post_assignment' => '1',
+        'def_newsletters' => '1',
+        'def_notification_email_limit' => '3',
+        'def_newsletter_limit' => '3',
 
-		'allow_avatars' => 1,
-		'min_picture_size' => 160, // minimum profile picture dimensions in pixels (width and height)
-		'allow_html_message' => 0, // Allow HTML in messages
+        'allow_avatars' => 1,
+        'min_picture_size' => 160, // minimum profile picture dimensions in pixels (width and height)
+        'allow_html_message' => 0, // Allow HTML in messages
 
-		// Users list settings:
-		'userlist_default_filters' => 'name_email,country',
+        // Users list settings:
+        'userlist_default_filters' => 'name_email,country',
 
-		// Welcome private message
-		'welcomepm_enabled' => 0,
-		'welcomepm_notag'   => 0,
-		'welcomepm_from'    => 'admin',	// User login
-		'welcomepm_title'   => 'Welcome to our community!',
-		'welcomepm_message' => '',
+        // Welcome private message
+        'welcomepm_enabled' => 0,
+        'welcomepm_notag' => 0,
+        'welcomepm_from' => 'admin',	// User login
+        'welcomepm_title' => 'Welcome to our community!',
+        'welcomepm_message' => '',
 
-		// Info message to reporters after account deletion
-		'reportpm_enabled' => 0,
-		'reportpm_from'    => 'admin',	// User login
-		'reportpm_title'   => 'The user account $reportedlogin$ that you have reported has just been deleted.',
-		'reportpm_message' => "You have reported the user account \$reportedlogin\$.\n\nThis is to inform you that we have just deleted this account.\n\nThank you for your help in keeping this site a friendly place!",
+        // Info message to reporters after account deletion
+        'reportpm_enabled' => 0,
+        'reportpm_from' => 'admin',	// User login
+        'reportpm_title' => 'The user account $reportedlogin$ that you have reported has just been deleted.',
+        'reportpm_message' => "You have reported the user account \$reportedlogin\$.\n\nThis is to inform you that we have just deleted this account.\n\nThank you for your help in keeping this site a friendly place!",
 
-		'regexp_filename' => '^[a-zA-Z0-9\-_. ]+$', // TODO: accept (spaces and) special chars / do full testing on this
-		'regexp_dirname' => '^[a-zA-Z0-9\-_]+$', // TODO: accept spaces and special chars / do full testing on this
-		'reloadpage_timeout' => '300',
-		'time_difference' => '0',
-		'timeout_sessions' => '604800',			// seconds (604800 == 7 days)
-		'timeout_online' => '1200',				// seconds (1200 == 20 minutes)
-		'upload_enabled' => '1',
-		'upload_maxkb' => '32000',					// 32 MB
-		'evocache_foldername' => '.evocache',
-		'blogs_order_by' => 'order',				// blogs order in backoffice menu and other places
-		'blogs_order_dir' => 'ASC',				// blogs order direction in backoffice menu and other places
+        'regexp_filename' => '^[a-zA-Z0-9\-_. ]+$', // TODO: accept (spaces and) special chars / do full testing on this
+        'regexp_dirname' => '^[a-zA-Z0-9\-_]+$', // TODO: accept spaces and special chars / do full testing on this
+        'reloadpage_timeout' => '300',
+        'time_difference' => '0',
+        'timeout_sessions' => '604800',			// seconds (604800 == 7 days)
+        'timeout_online' => '1200',				// seconds (1200 == 20 minutes)
+        'upload_enabled' => '1',
+        'upload_maxkb' => '32000',					// 32 MB
+        'evocache_foldername' => '.evocache',
+        'blogs_order_by' => 'order',				// blogs order in backoffice menu and other places
+        'blogs_order_dir' => 'ASC',				// blogs order direction in backoffice menu and other places
 
-		'user_minpwdlen' => '5',
-		'js_passwd_hashing' => '1',				// Use JS password hashing by default
-		'passwd_special' => '0',					// Do not require a special character in password by default
-		'strict_logins' => 1,						// Allow only plain ACSII characters in user login
+        'user_minpwdlen' => '5',
+        'js_passwd_hashing' => '1',				// Use JS password hashing by default
+        'passwd_special' => '0',					// Do not require a special character in password by default
+        'strict_logins' => 1,						// Allow only plain ACSII characters in user login
 
-		'allow_moving_chapters' => '0',			// Do not allow moving chapters by default
+        'allow_moving_chapters' => '0',			// Do not allow moving chapters by default
 
-		'cross_posting' => 0,						// Allow additional categories from other blogs
-		'cross_posting_blog' => 0,					// Allow to choose main category from another blog
-		'redirect_moved_posts' => 1,				// Allow to redirect moved posts link to the correct blog
-		'always_match_slug' => 1, 					// Allow to redirect to correct Collection if an Item Slug was found in any URL
-		'redirect_tinyurl' => 1, 					// Allow 301 redirect from Tiny URLs to canonical URL
+        'cross_posting' => 0,						// Allow additional categories from other blogs
+        'cross_posting_blog' => 0,					// Allow to choose main category from another blog
+        'redirect_moved_posts' => 1,				// Allow to redirect moved posts link to the correct blog
+        'always_match_slug' => 1, 					// Allow to redirect to correct Collection if an Item Slug was found in any URL
+        'redirect_tinyurl' => 1, 					// Allow 301 redirect from Tiny URLs to canonical URL
 
-		'subscribe_new_blogs' => 'public', // Subscribing to new blogs: 'page', 'public', 'all'
+        'subscribe_new_blogs' => 'public', // Subscribing to new blogs: 'page', 'public', 'all'
 
-		// Site settings
-		'system_lock' => 0,
-		'site_code' => 'b2evo',
-		'site_color' => '#ff8c0f',
-		'site_skins_enabled' => 1, // Enables a sitewide header and footer
-		'info_blog_ID' => 0, // Blog for info pages
-		'general_cache_enabled' => 0,
+        // Site settings
+        'system_lock' => 0,
+        'site_code' => 'b2evo',
+        'site_color' => '#ff8c0f',
+        'site_skins_enabled' => 1, // Enables a sitewide header and footer
+        'info_blog_ID' => 0, // Blog for info pages
+        'general_cache_enabled' => 0,
 
-		'newblog_cache_enabled' => 0,
-		'newblog_cache_enabled_widget' => 0,
+        'newblog_cache_enabled' => 0,
+        'newblog_cache_enabled_widget' => 0,
 
-		// Default Skins for New Collections:
-		'def_normal_skin_ID' => '1',  // Default normal skin ID
-		'def_mobile_skin_ID' => NULL, // NULL means same as normal skin
-		'def_tablet_skin_ID' => NULL, // NULL means same as normal skin
-		'def_alt_skin_ID'    => NULL, // NULL means same as normal skin
+        // Default Skins for New Collections:
+        'def_normal_skin_ID' => '1',  // Default normal skin ID
+        'def_mobile_skin_ID' => null, // NULL means same as normal skin
+        'def_tablet_skin_ID' => null, // NULL means same as normal skin
+        'def_alt_skin_ID' => null, // NULL means same as normal skin
 
-		// Default URL for New Collections:
-		'coll_access_type' => 'extrapath',
+        // Default URL for New Collections:
+        'coll_access_type' => 'extrapath',
 
-		// Post by Email
-		'eblog_enabled' => 0,
-		'eblog_method' => 'imap',
-		'eblog_encrypt' => 'none',
-		'eblog_server_port' => 143,
-		'eblog_default_category' => 1,
-		'eblog_add_imgtag' => 0,
-		'eblog_body_terminator' => '___',
-		'eblog_subject_prefix' => 'blog:',
-		'eblog_html_tag_limit' => 1,
-		'eblog_delete_emails' => 1,
-		'eblog_renderers' => array('default'),
+        // Post by Email
+        'eblog_enabled' => 0,
+        'eblog_method' => 'imap',
+        'eblog_encrypt' => 'none',
+        'eblog_server_port' => 143,
+        'eblog_default_category' => 1,
+        'eblog_add_imgtag' => 0,
+        'eblog_body_terminator' => '___',
+        'eblog_subject_prefix' => 'blog:',
+        'eblog_html_tag_limit' => 1,
+        'eblog_delete_emails' => 1,
+        'eblog_renderers' => ['default'],
 
-		// Returned Emails
-		'repath_enabled' => 0,
-		'repath_method' => 'imap',
-		'repath_encrypt' => 'none',
-		'repath_server_port' => 143,
-		'repath_imap_folder' => 'INBOX',
-		'repath_subject' => 'Returned mail:
+        // Returned Emails
+        'repath_enabled' => 0,
+        'repath_method' => 'imap',
+        'repath_encrypt' => 'none',
+        'repath_server_port' => 143,
+        'repath_imap_folder' => 'INBOX',
+        'repath_subject' => 'Returned mail:
 Mail delivery failed:
 Undelivered Mail Returned to Sender
 Delivery Status Notification (Failure)
@@ -249,12 +252,12 @@ failure notice
 Undeliverable:
 Quarantine
 Карантин',
-		'repath_body_terminator' => '---------- Forwarded message ----------
+        'repath_body_terminator' => '---------- Forwarded message ----------
 ------ This is a copy of the message, including all the headers. ------
 ----- Transcript of session follows -----
 Received: from
 --- Below this line is a copy of the message.',
-		'repath_errtype' => 'C ^101
+        'repath_errtype' => 'C ^101
 C ^111
 T ^421
 T ^431
@@ -316,244 +319,221 @@ C relay denied
 C relaying denied
 C message size exceeds',
 
-		'general_xmlrpc' => 1,
-		'xmlrpc_default_title' => '',				// default title for posts created throgh blogger api
+        'general_xmlrpc' => 1,
+        'xmlrpc_default_title' => '',				// default title for posts created throgh blogger api
 
-		'nickname_editing'   => 'edited-user',		// "never" - Never allow; "default-no" - Let users decide, default to "no" for new users; "default-yes" - Let users decide, default to "yes" for new users; "always" - Always allow
-		'firstname_editing'  => 'edited-user',		// "edited-user" - Can be edited by user; "edited-admin" - Can be edited by admins only, "hidden" - Hidden for all
-		'lastname_editing'   => 'edited-user',		// "edited-user" - Can be edited by user; "edited-admin" - Can be edited by admins only, "hidden" - Hidden for all
-		'location_country'   => 'optional', // Editing mode of country for user:   "optional" | "required" | "hidden"
-		'location_region'    => 'optional', // Editing mode of region for user:    "optional" | "required" | "hidden"
-		'location_subregion' => 'optional', // Editing mode of subregion for user: "optional" | "required" | "hidden"
-		'location_city'      => 'optional', // Editing mode of city for user:      "optional" | "required" | "hidden"
-		'birthday_year'      => 'optional', // Editing mode of birthday year for user: "optional" | "required" | "hidden"
-		'birthday_month'     => 'optional', // Editing mode of birthday month for user: "optional" | "required" | "hidden"
-		'birthday_day'       => 'optional', // Editing mode of birthday day for user: "optional" | "required" | "hidden"
-		'self_selected_age_group' => 'hidden', // Editing mode of self-selected age group for user: "optional" | "required" | "hidden"
-		'minimum_age'        => '13', // Minimum age for user forms
-		'multiple_sessions'  => 'userset_default_no', // multiple sessions settings -- overriden for demo mode in contructor
-		'emails_msgform'     => 'adminset', // Receiving emails through a message form is allowed: "never" | "adminset" | "userset"
+        'nickname_editing' => 'edited-user',		// "never" - Never allow; "default-no" - Let users decide, default to "no" for new users; "default-yes" - Let users decide, default to "yes" for new users; "always" - Always allow
+        'firstname_editing' => 'edited-user',		// "edited-user" - Can be edited by user; "edited-admin" - Can be edited by admins only, "hidden" - Hidden for all
+        'lastname_editing' => 'edited-user',		// "edited-user" - Can be edited by user; "edited-admin" - Can be edited by admins only, "hidden" - Hidden for all
+        'location_country' => 'optional', // Editing mode of country for user:   "optional" | "required" | "hidden"
+        'location_region' => 'optional', // Editing mode of region for user:    "optional" | "required" | "hidden"
+        'location_subregion' => 'optional', // Editing mode of subregion for user: "optional" | "required" | "hidden"
+        'location_city' => 'optional', // Editing mode of city for user:      "optional" | "required" | "hidden"
+        'birthday_year' => 'optional', // Editing mode of birthday year for user: "optional" | "required" | "hidden"
+        'birthday_month' => 'optional', // Editing mode of birthday month for user: "optional" | "required" | "hidden"
+        'birthday_day' => 'optional', // Editing mode of birthday day for user: "optional" | "required" | "hidden"
+        'self_selected_age_group' => 'hidden', // Editing mode of self-selected age group for user: "optional" | "required" | "hidden"
+        'minimum_age' => '13', // Minimum age for user forms
+        'multiple_sessions' => 'userset_default_no', // multiple sessions settings -- overriden for demo mode in contructor
+        'emails_msgform' => 'adminset', // Receiving emails through a message form is allowed: "never" | "adminset" | "userset"
 
-	// Display options:
-		'use_gravatar' => 1, // Use gravatar if a user has not uploaded a profile picture
-		'default_gravatar' => 'b2evo', // Gravatar type: 'b2evo', '', 'identicon', 'monsterid', 'wavatar', 'retro'
-		'username_display' => 'login', // What to display as user name: 'login' - Usernames/Logins or 'name' - 'Friendly names'
-		'bubbletip' => 1, // Display bubletips in the Back-office
-		'bubbletip_size_admin' => 'fit-160x160', // Avatar size in the bubbletip in the Back-office
-		'bubbletip_size_front' => 'fit-160x160', // Avatar size in the bubbletip in the Front-office
-		'bubbletip_anonymous' => 1, // Display bubbletips in Front-office for anonymous users
-		'bubbletip_size_anonymous' => 'fit-160x160-blur-18', // Avatar size in the bubbletip in the Front-office for anonymous users
-		'bubbletip_overlay' => "Log in to\r\nsee this\r\nimage",// Overlay text on the profile image for anonymous users
-		'allow_anonymous_user_list' => 1, // Allow anonymous users to see user list (disp=users)
-		'allow_anonymous_user_profiles' => 0, // Allow anonymous users to see the user display ( disp=user )
-		'allow_anonymous_user_level_min' => 0, // Min value of user group level to display for anonymous users
-		'allow_anonymous_user_level_max' => 10, // Max value of user group level to display for anonymous users
-		'user_url_loggedin' => 'page', // Link an user url to 'page' or 'url' for logged-in users
-		'user_url_anonymous' => 'page', // Link an user url to 'page' or 'url' for anonymous users
+        // Display options:
+        'use_gravatar' => 1, // Use gravatar if a user has not uploaded a profile picture
+        'default_gravatar' => 'b2evo', // Gravatar type: 'b2evo', '', 'identicon', 'monsterid', 'wavatar', 'retro'
+        'username_display' => 'login', // What to display as user name: 'login' - Usernames/Logins or 'name' - 'Friendly names'
+        'bubbletip' => 1, // Display bubletips in the Back-office
+        'bubbletip_size_admin' => 'fit-160x160', // Avatar size in the bubbletip in the Back-office
+        'bubbletip_size_front' => 'fit-160x160', // Avatar size in the bubbletip in the Front-office
+        'bubbletip_anonymous' => 1, // Display bubbletips in Front-office for anonymous users
+        'bubbletip_size_anonymous' => 'fit-160x160-blur-18', // Avatar size in the bubbletip in the Front-office for anonymous users
+        'bubbletip_overlay' => "Log in to\r\nsee this\r\nimage",
+        // Overlay text on the profile image for anonymous users
+        'allow_anonymous_user_list' => 1, // Allow anonymous users to see user list (disp=users)
+        'allow_anonymous_user_profiles' => 0, // Allow anonymous users to see the user display ( disp=user )
+        'allow_anonymous_user_level_min' => 0, // Min value of user group level to display for anonymous users
+        'allow_anonymous_user_level_max' => 10, // Max value of user group level to display for anonymous users
+        'user_url_loggedin' => 'page', // Link an user url to 'page' or 'url' for logged-in users
+        'user_url_anonymous' => 'page', // Link an user url to 'page' or 'url' for anonymous users
 
-		// Account closing options:
-		'account_close_enabled' => 1, // Allow users to close their account themselves
-		'account_close_intro'   => "We are sorry to see you leave.\n\nWe value your feedback. Please be so kind and tell us in a few words why you are leaving us. This will help us to improve the site for the future.",
-		'account_close_reasons' => "I don't need this account any more.\nI do not like this site.\nI am getting spam from this site.", // Reasons to close an account, separated by new line
-		'account_close_byemsg'  => 'Your account has now been closed. If you ever want to log in again, you will need to create a new account.',
+        // Account closing options:
+        'account_close_enabled' => 1, // Allow users to close their account themselves
+        'account_close_intro' => "We are sorry to see you leave.\n\nWe value your feedback. Please be so kind and tell us in a few words why you are leaving us. This will help us to improve the site for the future.",
+        'account_close_reasons' => "I don't need this account any more.\nI do not like this site.\nI am getting spam from this site.", // Reasons to close an account, separated by new line
+        'account_close_byemsg' => 'Your account has now been closed. If you ever want to log in again, you will need to create a new account.',
 
-	// Back-end settings, these can't be modified by the users:
-		'last_invalidation_timestamp' => 0,
+        // Back-end settings, these can't be modified by the users:
+        'last_invalidation_timestamp' => 0,
 
-	// Cron job settings:
-		// Max emails to send:
-		'cjob_maxemail_send-non-activated-account-reminders' => 50,
-		'cjob_maxemail_execute-automations' => 50,
-		'cjob_maxemail_send-inactive-account-reminders' => 50,
-		'cjob_maxemail_send-unread-messages-reminders' => 50,
-		// Do not notify IMAP errors before X consecutive errors:
-		'cjob_imap_error_process-return-path-inbox' => 3,
-		'cjob_imap_error_create-post-by-email' => 3,
-	);
+        // Cron job settings:
+        // Max emails to send:
+        'cjob_maxemail_send-non-activated-account-reminders' => 50,
+        'cjob_maxemail_execute-automations' => 50,
+        'cjob_maxemail_send-inactive-account-reminders' => 50,
+        'cjob_maxemail_send-unread-messages-reminders' => 50,
+        // Do not notify IMAP errors before X consecutive errors:
+        'cjob_imap_error_process-return-path-inbox' => 3,
+        'cjob_imap_error_create-post-by-email' => 3,
+    ];
 
+    /**
+     * Constructor.
+     *
+     * This loads the general settings and checks db_version.
+     *
+     * It will also turn off error-reporting/halting of the {@link $DB DB object}
+     * temporarily to present a more decent error message if tables do not exist yet.
+     *
+     * Because the {@link $DB DB object} itself creates a connection when it gets
+     * created "Error selecting database" occurs before we can check for it here.
+     * @param boolean TRUE to check current DB version
+     */
+    public function __construct($check_version = true)
+    {
+        global $new_db_version, $DB, $demo_mode, $instance_name, $basehost;
 
-	/**
-	 * Constructor.
-	 *
-	 * This loads the general settings and checks db_version.
-	 *
-	 * It will also turn off error-reporting/halting of the {@link $DB DB object}
-	 * temporarily to present a more decent error message if tables do not exist yet.
-	 *
-	 * Because the {@link $DB DB object} itself creates a connection when it gets
-	 * created "Error selecting database" occurs before we can check for it here.
-	 * @param boolean TRUE to check current DB version
-	 */
-	function __construct( $check_version = true )
-	{
-		global $new_db_version, $DB, $demo_mode, $instance_name, $basehost;
+        $save_DB_show_errors = $DB->show_errors;
+        $save_DB_halt_on_error = $DB->halt_on_error;
+        $DB->halt_on_error = false;
+        $DB->show_errors = false;
 
-		$save_DB_show_errors = $DB->show_errors;
-		$save_DB_halt_on_error = $DB->halt_on_error;
-		$DB->halt_on_error = false;
-		$DB->show_errors = false;
+        // Init through the abstract constructor. This should be the first DB connection.
+        parent::__construct('T_settings', ['set_name'], 'set_value', 0);
 
-		// Init through the abstract constructor. This should be the first DB connection.
-		parent::__construct( 'T_settings', array( 'set_name' ), 'set_value', 0 );
+        // check DB version:
+        if ($check_version && $this->get('db_version') != $new_db_version) { // Database is not up to date:
+            if ($DB->last_error) {
+                $error_title = 'The database is not installed yet!';
+                $error_message = '<p>MySQL error:</p>' . $DB->last_error;
+            } else {
+                $error_title = 'Database schema is not up to date!';
+                $error_message = '<p>Database schema is not up to date!</p>'
+                    . '<p>You have schema version &laquo;' . (int) $this->get('db_version') . '&raquo;, '
+                    . 'but we would need &laquo;' . (int) $new_db_version . '&raquo;.</p>';
+            }
+            global $adminskins_path;
+            require $adminskins_path . 'conf_error.main.php'; // error & exit
+        }
 
-		// check DB version:
-		if( $check_version && $this->get( 'db_version' ) != $new_db_version )
-		{ // Database is not up to date:
-			if( $DB->last_error )
-			{
-				$error_title = 'The database is not installed yet!';
-				$error_message = '<p>MySQL error:</p>'.$DB->last_error;
-			}
-			else
-			{
-				$error_title = 'Database schema is not up to date!';
-				$error_message = '<p>Database schema is not up to date!</p>'
-					.'<p>You have schema version &laquo;'.(integer)$this->get( 'db_version' ).'&raquo;, '
-					.'but we would need &laquo;'.(integer)$new_db_version.'&raquo;.</p>';
-			}
-			global $adminskins_path;
-			require $adminskins_path.'conf_error.main.php'; // error & exit
-		}
+        $DB->halt_on_error = $save_DB_halt_on_error;
+        $DB->show_errors = $save_DB_show_errors;
 
-		$DB->halt_on_error = $save_DB_halt_on_error;
-		$DB->show_errors = $save_DB_show_errors;
+        if ($demo_mode) { // Demo mode requires to allow multiple concurrent sessions:
+            $this->_defaults['multiple_sessions'] = 'always';
+        }
 
+        // set those defaults which needs some global variables
+        $this->_defaults['notification_sender_email'] = $instance_name . '-noreply@' . $basehost;
+        $this->_defaults['notification_return_path'] = $instance_name . '-return@' . $basehost;
+    }
 
-		if( $demo_mode )
-		{ // Demo mode requires to allow multiple concurrent sessions:
-			$this->_defaults['multiple_sessions'] = 'always';
-		}
+    /**
+     * Get a 32-byte string that can be used as salt for public keys.
+     *
+     * @return string
+     */
+    public function get_public_key_salt()
+    {
+        $public_key_salt = $this->get('public_key_salt');
+        if (empty($public_key_salt)) {
+            $public_key_salt = generate_random_key(32);
+            $this->set('public_key_salt', $public_key_salt);
+            $this->dbupdate();
+        }
+        return $public_key_salt;
+    }
 
-		// set those defaults which needs some global variables
-		$this->_defaults['notification_sender_email'] = $instance_name.'-noreply@'.$basehost;
-		$this->_defaults['notification_return_path'] = $instance_name.'-return@'.$basehost;
-	}
+    /**
+     * Get a member param by its name
+     *
+     * @param string Name of parameter
+     * @param boolean true to return param's real value
+     * @return mixed Value of parameter
+     */
+    public function get($parname, $real_value = false)
+    {
+        if ($real_value) {
+            return parent::getx($parname);
+        }
 
+        switch ($parname) {
+            case 'normal_skin_ID':
+                $result = parent::getx($parname);
+                if ($result === null) {	// Try to get default from the global settings:
+                    $result = $this->get('def_' . $parname);
+                }
+                return $result;
 
-	/**
-	 * Get a 32-byte string that can be used as salt for public keys.
-	 *
-	 * @return string
-	 */
-	function get_public_key_salt()
-	{
-		$public_key_salt = $this->get( 'public_key_salt' );
-		if( empty($public_key_salt) )
-		{
-			$public_key_salt = generate_random_key(32);
-			$this->set( 'public_key_salt', $public_key_salt );
-			$this->dbupdate();
-		}
-		return $public_key_salt;
-	}
+            case 'mobile_skin_ID':
+            case 'tablet_skin_ID':
+            case 'alt_skin_ID':
+                $result = parent::getx($parname);
+                if ($result === null) {	// Try to get default from the global settings:
+                    $result = $this->get('def_' . $parname);
+                }
+                if (($result === '0') && ! $real_value) {	// 0 value means that use the same as normal case:
+                    $result = $this->get('normal_skin_ID');
+                }
+                return $result;
 
+            case 'allow_avatars':
+                return (parent::getx($parname) && isset($GLOBALS['files_Module']));
+                break;
 
-	/**
-	 * Get a member param by its name
-	 *
-	 * @param string Name of parameter
-	 * @param boolean true to return param's real value
-	 * @return mixed Value of parameter
-	 */
-	function get( $parname, $real_value = false )
-	{
-		if( $real_value )
-		{
-			return parent::getx( $parname );
-		}
+            case 'upload_enabled':
+                return (parent::getx($parname) && isset($GLOBALS['files_Module']));
+                break;
 
-		switch($parname)
-		{
-			case 'normal_skin_ID':
-				$result = parent::getx( $parname );
-				if( $result === NULL )
-				{	// Try to get default from the global settings:
-					$result = $this->get( 'def_'.$parname );
-				}
-				return $result;
+            case 'activate_account_reminder_config':
+                $value = parent::getx($parname);
+                if (! is_array($value)) {	// Convert the setting value to array because it is used as array but stored as values separated by comma:
+                    $value = explode(',', $value);
+                }
+                return $value;
 
-			case 'mobile_skin_ID':
-			case 'tablet_skin_ID':
-			case 'alt_skin_ID':
-				$result = parent::getx( $parname );
-				if( $result === NULL )
-				{	// Try to get default from the global settings:
-					$result = $this->get( 'def_'.$parname );
-				}
-				if( ( $result === '0' ) && ! $real_value )
-				{	// 0 value means that use the same as normal case:
-					$result = $this->get( 'normal_skin_ID' );
-				}
-				return $result;
+            case 'unread_message_reminder_delay':
+                $value = parent::getx($parname);
+                if (! is_array($value)) {	// Convert the setting value to array because it is used as array but stored as values separated by comma and colon:
+                    $values = [];
+                    if (preg_match_all('/(\d+):(\d+)(,|$)/', $value, $matches)) {
+                        foreach ($matches[1] as $m => $v) {
+                            $values[intval($v)] = intval($matches[2][$m]);
+                        }
+                    }
+                    $value = $values;
+                }
+                return $value;
 
-			case 'allow_avatars':
-				return ( parent::getx( $parname ) && isset($GLOBALS['files_Module']) );
-				break;
+            case 'email_service':
+                global $email_send_allow_php_mail;
+                // Force to use SMTP gateway when php mail sending is disabled by config:
+                return $email_send_allow_php_mail ? parent::getx($parname) : 'smtp';
 
-			case 'upload_enabled':
-				return ( parent::getx( $parname ) && isset($GLOBALS['files_Module']) );
-				break;
+            case 'force_email_sending':
+                global $email_send_allow_php_mail;
+                // Don't force to use secondary email service when php mail sending is disabled by config:
+                return $email_send_allow_php_mail ? parent::getx($parname) : 0;
 
-			case 'activate_account_reminder_config':
-				$value = parent::getx( $parname );
-				if( ! is_array( $value ) )
-				{	// Convert the setting value to array because it is used as array but stored as values separated by comma:
-					$value = explode( ',', $value );
-				}
-				return $value;
+            default:
+                $value = parent::getx($parname);
+                if ($value === null && strpos($parname, 'cjob_timeout_') === 0) {	// Set default 10 minutes for max execution time of each cron job type:
+                    $value = 600;
+                }
+                return $value;
+        }
+    }
 
-			case 'unread_message_reminder_delay':
-				$value = parent::getx( $parname );
-				if( ! is_array( $value ) )
-				{	// Convert the setting value to array because it is used as array but stored as values separated by comma and colon:
-					$values = array();
-					if( preg_match_all( '/(\d+):(\d+)(,|$)/', $value, $matches ) )
-					{
-						foreach( $matches[1] as $m => $v )
-						{
-							$values[ intval( $v ) ] = intval( $matches[2][ $m ] );
-						}
-					}
-					$value = $values;
-				}
-				return $value;
+    /**
+     * Temporarily sets a setting ({@link dbupdate()} writes it to DB).
+     *
+     * @param string Name of parameter
+     * @param mixed Value
+     * @return boolean true, if the value has been set, false if it has not changed.
+     */
+    public function set($setting, $value)
+    {
+        // Limit value with max possible length:
+        $value = utf8_substr($value, 0, 10000);
 
-			case 'email_service':
-				global $email_send_allow_php_mail;
-				// Force to use SMTP gateway when php mail sending is disabled by config:
-				return $email_send_allow_php_mail ? parent::getx( $parname ) : 'smtp';
-
-			case 'force_email_sending':
-				global $email_send_allow_php_mail;
-				// Don't force to use secondary email service when php mail sending is disabled by config:
-				return $email_send_allow_php_mail ? parent::getx( $parname ) : 0;
-
-			default:
-				$value = parent::getx( $parname );
-				if( $value === NULL && strpos( $parname, 'cjob_timeout_' ) === 0 )
-				{	// Set default 10 minutes for max execution time of each cron job type:
-					$value = 600;
-				}
-				return $value;
-		}
-	}
-
-
-	/**
-	 * Temporarily sets a setting ({@link dbupdate()} writes it to DB).
-	 *
-	 * @param string Name of parameter
-	 * @param mixed Value
-	 * @return boolean true, if the value has been set, false if it has not changed.
-	 */
-	function set( $setting, $value )
-	{
-		// Limit value with max possible length:
-		$value = utf8_substr( $value, 0, 10000 );
-
-		return parent::setx( $setting, $value );
-	}
-
+        return parent::setx($setting, $value);
+    }
 }
-
-?>

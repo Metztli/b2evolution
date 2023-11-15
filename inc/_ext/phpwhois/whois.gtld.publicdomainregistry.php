@@ -25,33 +25,33 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-if (!defined('__PUBLICDOMAINREGISTRY_HANDLER__'))
-	define('__PUBLICDOMAINREGISTRY_HANDLER__', 1);
+if (! defined('__PUBLICDOMAINREGISTRY_HANDLER__')) {
+    define('__PUBLICDOMAINREGISTRY_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class publicdomainregistry_handler
-	{
-	function parse($data_str, $query)
-		{
-		$items = array(
-              'owner' => 'Registrant:',
-              'owner#' => '(Registrant):',
-              'admin' => 'Administrative Contact',
-              'tech' => 'Technical Contact',
-              'billing' => 'Billing Contact',
-              'domain.name' => 'Domain name:',
-              'domain.sponsor' => 'Registration Service Provided By:',
-              'domain.nserver' => 'Domain servers in listed order:',
-              'domain.changed' => 'Record last updated ',
-              'domain.created' => 'Record created on',
-              'domain.created#' => 'Creation Date:',
-              'domain.expires' => 'Record expires on',
-              'domain.expires#' => 'Expiration Date:',
-              'domain.status'	=> 'Status:'
-		          );
+{
+    public function parse($data_str, $query)
+    {
+        $items = [
+            'owner' => 'Registrant:',
+            'owner#' => '(Registrant):',
+            'admin' => 'Administrative Contact',
+            'tech' => 'Technical Contact',
+            'billing' => 'Billing Contact',
+            'domain.name' => 'Domain name:',
+            'domain.sponsor' => 'Registration Service Provided By:',
+            'domain.nserver' => 'Domain servers in listed order:',
+            'domain.changed' => 'Record last updated ',
+            'domain.created' => 'Record created on',
+            'domain.created#' => 'Creation Date:',
+            'domain.expires' => 'Record expires on',
+            'domain.expires#' => 'Expiration Date:',
+            'domain.status' => 'Status:',
+        ];
 
-		return easy_parser($data_str, $items, 'mdy', false, true, true);
-		}
-	}
-?>
+        return easy_parser($data_str, $items, 'mdy', false, true, true);
+    }
+}

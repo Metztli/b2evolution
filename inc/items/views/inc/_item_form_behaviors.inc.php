@@ -15,11 +15,12 @@
  * @author blueyed: Daniel HAHLER
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Afwas > Moved the javaScript to <head> in /skins-adm/_html_header.inc.php
 // This file is now obsolete.
 
 // FP> the nice thing about this file is that it was included only where it was needed.
 // *NOT* on every admin page.
-?>

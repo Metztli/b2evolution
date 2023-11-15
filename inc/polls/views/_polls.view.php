@@ -12,9 +12,10 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Display polls:
 polls_results_block();
-?>

@@ -1,0 +1,262 @@
+// Disp Login Style
+// ======================================================================== /
+.disp_login,
+.disp_lostpassword,
+.disp_register,
+.disp_access_requires_login {
+
+    #content {
+        padding: 120px 0;
+
+        @media screen and ( max-width: @S ) {
+            padding: 40px 0;
+        }
+
+        .title__content {
+            // font-family: @font_body;
+            margin-top: 0;
+            color: @w;
+            letter-spacing: 1.5px;
+            font-size: 3rem;
+
+            @media screen and ( max-width: @S ) {
+                font-size: 2.8rem;
+                margin-bottom: 0;
+                text-align: center;
+            }
+        }
+    }
+
+    .main_content {
+        position: relative;
+        background-image: url("assets/images/content/bgc-1.jpg");
+        background-size: cover;
+        max-width: 520px;
+        margin: 0 auto;
+        background-color: @w;
+        padding: 50px;
+        z-index: 0;
+        // overflow: hidden;
+
+        @media screen and ( max-width: @MX ) {
+            padding: 30px;
+        }
+
+        @media screen and ( max-width: @S ) {
+            padding: 25px;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: @b;
+            opacity: 0.55;
+            z-index: -1;
+        }
+
+        .form-group {
+            @media screen and ( max-width: @S ) {
+                margin-bottom: 10px;
+            }
+        }
+
+    }
+
+
+    #login_form,
+    #lostpass_form {
+        color: @w;
+
+        .panel {
+            background-color: transparent;
+
+            .panel-body {
+                border-radius: 2px;
+                padding: 20px;
+            }
+        }
+
+        .controls{
+            width: 100%;
+
+            .form-control {
+                width: 100%;
+                padding: 12px 15px;
+                height: auto;
+                border-radius: 0;
+                border-color: @w;
+
+                &:hover, &:active, &:focus {
+                    border-color: @w;
+                    box-shadow: none;
+                }
+            }
+        }
+
+        .control-buttons {
+            margin: 30px 0 20px;
+            padding: 0;
+            width: 100%;
+
+            @media screen and ( max-width: @S ) {
+                margin: 20px 0;
+            }
+
+            .btn {
+                border-radius: 0;
+                padding: 10px 20px;
+                font-size: 1.6rem;
+                text-transform: uppercase;
+
+                @media screen and ( max-width: @S ) {
+                    font-size: 1.3rem;
+                }
+
+                &:hover, &:active, &:focus{
+                    // box-shadow: 1px 2px 3px rgba(51, 51, 51, 0.2);
+                    // transform: translateY(-2px);
+                }
+
+                &.btn-success {
+                    background-color: @primary;
+                    border-color: @primary;
+                }
+
+                &.btn-primary {
+                    border-color: @btn_primary;
+
+                    &:hover, &:active, &:focus {
+                        border-color: @btn_primary_hover;
+                    }
+                }
+            }
+        }
+
+    }
+
+
+    #register_form {
+
+        .control-label {
+            color: @w;
+        }
+
+        .input_text {
+            width: 265px !important;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            height: auto;
+            border-radius: 0;
+            border-color: @w;
+
+            &:hover, &:active, &:focus {
+                border-color: @w;
+                box-shadow: none;
+            }
+        }
+
+        #p-container {
+            border-color: @w;
+        }
+
+        #p-status, .help-inline {
+            color: @w;
+        }
+
+        #p-status {
+            padding-left: 12px;
+        }
+
+        #p-result {
+            height: 3px;
+        }
+
+        .btn {
+            border-radius: 0;
+            padding: 10px 20px;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+        }
+
+    }
+
+
+    #lostpass_form {
+
+        .control-buttons {
+            margin-top: 0;
+            margin-right: auto;
+            margin-left: auto;
+
+            @media screen and ( min-width: @MX ) {
+                text-align: center;
+            }
+
+            .btn-primary {
+                font-size: 1.4rem;
+            }
+
+        }
+
+        @media screen and ( max-width: @MX ) {
+            .fieldset_wrapper {
+                margin-top: 10px;
+
+                .panel {
+                    border: none;
+                }
+
+                .panel-body {
+                    padding: 0;
+                }
+            }
+        }
+    }
+
+
+    #register_form {
+
+        .input_text {
+            font-size: 1.3rem;
+        }
+
+        .btn-primary {
+            font-size: 1.4rem;
+        }
+
+        @media screen and ( max-width: @MF ) and ( min-width: @S ) {
+            .control-label {
+                width: 25%;;
+                float: left;
+            }
+
+            .controls {
+                width: 75%;
+                float: left;
+            }
+
+            .control-buttons {
+                text-align: center;
+            }
+        }
+    }
+
+}
+
+
+// Requires Login and Login
+// ======================================================================== /
+.disp_access_requires_login.loggedin {
+
+    .main_content {
+        color: @w;
+    }
+
+}

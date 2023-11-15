@@ -25,31 +25,32 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-if (!defined('__MARKMONITOR_HANDLER__'))
-	define('__MARKMONITOR_HANDLER__', 1);
+if (! defined('__MARKMONITOR_HANDLER__')) {
+    define('__MARKMONITOR_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class markmonitor_handler
-	{
-	function parse($data_str, $query)
-		{
-		$items = array(
-                  'owner' => 'Registrant:',
-                  'admin' => 'Administrative Contact:',
-                  'tech' => 'Technical Contact, Zone Contact:',
-                  'domain.name' => 'Domain Name:',
-                  'domain.sponsor' => 'Registrar Name:',
-                  'domain.nserver' => 'Domain servers in listed order:',
-                  'domain.created' => 'Created on..............:',
-                  'domain.expires' => 'Expires on..............:',
-                  'domain.changed' => 'Record last updated on..:'
-		              );
+{
+    public function parse($data_str, $query)
+    {
+        $items = [
+            'owner' => 'Registrant:',
+            'admin' => 'Administrative Contact:',
+            'tech' => 'Technical Contact, Zone Contact:',
+            'domain.name' => 'Domain Name:',
+            'domain.sponsor' => 'Registrar Name:',
+            'domain.nserver' => 'Domain servers in listed order:',
+            'domain.created' => 'Created on..............:',
+            'domain.expires' => 'Expires on..............:',
+            'domain.changed' => 'Record last updated on..:',
+        ];
 
-		$r = easy_parser($data_str, $items, 'dmy', false, false, true);
-		if (isset($r['domain']['sponsor']) && is_array($r['domain']['sponsor']))
-		$r['domain']['sponsor'] = $r['domain']['sponsor'][0];
-		return $r;
-		}
-	}
-?>
+        $r = easy_parser($data_str, $items, 'dmy', false, false, true);
+        if (isset($r['domain']['sponsor']) && is_array($r['domain']['sponsor'])) {
+            $r['domain']['sponsor'] = $r['domain']['sponsor'][0];
+        }
+        return $r;
+    }
+}

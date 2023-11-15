@@ -29,7 +29,7 @@
  * SOFTWARE.
  */
 
-if (!defined('PHP_VERSION_ID')) {
+if (! defined('PHP_VERSION_ID')) {
     // This constant was introduced in PHP 5.2.7
     $RandomCompatversion = array_map('intval', explode('.', PHP_VERSION));
     define(
@@ -48,17 +48,17 @@ if (PHP_VERSION_ID >= 70000) {
     return;
 }
 
-if (!defined('RANDOM_COMPAT_READ_BUFFER')) {
+if (! defined('RANDOM_COMPAT_READ_BUFFER')) {
     define('RANDOM_COMPAT_READ_BUFFER', 8);
 }
 
 $RandomCompatDIR = dirname(__FILE__);
 
-require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'byte_safe_strings.php';
-require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'cast_to_int.php';
-require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'error_polyfill.php';
+require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'byte_safe_strings.php';
+require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'cast_to_int.php';
+require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'error_polyfill.php';
 
-if (!is_callable('random_bytes')) {
+if (! is_callable('random_bytes')) {
     /**
      * PHP 5.2.0 - 5.6.x way to implement random_bytes()
      *
@@ -76,9 +76,9 @@ if (!is_callable('random_bytes')) {
     if (extension_loaded('libsodium')) {
         // See random_bytes_libsodium.php
         if (PHP_VERSION_ID >= 50300 && is_callable('\\Sodium\\randombytes_buf')) {
-            require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_bytes_libsodium.php';
+            require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_bytes_libsodium.php';
         } elseif (method_exists('Sodium', 'randombytes_buf')) {
-            require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_bytes_libsodium_legacy.php';
+            require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_bytes_libsodium_legacy.php';
         }
     }
 
@@ -91,20 +91,20 @@ if (!is_callable('random_bytes')) {
         $RandomCompatUrandom = true;
         $RandomCompat_basedir = ini_get('open_basedir');
 
-        if (!empty($RandomCompat_basedir)) {
+        if (! empty($RandomCompat_basedir)) {
             $RandomCompat_open_basedir = explode(
                 PATH_SEPARATOR,
                 strtolower($RandomCompat_basedir)
             );
-            $RandomCompatUrandom = (array() !== array_intersect(
-                array('/dev', '/dev/', '/dev/urandom'),
+            $RandomCompatUrandom = ([] !== array_intersect(
+                ['/dev', '/dev/', '/dev/urandom'],
                 $RandomCompat_open_basedir
             ));
             $RandomCompat_open_basedir = null;
         }
 
         if (
-            !is_callable('random_bytes')
+            ! is_callable('random_bytes')
             &&
             $RandomCompatUrandom
             &&
@@ -117,7 +117,7 @@ if (!is_callable('random_bytes')) {
             // place, that is not helpful to us here.
 
             // See random_bytes_dev_urandom.php
-            require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_bytes_dev_urandom.php';
+            require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_bytes_dev_urandom.php';
         }
         // Unset variables after use
         $RandomCompat_basedir = null;
@@ -144,7 +144,7 @@ if (!is_callable('random_bytes')) {
      *     we get insufficient entropy errors.
      */
     if (
-        !is_callable('random_bytes')
+        ! is_callable('random_bytes')
         &&
         // Windows on PHP < 5.3.7 is broken, but non-Windows is not known to be.
         (DIRECTORY_SEPARATOR === '/' || PHP_VERSION_ID >= 50307)
@@ -159,7 +159,7 @@ if (!is_callable('random_bytes')) {
         extension_loaded('mcrypt')
     ) {
         // See random_bytes_mcrypt.php
-        require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_bytes_mcrypt.php';
+        require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_bytes_mcrypt.php';
     }
     $RandomCompatUrandom = null;
 
@@ -168,7 +168,7 @@ if (!is_callable('random_bytes')) {
      * isn't loaded.
      */
     if (
-        !is_callable('random_bytes')
+        ! is_callable('random_bytes')
         &&
         extension_loaded('com_dotnet')
         &&
@@ -179,13 +179,13 @@ if (!is_callable('random_bytes')) {
             strtolower(ini_get('disable_classes'))
         );
 
-        if (!in_array('com', $RandomCompat_disabled_classes)) {
+        if (! in_array('com', $RandomCompat_disabled_classes)) {
             try {
                 $RandomCompatCOMtest = new COM('CAPICOM.Utilities.1');
                 /** @psalm-suppress TypeDoesNotContainType */
-                if (is_callable(array($RandomCompatCOMtest, 'GetRandom'))) {
+                if (is_callable([$RandomCompatCOMtest, 'GetRandom'])) {
                     // See random_bytes_com_dotnet.php
-                    require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_bytes_com_dotnet.php';
+                    require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_bytes_com_dotnet.php';
                 }
             } catch (com_exception $e) {
                 // Don't try to use it.
@@ -198,7 +198,7 @@ if (!is_callable('random_bytes')) {
     /**
      * throw new Exception
      */
-    if (!is_callable('random_bytes')) {
+    if (! is_callable('random_bytes')) {
         /**
          * We don't have any more options, so let's throw an exception right now
          * and hope the developer won't let it fail silently.
@@ -219,8 +219,8 @@ if (!is_callable('random_bytes')) {
     }
 }
 
-if (!is_callable('random_int')) {
-    require_once $RandomCompatDIR.DIRECTORY_SEPARATOR.'random_int.php';
+if (! is_callable('random_int')) {
+    require_once $RandomCompatDIR . DIRECTORY_SEPARATOR . 'random_int.php';
 }
 
 $RandomCompatDIR = null;

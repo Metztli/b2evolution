@@ -10,332 +10,289 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var AdminUI_general
  */
 global $AdminUI;
 
-$AdminUI->set_path( 'users', 'groups' );
+$AdminUI->set_path('users', 'groups');
 
-param_action( 'list' );
-param( 'tab', 'string', '', true );
+param_action('list');
+param('tab', 'string', '', true);
 
-param( 'grp_ID', 'integer', NULL );		// Note: should NOT be memorized:    -- " --
+param('grp_ID', 'integer', null);		// Note: should NOT be memorized:    -- " --
 
 /**
  * @global boolean true, if user is only allowed to view group
  */
-$user_view_group_only = ! check_user_perm( 'users', 'edit' );
+$user_view_group_only = ! check_user_perm('users', 'edit');
 
-if( $user_view_group_only )
-{ // User has no permissions to view: he can only edit his profile
+if ($user_view_group_only) { // User has no permissions to view: he can only edit his profile
+    if (isset($grp_ID)) { // User is trying to edit something he should not: add error message (Should be prevented by UI)
+        $Messages->add(TB_('You have no permission to edit groups!'), 'warning');
+    }
 
-	if( isset($grp_ID) )
-	{ // User is trying to edit something he should not: add error message (Should be prevented by UI)
-		$Messages->add( TB_('You have no permission to edit groups!'), 'warning' );
-	}
+    // Make sure the user only edits himself:
 
-	// Make sure the user only edits himself:
-
-	//$grp_ID = NULL;
-	if( ! in_array( $action, array( 'new', 'view') ) )
-	{
-		$action = 'view';
-	}
+    //$grp_ID = NULL;
+    if (! in_array($action, ['new', 'view'])) {
+        $action = 'view';
+    }
 }
 
 /*
  * Load editable objects and set $action (while checking permissions)
  */
 
-$UserCache  = & get_UserCache();
-$GroupCache = & get_GroupCache();
+$UserCache = &get_UserCache();
+$GroupCache = &get_GroupCache();
 
-if( $grp_ID !== NULL )
-{ // Group selected
-	if( $action == 'update' && $grp_ID == 0 )
-	{ // New Group:
-		$edited_Group = new Group();
-	}
-	elseif( ($edited_Group = & $GroupCache->get_by_ID( $grp_ID, false )) === false )
-	{ // We could not find the Group to edit:
-		unset( $edited_Group );
-		forget_param( 'grp_ID' );
-		$Messages->add( sprintf( TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Group') ), 'error' );
-		$action = 'list';
-	}
-	elseif( $action == 'list' )
-	{ // 'list' is default, $grp_ID given
-		if( check_user_perm( 'users', 'edit' ) )
-		{
-			$action = 'edit';
-		}
-		else
-		{
-			$action = 'view';
-		}
-	}
+if ($grp_ID !== null) { // Group selected
+    if ($action == 'update' && $grp_ID == 0) { // New Group:
+        $edited_Group = new Group();
+    } elseif (($edited_Group = &$GroupCache->get_by_ID($grp_ID, false)) === false) { // We could not find the Group to edit:
+        unset($edited_Group);
+        forget_param('grp_ID');
+        $Messages->add(sprintf(TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Group')), 'error');
+        $action = 'list';
+    } elseif ($action == 'list') { // 'list' is default, $grp_ID given
+        if (check_user_perm('users', 'edit')) {
+            $action = 'edit';
+        } else {
+            $action = 'view';
+        }
+    }
 
-	if( $action != 'view' && $action != 'list' && $action != 'filter' )
-	{ // check edit permissions
-		if( ! check_user_perm( 'users', 'edit' ) )
-		{
-			$Messages->add( TB_('You have no permission to edit groups!'), 'error' );
-			$action = 'view';
-		}
-		elseif( $demo_mode && ( $edited_Group->ID <= 7 ) )
-		{ // Demo mode restrictions: groups created by install process cannot be edited
-			$Messages->add( TB_('You cannot edit the default groups in demo mode!'), 'error' );
-			$action = 'view';
-		}
-	}
+    if ($action != 'view' && $action != 'list' && $action != 'filter') { // check edit permissions
+        if (! check_user_perm('users', 'edit')) {
+            $Messages->add(TB_('You have no permission to edit groups!'), 'error');
+            $action = 'view';
+        } elseif ($demo_mode && ($edited_Group->ID <= 7)) { // Demo mode restrictions: groups created by install process cannot be edited
+            $Messages->add(TB_('You cannot edit the default groups in demo mode!'), 'error');
+            $action = 'view';
+        }
+    }
 }
 
-switch ( $action )
-{
-	case 'new':
-		// We want to create a new group:
-		if( isset( $edited_Group ) )
-		{ // We want to use a template
-			$edited_Group->get_GroupSettings(); // Load all group settings
-			$new_Group = $edited_Group; // Copy !
-			$new_Group->set( 'ID', 0 );
-			$edited_Group = & $new_Group;
-		}
-		else
-		{ // We use an empty group:
-			$edited_Group = new Group();
-		}
+switch ($action) {
+    case 'new':
+        // We want to create a new group:
+        if (isset($edited_Group)) { // We want to use a template
+            $edited_Group->get_GroupSettings(); // Load all group settings
+            $new_Group = $edited_Group; // Copy !
+            $new_Group->set('ID', 0);
+            $edited_Group = &$new_Group;
+        } else { // We use an empty group:
+            $edited_Group = new Group();
+        }
 
-		break;
+        break;
 
 
-	case 'update':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'group' );
+    case 'update':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('group');
 
-		if( empty($edited_Group) || !is_object($edited_Group) )
-		{
-			$Messages->add( 'No group set!' ); // Needs no translation, should be prevented by UI.
-			$action = 'list';
-			break;
-		}
+        if (empty($edited_Group) || ! is_object($edited_Group)) {
+            $Messages->add('No group set!'); // Needs no translation, should be prevented by UI.
+            $action = 'list';
+            break;
+        }
 
-		if( $edited_Group->load_from_Request() )
-		{
+        if ($edited_Group->load_from_Request()) {
+            // check if the group name already exists for another group
+            $query = 'SELECT grp_ID FROM T_groups
+			           WHERE grp_name = ' . $DB->quote($edited_grp_name) . '
+			             AND grp_ID != ' . $edited_Group->ID;
+            if ($q = $DB->get_var($query)) {
+                param_error(
+                    'edited_grp_name',
+                    sprintf(
+                        TB_('This group name already exists! Do you want to <a %s>edit the existing group</a>?'),
+                        'href="?ctrl=groups&amp;action=edit&amp;grp_ID=' . $q . '"'
+                    )
+                );
+            }
+        }
 
-			// check if the group name already exists for another group
-			$query = 'SELECT grp_ID FROM T_groups
-			           WHERE grp_name = '.$DB->quote($edited_grp_name).'
-			             AND grp_ID != '.$edited_Group->ID;
-			if( $q = $DB->get_var( $query ) )
-			{
-				param_error( 'edited_grp_name',
-					sprintf( TB_('This group name already exists! Do you want to <a %s>edit the existing group</a>?'),
-						'href="?ctrl=groups&amp;action=edit&amp;grp_ID='.$q.'"' ) );
-			}
-		}
+        if ($Messages->has_errors()) {	// We have found validation errors:
+            $action = 'edit';
+            break;
+        }
 
-		if( $Messages->has_errors() )
-		{	// We have found validation errors:
-			$action = 'edit';
-			break;
-		}
+        if ($edited_Group->ID == 0) { // Insert into the DB:
+            $edited_Group->dbinsert();
+            $Messages->add(TB_('New group created.'), 'success');
+        } else { // Commit update to the DB:
+            $edited_Group->dbupdate();
+            $Messages->add(TB_('Group updated.'), 'success');
+        }
 
-		if( $edited_Group->ID == 0 )
-		{ // Insert into the DB:
-			$edited_Group->dbinsert();
-			$Messages->add( TB_('New group created.'), 'success' );
-		}
-		else
-		{ // Commit update to the DB:
-			$edited_Group->dbupdate();
-			$Messages->add( TB_('Group updated.'), 'success' );
-		}
+        // Commit changes in cache:
+        $GroupCache->add($edited_Group);
 
-		// Commit changes in cache:
-		$GroupCache->add( $edited_Group );
+        // Update plugin group settings:
+        load_funcs('plugins/_plugin.funcs.php');
 
-		// Update plugin group settings:
-		load_funcs( 'plugins/_plugin.funcs.php' );
+        $any_plugin_settings_updated = false;
+        $Plugins->restart();
+        while ($loop_Plugin = &$Plugins->get_next()) {
+            $tmp_params = [
+                'for_editing' => true,
+            ];
+            $plugin_group_settings = $loop_Plugin->GetDefaultGroupSettings($tmp_params);
+            if (empty($plugin_group_settings)) {	// Skip plugin without group settings:
+                continue;
+            }
 
-		$any_plugin_settings_updated = false;
-		$Plugins->restart();
-		while( $loop_Plugin = & $Plugins->get_next() )
-		{
-			$tmp_params = array( 'for_editing' => true );
-			$plugin_group_settings = $loop_Plugin->GetDefaultGroupSettings( $tmp_params );
-			if( empty( $plugin_group_settings ) )
-			{	// Skip plugin without group settings:
-				continue;
-			}
+            // Loop through settings for this plugin:
+            foreach ($plugin_group_settings as $set_name => $set_meta) {
+                autoform_set_param_from_request($set_name, $set_meta, $loop_Plugin, 'GroupSettings', $edited_Group);
+            }
 
-			// Loop through settings for this plugin:
-			foreach( $plugin_group_settings as $set_name => $set_meta )
-			{
-				autoform_set_param_from_request( $set_name, $set_meta, $loop_Plugin, 'GroupSettings', $edited_Group );
-			}
+            if ($loop_Plugin->GroupSettings->dbupdate()) {
+                $any_plugin_settings_updated = true;
+            }
+        }
 
-			if( $loop_Plugin->GroupSettings->dbupdate() )
-			{
-				$any_plugin_settings_updated = true;
-			}
-		}
+        if ($any_plugin_settings_updated) {
+            $Messages->add(TB_('Plugin group settings have been updated.'), 'success');
+        }
 
-		if( $any_plugin_settings_updated )
-		{
-			$Messages->add( TB_('Plugin group settings have been updated.'), 'success' );
-		}
-
-		if( param_errors_detected() )
-		{
-			$action = 'edit';
-		}
-		else
-		{	// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=groups', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		break;
+        if (param_errors_detected()) {
+            $action = 'edit';
+        } else {	// Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=groups', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        break;
 
 
-	case 'update_perms':
-		// Update permissions of the edited group for collections:
+    case 'update_perms':
+        // Update permissions of the edited group for collections:
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'group' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('group');
 
-		if( empty( $edited_Group ) || ! is_object( $edited_Group ) || $edited_Group->ID == 0 )
-		{
-			$Messages->add( 'No group set!' ); // Needs no translation, should be prevented by UI.
-			$action = 'list';
-			break;
-		}
+        if (empty($edited_Group) || ! is_object($edited_Group) || $edited_Group->ID == 0) {
+            $Messages->add('No group set!'); // Needs no translation, should be prevented by UI.
+            $action = 'list';
+            break;
+        }
 
-		// Update group permissions for each collection:
-		blog_update_perms( $edited_Group->ID, 'coll' );
-		$Messages->add( TB_('The collection permissions have been updated.'), 'success' );
+        // Update group permissions for each collection:
+        blog_update_perms($edited_Group->ID, 'coll');
+        $Messages->add(TB_('The collection permissions have been updated.'), 'success');
 
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( $admin_url.'?ctrl=groups&action=edit&tab=collection&grp_ID='.$edited_Group->ID, 303 ); // Will EXIT
-		// We have EXITed already at this point!!
-		break;
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect($admin_url . '?ctrl=groups&action=edit&tab=collection&grp_ID=' . $edited_Group->ID, 303); // Will EXIT
+        // We have EXITed already at this point!!
+        break;
 
 
-	case 'delete':
-		/*
-		 * Delete group
-		 */
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'group' );
+    case 'delete':
+        /*
+         * Delete group
+         */
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('group');
 
-		if( !isset($edited_Group) )
-		{
-			debug_die( 'no Group set' );
-		}
+        if (! isset($edited_Group)) {
+            debug_die('no Group set');
+        }
 
-		if( $edited_Group->ID == 1 )
-		{
-			$Messages->add( TB_('You can\'t delete Group #1!'), 'error' );
-			$action = 'view';
-			break;
-		}
-		if( $edited_Group->ID == $Settings->get('newusers_grp_ID' ) )
-		{
-			$Messages->add( TB_('You can\'t delete the default group for new users!'), 'error' );
-			$action = 'view';
-			break;
-		}
+        if ($edited_Group->ID == 1) {
+            $Messages->add(TB_('You can\'t delete Group #1!'), 'error');
+            $action = 'view';
+            break;
+        }
+        if ($edited_Group->ID == $Settings->get('newusers_grp_ID')) {
+            $Messages->add(TB_('You can\'t delete the default group for new users!'), 'error');
+            $action = 'view';
+            break;
+        }
 
-		if( param( 'confirm', 'integer', 0 ) )
-		{ // confirmed, Delete from DB:
-			$msg = sprintf( TB_('Group &laquo;%s&raquo; deleted.'), $edited_Group->dget( 'name' ) );
-			$edited_Group->dbdelete();
-			unset($edited_Group);
-			forget_param('grp_ID');
-			$Messages->add( $msg, 'success' );
+        if (param('confirm', 'integer', 0)) { // confirmed, Delete from DB:
+            $msg = sprintf(TB_('Group &laquo;%s&raquo; deleted.'), $edited_Group->dget('name'));
+            $edited_Group->dbdelete();
+            unset($edited_Group);
+            forget_param('grp_ID');
+            $Messages->add($msg, 'success');
 
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=groups', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		else
-		{	// not confirmed, Check for restrictions:
-			memorize_param( 'grp_ID', 'integer', true );
-			if( ! $edited_Group->check_delete( sprintf( TB_('Cannot delete Group &laquo;%s&raquo;'), $edited_Group->dget( 'name' ) ) ) )
-			{	// There are restrictions:
-				$action = 'view';
-			}
-		}
-		break;
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=groups', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        } else {	// not confirmed, Check for restrictions:
+            memorize_param('grp_ID', 'integer', true);
+            if (! $edited_Group->check_delete(sprintf(TB_('Cannot delete Group &laquo;%s&raquo;'), $edited_Group->dget('name')))) {	// There are restrictions:
+                $action = 'view';
+            }
+        }
+        break;
 }
 
 
-$AdminUI->breadcrumbpath_init( false );  // fp> I'm playing with the idea of keeping the current blog in the path here...
-$AdminUI->breadcrumbpath_add( TB_('Users'), '?ctrl=users' );
-$AdminUI->breadcrumbpath_add( TB_('Groups'), '?ctrl=groups' );
-if( !empty( $edited_Group ) )
-{
-	if( $edited_Group->ID > 0 )
-	{	// Edit group
-		$AdminUI->breadcrumbpath_add( $edited_Group->dget('name'), '?ctrl=groups&amp;action=edit&amp;grp_ID='.$edited_Group->ID );
-	}
-	else
-	{	// New group
-		$AdminUI->breadcrumbpath_add( $edited_Group->dget('name'), '?ctrl=groups&amp;action=new' );
-	}
+$AdminUI->breadcrumbpath_init(false);  // fp> I'm playing with the idea of keeping the current blog in the path here...
+$AdminUI->breadcrumbpath_add(TB_('Users'), '?ctrl=users');
+$AdminUI->breadcrumbpath_add(TB_('Groups'), '?ctrl=groups');
+if (! empty($edited_Group)) {
+    if ($edited_Group->ID > 0) {	// Edit group
+        $AdminUI->breadcrumbpath_add($edited_Group->dget('name'), '?ctrl=groups&amp;action=edit&amp;grp_ID=' . $edited_Group->ID);
+    } else {	// New group
+        $AdminUI->breadcrumbpath_add($edited_Group->dget('name'), '?ctrl=groups&amp;action=new');
+    }
 }
-if( $action == 'list' && check_user_perm( 'users', 'edit', false ) )
-{ // Include to edit group level
-	require_js_defer( 'customized:jquery/jeditable/jquery.jeditable.js', 'rsc_url' );
+if ($action == 'list' && check_user_perm('users', 'edit', false)) { // Include to edit group level
+    require_js_defer('customized:jquery/jeditable/jquery.jeditable.js', 'rsc_url');
 }
 
 // Set an url for manual page:
-switch( $action )
-{
-	case 'new':
-		$AdminUI->set_page_manual_link( 'editing-user-groups' );
-		break;
+switch ($action) {
+    case 'new':
+        $AdminUI->set_page_manual_link('editing-user-groups');
+        break;
 
-	case 'edit':
-	case 'filter':
-		if( $edited_Group->ID > 0 )
-		{	// Add menu level 3 entries:
-			$AdminUI->add_menu_entries( array( 'users', 'groups' ), array(
-					'general' => array(
-						'text' => TB_('General Permissions'),
-						'href' => $admin_url.'?ctrl=groups&amp;action=edit&amp;tab=general&amp;grp_ID='.$edited_Group->ID ),
-					'collection' => array(
-						'text' => TB_('Collection Permissions'),
-						'href' => $admin_url.'?ctrl=groups&amp;action=edit&amp;tab=collection&amp;grp_ID='.$edited_Group->ID ),
-				) );
-		}
+    case 'edit':
+    case 'filter':
+        if ($edited_Group->ID > 0) {	// Add menu level 3 entries:
+            $AdminUI->add_menu_entries(['users', 'groups'], [
+                'general' => [
+                    'text' => TB_('General Permissions'),
+                    'href' => $admin_url . '?ctrl=groups&amp;action=edit&amp;tab=general&amp;grp_ID=' . $edited_Group->ID,
+                ],
+                'collection' => [
+                    'text' => TB_('Collection Permissions'),
+                    'href' => $admin_url . '?ctrl=groups&amp;action=edit&amp;tab=collection&amp;grp_ID=' . $edited_Group->ID,
+                ],
+            ]);
+        }
 
-		switch( $tab )
-		{
-			case 'collection':
-				// Collection Permissions:
-				$AdminUI->set_page_manual_link( 'group-collection-permissions' );
-				$AdminUI->set_path( 'users', 'groups', 'collection' );
-				// Memorize group ID to sort permissions table:
-				memorize_param( 'grp_ID', 'integer', true );
-				// Memorize action to filter permissions table:
-				memorize_param( 'action', 'string', true );
-				// Load JavaScript to toggle checkboxes:
-				require_js_defer( 'collectionperms.js', 'rsc_url' );
-				break;
-			default:
-				// General Permissions:
-				$AdminUI->set_page_manual_link( 'editing-user-groups' );
-				$AdminUI->set_path( 'users', 'groups', 'general' );
-				break;
-		}
-		break;
-	default:
-		$AdminUI->set_page_manual_link( 'user-groups' );
-		break;
+        switch ($tab) {
+            case 'collection':
+                // Collection Permissions:
+                $AdminUI->set_page_manual_link('group-collection-permissions');
+                $AdminUI->set_path('users', 'groups', 'collection');
+                // Memorize group ID to sort permissions table:
+                memorize_param('grp_ID', 'integer', true);
+                // Memorize action to filter permissions table:
+                memorize_param('action', 'string', true);
+                // Load JavaScript to toggle checkboxes:
+                require_js_defer('collectionperms.js', 'rsc_url');
+                break;
+            default:
+                // General Permissions:
+                $AdminUI->set_page_manual_link('editing-user-groups');
+                $AdminUI->set_path('users', 'groups', 'general');
+                break;
+        }
+        break;
+    default:
+        $AdminUI->set_page_manual_link('user-groups');
+        break;
 }
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -348,36 +305,38 @@ $AdminUI->disp_body_top();
 $AdminUI->disp_payload_begin();
 
 // Display VIEW:
-switch( $action )
-{
-	case 'new':
-		$AdminUI->disp_view( 'users/views/_group.form.php' );
-		break;
-	case 'edit':
-	case 'filter':
-		switch( $tab )
-		{
-			case 'collection':
-				// Collection Permissions:
-				load_funcs( 'collections/views/_coll_perm_view.funcs.php' );
-				$AdminUI->disp_view( 'users/views/_group_coll_perm.form.php' );
-				break;
-			default:
-				// General Permissions:
-				$AdminUI->disp_view( 'users/views/_group.form.php' );
-				break;
-		}
-		break;
-	case 'nil':
-		// Do nothing
-		break;
-	case 'delete':
-			// We need to ask for confirmation:
-			$edited_Group->confirm_delete(
-					sprintf( TB_('Delete group &laquo;%s&raquo;?'), $edited_Group->dget( 'name' ) ),
-					'group', $action, get_memorized( 'action' ) );
-	default:
-		$AdminUI->disp_view( 'users/views/_group.view.php' );
+switch ($action) {
+    case 'new':
+        $AdminUI->disp_view('users/views/_group.form.php');
+        break;
+    case 'edit':
+    case 'filter':
+        switch ($tab) {
+            case 'collection':
+                // Collection Permissions:
+                load_funcs('collections/views/_coll_perm_view.funcs.php');
+                $AdminUI->disp_view('users/views/_group_coll_perm.form.php');
+                break;
+            default:
+                // General Permissions:
+                $AdminUI->disp_view('users/views/_group.form.php');
+                break;
+        }
+        break;
+    case 'nil':
+        // Do nothing
+        break;
+    case 'delete':
+        // We need to ask for confirmation:
+        $edited_Group->confirm_delete(
+            sprintf(TB_('Delete group &laquo;%s&raquo;?'), $edited_Group->dget('name')),
+            'group',
+            $action,
+            get_memorized('action')
+        );
+        // no break
+    default:
+        $AdminUI->disp_view('users/views/_group.view.php');
 }
 
 // End payload block:
@@ -385,5 +344,3 @@ $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

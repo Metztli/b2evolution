@@ -9,18 +9,17 @@
  *                tap into the same language file.)
  *  - 'charset':  Character set of the locale's messages files.
  */
-$locale_defs['fr-FR'] = array(
-		'name' => NT_('French (FR) utf-8'),
-		'messages' => 'fr_FR',
-		'charset' => 'utf-8',
-		'datefmt' => 'd.m.y',
-		'longdatefmt' => 'd.m.Y',
-		'extdatefmt' => 'd M Y',
-		'input_datefmt' => 'd.m.y',
-		'timefmt' => 'H:i:s',
-		'shorttimefmt' => 'H:i',
-		'input_timefmt' => 'H:i:s',
-		'startofweek' => 1,
-		'transliteration_map' => array(),
-	);
-?>
+$locale_defs['fr-FR'] = [
+    'name' => NT_('French (FR) utf-8'),
+    'messages' => 'fr_FR',
+    'charset' => 'utf-8',
+    'datefmt' => 'd.m.y',
+    'longdatefmt' => 'd.m.Y',
+    'extdatefmt' => 'd M Y',
+    'input_datefmt' => 'd.m.y',
+    'timefmt' => 'H:i:s',
+    'shorttimefmt' => 'H:i',
+    'input_timefmt' => 'H:i:s',
+    'startofweek' => 1,
+    'transliteration_map' => [],
+];

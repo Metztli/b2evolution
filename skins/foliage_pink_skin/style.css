@@ -1,0 +1,249 @@
+* {
+	padding: 0px;
+	margin: 0px;
+}
+body {
+	font-family: 'Trebuchet MS', Tahoma, Arial, Helvetica, sans-serif;
+	background-color: #d6b6c7;
+	font-size: 8pt;
+	color: #252525;
+}
+#wrap {
+	width: 650px;
+	background: url(images/bg.gif) repeat-y center;
+	text-align: left;
+}
+#header {
+	background:url(images/background_header.gif) no-repeat;
+	height: 150px;
+}
+#search {
+	padding: 10px 10px 0px 0px;
+	text-align: right;
+}
+#title {
+	padding: 10px 10px 0px 0px;
+	text-align: right;
+}
+#navigation {
+	clear: both;
+	text-align: right;
+	padding-right: 10px;
+	margin-top: 15px;
+	font-weight: bold;
+	font-size: 10pt;
+}
+#main {
+
+}
+#sidebar {
+	margin: 0px 500px 0px 0px;
+	color: #ffffff;
+	padding: 10px;
+	background-color: #bc80a0;
+}
+
+#content {
+	float: right;
+	text-align: left;
+	padding: 10px;
+	width: 480px;
+	background: url(images/background_content.gif) top no-repeat #ffffff;
+}
+#footer {
+	clear: both;
+	padding-top: 30px;
+	background: url(images/bottom.gif) no-repeat top;
+	width: 650px;
+	text-align: left;
+}
+#footer a {
+	color: #252525;
+	text-decoration: none;
+}
+/* text */
+#title h1 {
+	font-size: 18pt;
+	color: #736d70;
+}
+#title h1 a {
+	color: #736d70;
+	text-decoration: none;
+}
+.description {
+	color: #736d70;
+	font-size: 12pt;
+}
+#navigation ul li {
+	list-style: none;
+	display: inline;
+}
+#navigation li a {
+	padding: 2px 6px;
+	background-color: #bc80a0;
+	color: #ffffff;
+	text-decoration: none;
+		margin-left: 5px;
+}
+#navigation li a:hover {
+	background-color: #d6b6c7;
+	color: #252525;
+}
+#content h1 {
+	color: #736d70;
+	font-size: 14pt;
+}
+#content h1 a {
+	color: #736d70;
+	text-decoration: none;
+}
+#content h1,
+#content h2,
+h3,
+h4,
+p,
+#sidebar h2,
+#sidebar ul,
+#content ul,
+#content ol {
+	padding-bottom: 10px;
+}
+#sidebar h2 {
+	font-size: 11pt;
+}
+#content ul,
+#content ol {
+	margin-left: 25px;
+}
+#content a {
+	color: #bc80a0;
+	text-decoration: none
+}
+#sidebar ul li {
+	list-style: none;
+}
+#sidebar li {
+	padding-bottom: 2px;
+}
+#sidebar a {
+	color: #ffffff;
+	text-decoration: none;
+}
+#sidebar a:hover {
+	text-decoration: underline;
+}
+.postmetadata {
+	color: #999999;
+	padding: 10px 0px;
+}
+.postmetadata a {
+	color: #999999;
+	text-decoration: none;
+}
+blockquote {
+	background-color: #d6b6c7;
+	padding: 10px;
+	font-size: 9pt;
+	margin: 10px;
+	color: #252525;
+}
+blockquote {
+	color: #252525;
+}
+/* form */
+
+fieldset {
+	border: 0px; 
+	padding: 0px 15px 15px 15px;
+}
+input, textarea {
+	border: 1px solid #CCCCCC;
+	font-size: 10pt;
+	font-weight: bold;
+	padding: 2px 4px;
+	color: #999999;
+	margin-bottom: 2px;
+}
+.label {
+	font-weight: bold;
+}
+.notes {
+	font-style: italic;
+}
+
+#commentform a {
+	color: #85ccfb;
+	text-decoration: none;
+}
+#commentform a:hover {
+	color: #85ccfb;	
+	text-decoration: underline;
+}
+.bComment {
+	padding: 0px 15px;
+}
+.bCommentText {
+	padding: 10px 15px;
+}
+.bCommentSmallPrint {
+	font-size: 7pt;
+	padding: 0px 15px;
+}
+.feedback_feed_msg {
+	padding: 10px 15px;
+}
+.widget_core_coll_longdesc p {
+	padding-bottom: 0px;
+}
+.powered_by {
+	padding: 10px 0px;
+}
+.widget_core_coll_title {
+	padding-top: 10px;
+}
+.widget_plugin_evo_Calr {
+	font-size: 7pt;
+}
+/* ---------------------------------------------------------- */
+#evo_toolbar ul li,
+#evo_toolbar ol li {
+   margin-left: 0;
+}
+#content blockquote p {
+	padding-top: 10px;
+}
+#content .search_field {
+	width: 90% !important;
+}
+#sidebar .submit {
+	border: 1px solid #FFF !important;
+	color: #FFF !important;
+	border-radius: 0px !important;
+	cursor: pointer;
+	background-color: transparent;
+}
+ input.search_field {
+	width: 90px !important;
+}
+textarea.bComment {
+	width: auto !important;
+	padding-top: 15px;
+}
+form.bComment input.preview {
+	border: 1px solid #bc80a0 !important;
+	color: #bc80a0 !important;
+	border-radius: 0px !important;
+	cursor: pointer;
+	background-color: transparent;
+}
+form.bComment input.submit, #content .submit {
+	border: 1px solid #bc80a0 !important;
+	color: #FFF !important;
+	border-radius: 0px !important;
+	cursor: pointer;
+	background-color: #bc80a0;
+}
+.sitewide_header {
+	margin-bottom: 0px !important;
+	box-shadow: none !important;
+}

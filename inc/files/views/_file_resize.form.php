@@ -11,7 +11,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -20,34 +22,34 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
 global $Settings, $selected_Filelist;
 
 
-$Form = new Form( NULL );
+$Form = new Form(null);
 
-$Form->global_icon( TB_('Cancel resize!'), 'close', regenerate_url() );
+$Form->global_icon(TB_('Cancel resize!'), 'close', regenerate_url());
 
-$Form->begin_form( 'fform', TB_('Resize') );
+$Form->begin_form('fform', TB_('Resize'));
 
-	$Form->add_crumb( 'file' );
-	$Form->hidden_ctrl();
-	$Form->hiddens_by_key( get_memorized() );
-	$Form->hidden( 'action', 'resize' );
-	$Form->hidden( 'confirmed', 1 );
+$Form->add_crumb('file');
+$Form->hidden_ctrl();
+$Form->hiddens_by_key(get_memorized());
+$Form->hidden('action', 'resize');
+$Form->hidden('confirmed', 1);
 
-	$Form->begin_fieldset( TB_('Confirm resize') );
+$Form->begin_fieldset(TB_('Confirm resize'));
 
-	echo sprintf( TB_('%s images will be resized to fit %s. Are you sure?'), $selected_Filelist->count(),
-			$Settings->get( 'fm_resize_width' ).'x'.$Settings->get( 'fm_resize_height' ) );
+echo sprintf(
+    TB_('%s images will be resized to fit %s. Are you sure?'),
+    $selected_Filelist->count(),
+    $Settings->get('fm_resize_width') . 'x' . $Settings->get('fm_resize_height')
+);
 
-	$selected_Filelist->restart();
-	echo '<ul>';
-		while( $l_File = & $selected_Filelist->get_next() )
-		{
-			echo '<li>'.$l_File->get_prefixed_name().'</li>';
-		}
-	echo '</ul>';
+$selected_Filelist->restart();
+echo '<ul>';
+while ($l_File = &$selected_Filelist->get_next()) {
+    echo '<li>' . $l_File->get_prefixed_name() . '</li>';
+}
+echo '</ul>';
 
-	$Form->end_fieldset();
+$Form->end_fieldset();
 
-$Form->end_form( array(
-		array( 'submit', 'submit', TB_('Resize'), 'SaveButton' ) ) );
-
-?>
+$Form->end_form([
+    ['submit', 'submit', TB_('Resize'), 'SaveButton']]);

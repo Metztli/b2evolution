@@ -12,7 +12,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var Blog
@@ -26,136 +28,145 @@ global $ItemList;
 global $edit_item_url, $delete_item_url;
 global $Session;
 
-if( $highlight = param( 'highlight', 'integer', NULL ) )
-{	// There are lines we want to highlight:
-	$result_fadeout = array( 'post_ID' => array($highlight) );
-}
-elseif ( $highlight = $Session->get( 'highlight_id' ) )
-{
-	$result_fadeout = array( 'post_ID' => array($highlight) );
-	$Session->delete( 'highlight_id' );
-}
-else
-{	// Nothing to highlight
-	$result_fadeout = NULL;
+if ($highlight = param('highlight', 'integer', null)) {	// There are lines we want to highlight:
+    $result_fadeout = [
+        'post_ID' => [$highlight],
+    ];
+} elseif ($highlight = $Session->get('highlight_id')) {
+    $result_fadeout = [
+        'post_ID' => [$highlight],
+    ];
+    $Session->delete('highlight_id');
+} else {	// Nothing to highlight
+    $result_fadeout = null;
 }
 
 
-$ItemList->filter_area = array(
-		'callback' => 'callback_filter_item_list_table',
-		'apply_filters_button' => 'none',
-	);
+$ItemList->filter_area = [
+    'callback' => 'callback_filter_item_list_table',
+    'apply_filters_button' => 'none',
+];
 
 
 /*
-	**
-	 * Callback to add filters on top of the result set
-	 *
-	function filter_on_post_title( & $Form )
-	{
-		global $pagenow, $post_filter;
+    **
+     * Callback to add filters on top of the result set
+     *
+    function filter_on_post_title( & $Form )
+    {
+        global $pagenow, $post_filter;
 
-		$Form->hidden( 'filter_on_post_title', 1 );
-		$Form->text( 'post_filter', $post_filter, 20, T_('Task title'), '', 60 );
-	}
-	$ItemList->filters_callback = 'filter_on_post_title';
+        $Form->hidden( 'filter_on_post_title', 1 );
+        $Form->text( 'post_filter', $post_filter, 20, T_('Task title'), '', 60 );
+    }
+    $ItemList->filters_callback = 'filter_on_post_title';
 */
 
 
-$ItemList->title = T_('Task list').get_manual_link( 'task-list' );
+$ItemList->title = T_('Task list') . get_manual_link('task-list');
 
-$ItemList->cols[] = array(
-						'th' => /* TRANS: abbrev for Priority */ T_('Priority'),
-						'order' => 'priority',
-						'th_class' => 'shrinkwrap',
-						'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_priority_edit" )%',
-						'td' => '%item_td_task_cell( "priority", {Obj} )%',
-						'extra' => array( 'rel' => '#post_ID#', 'style' => 'background-color: %item_priority_color( "#post_priority#" )%;', 'format_to_output' => false )
-					);
+$ItemList->cols[] = [
+    'th' => /* TRANS: abbrev for Priority */ T_('Priority'),
+    'order' => 'priority',
+    'th_class' => 'shrinkwrap',
+    'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_priority_edit" )%',
+    'td' => '%item_td_task_cell( "priority", {Obj} )%',
+    'extra' => [
+        'rel' => '#post_ID#',
+        'style' => 'background-color: %item_priority_color( "#post_priority#" )%;',
+        'format_to_output' => false,
+    ],
+];
 
-$ItemList->cols[] = array(
-						'th' => T_('Item/Task'),
-						'order' => 'title',
-						'td_class' => 'tskst_$post_pst_ID$',
-						'td' => '<strong lang="@get(\'locale\')@">%task_title_link( {Obj}, 1 )%</strong>'.
-						        ( is_admin_page() ? ' @get_permanent_link( get_icon(\'permalink\'), \'\', \'\', \'auto\' )@' : '' ),
-					);
+$ItemList->cols[] = [
+    'th' => T_('Item/Task'),
+    'order' => 'title',
+    'td_class' => 'tskst_$post_pst_ID$',
+    'td' => '<strong lang="@get(\'locale\')@">%task_title_link( {Obj}, 1 )%</strong>' .
+            (is_admin_page() ? ' @get_permanent_link( get_icon(\'permalink\'), \'\', \'\', \'auto\' )@' : ''),
+];
 
-$ItemList->cols[] = array(
-						'th' => T_('Slug'),
-						'order' => 'urltitle',
-						'td' => '%item_row_slug( #post_urltitle# )%',
-						'th_class' => 'shrinkwrap',
-						'td_class' => 'shrinkwrap left',
-					);
+$ItemList->cols[] = [
+    'th' => T_('Slug'),
+    'order' => 'urltitle',
+    'td' => '%item_row_slug( #post_urltitle# )%',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap left',
+];
 
-$ItemList->cols[] = array(
-						'th' => T_('Status'),
-						'th_class' => 'shrinkwrap',
-						'td_class' => 'shrinkwrap left',
-						'order' => 'status',
-						'td' => '%item_row_status( {Obj}, {CUR_IDX} )%',
-					);
+$ItemList->cols[] = [
+    'th' => T_('Status'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap left',
+    'order' => 'status',
+    'td' => '%item_row_status( {Obj}, {CUR_IDX} )%',
+];
 
-$ItemList->cols[] = array(
-						'th' => T_('Assigned'),
-						'order' => 'assigned_user_ID',
-						'th_class' => 'shrinkwrap',
-						'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_assigned_edit" )%',
-						'td' => '%item_td_task_cell( "assigned", {Obj} )%',
-						'extra' => array( 'rel' => '#post_ID#', 'format_to_output' => false )
-					);
+$ItemList->cols[] = [
+    'th' => T_('Assigned'),
+    'order' => 'assigned_user_ID',
+    'th_class' => 'shrinkwrap',
+    'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_assigned_edit" )%',
+    'td' => '%item_td_task_cell( "assigned", {Obj} )%',
+    'extra' => [
+        'rel' => '#post_ID#',
+        'format_to_output' => false,
+    ],
+];
 
-$ItemList->cols[] = array(
-						'th' => T_('Workflow Status'),
-						'order' => 'pst_ID',
-						'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_status_edit" )%',
-						'td' => '%item_td_task_cell( "status", {Obj} )%',
-						'extra' => array( 'rel' => '#post_ID#', 'data-post-type' => '#post_ityp_ID#', 'format_to_output' => false )
-					);
+$ItemList->cols[] = [
+    'th' => T_('Workflow Status'),
+    'order' => 'pst_ID',
+    'td_class' => '%item_td_task_class( #post_ID#, #post_pst_ID#, "jeditable_cell task_status_edit" )%',
+    'td' => '%item_td_task_cell( "status", {Obj} )%',
+    'extra' => [
+        'rel' => '#post_ID#',
+        'data-post-type' => '#post_ityp_ID#',
+        'format_to_output' => false,
+    ],
+];
 
-if( $Blog->get_setting( 'use_deadline' ) )
-{	// Display deadline column only when it is enabled for collection:
-	function deadline( $date )
-	{
-		$timestamp = mysql2timestamp( $date );
+if ($Blog->get_setting('use_deadline')) {	// Display deadline column only when it is enabled for collection:
+    function deadline($date)
+    {
+        $timestamp = mysql2timestamp($date);
 
-		if( $timestamp <= 0 )
-		{
-			return '&nbsp;';	// IE needs that crap in order to display cell border :/
-		}
+        if ($timestamp <= 0) {
+            return '&nbsp;';	// IE needs that crap in order to display cell border :/
+        }
 
-		return mysql2localedate( $date );
-	}
-	$ItemList->cols[] = array(
-						'th' => T_('Deadline'),
-						'order' => 'post_datedeadline',
-						'td_class' => 'shrinkwrap tskst_$post_pst_ID$',
-						'td' => '%deadline( #post_datedeadline# )%',
-					);
+        return mysql2localedate($date);
+    }
+    $ItemList->cols[] = [
+        'th' => T_('Deadline'),
+        'order' => 'post_datedeadline',
+        'td_class' => 'shrinkwrap tskst_$post_pst_ID$',
+        'td' => '%deadline( #post_datedeadline# )%',
+    ];
 }
 
 
-$ItemList->cols[] = array(
-		'th' => /* TRANS: abbrev for info */ T_('i'),
-		'order' => 'datemodified',
-		'default_dir' => 'D',
-		'th_class' => 'shrinkwrap hidden-xs',
-		'td_class' => 'shrinkwrap hidden-xs',
-		'td' => '@history_info_icon()@',
-	);
+$ItemList->cols[] = [
+    'th' => /* TRANS: abbrev for info */ T_('i'),
+    'order' => 'datemodified',
+    'default_dir' => 'D',
+    'th_class' => 'shrinkwrap hidden-xs',
+    'td_class' => 'shrinkwrap hidden-xs',
+    'td' => '@history_info_icon()@',
+];
 
-$ItemList->cols[] = array(
-		'th' => T_('Actions'),
-		'th_class' => 'shrinkwrap hidden-xs',
-		'td_class' => 'shrinkwrap hidden-xs',
-		'td' => '%item_edit_actions( {Obj} )%',
-	);
+$ItemList->cols[] = [
+    'th' => T_('Actions'),
+    'th_class' => 'shrinkwrap hidden-xs',
+    'td_class' => 'shrinkwrap hidden-xs',
+    'td' => '%item_edit_actions( {Obj} )%',
+];
 
 
-if( check_user_perm( 'blog_post_statuses', 'edit', false, $Blog->ID ) )
-{	// We have permission to add a post with at least one status:
-	$ItemList->global_icon( T_('Create a new task...'), 'new', '?ctrl=items&amp;action=new&amp;blog='.$Blog->ID.'&amp;redirect_to='.rawurlencode( regenerate_url( '', '', '', '&' ) ), T_('New task').' &raquo;', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+if (check_user_perm('blog_post_statuses', 'edit', false, $Blog->ID)) {	// We have permission to add a post with at least one status:
+    $ItemList->global_icon(T_('Create a new task...'), 'new', '?ctrl=items&amp;action=new&amp;blog=' . $Blog->ID . '&amp;redirect_to=' . rawurlencode(regenerate_url('', '', '', '&')), T_('New task') . ' &raquo;', 3, 4, [
+        'class' => 'action_icon btn-primary',
+    ]);
 }
 
 
@@ -168,63 +179,63 @@ $postIDlist = $ItemList->get_page_ID_list();
 $postIDarray = $ItemList->get_page_ID_array();
 
 // DISPLAY table now:
-$ItemList->display( NULL, $result_fadeout );
+$ItemList->display(null, $result_fadeout);
 
 // Print JS to edit a task priority
-echo_editable_column_js( array(
-	'column_selector' => '.task_priority_edit',
-	'ajax_url'        => get_htsrv_url().'async.php?action=item_task_edit&field=priority&'.url_crumb( 'itemtask' ),
-	'options'         => item_priority_titles(),
-	'new_field_name'  => 'new_priority',
-	'ID_value'        => 'jQuery( this ).attr( "rel" )',
-	'ID_name'         => 'post_ID',
-	'colored_cells'   => true ) );
+echo_editable_column_js([
+    'column_selector' => '.task_priority_edit',
+    'ajax_url' => get_htsrv_url() . 'async.php?action=item_task_edit&field=priority&' . url_crumb('itemtask'),
+    'options' => item_priority_titles(),
+    'new_field_name' => 'new_priority',
+    'ID_value' => 'jQuery( this ).attr( "rel" )',
+    'ID_name' => 'post_ID',
+    'colored_cells' => true,
+]);
 
 // Print JS to edit a task assigned
 // Load current blog members into cache:
-$UserCache = & get_UserCache();
+$UserCache = &get_UserCache();
 // Load only first 21 users to know when we should display an input box instead of full users list
-$UserCache->load_blogmembers( $Blog->ID, 21, false );
+$UserCache->load_blogmembers($Blog->ID, 21, false);
 // Init this array only for <select> when we have less than 21 users, otherwise we use <input> field with autocomplete feature
-$field_type = count( $UserCache->cache ) < 21 ? 'select' : 'text';
+$field_type = count($UserCache->cache) < 21 ? 'select' : 'text';
 
-$task_assignees = array( 0 => T_('No user') );
-if( $field_type == 'select' )
-{
-	foreach( $UserCache->cache as $User )
-	{
-		$task_assignees[ $User->ID ] = $User->login;
-	}
+$task_assignees = [
+    0 => T_('No user'),
+];
+if ($field_type == 'select') {
+    foreach ($UserCache->cache as $User) {
+        $task_assignees[$User->ID] = $User->login;
+    }
 }
-echo_editable_column_js( array(
-	'column_selector' => '.task_assigned_edit',
-	'ajax_url'        => get_htsrv_url().'async.php?action=item_task_edit&field=assigned&'.url_crumb( 'itemtask' ),
-	'options'         => $task_assignees,
-	'new_field_name'  => $field_type == 'select' ? 'new_assigned_ID' : 'new_assigned_login',
-	'ID_value'        => 'jQuery( this ).attr( "rel" )',
-	'ID_name'         => 'post_ID',
-	'field_type'      => $field_type,
-	'field_class'     => 'autocomplete_login only_assignees',
-	'null_text'       => T_('No user') ) );
+echo_editable_column_js([
+    'column_selector' => '.task_assigned_edit',
+    'ajax_url' => get_htsrv_url() . 'async.php?action=item_task_edit&field=assigned&' . url_crumb('itemtask'),
+    'options' => $task_assignees,
+    'new_field_name' => $field_type == 'select' ? 'new_assigned_ID' : 'new_assigned_login',
+    'ID_value' => 'jQuery( this ).attr( "rel" )',
+    'ID_name' => 'post_ID',
+    'field_type' => $field_type,
+    'field_class' => 'autocomplete_login only_assignees',
+    'null_text' => T_('No user'),
+]);
 
 // Print JS to edit a task status
 global $DB;
-$post_status_types = $DB->get_results( 'SELECT its_ityp_ID, its_pst_ID, pst_name FROM T_items__status_type LEFT JOIN T_items__status ON pst_ID = its_pst_ID' );
-$post_statuses = array();
-foreach( $post_status_types as $post_status_type )
-{
-	if( ! isset( $post_statuses[$post_status_type->its_ityp_ID] ) )
-	{
-		$post_statuses[$post_status_type->its_ityp_ID] = array();
-	}
+$post_status_types = $DB->get_results('SELECT its_ityp_ID, its_pst_ID, pst_name FROM T_items__status_type LEFT JOIN T_items__status ON pst_ID = its_pst_ID');
+$post_statuses = [];
+foreach ($post_status_types as $post_status_type) {
+    if (! isset($post_statuses[$post_status_type->its_ityp_ID])) {
+        $post_statuses[$post_status_type->its_ityp_ID] = [];
+    }
 
-	// Add '_' to don't break a sorting by name on jeditable:
-	$post_statuses[$post_status_type->its_ityp_ID]['_'.$post_status_type->its_pst_ID] = $post_status_type->pst_name;
+    // Add '_' to don't break a sorting by name on jeditable:
+    $post_statuses[$post_status_type->its_ityp_ID]['_' . $post_status_type->its_pst_ID] = $post_status_type->pst_name;
 }
 
 ?>
 <script>
-	var itemStatuses = <?php echo json_encode( $post_statuses );?>;
+	var itemStatuses = <?php echo json_encode($post_statuses); ?>;
 
 	function getApplicableStatus( el, selected ) {
 		var postType = el.attr( "data-post-type" );
@@ -236,11 +247,12 @@ foreach( $post_status_types as $post_status_type )
 	}
 </script>
 <?php
-echo_editable_column_js( array(
-	'column_selector' => '.task_status_edit',
-	'ajax_url'        => get_htsrv_url().'async.php?action=item_task_edit&field=status&'.url_crumb( 'itemtask' ),
-	'options_eval'    => 'getApplicableStatus( jQuery( this ), result[1] );',
-	'new_field_name'  => 'new_status',
-	'ID_value'        => 'jQuery( this ).attr( "rel" )',
-	'ID_name'         => 'post_ID' ) );
+echo_editable_column_js([
+    'column_selector' => '.task_status_edit',
+    'ajax_url' => get_htsrv_url() . 'async.php?action=item_task_edit&field=status&' . url_crumb('itemtask'),
+    'options_eval' => 'getApplicableStatus( jQuery( this ), result[1] );',
+    'new_field_name' => 'new_status',
+    'ID_value' => 'jQuery( this ).attr( "rel" )',
+    'ID_name' => 'post_ID',
+]);
 ?>

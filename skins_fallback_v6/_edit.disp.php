@@ -13,7 +13,9 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Collection, $Blog, $Session, $inc_path;
 global $action, $form_action;
@@ -41,221 +43,189 @@ global $admin_url, $redirect_to, $form_action;
 
 
 // Default params:
-$params = array_merge( array(
-		'edit_form_params' => array(),
-	), $params );
+$params = array_merge([
+    'edit_form_params' => [],
+], $params);
 
 // Determine if we are creating or updating...
-$creating = is_create_action( $action );
+$creating = is_create_action($action);
 
 // Used to mark the required fields (in non-standard template)
 $required_star = '<span class="label_field_required">*</span>';
 
-$Form = new Form( $form_action, 'item_checkchanges', 'post' );
+$Form = new Form($form_action, 'item_checkchanges', 'post');
 
-$Form->switch_template_parts( $params['edit_form_params'] );
+$Form->switch_template_parts($params['edit_form_params']);
 
 // ================================ START OF EDIT FORM ================================
-$form_params = array();
-$iframe_name = NULL;
-if( !empty( $bozo_start_modified ) )
-{
-	$form_params['bozo_start_modified'] = true;
+$form_params = [];
+$iframe_name = null;
+if (! empty($bozo_start_modified)) {
+    $form_params['bozo_start_modified'] = true;
 }
 
-$Form->begin_form( 'inskin', '', $form_params );
+$Form->begin_form('inskin', '', $form_params);
 
-	$Form->add_crumb( 'item' );
-	$Form->hidden( 'ctrl', 'items' );
-	$Form->hidden( 'blog', $Blog->ID );
-	if( isset( $edited_Item ) )
-	{
-		$copy_post_ID = param( 'cp', 'integer', 0 );
-		if( $copy_post_ID > 0 )
-		{	// Copy post
-			$Form->hidden( 'post_ID', 0 );
-		}
-		else
-		{	// Edit post
-			$Form->hidden( 'post_ID', $edited_Item->ID );
-		}
-	}
-	$Form->hidden( 'redirect_to', $redirect_to );
+$Form->add_crumb('item');
+$Form->hidden('ctrl', 'items');
+$Form->hidden('blog', $Blog->ID);
+if (isset($edited_Item)) {
+    $copy_post_ID = param('cp', 'integer', 0);
+    if ($copy_post_ID > 0) {	// Copy post
+        $Form->hidden('post_ID', 0);
+    } else {	// Edit post
+        $Form->hidden('post_ID', $edited_Item->ID);
+    }
+}
+$Form->hidden('redirect_to', $redirect_to);
 
-	// In case we send this to the blog for a preview :
-	$Form->hidden( 'preview', 0 );
-	$Form->hidden( 'more', 1 );
+// In case we send this to the blog for a preview :
+$Form->hidden('preview', 0);
+$Form->hidden('more', 1);
 
-	// Add hidden required fields or fields that were set in the init_inskin_editing() function
-	$Form->hidden( 'item_typ_ID', $edited_Item->ityp_ID );
+// Add hidden required fields or fields that were set in the init_inskin_editing() function
+$Form->hidden('item_typ_ID', $edited_Item->ityp_ID);
 
-	if( $edited_Item->get( 'urltitle' ) != '' )
-	{	// post_urltitle can be defined from request param
-		$Form->hidden( 'post_urltitle', $edited_Item->get( 'urltitle' ) );
-	}
+if ($edited_Item->get('urltitle') != '') {	// post_urltitle can be defined from request param
+    $Form->hidden('post_urltitle', $edited_Item->get('urltitle'));
+}
 
-	if( $action != 'new' )
-	{ // DO NOT ADD HIDDEN FIELDS IF THEY ARE NOT SET
-		// These fields will be set only in case when switch tab from admin editing to in-skin editing
-		// Fields used in "advanced" form, but not here:
-		$Form->hidden( 'post_comment_status', $edited_Item->get( 'comment_status' ) );
-		$Form->hidden( 'post_locale', $edited_Item->get( 'locale' ) );
-		$Form->hidden( 'post_locale_visibility', $edited_Item->get( 'locale_visibility' ) );
-		$Form->hidden( 'post_parent_ID', $edited_Item->get( 'parent_ID' ) );
-		$Form->hidden( 'titletag', $edited_Item->get( 'titletag' ) );
-		$Form->hidden( 'metadesc', $edited_Item->get_setting( 'metadesc' ) );
-		$Form->hidden( 'metakeywords', $edited_Item->get_setting( 'metakeywords' ) );
+if ($action != 'new') { // DO NOT ADD HIDDEN FIELDS IF THEY ARE NOT SET
+    // These fields will be set only in case when switch tab from admin editing to in-skin editing
+    // Fields used in "advanced" form, but not here:
+    $Form->hidden('post_comment_status', $edited_Item->get('comment_status'));
+    $Form->hidden('post_locale', $edited_Item->get('locale'));
+    $Form->hidden('post_locale_visibility', $edited_Item->get('locale_visibility'));
+    $Form->hidden('post_parent_ID', $edited_Item->get('parent_ID'));
+    $Form->hidden('titletag', $edited_Item->get('titletag'));
+    $Form->hidden('metadesc', $edited_Item->get_setting('metadesc'));
+    $Form->hidden('metakeywords', $edited_Item->get_setting('metakeywords'));
 
-		$Form->hidden( 'trackback_url', $trackback_url );
-		if( check_user_perm( 'blog_edit_ts', 'edit', false, $Blog->ID ) )
-		{	// If user has a permission to edit advanced properties of items:
-			$Form->hidden( 'item_featured', $edited_Item->featured );
-			$Form->hidden( 'expiry_delay', $edited_Item->get_setting( 'comment_expiry_delay' ) );
-			$Form->hidden( 'goal_ID', $edited_Item->get_setting( 'goal_ID' ) );
-		}
-		if( is_pro() && $Blog->get_setting( 'track_unread_content' ) )
-		{	// Update setting to mark Item as "must read" only for PRO version and when tracking of unread content is enabled for collection:
-			$Form->hidden( 'item_mustread', $edited_Item->get_setting( 'mustread' ) );
-		}
-		$Form->hidden( 'item_hideteaser', $edited_Item->get_setting( 'hide_teaser' ) );
-		$Form->hidden( 'item_switchable', $edited_Item->get_setting( 'switchable' ) );
-		$Form->hidden( 'item_switchable_params', $edited_Item->get_setting( 'switchable_params' ) );
+    $Form->hidden('trackback_url', $trackback_url);
+    if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) {	// If user has a permission to edit advanced properties of items:
+        $Form->hidden('item_featured', $edited_Item->featured);
+        $Form->hidden('expiry_delay', $edited_Item->get_setting('comment_expiry_delay'));
+        $Form->hidden('goal_ID', $edited_Item->get_setting('goal_ID'));
+    }
+    if (is_pro() && $Blog->get_setting('track_unread_content')) {	// Update setting to mark Item as "must read" only for PRO version and when tracking of unread content is enabled for collection:
+        $Form->hidden('item_mustread', $edited_Item->get_setting('mustread'));
+    }
+    $Form->hidden('item_hideteaser', $edited_Item->get_setting('hide_teaser'));
+    $Form->hidden('item_switchable', $edited_Item->get_setting('switchable'));
+    $Form->hidden('item_switchable_params', $edited_Item->get_setting('switchable_params'));
 
-		$creator_User = $edited_Item->get_creator_User();
-		$Form->hidden( 'item_owner_login', $creator_User->login );
-		$Form->hidden( 'item_owner_login_displayed', 1 );
-	}
-	elseif( !isset( $edited_Item->status ) )
-	{
-		$highest_publish_status = get_highest_publish_status( 'post', $Blog->ID, false, '', $edited_Item );
-		$edited_Item->set( 'status', $highest_publish_status );
-	}
+    $creator_User = $edited_Item->get_creator_User();
+    $Form->hidden('item_owner_login', $creator_User->login);
+    $Form->hidden('item_owner_login_displayed', 1);
+} elseif (! isset($edited_Item->status)) {
+    $highest_publish_status = get_highest_publish_status('post', $Blog->ID, false, '', $edited_Item);
+    $edited_Item->set('status', $highest_publish_status);
+}
 
-	if( check_user_perm( 'admin', 'restricted' ) )
-	{ // These fields can be edited only by users which have an access to back-office
-		if( check_user_perm( 'blog_edit_ts', 'edit', false, $Blog->ID ) )
-		{ // Time stamp field values
-			$Form->hidden( 'item_dateset', $edited_Item->get( 'dateset' ) );
-			$Form->hidden( 'item_issue_date', mysql2localedate( $edited_Item->get( 'issue_date' ) ) );
-			$Form->hidden( 'item_issue_time', substr( $edited_Item->get( 'issue_date' ), 11 ) );
-		}
-	}
+if (check_user_perm('admin', 'restricted')) { // These fields can be edited only by users which have an access to back-office
+    if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) { // Time stamp field values
+        $Form->hidden('item_dateset', $edited_Item->get('dateset'));
+        $Form->hidden('item_issue_date', mysql2localedate($edited_Item->get('issue_date')));
+        $Form->hidden('item_issue_time', substr($edited_Item->get('issue_date'), 11));
+    }
+}
 
-	if( $edited_Item->get_type_setting( 'use_coordinates' ) != 'never' )
-	{
-		$Form->hidden( 'item_latitude', $edited_Item->get_setting( 'latitude' ) );
-		$Form->hidden( 'item_longitude', $edited_Item->get_setting( 'longitude' ) );
-		$Form->hidden( 'google_map_zoom', $edited_Item->get_setting( 'map_zoom' ) );
-		$Form->hidden( 'google_map_type', $edited_Item->get_setting( 'map_type' ) );
-	}
+if ($edited_Item->get_type_setting('use_coordinates') != 'never') {
+    $Form->hidden('item_latitude', $edited_Item->get_setting('latitude'));
+    $Form->hidden('item_longitude', $edited_Item->get_setting('longitude'));
+    $Form->hidden('google_map_zoom', $edited_Item->get_setting('map_zoom'));
+    $Form->hidden('google_map_type', $edited_Item->get_setting('map_type'));
+}
 
-	if( $edited_Item->get_type_setting( 'allow_attachments' ) &&
-			check_user_perm( 'files', 'view', false ) )
-	{	// If current user has a permission to view the files AND attachments are allowed for the item type:
-		load_class( 'links/model/_linkitem.class.php', 'LinkItem' );
-		// Initialize this object as global because this is used in many link functions:
-		global $LinkOwner;
-		$LinkOwner = new LinkItem( $edited_Item, param( 'temp_link_owner_ID', 'integer', 0 ) );
-	}
+if ($edited_Item->get_type_setting('allow_attachments') &&
+        check_user_perm('files', 'view', false)) {	// If current user has a permission to view the files AND attachments are allowed for the item type:
+    load_class('links/model/_linkitem.class.php', 'LinkItem');
+    // Initialize this object as global because this is used in many link functions:
+    global $LinkOwner;
+    $LinkOwner = new LinkItem($edited_Item, param('temp_link_owner_ID', 'integer', 0));
+}
 
-	// Display buttons to change Item Type:
-	echo_item_type_change_buttons( $edited_Item );
+// Display buttons to change Item Type:
+echo_item_type_change_buttons($edited_Item);
 
-	$front_edit_fields = $edited_Item->get_front_edit_fields();
-	foreach( $front_edit_fields as $front_edit_field )
-	{
-		if( $front_edit_field['type'] == 'custom' )
-		{	// For custom field we should check option "Public" to know when it may be visible on front-office:
-			$front_edit_field_is_visible = ! empty( $front_edit_field['public'] );
-		}
-		else
-		{	// For other item fields we can make it visible onle when setting "Front-Office Order" is filled for the field:
-			$front_edit_field_is_visible = ! empty( $front_edit_field['order'] );
-		}
-		if( $front_edit_field['type'] == 'item' )
-		{	// Item field:
-			switch( $front_edit_field['name'] )
-			{
-				case 'title':
-					// Title:
-					if( $edited_Item->get_type_setting( 'use_title' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						$Form->switch_layout( 'fields_table' );
-						$Form->begin_fieldset();
-						$Form->text_input( 'post_title', $item_title, 20, T_('Title'), '', array(
-								'maxlength' => intval( $edited_Item->get_type_setting( 'title_maxlen' ) ),
-								'required'  => ( $edited_Item->get_type_setting( 'use_title' ) == 'required' ),
-								'style'     => 'width:100%',
-							) );
-						$Form->end_fieldset();
-						$Form->switch_layout( NULL );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'post_title', $item_title );
-					}
-					break;
+$front_edit_fields = $edited_Item->get_front_edit_fields();
+foreach ($front_edit_fields as $front_edit_field) {
+    if ($front_edit_field['type'] == 'custom') {	// For custom field we should check option "Public" to know when it may be visible on front-office:
+        $front_edit_field_is_visible = ! empty($front_edit_field['public']);
+    } else {	// For other item fields we can make it visible onle when setting "Front-Office Order" is filled for the field:
+        $front_edit_field_is_visible = ! empty($front_edit_field['order']);
+    }
+    if ($front_edit_field['type'] == 'item') {	// Item field:
+        switch ($front_edit_field['name']) {
+            case 'title':
+                // Title:
+                if ($edited_Item->get_type_setting('use_title') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    $Form->switch_layout('fields_table');
+                    $Form->begin_fieldset();
+                    $Form->text_input('post_title', $item_title, 20, T_('Title'), '', [
+                        'maxlength' => intval($edited_Item->get_type_setting('title_maxlen')),
+                        'required' => ($edited_Item->get_type_setting('use_title') == 'required'),
+                        'style' => 'width:100%',
+                    ]);
+                    $Form->end_fieldset();
+                    $Form->switch_layout(null);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('post_title', $item_title);
+                }
+                break;
 
-				case 'short_title':
-					// Short title:
-					if( $edited_Item->get_type_setting( 'use_short_title' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						$Form->switch_layout( 'fields_table' );
-						$Form->begin_fieldset();
-						$Form->text_input( 'post_short_title', htmlspecialchars_decode( $edited_Item->get( 'short_title' ) ), 50, T_('Short title'), '', array(
-								'maxlength' => intval( $edited_Item->get_type_setting( 'short_title_maxlen' ) ),
-								'style'     => 'width:100%',
-							) );
-						$Form->end_fieldset();
-						$Form->switch_layout( NULL );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'post_short_title', htmlspecialchars_decode( $edited_Item->get( 'short_title' ) ) );
-					}
-					break;
+            case 'short_title':
+                // Short title:
+                if ($edited_Item->get_type_setting('use_short_title') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    $Form->switch_layout('fields_table');
+                    $Form->begin_fieldset();
+                    $Form->text_input('post_short_title', htmlspecialchars_decode($edited_Item->get('short_title')), 50, T_('Short title'), '', [
+                        'maxlength' => intval($edited_Item->get_type_setting('short_title_maxlen')),
+                        'style' => 'width:100%',
+                    ]);
+                    $Form->end_fieldset();
+                    $Form->switch_layout(null);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('post_short_title', htmlspecialchars_decode($edited_Item->get('short_title')));
+                }
+                break;
 
-				case 'text':
-					// Text:
-					if( $edited_Item->get_type_setting( 'use_text' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						// --------------------------- TOOLBARS ------------------------------------
-						echo '<div class="edit_toolbars">';
-						// CALL PLUGINS NOW:
-						$admin_toolbar_params = array(
-								'edit_layout' => 'expert',
-								'Item' => $edited_Item,
-							);
-						if( isset( $LinkOwner) && $LinkOwner->is_temp() )
-						{
-							$admin_toolbar_params['temp_ID'] = $LinkOwner->get_ID();
-						}
-						$Plugins->trigger_event( 'AdminDisplayToolbar', $admin_toolbar_params );
-						echo '</div>';
+            case 'text':
+                // Text:
+                if ($edited_Item->get_type_setting('use_text') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    // --------------------------- TOOLBARS ------------------------------------
+                    echo '<div class="edit_toolbars">';
+                    // CALL PLUGINS NOW:
+                    $admin_toolbar_params = [
+                        'edit_layout' => 'expert',
+                        'Item' => $edited_Item,
+                    ];
+                    if (isset($LinkOwner) && $LinkOwner->is_temp()) {
+                        $admin_toolbar_params['temp_ID'] = $LinkOwner->get_ID();
+                    }
+                    $Plugins->trigger_event('AdminDisplayToolbar', $admin_toolbar_params);
+                    echo '</div>';
 
-						// ---------------------------- TEXTAREA -------------------------------------
-						$Form->switch_layout( 'none' );
-						$Form->fieldstart = '<div class="edit_area" data-filedrop-callback="helloWorld">';
-						$Form->fieldend = "</div>\n";
-						$Form->textarea_input( 'content', $item_content, 16, NULL, array(
-								'cols' => 50 ,
-								'id' => 'itemform_post_content',
-								'class' => 'autocomplete_usernames link_attachment_dropzone'
-							) );
-						$Form->switch_layout( NULL );
-						?>
+                    // ---------------------------- TEXTAREA -------------------------------------
+                    $Form->switch_layout('none');
+                    $Form->fieldstart = '<div class="edit_area" data-filedrop-callback="helloWorld">';
+                    $Form->fieldend = "</div>\n";
+                    $Form->textarea_input('content', $item_content, 16, null, [
+                        'cols' => 50,
+                        'id' => 'itemform_post_content',
+                        'class' => 'autocomplete_usernames link_attachment_dropzone',
+                    ]);
+                    $Form->switch_layout(null);
+                    ?>
 						<script>
 							<!--
 							// This is for toolbar plugins
@@ -264,274 +234,232 @@ $Form->begin_form( 'inskin', '', $form_params );
 						</script>
 
 						<?php
-						echo '<div class="edit_plugin_actions">';
-						// Text Renderers:
-						if( $Blog->get_setting( 'in_skin_editing_renderers' ) )
-						{	// If text renderers are allowed to update from front-office:
-							$item_renderer_checkboxes = $edited_Item->get_renderer_checkboxes();
-						}
-						if( ! empty( $item_renderer_checkboxes ) )
-						{	// Display only if at least one text renderer is visible:
-							echo '<div id="itemform_renderers" class="btn-group dropup pull-right">
-								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span> '.T_('Text Renderers').'</button>
-								<div class="dropdown-menu dropdown-menu-right">'.$item_renderer_checkboxes.'</div>
+                    echo '<div class="edit_plugin_actions">';
+                    // Text Renderers:
+                    if ($Blog->get_setting('in_skin_editing_renderers')) {	// If text renderers are allowed to update from front-office:
+                        $item_renderer_checkboxes = $edited_Item->get_renderer_checkboxes();
+                    }
+                    if (! empty($item_renderer_checkboxes)) {	// Display only if at least one text renderer is visible:
+                        echo '<div id="itemform_renderers" class="btn-group dropup pull-right">
+								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span> ' . T_('Text Renderers') . '</button>
+								<div class="dropdown-menu dropdown-menu-right">' . $item_renderer_checkboxes . '</div>
 							</div>';
-							// JS code to don't hide popup on click to checkbox:
-							expose_var_to_js( 'evo_itemform_renderers__click', true );
-						}
-						// CALL PLUGINS NOW:
-						$display_editor_params = array(
-								'target_type'   => 'Item',
-								'target_object' => $edited_Item,
-								'content_id'    => 'itemform_post_content',
-								'edit_layout'   => 'inskin',
-							);
-						if( isset( $LinkOwner) && $LinkOwner->is_temp() )
-						{
-							$display_editor_params['temp_ID'] = $LinkOwner->get_ID();
-						}
-						$Plugins->trigger_event( 'DisplayEditorButton', $display_editor_params );
-						echo '</div>';
-						echo '<div class="clear"></div>';
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'content', $item_content );
-					}
-					break;
+                        // JS code to don't hide popup on click to checkbox:
+                        expose_var_to_js('evo_itemform_renderers__click', true);
+                    }
+                    // CALL PLUGINS NOW:
+                    $display_editor_params = [
+                        'target_type' => 'Item',
+                        'target_object' => $edited_Item,
+                        'content_id' => 'itemform_post_content',
+                        'edit_layout' => 'inskin',
+                    ];
+                    if (isset($LinkOwner) && $LinkOwner->is_temp()) {
+                        $display_editor_params['temp_ID'] = $LinkOwner->get_ID();
+                    }
+                    $Plugins->trigger_event('DisplayEditorButton', $display_editor_params);
+                    echo '</div>';
+                    echo '<div class="clear"></div>';
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('content', $item_content);
+                }
+                break;
 
-				case 'instruction':
-					// Instructions:
-					if( $front_edit_field_is_visible && $edited_Item->get_type_setting( 'instruction' ) )
-					{	// Display only if it is visible on front-office:
-						echo '<div class="alert alert-info fade in evo_instruction">'.$edited_Item->get_type_setting( 'instruction' ).'</div>';
-					}
-					break;
+            case 'instruction':
+                // Instructions:
+                if ($front_edit_field_is_visible && $edited_Item->get_type_setting('instruction')) {	// Display only if it is visible on front-office:
+                    echo '<div class="alert alert-info fade in evo_instruction">' . $edited_Item->get_type_setting('instruction') . '</div>';
+                }
+                break;
 
-				case 'attachments':
-					// Attachments:
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						$Form->attachments_fieldset( $edited_Item );
-					}
-					break;
+            case 'attachments':
+                // Attachments:
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    $Form->attachments_fieldset($edited_Item);
+                }
+                break;
 
-				case 'workflow':
-					// Workflow properties:
-					if( ! $edited_Item->can_edit_workflow() )
-					{	// Don't display workflow properties if current user has no permission:
-						break;
-					}
+            case 'workflow':
+                // Workflow properties:
+                if (! $edited_Item->can_edit_workflow()) {	// Don't display workflow properties if current user has no permission:
+                    break;
+                }
 
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						$Form->begin_line( T_('Workflow') );
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    $Form->begin_line(T_('Workflow'));
 
-						$edited_Item->display_workflow_field( 'status', $Form, array( 'hide_label' => true ) );
+                    $edited_Item->display_workflow_field('status', $Form, [
+                        'hide_label' => true,
+                    ]);
 
-						$edited_Item->display_workflow_field( 'user', $Form, array(
-								'hide_label'  => true,
-								'placeholder' => 'Assignee',
-							) );
+                    $edited_Item->display_workflow_field('user', $Form, [
+                        'hide_label' => true,
+                        'placeholder' => 'Assignee',
+                    ]);
 
-						$edited_Item->display_workflow_field( 'priority', $Form, array( 'hide_label' => true ) );
+                    $edited_Item->display_workflow_field('priority', $Form, [
+                        'hide_label' => true,
+                    ]);
 
-						$edited_Item->display_workflow_field( 'deadline', $Form, array( 'hide_label' => true ) );
+                    $edited_Item->display_workflow_field('deadline', $Form, [
+                        'hide_label' => true,
+                    ]);
 
-						$Form->end_line();
-					}
-					else
-					{	// Print hidden fields in order to don't lost changes on switching from back-office edit form:
-						if( $edited_Item->can_edit_workflow( 'status' ) )
-						{	// Allow workflow status if current user can edit this property:
-							$Form->hidden( 'item_st_ID', $edited_Item->pst_ID );
-						}
-						if( $edited_Item->can_edit_workflow( 'status' ) )
-						{	// Allow workflow user if current user can edit this property:
-							$Form->hidden( 'item_assigned_user_ID', $edited_Item->assigned_user_ID );
-						}
-						if( $edited_Item->can_edit_workflow( 'priority' ) )
-						{	// Allow workflow priority if current user can edit this property:
-							$Form->hidden( 'item_priority', $edited_Item->priority );
-						}
-						if( $edited_Item->can_edit_workflow( 'deadline' ) )
-						{	// Allow workflow deadline if current user can edit this property:
-							$Form->hidden( 'item_deadline', mysql2date( locale_input_datefmt(), $edited_Item->datedeadline ) );
-							$Form->hidden( 'item_deadline_time', mysql2date( 'H:i', $edited_Item->datedeadline ) );
-						}
-					}
-					break;
+                    $Form->end_line();
+                } else {	// Print hidden fields in order to don't lost changes on switching from back-office edit form:
+                    if ($edited_Item->can_edit_workflow('status')) {	// Allow workflow status if current user can edit this property:
+                        $Form->hidden('item_st_ID', $edited_Item->pst_ID);
+                    }
+                    if ($edited_Item->can_edit_workflow('status')) {	// Allow workflow user if current user can edit this property:
+                        $Form->hidden('item_assigned_user_ID', $edited_Item->assigned_user_ID);
+                    }
+                    if ($edited_Item->can_edit_workflow('priority')) {	// Allow workflow priority if current user can edit this property:
+                        $Form->hidden('item_priority', $edited_Item->priority);
+                    }
+                    if ($edited_Item->can_edit_workflow('deadline')) {	// Allow workflow deadline if current user can edit this property:
+                        $Form->hidden('item_deadline', mysql2date(locale_input_datefmt(), $edited_Item->datedeadline));
+                        $Form->hidden('item_deadline_time', mysql2date('H:i', $edited_Item->datedeadline));
+                    }
+                }
+                break;
 
-				case 'tags':
-					// Tags:
-					if( $edited_Item->get_type_setting( 'use_tags' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						// Checkbox to suggest tags:
-						$suggest_checkbox = '<label class="text-normal">'
-								.'<input id="suggest_item_tags" name="suggest_item_tags" value="1" type="checkbox"'.( $UserSettings->get( 'suggest_item_tags' ) ? ' checked="checked"' : '' ).' /> '
-								.T_('Auto-suggest tags as you type (based on existing tags)')
-							.'</label>';
-						$Form->text_input( 'item_tags', $item_tags, 40, T_('Tags'), $suggest_checkbox, array(
-								'maxlength' => 255,
-								'required'  => ( $edited_Item->get_type_setting( 'use_tags' ) == 'required' ),
-								'style'     => 'width:100%',
-							) );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'item_tags', $item_tags );
-						$Form->hidden( 'suggest_item_tags', $UserSettings->get( 'suggest_item_tags' ) );
-					}
-					break;
+            case 'tags':
+                // Tags:
+                if ($edited_Item->get_type_setting('use_tags') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    // Checkbox to suggest tags:
+                    $suggest_checkbox = '<label class="text-normal">'
+                            . '<input id="suggest_item_tags" name="suggest_item_tags" value="1" type="checkbox"' . ($UserSettings->get('suggest_item_tags') ? ' checked="checked"' : '') . ' /> '
+                            . T_('Auto-suggest tags as you type (based on existing tags)')
+                        . '</label>';
+                    $Form->text_input('item_tags', $item_tags, 40, T_('Tags'), $suggest_checkbox, [
+                        'maxlength' => 255,
+                        'required' => ($edited_Item->get_type_setting('use_tags') == 'required'),
+                        'style' => 'width:100%',
+                    ]);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('item_tags', $item_tags);
+                    $Form->hidden('suggest_item_tags', $UserSettings->get('suggest_item_tags'));
+                }
+                break;
 
-				case 'excerpt':
-					// Excerpt:
-					if( $edited_Item->get_type_setting( 'use_excerpt' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						$excerpt_checkbox = '<label class="text-normal">'
-								.'<input name="post_excerpt_autogenerated" value="1" type="checkbox"'.( $edited_Item->get( 'excerpt_autogenerated' ) ? ' checked="checked"' : '' ).' /> '
-								.T_('Auto-generate excerpt from content')
-							.'</label>';
-						$Form->textarea_input( 'post_excerpt', $edited_Item->get( 'excerpt' ), 3, T_('Excerpt'), array(
-								'required' => ( $edited_Item->get_type_setting( 'use_excerpt' ) == 'required' ),
-								'note'     => $excerpt_checkbox,
-								'style'    => 'width:100%',
-							) );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'post_excerpt', $edited_Item->get( 'excerpt' ) );
-						$Form->hidden( 'post_excerpt_autogenerated', $edited_Item->get( 'excerpt_autogenerated' ) );
-					}
-					break;
+            case 'excerpt':
+                // Excerpt:
+                if ($edited_Item->get_type_setting('use_excerpt') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    $excerpt_checkbox = '<label class="text-normal">'
+                            . '<input name="post_excerpt_autogenerated" value="1" type="checkbox"' . ($edited_Item->get('excerpt_autogenerated') ? ' checked="checked"' : '') . ' /> '
+                            . T_('Auto-generate excerpt from content')
+                        . '</label>';
+                    $Form->textarea_input('post_excerpt', $edited_Item->get('excerpt'), 3, T_('Excerpt'), [
+                        'required' => ($edited_Item->get_type_setting('use_excerpt') == 'required'),
+                        'note' => $excerpt_checkbox,
+                        'style' => 'width:100%',
+                    ]);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('post_excerpt', $edited_Item->get('excerpt'));
+                    $Form->hidden('post_excerpt_autogenerated', $edited_Item->get('excerpt_autogenerated'));
+                }
+                break;
 
-				case 'url':
-					// Link to url:
-					if( $edited_Item->get_type_setting( 'use_url' ) == 'never' )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						if( is_pro() )
-						{	// Only PRO feature for using of post link URL as an External Canonical URL:
-							$external_canonical_url_checkbox = '<label>'
-									.'<input name="post_external_canonical_url" value="1" type="checkbox"'.( $edited_Item->get_setting( 'external_canonical_url' ) ? ' checked="checked"' : '' ).' /> '
-									.sprintf( T_('Use as <a %s>External canonical URL</a>'), 'href="'.get_manual_url( 'external-canonical-url' ).'"' ).' '.get_pro_label()
-								.'</label>';
-						}
-						else
-						{
-							$external_canonical_url_checkbox = '';
-						}
-						$Form->text_input( 'post_url', $edited_Item->get( 'url' ), 20, T_('Link to url'), $external_canonical_url_checkbox, array(
-								'maxlength' => 255,
-								'required'  => ( $edited_Item->get_type_setting( 'use_url' ) == 'required' ),
-								'style'    => 'width:100%',
-							) );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'post_url', $edited_Item->get( 'url' ) );
-						if( is_pro() )
-						{	// Only PRO feature for using of post link URL as an External Canonical URL:
-							$Form->hidden( 'post_external_canonical_url', $edited_Item->get_setting( 'external_canonical_url' ) );
-						}
-					}
-					break;
+            case 'url':
+                // Link to url:
+                if ($edited_Item->get_type_setting('use_url') == 'never') {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    if (is_pro()) {	// Only PRO feature for using of post link URL as an External Canonical URL:
+                        $external_canonical_url_checkbox = '<label>'
+                                . '<input name="post_external_canonical_url" value="1" type="checkbox"' . ($edited_Item->get_setting('external_canonical_url') ? ' checked="checked"' : '') . ' /> '
+                                . sprintf(T_('Use as <a %s>External canonical URL</a>'), 'href="' . get_manual_url('external-canonical-url') . '"') . ' ' . get_pro_label()
+                            . '</label>';
+                    } else {
+                        $external_canonical_url_checkbox = '';
+                    }
+                    $Form->text_input('post_url', $edited_Item->get('url'), 20, T_('Link to url'), $external_canonical_url_checkbox, [
+                        'maxlength' => 255,
+                        'required' => ($edited_Item->get_type_setting('use_url') == 'required'),
+                        'style' => 'width:100%',
+                    ]);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('post_url', $edited_Item->get('url'));
+                    if (is_pro()) {	// Only PRO feature for using of post link URL as an External Canonical URL:
+                        $Form->hidden('post_external_canonical_url', $edited_Item->get_setting('external_canonical_url'));
+                    }
+                }
+                break;
 
-				case 'location':
-					// Location:
-					if( ! $edited_Item->country_visible() )
-					{	// Skip, because it is not used for the Item Type:
-						break;
-					}
-					if( $front_edit_field_is_visible )
-					{	// Display only if it is visible on front-office:
-						echo_item_location_form( $Form, $edited_Item );
-					}
-					else
-					{	// Put value in hidden field for proper switching between back-office edit form:
-						$Form->hidden( 'item_ctry_ID', $edited_Item->ctry_ID );
-						if( $edited_Item->region_visible() )
-						{
-							$Form->hidden( 'item_rgn_ID', $edited_Item->rgn_ID );
-						}
-						if( $edited_Item->subregion_visible() )
-						{
-							$Form->hidden( 'item_subrg_ID', $edited_Item->subrg_ID );
-						}
-						if( $edited_Item->city_visible() )
-						{
-							$Form->hidden( 'item_ctry_ID', $edited_Item->ctry_ID );
-						}
-					}
-					break;
-			}
-		}
-		else
-		{	// Custom field:
-			if( $front_edit_field_is_visible )
-			{	// Display only if it is visible on front-office:
-				display_editable_custom_field( $front_edit_field['name'], $Form, $edited_Item );
-			}
-			else
-			{	// Put value in hidden field for proper switching between back-office edit form:
-				$Form->hidden( 'item_cf_'. $front_edit_field['name'],  $front_edit_field['value'] );
-			}
-		}
-	}
+            case 'location':
+                // Location:
+                if (! $edited_Item->country_visible()) {	// Skip, because it is not used for the Item Type:
+                    break;
+                }
+                if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+                    echo_item_location_form($Form, $edited_Item);
+                } else {	// Put value in hidden field for proper switching between back-office edit form:
+                    $Form->hidden('item_ctry_ID', $edited_Item->ctry_ID);
+                    if ($edited_Item->region_visible()) {
+                        $Form->hidden('item_rgn_ID', $edited_Item->rgn_ID);
+                    }
+                    if ($edited_Item->subregion_visible()) {
+                        $Form->hidden('item_subrg_ID', $edited_Item->subrg_ID);
+                    }
+                    if ($edited_Item->city_visible()) {
+                        $Form->hidden('item_ctry_ID', $edited_Item->ctry_ID);
+                    }
+                }
+                break;
+        }
+    } else {	// Custom field:
+        if ($front_edit_field_is_visible) {	// Display only if it is visible on front-office:
+            display_editable_custom_field($front_edit_field['name'], $Form, $edited_Item);
+        } else {	// Put value in hidden field for proper switching between back-office edit form:
+            $Form->hidden('item_cf_' . $front_edit_field['name'], $front_edit_field['value']);
+        }
+    }
+}
 
-	// ################### CATEGORIES ###################
-	if( $Blog->get_setting( 'in_skin_editing_category' ) &&
-	    get_post_cat_setting( $Blog->ID ) > 0 )
-	{	// Display categories if it is allowed to update from front-office:
-		cat_select( $Form, true, false );
-	}
-	else
-	{	// When categories are hidden, we store main and extra categories IDs in the hidden input:
-		if( $edited_Item->ID > 0 )
-		{	// Get cat_ID from existing Item:
-			$main_Chapter = $edited_Item->get_main_Chapter();
-			$cat = $main_Chapter->ID;
-			$extra_cats = $edited_Item->get( 'extra_cat_IDs' );
-		}
-		else
-		{	// Forums skin get cat_ID from $_GET:
-			$cat = param( 'cat', 'integer', 0 );
-			$extra_cats = array( $cat );
-		}
+// ################### CATEGORIES ###################
+if ($Blog->get_setting('in_skin_editing_category') &&
+    get_post_cat_setting($Blog->ID) > 0) {	// Display categories if it is allowed to update from front-office:
+    cat_select($Form, true, false);
+} else {	// When categories are hidden, we store main and extra categories IDs in the hidden input:
+    if ($edited_Item->ID > 0) {	// Get cat_ID from existing Item:
+        $main_Chapter = $edited_Item->get_main_Chapter();
+        $cat = $main_Chapter->ID;
+        $extra_cats = $edited_Item->get('extra_cat_IDs');
+    } else {	// Forums skin get cat_ID from $_GET:
+        $cat = param('cat', 'integer', 0);
+        $extra_cats = [$cat];
+    }
 
-		if( $cat > 0 )
-		{	// Put main and extra categories IDs in the hidden input:
-			$Form->hidden( 'post_category', $cat );
-			$Form->hidden( 'cat', $cat );
-			foreach( $extra_cats as $extra_cat_ID )
-			{
-				$Form->hidden( 'post_extracats[]', $extra_cat_ID );
-			}
-		}
-	}
+    if ($cat > 0) {	// Put main and extra categories IDs in the hidden input:
+        $Form->hidden('post_category', $cat);
+        $Form->hidden('cat', $cat);
+        foreach ($extra_cats as $extra_cat_ID) {
+            $Form->hidden('post_extracats[]', $extra_cat_ID);
+        }
+    }
+}
 
 // ####################### PLUGIN FIELDSETS #########################
-$Plugins->trigger_event( 'DisplayItemFormFieldset', array( 'Form' => & $Form, 'Item' => & $edited_Item) );
+$Plugins->trigger_event('DisplayItemFormFieldset', [
+    'Form' => &$Form,
+    'Item' => &$edited_Item,
+]);
 ?>
 
 <div class="clear"></div>
 
 <div class="center margin2ex">
 <?php // ------------------------------- ACTIONS ----------------------------------
-	echo '<div class="edit_actions">';
-	echo_item_status_buttons( $Form, $edited_Item );
-	echo '</div>';
+    echo '<div class="edit_actions">';
+echo_item_status_buttons($Form, $edited_Item);
+echo '</div>';
 ?>
 </div>
 <?php
@@ -541,7 +469,7 @@ $Form->end_form();
 
 // ####################### JS BEHAVIORS #########################
 // JS code for status dropdown submit button
-echo_status_dropdown_button_js( 'post' );
+echo_status_dropdown_button_js('post');
 // New category input box:
 echo_onchange_newcat();
 echo_autocomplete_tags();

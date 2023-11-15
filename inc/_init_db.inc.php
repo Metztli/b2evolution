@@ -1,4 +1,5 @@
 <?php
+
 // This is separated from init_base inc case we want to do a apage that does not connect to the database at all.
 // However, once we connect, we load everything we normally expect to be available from the DB.
 /**
@@ -18,27 +19,29 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
-$Timer->resume( '_init_db' );
+$Timer->resume('_init_db');
 
 /**
  * Load DB class
  */
-require_once dirname(__FILE__).'/_core/model/db/_db.class.php';
+require_once dirname(__FILE__) . '/_core/model/db/_db.class.php';
 
 /**
  * Database connection (connection opened here)
  *
  * @global DB $DB
  */
-$DB = new DB( $db_config );
+$DB = new DB($db_config);
 
 
 /**
  * Load settings class
  */
-load_class( 'settings/model/_generalsettings.class.php', 'GeneralSettings' );
+load_class('settings/model/_generalsettings.class.php', 'GeneralSettings');
 /**
  * Interface to general settings
  *
@@ -64,9 +67,7 @@ $localtimenow = $servertimenow + $time_difference;
  * @todo TODO: make a class GlobalSettings
  * @global AbstractSettings
  */
-$global_Cache = new AbstractSettings( 'T_global__cache', array( 'cach_name' ), 'cach_cache', 0 /* load all */ );
+$global_Cache = new AbstractSettings('T_global__cache', ['cach_name'], 'cach_cache', 0 /* load all */);
 
 
-$Timer->pause( '_init_db' );
-
-?>
+$Timer->pause('_init_db');

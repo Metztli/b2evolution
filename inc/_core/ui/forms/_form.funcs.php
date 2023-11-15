@@ -14,7 +14,9 @@
  *
  * @deprecated All those functions should be handled by the {@link Form Form class}.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -33,45 +35,49 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  * @param boolean display (default) or return
  * @return mixed true (if output) or the generated HTML if not outputting
  */
-function form_text( $field_name, $field_value, $field_size, $field_label, $field_note = '',
-										$field_maxlength = 0 , $field_class = '', $inputtype = 'text', $output = true  )
-{
-	if( $field_maxlength == 0 )
-		$field_maxlength = $field_size;
+function form_text(
+    $field_name,
+    $field_value,
+    $field_size,
+    $field_label,
+    $field_note = '',
+    $field_maxlength = 0,
+    $field_class = '',
+    $inputtype = 'text',
+    $output = true
+) {
+    if ($field_maxlength == 0) {
+        $field_maxlength = $field_size;
+    }
 
-	// question: is it necessary to enclose each field in a fieldset.
-	// fplanque> YES, for CSS
-	// shouldn't there be a fieldset for a set of field (i.e. all fields
-	// in the form)?
-	// fplanque>> Create a new 'simple' layout if this is what you want
+    // question: is it necessary to enclose each field in a fieldset.
+    // fplanque> YES, for CSS
+    // shouldn't there be a fieldset for a set of field (i.e. all fields
+    // in the form)?
+    // fplanque>> Create a new 'simple' layout if this is what you want
 
-	$r = "<fieldset>\n"
-			.'<div class="label"><label for="'.$field_name.'">'.$field_label.":</label></div>\n"
-			.'<div class="input"><input type="'.$inputtype.'" name="'.$field_name
-			.'" id="'.$field_name.'" size="'.$field_size.'" maxlength="'.$field_maxlength
-			.'" value="'.format_to_output($field_value, 'formvalue').'"';
-	if( !empty($field_class) )
-	{
-		$r .= ' class="'.$field_class.'"';
-	}
-	$r .= " />\n";
+    $r = "<fieldset>\n"
+            . '<div class="label"><label for="' . $field_name . '">' . $field_label . ":</label></div>\n"
+            . '<div class="input"><input type="' . $inputtype . '" name="' . $field_name
+            . '" id="' . $field_name . '" size="' . $field_size . '" maxlength="' . $field_maxlength
+            . '" value="' . format_to_output($field_value, 'formvalue') . '"';
+    if (! empty($field_class)) {
+        $r .= ' class="' . $field_class . '"';
+    }
+    $r .= " />\n";
 
-	if( !empty( $field_note ) )
-	{
-		$r .= '<span class="notes">'.$field_note.'</span>';
-	}
+    if (! empty($field_note)) {
+        $r .= '<span class="notes">' . $field_note . '</span>';
+    }
 
-	$r .= "</div>\n</fieldset>\n\n";
+    $r .= "</div>\n</fieldset>\n\n";
 
-	if( $output )
-	{
-		echo $r;
-		return true;
-	}
-	else
-	{
-		return $r;
-	}
+    if ($output) {
+        echo $r;
+        return true;
+    } else {
+        return $r;
+    }
 }
 
 /**
@@ -88,28 +94,27 @@ function form_text( $field_name, $field_value, $field_size, $field_label, $field
  * waltercruz> still used by mtimport
  */
 function form_select(
-	$field_name,
-	$field_value,
-	$field_list_callback,
-	$field_label,
-	$field_note = '',
-	$field_class = '' )
-{
-	echo '<fieldset>';
-	echo '  <div class="label"><label for="', $field_name, '">', $field_label, (($field_label != '') ? ':' : ''), '</label></div>';
-	echo '  <div class="input"><select name="', $field_name, '" id="', $field_name, '"';
-	if( !empty($field_class) )
-	{
-		echo ' class="', $field_class,'"';
-	}
-	echo '>';
+    $field_name,
+    $field_value,
+    $field_list_callback,
+    $field_label,
+    $field_note = '',
+    $field_class = ''
+) {
+    echo '<fieldset>';
+    echo '  <div class="label"><label for="', $field_name, '">', $field_label, (($field_label != '') ? ':' : ''), '</label></div>';
+    echo '  <div class="input"><select name="', $field_name, '" id="', $field_name, '"';
+    if (! empty($field_class)) {
+        echo ' class="', $field_class,'"';
+    }
+    echo '>';
 
-	// call the callback function:
-	$field_list_callback( $field_value );
+    // call the callback function:
+    $field_list_callback($field_value);
 
-	echo '  </select>';
-	echo '  <span class="notes">', $field_note, '</span></div>';
-	echo "</fieldset>\n\n";
+    echo '  </select>';
+    echo '  <span class="notes">', $field_note, '</span></div>';
+    echo "</fieldset>\n\n";
 }
 
 
@@ -128,26 +133,25 @@ function form_select(
  * waltercruz> still used by mtimport
  */
 function form_select_object(
-	$field_name,
-	$field_value,
-	& $field_object,
-	$field_label,
-	$field_note = '',
-	$allow_none = false,
-	$field_class = '' )
-{
-	echo '<fieldset>';
-	echo '  <div class="label"><label for="', $field_name, '">', $field_label, ':</label></div>';
-	echo '  <div class="input"><select name="', $field_name, '" id="', $field_name, '"';
-	if( !empty($field_class) )
-	{
-		echo ' class="'.$field_class.'"';
-	}
-	echo '>';
-	echo $field_object->get_option_list( $field_value, $allow_none );
-	echo '  </select>';
-	echo '  <span class="notes">'.$field_note.'</span></div>';
-	echo "</fieldset>\n\n";
+    $field_name,
+    $field_value,
+    &$field_object,
+    $field_label,
+    $field_note = '',
+    $allow_none = false,
+    $field_class = ''
+) {
+    echo '<fieldset>';
+    echo '  <div class="label"><label for="', $field_name, '">', $field_label, ':</label></div>';
+    echo '  <div class="input"><select name="', $field_name, '" id="', $field_name, '"';
+    if (! empty($field_class)) {
+        echo ' class="' . $field_class . '"';
+    }
+    echo '>';
+    echo $field_object->get_option_list($field_value, $allow_none);
+    echo '  </select>';
+    echo '  <span class="notes">' . $field_note . '</span></div>';
+    echo "</fieldset>\n\n";
 }
 
 /**
@@ -164,34 +168,34 @@ function form_select_object(
  * @return mixed true (if output) or the generated HTML if not outputting
  * waltercruz > still used by mtimport
  */
-function form_checkbox( $field_name, $field_value, $field_label, $field_note = '',
-												$field_class = '', $output = true )
-{
-	$r = "<fieldset>\n"
-			.'<div class="label"><label for="'.$field_name.'">'.$field_label.":</label></div>\n"
-			.'<div class="input"><input type="checkbox" class="checkbox" name="'.$field_name.'" id="'
-			.$field_name.'" value="1"';
-	if( $field_value )
-	{
-		$r .= ' checked="checked"';
-	}
-	if( !empty($field_class) )
-	{
-		$r .= ' class="'.$field_class.'"';
-	}
-	$r .= " />\n"
-				.'<span class="notes">'.$field_note."</span></div>\n"
-				."</fieldset>\n\n";
+function form_checkbox(
+    $field_name,
+    $field_value,
+    $field_label,
+    $field_note = '',
+    $field_class = '',
+    $output = true
+) {
+    $r = "<fieldset>\n"
+            . '<div class="label"><label for="' . $field_name . '">' . $field_label . ":</label></div>\n"
+            . '<div class="input"><input type="checkbox" class="checkbox" name="' . $field_name . '" id="'
+            . $field_name . '" value="1"';
+    if ($field_value) {
+        $r .= ' checked="checked"';
+    }
+    if (! empty($field_class)) {
+        $r .= ' class="' . $field_class . '"';
+    }
+    $r .= " />\n"
+                . '<span class="notes">' . $field_note . "</span></div>\n"
+                . "</fieldset>\n\n";
 
-	if( $output )
-	{
-		echo $r;
-		return true;
-	}
-	else
-	{
-		return $r;
-	}
+    if ($output) {
+        echo $r;
+        return true;
+    } else {
+        return $r;
+    }
 }
 
 /**
@@ -200,17 +204,16 @@ function form_checkbox( $field_name, $field_value, $field_label, $field_note = '
  * @deprecated Deprecated by (@link Form::info_field())
  * @internal Tblue> Still used by gettext/staticfiles.php
  */
-function form_info( $field_label, $field_info, $field_note = '' )
+function form_info($field_label, $field_info, $field_note = '')
 {
-	echo '<fieldset>';
-	echo '  <div class="label">', $field_label, ':</div>';
-	echo '  <div class="info">', $field_info;
-	if( !empty($field_note) )
-	{
-		echo '&nbsp; <small class="notes">', $field_note, '</small>';
-	}
-	echo '</div>';
-	echo "</fieldset>\n\n";
+    echo '<fieldset>';
+    echo '  <div class="label">', $field_label, ':</div>';
+    echo '  <div class="info">', $field_info;
+    if (! empty($field_note)) {
+        echo '&nbsp; <small class="notes">', $field_note, '</small>';
+    }
+    echo '</div>';
+    echo "</fieldset>\n\n";
 }
 
 /**
@@ -219,41 +222,40 @@ function form_info( $field_label, $field_info, $field_note = '' )
  * @deprecated Deprecated by (@link Form::begin_form())
  * waltercruz> still used by inc/widgets/widgets/_coll_search_form.widget.php
  */
-function form_formstart( $action, $class = '', $name = '', $method = 'get', $id = '' )
+function form_formstart($action, $class = '', $name = '', $method = 'get', $id = '')
 {
-	if( $method == 'get' )
-	{
-		$action = explode( '?', $action );
-		if( isset($action[1]) )
-		{ // we have GET params in $action
-			$getparams = preg_split( '/&amp;|&/i', $action[1], -1, PREG_SPLIT_NO_EMPTY );
-		}
-		$action = $action[0];
-	}
+    if ($method == 'get') {
+        $action = explode('?', $action);
+        if (isset($action[1])) { // we have GET params in $action
+            $getparams = preg_split('/&amp;|&/i', $action[1], -1, PREG_SPLIT_NO_EMPTY);
+        }
+        $action = $action[0];
+    }
 
-	echo '<form action="'.$action.'" method="'.$method.'"';
+    echo '<form action="' . $action . '" method="' . $method . '"';
 
-	// this is not xhtml strict, see: http://forums.b2evolution.net//viewtopic.php?t=8475
-	// if( !empty($name) ) echo ' name="'.$name.'"';
-	if( !empty($id) ) echo ' id="'.$id.'"';
-	if( !empty($class) ) echo ' class="'.$class.'"';
+    // this is not xhtml strict, see: http://forums.b2evolution.net//viewtopic.php?t=8475
+    // if( !empty($name) ) echo ' name="'.$name.'"';
+    if (! empty($id)) {
+        echo ' id="' . $id . '"';
+    }
+    if (! empty($class)) {
+        echo ' class="' . $class . '"';
+    }
 
-	echo '>';
+    echo '>';
 
-	if( isset($getparams) )
-	{ // These need to be wrapped in a div to validate xhtml strict
-		echo '<div>';
-		foreach( $getparams as $param)
-		{
-			$param = explode( '=', $param );
-			if( isset($param[1]) )
-			{
-				echo '<input type="hidden" name="'.$param[0].'" value="'.$param[1].'" />';
-			}
-		}
-		// close the div
-		echo '</div>';
-	}
+    if (isset($getparams)) { // These need to be wrapped in a div to validate xhtml strict
+        echo '<div>';
+        foreach ($getparams as $param) {
+            $param = explode('=', $param);
+            if (isset($param[1])) {
+                echo '<input type="hidden" name="' . $param[0] . '" value="' . $param[1] . '" />';
+            }
+        }
+        // close the div
+        echo '</div>';
+    }
 }
 
 
@@ -268,41 +270,36 @@ function form_formstart( $action, $class = '', $name = '', $method = 'get', $id 
  * @param string label displayed in front of the field
  * @param array params
  */
-function form_textarea( $field_name, $field_value, $field_rows, $field_label, $field_params = array() )
+function form_textarea($field_name, $field_value, $field_rows, $field_label, $field_params = [])
 {
+    $textarea_rows = '';
+    if (! empty($field_rows)) {
+        $textarea_rows = ' rows="' . $field_rows . '"';
+    }
 
-	$textarea_rows = '';
-	if( !empty( $field_rows ) )
-	{
-		$textarea_rows = ' rows="'.$field_rows.'"';
-	}
+    $textarea_cols = '';
+    if (! empty($field_params['cols'])) {
+        $textarea_cols = ' cols="' . $field_params['cols'] . '"';
+    }
 
-	$textarea_cols = '';
-	if( !empty( $field_params['cols'] ) )
-	{
-		$textarea_cols = ' cols="'.$field_params['cols'].'"';
-	}
+    $textarea_class = '';
+    if (! empty($field_params['class'])) {
+        $textarea_class = ' class="' . $field_params['class'] . '"';
+    }
 
-	$textarea_class = '';
-	if( !empty( $field_params['class'] ) )
-	{
-		$textarea_class = ' class="'.$field_params['class'].'"';
-	}
+    $r = "<fieldset>\n"
+            . '<div class="label"><label for="' . $field_name . '">' . $field_label . ":</label></div>\n"
+            . '<div class="input"><textarea name="' . $field_name . '" id="' . $field_name . '"' . $textarea_rows . $textarea_cols . $textarea_class . '>'
+            . format_to_output($field_value, 'formvalue')
+            . '</textarea>' . "\n";
 
-	$r = "<fieldset>\n"
-			.'<div class="label"><label for="'.$field_name.'">'.$field_label.":</label></div>\n"
-			.'<div class="input"><textarea name="'.$field_name.'" id="'.$field_name.'"'.$textarea_rows.$textarea_cols.$textarea_class.'>'
-			.format_to_output($field_value, 'formvalue')
-			.'</textarea>'."\n";
+    if (! empty($field_params['note'])) {
+        $r .= '<span class="notes">' . $field_params['note'] . '</span>';
+    }
 
-	if( !empty( $field_params['note'] ) )
-	{
-		$r .= '<span class="notes">'.$field_params['note'].'</span>';
-	}
+    $r .= "</div>\n</fieldset>\n\n";
 
-	$r .= "</div>\n</fieldset>\n\n";
-
-	echo $r;
+    echo $r;
 }
 
 
@@ -312,70 +309,80 @@ function form_textarea( $field_name, $field_value, $field_rows, $field_label, $f
  * @param integer ID of file to generate thumbnail
  * @param array params
  */
-function file_select_item( $file_ID, $params = array() )
+function file_select_item($file_ID, $params = [])
 {
-	$FileCache = & get_FileCache();
-	$File = & $FileCache->get_by_ID( $file_ID, false );
+    $FileCache = &get_FileCache();
+    $File = &$FileCache->get_by_ID($file_ID, false);
 
-	$params = array_merge( array(
-			'field_item_start' => '<div class="file_select_item" data-item-value="%value%" data-file-url="%url%">',
-			'field_item_end' => '</div>',
-			'item_before' => '<div>',
-			'item_after' => '</div>',
-			'size_name' => 'crop-64x64',
-			'class' => '',
-			'remove_file_text' => T_('Remove file'),
-			'edit_file_text' => T_('Select another'),
-			'max_file_num' => 1
-		), $params );
+    $params = array_merge([
+        'field_item_start' => '<div class="file_select_item" data-item-value="%value%" data-file-url="%url%">',
+        'field_item_end' => '</div>',
+        'item_before' => '<div>',
+        'item_after' => '</div>',
+        'size_name' => 'crop-64x64',
+        'class' => '',
+        'remove_file_text' => T_('Remove file'),
+        'edit_file_text' => T_('Select another'),
+        'max_file_num' => 1,
+    ], $params);
 
-	// Set full file URL (used by JS e.g. on designer customizer mode):
-	$file_url = ( $File && $File->exists() ? $File->get_url() : '' );
+    // Set full file URL (used by JS e.g. on designer customizer mode):
+    $file_url = ($File && $File->exists() ? $File->get_url() : '');
 
-	$r = str_replace( array( '%value%', '%url%' ), array( $file_ID, $file_url ), $params['field_item_start'] );
-	$r .= $params['max_file_num'] > 1 ? '<div>' : '';
-	if( $File )
-	{
-		if( $File->exists() )
-		{
-			$r .= $params['item_before'];
-			$r .= $File->get_thumb_imgtag( $params['size_name'], $params['class'] );
-			$r .= $params['item_after'];
-		}
-		else
-		{
-			$r .= '<div class="bg-danger">'.T_('File not found').'</div>';
-		}
-	}
-	else
-	{
-		$r .= '<div class="bg-danger">'.T_('You have no permission to see this file.').'</div>';
-	}
-	$blog_param = empty( $blog ) ? '' : '&amp;blog='.$blog;
-	if( $params['max_file_num'] > 1 )
-	{
-		$r .= '<div>';
-	}
-	else
-	{
-		$r .= '<div class="item_actions">';
-	}
-	// Display a button to select another file:
-	$r .= action_icon( $params['edit_file_text'], 'edit',
-			'', ' '.T_('Select another'), NULL, $params['max_file_num'] > 1 ? NULL : 4,
-			array( 'onclick' => 'return file_select_attachment_window( this, true );',
-			       'class' => 'btn btn-sm btn-info' ),
-			array( 'class' => 'edit_file_icon' ) );
-	// Display a button to remove current selected file:
-	$r .= action_icon( $params['remove_file_text'], 'remove',
-			'', ' '.T_('Remove'), NULL, $params['max_file_num'] > 1 ? NULL : 4,
-			array( 'onclick' => 'return file_select_delete( this );',
-			       'class' => 'btn btn-sm btn-default' ),
-			array( 'class' => 'remove_file_icon' ) );
-	$r .= '</div>';
-	$r .= $params['max_file_num'] > 1 ? '</div>' : '';
-	$r .= $params['field_item_end'];
+    $r = str_replace(['%value%', '%url%'], [$file_ID, $file_url], $params['field_item_start']);
+    $r .= $params['max_file_num'] > 1 ? '<div>' : '';
+    if ($File) {
+        if ($File->exists()) {
+            $r .= $params['item_before'];
+            $r .= $File->get_thumb_imgtag($params['size_name'], $params['class']);
+            $r .= $params['item_after'];
+        } else {
+            $r .= '<div class="bg-danger">' . T_('File not found') . '</div>';
+        }
+    } else {
+        $r .= '<div class="bg-danger">' . T_('You have no permission to see this file.') . '</div>';
+    }
+    $blog_param = empty($blog) ? '' : '&amp;blog=' . $blog;
+    if ($params['max_file_num'] > 1) {
+        $r .= '<div>';
+    } else {
+        $r .= '<div class="item_actions">';
+    }
+    // Display a button to select another file:
+    $r .= action_icon(
+        $params['edit_file_text'],
+        'edit',
+        '',
+        ' ' . T_('Select another'),
+        null,
+        $params['max_file_num'] > 1 ? null : 4,
+        [
+            'onclick' => 'return file_select_attachment_window( this, true );',
+            'class' => 'btn btn-sm btn-info',
+        ],
+        [
+            'class' => 'edit_file_icon',
+        ]
+    );
+    // Display a button to remove current selected file:
+    $r .= action_icon(
+        $params['remove_file_text'],
+        'remove',
+        '',
+        ' ' . T_('Remove'),
+        null,
+        $params['max_file_num'] > 1 ? null : 4,
+        [
+            'onclick' => 'return file_select_delete( this );',
+            'class' => 'btn btn-sm btn-default',
+        ],
+        [
+            'class' => 'remove_file_icon',
+        ]
+    );
+    $r .= '</div>';
+    $r .= $params['max_file_num'] > 1 ? '</div>' : '';
+    $r .= $params['field_item_end'];
 
-	return $r;
+    return $r;
 }
-?>

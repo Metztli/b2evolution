@@ -18,55 +18,48 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Collection, $Blog, $Session, $Messages, $inc_path;
 global $action, $user_profile_only, $current_User, $edited_User, $form_action;
 global $user_ID;
 
-if( ! is_logged_in() )
-{ // must be logged in!
-	echo '<p class="error">'.T_( 'You are not logged in.' ).'</p>';
-	return;
+if (! is_logged_in()) { // must be logged in!
+    echo '<p class="error">' . T_('You are not logged in.') . '</p>';
+    return;
 }
 
-$UserCache = & get_UserCache();
-if( empty( $user_ID ) || $user_ID !== $current_User->ID )
-{ // Users can only view their own visit profiles in the Front-office
-	$user_ID = $current_User->ID;
+$UserCache = &get_UserCache();
+if (empty($user_ID) || $user_ID !== $current_User->ID) { // Users can only view their own visit profiles in the Front-office
+    $user_ID = $current_User->ID;
 }
 
-$viewed_User = & $UserCache->get_by_ID( $user_ID );
+$viewed_User = &$UserCache->get_by_ID($user_ID);
 //$view_perm = $current_User->ID == $viewed_User->ID || check_user_perm( 'users', 'view', false, $viewed_User );
 $view_perm = $current_User->ID == $viewed_User->ID;
 
 // Check if admin, moderator or user with 'view details' permission
-if( ! $view_perm )
-{
-	echo '<p class="error">'.T_( 'You have no permission to view other users!' ).'</p>';
-	return;
+if (! $view_perm) {
+    echo '<p class="error">' . T_('You have no permission to view other users!') . '</p>';
+    return;
 }
 
 
 $user_profile_only = true;
 // check if there is unsaved User object stored in Session
-$viewed_User = $Session->get( 'core.unsaved_User' );
-if( $edited_User == NULL )
-{ // edited_User is the current_User
-	$edited_User = $current_User;
-}
-else
-{ // unsaved user exists, delete it from Session
-	$Session->delete( 'core.unsaved_User' );
-	if( $edited_User->ID != $current_User->ID )
-	{ // edited user ID must be the same as current User
-		debug_die( 'Inconsistent state, you are allowed to edit only your profile' );
-	}
+$viewed_User = $Session->get('core.unsaved_User');
+if ($edited_User == null) { // edited_User is the current_User
+    $edited_User = $current_User;
+} else { // unsaved user exists, delete it from Session
+    $Session->delete('core.unsaved_User');
+    if ($edited_User->ID != $current_User->ID) { // edited user ID must be the same as current User
+        debug_die('Inconsistent state, you are allowed to edit only your profile');
+    }
 }
 
 
 
 // Display form
-require $inc_path.'users/views/_user_profile_visits.view.php';
-
-?>
+require $inc_path . 'users/views/_user_profile_visits.view.php';

@@ -14,7 +14,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -22,31 +24,41 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 global $edited_Organization;
 
-$Form = new Form( NULL, 'orguser_checkchanges' );
+$Form = new Form(null, 'orguser_checkchanges');
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-	$Form->add_crumb( 'organization' );
+$Form->add_crumb('organization');
 
-	$Form->hiddens_by_key( get_memorized( 'action' ) ); // (this allows to come back to the right list order & page)
+$Form->hiddens_by_key(get_memorized('action')); // (this allows to come back to the right list order & page)
 
-	$User = NULL;
-	$Form->username( 'user_login', $User, TB_('Username'), '', '', array( 'required' => true ) );
+$User = null;
+$Form->username('user_login', $User, TB_('Username'), '', '', [
+    'required' => true,
+]);
 
-	$Form->radio( 'accepted', '1',
-				array(
-					array( '1', TB_('Accepted') ),
-					array( '0', TB_('Not Accepted') ),
-			), TB_('Membership'), true );
+$Form->radio(
+    'accepted',
+    '1',
+    [
+        ['1', TB_('Accepted')],
+        ['0', TB_('Not Accepted')],
+    ],
+    TB_('Membership'),
+    true
+);
 
-	$Form->text_input( 'role', '', 32, TB_('Role'), '', array( 'maxlength' => 255 ) );
+$Form->text_input('role', '', 32, TB_('Role'), '', [
+    'maxlength' => 255,
+]);
 
-	$Form->text_input( 'priority', '', 32, TB_('Order'), '', array( 'maxlength' => 255, 'type' => 'number' ) );
+$Form->text_input('priority', '', 32, TB_('Order'), '', [
+    'maxlength' => 255,
+    'type' => 'number',
+]);
 
-$buttons = array();
-if( check_user_perm( 'orgs', 'edit', false, $edited_Organization ) )
-{	// Display a button to update the poll question only if current user has a permission:
-	$buttons[] = array( 'submit', 'actionArray[link_user]', TB_('Add'), 'SaveButton' );
+$buttons = [];
+if (check_user_perm('orgs', 'edit', false, $edited_Organization)) {	// Display a button to update the poll question only if current user has a permission:
+    $buttons[] = ['submit', 'actionArray[link_user]', TB_('Add'), 'SaveButton'];
 }
-$Form->end_form( $buttons );
-?>
+$Form->end_form($buttons);

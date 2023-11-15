@@ -13,7 +13,7 @@
 
 
 // Initialize config:
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
 /**
  * @global boolean Is this an API request?
@@ -21,7 +21,7 @@ require_once dirname(__FILE__).'/../conf/_config.php';
 $is_api_request = true;
 
 // Initialize main functions:
-require_once $inc_path.'_main.inc.php';
+require_once $inc_path . '_main.inc.php';
 
 
 // Don't check new updates from b2evolution.net (@see b2evonet_get_updates()),
@@ -36,15 +36,14 @@ $DB->show_errors = false;
 $debug = 0;
 
 // Get two main params for REST API class:
-$api_version = param( 'api_version', 'integer', 1 );
-$api_request = param( 'api_request', 'string', '' );
+$api_version = param('api_version', 'integer', 1);
+$api_request = param('api_request', 'string', '');
 
 // Load class to work with REST API:
-load_class( 'rest/_restapi.class.php', 'RestApi' );
+load_class('rest/_restapi.class.php', 'RestApi');
 
 // Initialize REST API object for current request:
-$RestApi = new RestApi( $api_request );
+$RestApi = new RestApi($api_request);
 
 // Execute REST API request:
 $RestApi->execute();
-?>

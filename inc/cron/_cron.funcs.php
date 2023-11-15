@@ -11,7 +11,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -21,23 +23,19 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  *        (if $quiet (number of "-q" params passed to cron_exec.php)
  *         is higher than this, the message gets skipped)
  */
-function cron_log( $message, $level = 0 )
+function cron_log($message, $level = 0)
 {
-	global $is_web, $quiet;
+    global $is_web, $quiet;
 
-	if( $quiet > $level )
-	{
-		return;
-	}
+    if ($quiet > $level) {
+        return;
+    }
 
-	if( $is_web )
-	{
-		echo '<p>'.$message.'</p>';
-	}
-	else
-	{
-		echo "\n".$message."\n";
-	}
+    if ($is_web) {
+        echo '<p>' . $message . '</p>';
+    } else {
+        echo "\n" . $message . "\n";
+    }
 }
 
 
@@ -48,77 +46,71 @@ function cron_log( $message, $level = 0 )
  * @param string Message type: 'success', 'warning', 'error', 'note', NULL - to use default text without addition style color
  * @param string New line
  */
-function cron_log_append( $message, $type = NULL, $nl = "\n" )
+function cron_log_append($message, $type = null, $nl = "\n")
 {
-	global $result_message, $cron_log_last_time, $cron_log_buffer_size, $cron_log_actions_num;
+    global $result_message, $cron_log_last_time, $cron_log_buffer_size, $cron_log_actions_num;
 
-	if( ! isset( $result_message ) )
-	{	// Initialize a var for cron log message:
-		$result_message = '';
-	}
+    if (! isset($result_message)) {	// Initialize a var for cron log message:
+        $result_message = '';
+    }
 
-	if( ! isset( $cron_log_buffer_size ) )
-	{	// Initialize a var to count a cron log message length:
-		$cron_log_buffer_size = 0;
-	}
+    if (! isset($cron_log_buffer_size)) {	// Initialize a var to count a cron log message length:
+        $cron_log_buffer_size = 0;
+    }
 
-	if( ! isset( $cron_log_actions_num ) )
-	{	// Initialize a var to count cron log actions:
-		$cron_log_actions_num = 0;
-	}
+    if (! isset($cron_log_actions_num)) {	// Initialize a var to count cron log actions:
+        $cron_log_actions_num = 0;
+    }
 
-	if( ! empty( $message ) )
-	{
-		// Set style for message depending on type:
-		switch( $type )
-		{
-			case 'success':
-				$message = '<span class="green">'.$message.'</span>';
-				break;
-			case 'error':
-				$message = '<span class="red">'.$message.'</span>';
-				break;
-			case 'warning':
-				$message = '<span class="orange">'.$message.'</span>';
-				break;
-			case 'note':
-				$message = '<span class="grey">'.$message.'</span>';
-				break;
-		}
+    if (! empty($message)) {
+        // Set style for message depending on type:
+        switch ($type) {
+            case 'success':
+                $message = '<span class="green">' . $message . '</span>';
+                break;
+            case 'error':
+                $message = '<span class="red">' . $message . '</span>';
+                break;
+            case 'warning':
+                $message = '<span class="orange">' . $message . '</span>';
+                break;
+            case 'note':
+                $message = '<span class="grey">' . $message . '</span>';
+                break;
+        }
 
-		// Append new line:
-		$message .= $nl;
-	}
+        // Append new line:
+        $message .= $nl;
+    }
 
-	// Append new message to the cron log:
-	$result_message .= $message;
+    // Append new message to the cron log:
+    $result_message .= $message;
 
-	// Update buffer size:
-	$cron_log_buffer_size += strlen( $message );
+    // Update buffer size:
+    $cron_log_buffer_size += strlen($message);
 
-	if( $cron_log_buffer_size >= 4096 ||
-	    ( isset( $cron_log_last_time ) && ( time() - $cron_log_last_time ) >= 1 ) )
-	{	// If log buffer >= 4096 OR last time execution >= 1 second:
-		if( $cron_log_buffer_size >= 4096 )
-		{	// Reset buffer size to count a next portion:
-			$cron_log_buffer_size = 0;
-		}
+    if ($cron_log_buffer_size >= 4096 ||
+        (isset($cron_log_last_time) && (time() - $cron_log_last_time) >= 1)) {	// If log buffer >= 4096 OR last time execution >= 1 second:
+        if ($cron_log_buffer_size >= 4096) {	// Reset buffer size to count a next portion:
+            $cron_log_buffer_size = 0;
+        }
 
-		// We must update cron log in DB in order to don't lose it on unexpected crash:
-		global $DB, $ctsk_ID, $time_difference;
-		if( ! empty( $ctsk_ID ) )
-		{	// We can update only cron job which is executing right now:
-			$DB->query( 'UPDATE T_cron__log
-				  SET clog_messages = '.$DB->quote( $result_message ).',
-				      clog_actions_num = '.$DB->quote( $cron_log_actions_num ).',
-				      clog_realstop_datetime = '.$DB->quote( date2mysql( time() + $time_difference ) ).'
-				WHERE clog_ctsk_ID = '.$ctsk_ID,
-				'Update a log message of the executing cron job #'.$ctsk_ID );
-		}
-	}
+        // We must update cron log in DB in order to don't lose it on unexpected crash:
+        global $DB, $ctsk_ID, $time_difference;
+        if (! empty($ctsk_ID)) {	// We can update only cron job which is executing right now:
+            $DB->query(
+                'UPDATE T_cron__log
+				  SET clog_messages = ' . $DB->quote($result_message) . ',
+				      clog_actions_num = ' . $DB->quote($cron_log_actions_num) . ',
+				      clog_realstop_datetime = ' . $DB->quote(date2mysql(time() + $time_difference)) . '
+				WHERE clog_ctsk_ID = ' . $ctsk_ID,
+                'Update a log message of the executing cron job #' . $ctsk_ID
+            );
+        }
+    }
 
-	// Update a time global var to compare with next time:
-	$cron_log_last_time = time();
+    // Update a time global var to compare with next time:
+    $cron_log_last_time = time();
 }
 
 
@@ -129,20 +121,19 @@ function cron_log_append( $message, $type = NULL, $nl = "\n" )
  * @param string Message type: 'success', 'warning', 'error', 'note'
  * @param string New line
  */
-function cron_log_action_end( $message, $type = NULL, $nl = "\n" )
+function cron_log_action_end($message, $type = null, $nl = "\n")
 {
-	global $cron_log_actions_num;
+    global $cron_log_actions_num;
 
-	if( ! isset( $cron_log_actions_num ) )
-	{	// Initialize a var to count cron log actions:
-		$cron_log_actions_num = 0;
-	}
+    if (! isset($cron_log_actions_num)) {	// Initialize a var to count cron log actions:
+        $cron_log_actions_num = 0;
+    }
 
-	// Mark this as separate action:
-	$cron_log_actions_num++;
+    // Mark this as separate action:
+    $cron_log_actions_num++;
 
-	// Append cron log:
-	cron_log_append( $message.get_cron_log_time( $cron_log_actions_num ), $type, $nl );
+    // Append cron log:
+    cron_log_append($message . get_cron_log_time($cron_log_actions_num), $type, $nl);
 }
 
 
@@ -154,10 +145,10 @@ function cron_log_action_end( $message, $type = NULL, $nl = "\n" )
  *
  * @param integer Number of actions
  */
-function cron_log_report_action_count( $num )
+function cron_log_report_action_count($num)
 {
-	global $cron_log_actions_num;
-	$cron_log_actions_num = $num;
+    global $cron_log_actions_num;
+    $cron_log_actions_num = $num;
 }
 
 
@@ -167,14 +158,14 @@ function cron_log_report_action_count( $num )
  * @param integer A number of cron log action
  * @return string Cron log time
  */
-function get_cron_log_time( $action_num = NULL )
+function get_cron_log_time($action_num = null)
 {
-	global $Timer;
+    global $Timer;
 
-	return '<div class="note">'
-			.( $action_num === NULL ? '' : 'Action #'.$action_num.' Finished. ' )
-			.'Elapsed time since beginning of task: '.$Timer->get_duration( 'cron_exec' ).' seconds'
-		.'</div>';
+    return '<div class="note">'
+            . ($action_num === null ? '' : 'Action #' . $action_num . ' Finished. ')
+            . 'Elapsed time since beginning of task: ' . $Timer->get_duration('cron_exec') . ' seconds'
+        . '</div>';
 }
 
 
@@ -187,103 +178,91 @@ function get_cron_log_time( $action_num = NULL )
  *               'ctsk_name' - task name
  * @return string Error message
  */
-function call_job( $job_key, $job_params = array() )
+function call_job($job_key, $job_params = [])
 {
-	global $DB, $inc_path, $Plugins, $admin_url, $is_web;
+    global $DB, $inc_path, $Plugins, $admin_url, $is_web;
 
-	global $result_message, $result_status, $timestop, $time_difference;
+    global $result_message, $result_status, $timestop, $time_difference;
 
-	$error_message = '';
-	$result_message = NULL;
-	$result_status = 'error';
+    $error_message = '';
+    $result_message = null;
+    $result_status = 'error';
 
-	$job_ctrl = get_cron_jobs_config( 'ctrl', $job_key );
+    $job_ctrl = get_cron_jobs_config('ctrl', $job_key);
 
-	if( preg_match( '~^plugin_(\d+)_(.*)$~', $job_ctrl, $match ) )
-	{ // Cron job provided by a plugin:
-		if( ! is_object($Plugins) )
-		{
-			load_class( 'plugins/model/_plugins.class.php', 'Plugins' );
-			$Plugins = new Plugins();
-		}
+    if (preg_match('~^plugin_(\d+)_(.*)$~', $job_ctrl, $match)) { // Cron job provided by a plugin:
+        if (! is_object($Plugins)) {
+            load_class('plugins/model/_plugins.class.php', 'Plugins');
+            $Plugins = new Plugins();
+        }
 
-		$Plugin = & $Plugins->get_by_ID( $match[1] );
-		if( ! $Plugin )
-		{
-			$result_message = 'Plugin for controller ['.$job_ctrl.'] could not get instantiated.';
-			cron_log( $result_message, 2 );
-			return $result_message;
-		}
+        $Plugin = &$Plugins->get_by_ID($match[1]);
+        if (! $Plugin) {
+            $result_message = 'Plugin for controller [' . $job_ctrl . '] could not get instantiated.';
+            cron_log($result_message, 2);
+            return $result_message;
+        }
 
-		// CALL THE PLUGIN TO HANDLE THE JOB:
-		$tmp_params = array( 'ctrl' => $match[2], 'params' => $job_params );
-		$sub_r = $Plugins->call_method( $Plugin->ID, 'ExecCronJob', $tmp_params );
+        // CALL THE PLUGIN TO HANDLE THE JOB:
+        $tmp_params = [
+            'ctrl' => $match[2],
+            'params' => $job_params,
+        ];
+        $sub_r = $Plugins->call_method($Plugin->ID, 'ExecCronJob', $tmp_params);
 
-		$error_code = (int)$sub_r['code'];
-		$result_message = $sub_r['message'];
-	}
-	else
-	{
-		$controller = $inc_path.$job_ctrl;
-		if( ! is_file( $controller ) )
-		{
-			$result_message = 'Controller ['.$job_ctrl.'] does not exist.';
-			cron_log( $result_message, 2 );
-			return $result_message;
-		}
+        $error_code = (int) $sub_r['code'];
+        $result_message = $sub_r['message'];
+    } else {
+        $controller = $inc_path . $job_ctrl;
+        if (! is_file($controller)) {
+            $result_message = 'Controller [' . $job_ctrl . '] does not exist.';
+            cron_log($result_message, 2);
+            return $result_message;
+        }
 
-		// INCLUDE THE JOB FILE AND RUN IT:
-		$error_code = require $controller;
-	}
+        // INCLUDE THE JOB FILE AND RUN IT:
+        $error_code = require $controller;
+    }
 
-	if( is_array( $result_message ) )
-	{	// If result is array (we should store it as serialized data later)
-		// array keys: 'message' - Result message
-		//             'table_cols' - Columns names of the table to display on the Execution details of the cron job log
-		//             'table_data' - Array
-		$result_message_text = $result_message['message'];
-	}
-	else
-	{	// Result is text string
-		$result_message_text = $result_message;
-	}
+    if (is_array($result_message)) {	// If result is array (we should store it as serialized data later)
+        // array keys: 'message' - Result message
+        //             'table_cols' - Columns names of the table to display on the Execution details of the cron job log
+        //             'table_data' - Array
+        $result_message_text = $result_message['message'];
+    } else {	// Result is text string
+        $result_message_text = $result_message;
+    }
 
-	if( $error_code != 1 )
-	{	// We got an error
-		$result_status = ( $error_code == 20 ? 'imap_error' : 'error' );
-		$result_message_text = 'Error code: '.$error_code."\n"
-			.'Result message: '.$result_message_text."\n\n";
-		if( is_array( $result_message ) )
-		{ // If result is array
-			$result_message['message'] = $result_message_text;
-		}
-		$cron_log_level = 2;
+    if ($error_code != 1) {	// We got an error
+        $result_status = ($error_code == 20 ? 'imap_error' : 'error');
+        $result_message_text = 'Error code: ' . $error_code . "\n"
+            . 'Result message: ' . $result_message_text . "\n\n";
+        if (is_array($result_message)) { // If result is array
+            $result_message['message'] = $result_message_text;
+        }
+        $cron_log_level = 2;
 
-		$error_message = $result_message_text;
-	}
-	else
-	{
-		$result_status = 'finished';
-		$cron_log_level = 1;
-	}
+        $error_message = $result_message_text;
+    } else {
+        $result_status = 'finished';
+        $cron_log_level = 1;
+    }
 
-	if( $is_web )
-	{	// Is web interface?
-		$result_message_text = str_replace( "\n", "<br>\n", $result_message_text );
-	}
-	else
-	{	// Is CLI mode?
-		$result_message_text = str_replace(
-			array( '<br>', '<b>', '</b>', '<code>', '</code>', '&#8800;', '&#8804;', '&#8805;' ),
-			array( "\n", '*', '*', '`', '`', '!=', '<=', '>=' ),
-			$result_message_text );
-	}
+    if ($is_web) {	// Is web interface?
+        $result_message_text = str_replace("\n", "<br>\n", $result_message_text);
+    } else {	// Is CLI mode?
+        $result_message_text = str_replace(
+            ['<br>', '<b>', '</b>', '<code>', '</code>', '&#8800;', '&#8804;', '&#8805;'],
+            ["\n", '*', '*', '`', '`', '!=', '<=', '>='],
+            $result_message_text
+        );
+    }
 
-	$timestop = time() + $time_difference;
-	cron_log( 'Task finished at '.date( 'H:i:s', $timestop ).' with status: '.$result_status
-		.( $is_web ? '<br>' : "\n" ).'Message: '.$result_message_text, $cron_log_level );
+    $timestop = time() + $time_difference;
+    cron_log('Task finished at ' . date('H:i:s', $timestop) . ' with status: ' . $result_status
+        . ($is_web ? '<br>' : "\n") . 'Message: ' . $result_message_text, $cron_log_level);
 
-	return $error_message;
+    return $error_message;
 }
 
 
@@ -294,15 +273,15 @@ function call_job( $job_key, $job_params = array() )
  */
 function cron_statuses()
 {
-	return array(
-			'pending'    => T_('Pending'),
-			'started'    => T_('Started'),
-			'warning'    => T_('Warning'),
-			'timeout'    => T_('Timed out'),
-			'error'      => T_('Error'),
-			'imap_error' => T_('IMAP error'),
-			'finished'   => T_('Finished'),
-		);
+    return [
+        'pending' => T_('Pending'),
+        'started' => T_('Started'),
+        'warning' => T_('Warning'),
+        'timeout' => T_('Timed out'),
+        'error' => T_('Error'),
+        'imap_error' => T_('IMAP error'),
+        'finished' => T_('Finished'),
+    ];
 }
 
 
@@ -312,11 +291,11 @@ function cron_statuses()
  * @param string Status
  * @return string Title
  */
-function cron_status_title( $status )
+function cron_status_title($status)
 {
-	$titles = cron_statuses();
+    $titles = cron_statuses();
 
-	return isset( $titles[ $status ] ) ? $titles[ $status ] : $status;
+    return isset($titles[$status]) ? $titles[$status] : $status;
 }
 
 
@@ -326,19 +305,19 @@ function cron_status_title( $status )
  * @param string Status value
  * @return string Color value
  */
-function cron_status_color( $status )
+function cron_status_color($status)
 {
-	$colors = array(
-			'pending'  => '808080',
-			'started'  => '4d77cb',
-			'warning'  => 'dbdb57',
-			'timeout'  => 'e09952',
-			'error'    => 'cb4d4d',
-			'imap_error' => 'cb4d4d',
-			'finished' => '34b27d',
-		);
+    $colors = [
+        'pending' => '808080',
+        'started' => '4d77cb',
+        'warning' => 'dbdb57',
+        'timeout' => 'e09952',
+        'error' => 'cb4d4d',
+        'imap_error' => 'cb4d4d',
+        'finished' => '34b27d',
+    ];
 
-	return isset( $colors[ $status ] ) ? '#'.$colors[ $status ] : 'none';
+    return isset($colors[$status]) ? '#' . $colors[$status] : 'none';
 }
 
 
@@ -348,26 +327,26 @@ function cron_status_color( $status )
  * @param string job key
  * @return string Link to manual page of cron job task
  */
-function cron_job_manual_link( $job_key )
+function cron_job_manual_link($job_key)
 {
-	$help_config = get_cron_jobs_config( 'help', $job_key );
+    $help_config = get_cron_jobs_config('help', $job_key);
 
-	if( empty( $help_config ) )
-	{ // There was no 'help' topic defined for this job
-		return '';
-	}
+    if (empty($help_config)) { // There was no 'help' topic defined for this job
+        return '';
+    }
 
-	if( $help_config == '#' )
-	{ // The 'help' topic is set to '#', use the default 'task-' + job_key
-		return get_manual_link( 'task-'.$job_key );
-	}
+    if ($help_config == '#') { // The 'help' topic is set to '#', use the default 'task-' + job_key
+        return get_manual_link('task-' . $job_key);
+    }
 
-	if( is_url( $help_config ) )
-	{ // This cron job help topic is an url
-		return action_icon( T_('Open relevant page in online manual'), 'manual', $help_config, T_('Manual'), 5, 1, array( 'target' => '_blank', 'style' => 'vertical-align:top' ) );
-	}
+    if (is_url($help_config)) { // This cron job help topic is an url
+        return action_icon(T_('Open relevant page in online manual'), 'manual', $help_config, T_('Manual'), 5, 1, [
+            'target' => '_blank',
+            'style' => 'vertical-align:top',
+        ]);
+    }
 
-	return get_manual_link( $help_config );
+    return get_manual_link($help_config);
 }
 
 
@@ -379,63 +358,53 @@ function cron_job_manual_link( $job_key )
  * @param string|array Job params
  * @return string Default value of job name of Name from DB
  */
-function cron_job_name( $job_key, $job_name = '', $job_params = '' )
+function cron_job_name($job_key, $job_name = '', $job_params = '')
 {
-	if( empty( $job_name ) )
-	{ // Get default name by key
-		$job_name = get_cron_jobs_config( 'name', $job_key );
-	}
+    if (empty($job_name)) { // Get default name by key
+        $job_name = get_cron_jobs_config('name', $job_key);
+    }
 
-	$job_params = is_string( $job_params ) ? unserialize( $job_params ) : $job_params;
-	if( ! empty( $job_params ) )
-	{ // Prepare job name with the specified params
-		switch( $job_key )
-		{
-			case 'send-post-notifications':
-				// Add item title to job name
-				if( ! empty( $job_params['item_ID'] ) )
-				{
-					$ItemCache = & get_ItemCache();
-					if( $Item = $ItemCache->get_by_ID( $job_params['item_ID'], false, false ) )
-					{
-						$job_name = sprintf( $job_name, $Item->ID, $Item->get( 'title' ) );
-					}
-				}
-				break;
+    $job_params = is_string($job_params) ? unserialize($job_params) : $job_params;
+    if (! empty($job_params)) { // Prepare job name with the specified params
+        switch ($job_key) {
+            case 'send-post-notifications':
+                // Add item title to job name
+                if (! empty($job_params['item_ID'])) {
+                    $ItemCache = &get_ItemCache();
+                    if ($Item = $ItemCache->get_by_ID($job_params['item_ID'], false, false)) {
+                        $job_name = sprintf($job_name, $Item->ID, $Item->get('title'));
+                    }
+                }
+                break;
 
-			case 'send-comment-notifications':
-				// Add item title of the comment to job name
-				if( ! empty( $job_params['comment_ID'] ) )
-				{
-					$CommentCache = & get_CommentCache();
-					if( $Comment = & $CommentCache->get_by_ID( $job_params['comment_ID'], false, false ) )
-					{
-						if( $Item = $Comment->get_Item() )
-						{
-							$job_name = sprintf( $job_name, $Item->get( 'title' ) );
-						}
-					}
-				}
-				break;
+            case 'send-comment-notifications':
+                // Add item title of the comment to job name
+                if (! empty($job_params['comment_ID'])) {
+                    $CommentCache = &get_CommentCache();
+                    if ($Comment = &$CommentCache->get_by_ID($job_params['comment_ID'], false, false)) {
+                        if ($Item = $Comment->get_Item()) {
+                            $job_name = sprintf($job_name, $Item->get('title'));
+                        }
+                    }
+                }
+                break;
 
-			case 'send-email-campaign':
-				// Add email campaign title and chunk size to job name:
-				global $Settings;
-				$email_campaign_title = '';
-				if( ! empty( $job_params['ecmp_ID'] ) )
-				{
-					$EmailCampaignCache = & get_EmailCampaignCache();
-					if( $EmailCampaign = $EmailCampaignCache->get_by_ID( $job_params['ecmp_ID'], false, false ) )
-					{
-						$email_campaign_title = $EmailCampaign->get( 'name' );
-					}
-				}
-				$job_name = sprintf( $job_name, $Settings->get( 'email_campaign_chunk_size' ), $email_campaign_title );
-				break;
-		}
-	}
+            case 'send-email-campaign':
+                // Add email campaign title and chunk size to job name:
+                global $Settings;
+                $email_campaign_title = '';
+                if (! empty($job_params['ecmp_ID'])) {
+                    $EmailCampaignCache = &get_EmailCampaignCache();
+                    if ($EmailCampaign = $EmailCampaignCache->get_by_ID($job_params['ecmp_ID'], false, false)) {
+                        $email_campaign_title = $EmailCampaign->get('name');
+                    }
+                }
+                $job_name = sprintf($job_name, $Settings->get('email_campaign_chunk_size'), $email_campaign_title);
+                break;
+        }
+    }
 
-	return $job_name;
+    return $job_name;
 }
 
 
@@ -446,76 +415,63 @@ function cron_job_name( $job_key, $job_name = '', $job_params = '' )
  *             'name'
  *             'message'
  */
-function detect_timeout_cron_jobs( $error_task = NULL )
+function detect_timeout_cron_jobs($error_task = null)
 {
-	global $DB, $time_difference, $admin_url;
+    global $DB, $time_difference, $admin_url;
 
-	// Convert time difference to mysql format:
-	$mysql_time_difference = intval( $time_difference );
-	if( $mysql_time_difference >= 0 )
-	{	// Negative value already has a sign "-", but for positive value we must add a sigh "+" for correct mysql operation below:
-		$mysql_time_difference = '+ '.$mysql_time_difference;
-	}
+    // Convert time difference to mysql format:
+    $mysql_time_difference = intval($time_difference);
+    if ($mysql_time_difference >= 0) {	// Negative value already has a sign "-", but for positive value we must add a sigh "+" for correct mysql operation below:
+        $mysql_time_difference = '+ ' . $mysql_time_difference;
+    }
 
-	$SQL = new SQL( 'Find cron timeouts' );
-	$SQL->SELECT( 'ctsk_ID, ctsk_name, ctsk_key' );
-	$SQL->FROM( 'T_cron__log' );
-	$SQL->FROM_add( 'INNER JOIN T_cron__task ON ctsk_ID = clog_ctsk_ID' );
-	$SQL->FROM_add( 'LEFT JOIN T_settings ON set_name = CONCAT( "cjob_timeout_", ctsk_key )' );
-	$SQL->WHERE( 'clog_status = "started"' );
-	$SQL->WHERE_and( 'UNIX_TIMESTAMP( clog_realstart_datetime ) < UNIX_TIMESTAMP() - IFNULL( set_value, 600 ) - 120 '.$mysql_time_difference );
-	$SQL->GROUP_BY( 'ctsk_ID' );
-	$timeout_tasks = $DB->get_results( $SQL );
+    $SQL = new SQL('Find cron timeouts');
+    $SQL->SELECT('ctsk_ID, ctsk_name, ctsk_key');
+    $SQL->FROM('T_cron__log');
+    $SQL->FROM_add('INNER JOIN T_cron__task ON ctsk_ID = clog_ctsk_ID');
+    $SQL->FROM_add('LEFT JOIN T_settings ON set_name = CONCAT( "cjob_timeout_", ctsk_key )');
+    $SQL->WHERE('clog_status = "started"');
+    $SQL->WHERE_and('UNIX_TIMESTAMP( clog_realstart_datetime ) < UNIX_TIMESTAMP() - IFNULL( set_value, 600 ) - 120 ' . $mysql_time_difference);
+    $SQL->GROUP_BY('ctsk_ID');
+    $timeout_tasks = $DB->get_results($SQL);
 
-	$tasks = array();
+    $tasks = [];
 
-	if( count( $timeout_tasks ) > 0 )
-	{
-		$cron_jobs_names = get_cron_jobs_config( 'name' );
-		foreach( $timeout_tasks as $timeout_task )
-		{
-			if( ! empty( $timeout_task->ctsk_name ) )
-			{ // Task name is defined in DB
-				$task_name = $timeout_task->ctsk_name;
-			}
-			else
-			{ // Try to get default task name by key:
-				$task_name = ( isset( $cron_jobs_names[ $timeout_task->ctsk_key ] ) ? $cron_jobs_names[ $timeout_task->ctsk_key ] : $timeout_task->ctsk_key );
-			}
-			$tasks[ $timeout_task->ctsk_ID ] = $task_name;
-		}
+    if (count($timeout_tasks) > 0) {
+        $cron_jobs_names = get_cron_jobs_config('name');
+        foreach ($timeout_tasks as $timeout_task) {
+            if (! empty($timeout_task->ctsk_name)) { // Task name is defined in DB
+                $task_name = $timeout_task->ctsk_name;
+            } else { // Try to get default task name by key:
+                $task_name = (isset($cron_jobs_names[$timeout_task->ctsk_key]) ? $cron_jobs_names[$timeout_task->ctsk_key] : $timeout_task->ctsk_key);
+            }
+            $tasks[$timeout_task->ctsk_ID] = $task_name;
+        }
 
-		// Update timed out cron jobs:
-		$DB->query( 'UPDATE T_cron__log
+        // Update timed out cron jobs:
+        $DB->query('UPDATE T_cron__log
 			  SET clog_status = "timeout"
-			WHERE clog_ctsk_ID IN ( '.$DB->quote( array_keys( $tasks ) ).' )', 'Mark timeouts in cron jobs.' );
-	}
+			WHERE clog_ctsk_ID IN ( ' . $DB->quote(array_keys($tasks)) . ' )', 'Mark timeouts in cron jobs.');
+    }
 
-	$timeout_tasks_num = count( $tasks );
-	if( $timeout_tasks_num > 0 || $error_task !== NULL )
-	{	// Send notification email about timed out and error cron jobs to users with edit options permission:
-		$email_template_params = array(
-				'timeout_tasks' => $tasks,
-				'error_task'    => $error_task,
-			);
-		if( $timeout_tasks_num > 1 || ( $error_task !== NULL && $timeout_tasks_num > 0 ) )
-		{	// Set email subject for multiple cron jobs:
-			$email_subject = NT_('Errors in multiple scheduled tasks');
-		}
-		elseif( $error_task !== NULL )
-		{	// Use name of error task in email subject:
-			$email_subject = array( NT_('Error in task: %s'), $error_task['name'] );
-		}
-		else
-		{	// Use name of first timed out task in email subject:
-			foreach( $tasks as $timeout_task_name )
-			{
-				$email_subject = array( NT_('Error in task: %s'), $timeout_task_name );
-				break;
-			}
-		}
-		send_admin_notification( $email_subject, 'scheduled_task_error_report', $email_template_params );
-	}
+    $timeout_tasks_num = count($tasks);
+    if ($timeout_tasks_num > 0 || $error_task !== null) {	// Send notification email about timed out and error cron jobs to users with edit options permission:
+        $email_template_params = [
+            'timeout_tasks' => $tasks,
+            'error_task' => $error_task,
+        ];
+        if ($timeout_tasks_num > 1 || ($error_task !== null && $timeout_tasks_num > 0)) {	// Set email subject for multiple cron jobs:
+            $email_subject = NT_('Errors in multiple scheduled tasks');
+        } elseif ($error_task !== null) {	// Use name of error task in email subject:
+            $email_subject = [NT_('Error in task: %s'), $error_task['name']];
+        } else {	// Use name of first timed out task in email subject:
+            foreach ($tasks as $timeout_task_name) {
+                $email_subject = [NT_('Error in task: %s'), $timeout_task_name];
+                break;
+            }
+        }
+        send_admin_notification($email_subject, 'scheduled_task_error_report', $email_template_params);
+    }
 }
 
 
@@ -526,83 +482,70 @@ function detect_timeout_cron_jobs( $error_task = NULL )
  * @param string Get one cron job by specified key
  * @return array|string Array of all cron jobs | Value of specified cron job
  */
-function get_cron_jobs_config( $get_param = '', $get_by_key = '' )
+function get_cron_jobs_config($get_param = '', $get_by_key = '')
 {
-	global $cron_jobs_config;
+    global $cron_jobs_config;
 
-	if( isset( $cron_jobs_config ) )
-	{ // Get config from global vaiable to don't initialize this var twice
-		if( !empty( $get_by_key ) )
-		{ // A specific job param(s) was requested
-			if( empty( $get_param ) )
-			{ // Return all params
-				return $cron_jobs_config[ $get_by_key ];
-			}
-			// Return the requested job param if it is set or NULL otherwise
-			return ( isset( $cron_jobs_config[ $get_by_key ][$get_param] ) ) ? $cron_jobs_config[ $get_by_key ][$get_param] : NULL;
-		}
+    if (isset($cron_jobs_config)) { // Get config from global vaiable to don't initialize this var twice
+        if (! empty($get_by_key)) { // A specific job param(s) was requested
+            if (empty($get_param)) { // Return all params
+                return $cron_jobs_config[$get_by_key];
+            }
+            // Return the requested job param if it is set or NULL otherwise
+            return (isset($cron_jobs_config[$get_by_key][$get_param])) ? $cron_jobs_config[$get_by_key][$get_param] : null;
+        }
 
-		if( empty( $get_param ) )
-		{ // No specific param or job key was requested, return the whole config list
-			return $cron_jobs_config;
-		}
+        if (empty($get_param)) { // No specific param or job key was requested, return the whole config list
+            return $cron_jobs_config;
+        }
 
-		// Get a specific config param for all jobs
-		$restricted_config = array();
-		foreach( $cron_jobs_config as $job_key => $job_config )
-		{
-			$restricted_config[ $job_key ] = isset( $job_config[ $get_param ] ) ? $job_config[ $get_param ] : NULL;
-		}
-		return $restricted_config;
-	}
+        // Get a specific config param for all jobs
+        $restricted_config = [];
+        foreach ($cron_jobs_config as $job_key => $job_config) {
+            $restricted_config[$job_key] = isset($job_config[$get_param]) ? $job_config[$get_param] : null;
+        }
+        return $restricted_config;
+    }
 
-	// This array will contain the modules and the plugins cron jobs data
-	$cron_jobs_config = array();
+    // This array will contain the modules and the plugins cron jobs data
+    $cron_jobs_config = [];
 
-	// Get additional jobs from different modules and Plugins:
-	global $modules, $Plugins;
+    // Get additional jobs from different modules and Plugins:
+    global $modules, $Plugins;
 
-	foreach( $modules as $module )
-	{
-		$Module = & $GLOBALS[$module.'_Module'];
-		// Note: cron jobs with the same key will ovverride previously defined cron jobs data
-		$cron_jobs_config = array_merge( $cron_jobs_config, $Module->get_cron_jobs() );
-	}
+    foreach ($modules as $module) {
+        $Module = &$GLOBALS[$module . '_Module'];
+        // Note: cron jobs with the same key will ovverride previously defined cron jobs data
+        $cron_jobs_config = array_merge($cron_jobs_config, $Module->get_cron_jobs());
+    }
 
-	if( !empty( $Plugins ) )
-	{
-		foreach( $Plugins->trigger_collect( 'GetCronJobs' ) as $plug_ID => $jobs )
-		{
-			if( ! is_array($jobs) )
-			{
-				$Debuglog->add( sprintf('GetCronJobs() for plugin #%d did not return array. Ignoring its jobs.', $plug_ID), array('plugins', 'error') );
-				continue;
-			}
-			foreach( $jobs as $job )
-			{
-				// Validate params from plugin:
-				if( ! isset($job['params']) )
-				{
-					$job['params'] = NULL;
-				}
-				if( ! is_array($job) || ! isset($job['ctrl'], $job['name']) )
-				{
-					$Debuglog->add( sprintf('GetCronJobs() for plugin #%d did return invalid job. Ignoring.', $plug_ID), array('plugins', 'error') );
-					continue;
-				}
-				if( isset($job['params']) && ! is_array($job['params']) )
-				{
-					$Debuglog->add( sprintf('GetCronJobs() for plugin #%d did return invalid job params (not an array). Ignoring.', $plug_ID), array('plugins', 'error') );
-					continue;
-				}
-				$job['ctrl'] = 'plugin_'.$plug_ID.'_'.$job['ctrl'];
+    if (! empty($Plugins)) {
+        foreach ($Plugins->trigger_collect('GetCronJobs') as $plug_ID => $jobs) {
+            if (! is_array($jobs)) {
+                $Debuglog->add(sprintf('GetCronJobs() for plugin #%d did not return array. Ignoring its jobs.', $plug_ID), ['plugins', 'error']);
+                continue;
+            }
+            foreach ($jobs as $job) {
+                // Validate params from plugin:
+                if (! isset($job['params'])) {
+                    $job['params'] = null;
+                }
+                if (! is_array($job) || ! isset($job['ctrl'], $job['name'])) {
+                    $Debuglog->add(sprintf('GetCronJobs() for plugin #%d did return invalid job. Ignoring.', $plug_ID), ['plugins', 'error']);
+                    continue;
+                }
+                if (isset($job['params']) && ! is_array($job['params'])) {
+                    $Debuglog->add(sprintf('GetCronJobs() for plugin #%d did return invalid job params (not an array). Ignoring.', $plug_ID), ['plugins', 'error']);
+                    continue;
+                }
+                $job['ctrl'] = 'plugin_' . $plug_ID . '_' . $job['ctrl'];
 
-				add_cron_jobs_config( str_replace( '_', '-', $job['ctrl'] ), $job, true );
-			}
-		}
-	}
+                add_cron_jobs_config(str_replace('_', '-', $job['ctrl']), $job, true);
+            }
+        }
+    }
 
-	return get_cron_jobs_config( $get_param, $get_by_key );
+    return get_cron_jobs_config($get_param, $get_by_key);
 }
 
 
@@ -613,16 +556,15 @@ function get_cron_jobs_config( $get_param = '', $get_by_key = '' )
  * @param array Cron job data, array with keys: 'name', 'ctrl', 'params'
  * @param boolean TRUE to rewrite previous key
  */
-function add_cron_jobs_config( $key, $data, $force = false )
+function add_cron_jobs_config($key, $data, $force = false)
 {
-	global $cron_jobs_config;
+    global $cron_jobs_config;
 
-	if( ! $force && isset( $cron_jobs_config[ $key ] ))
-	{ // Add new cron job to config array
-		return;
-	}
+    if (! $force && isset($cron_jobs_config[$key])) { // Add new cron job to config array
+        return;
+    }
 
-	$cron_jobs_config[ $key ] = $data;
+    $cron_jobs_config[$key] = $data;
 }
 
 
@@ -632,48 +574,42 @@ function add_cron_jobs_config( $key, $data, $force = false )
  * @param string What fields to get, separated by comma
  * @return string SQL query
  */
-function cron_job_sql_query( $fields = 'key,name' )
+function cron_job_sql_query($fields = 'key,name')
 {
-	global $DB;
+    global $DB;
 
-	$cron_jobs_config = get_cron_jobs_config();
+    $cron_jobs_config = get_cron_jobs_config();
 
-	// We need to set the collation explicitly if the current db connection charset is utf-8 in order to avoid "Illegal mix of collation" issue
-	// Basically this is a hack which should be reviewed when the charset issues are fixed generally.
-	// TODO: asimo>Review this temporary solution after the charset issues were fixed.
-	$default_collation = ( $DB->is_expected_connection_charset( 'utf8' ) ) ? ' COLLATE utf8mb4_unicode_ci' : '';
+    // We need to set the collation explicitly if the current db connection charset is utf-8 in order to avoid "Illegal mix of collation" issue
+    // Basically this is a hack which should be reviewed when the charset issues are fixed generally.
+    // TODO: asimo>Review this temporary solution after the charset issues were fixed.
+    $default_collation = ($DB->is_expected_connection_charset('utf8')) ? ' COLLATE utf8mb4_unicode_ci' : '';
 
-	$name_query = '';
-	if( !empty( $cron_jobs_config ) )
-	{
-		$fields = explode( ',', $fields );
+    $name_query = '';
+    if (! empty($cron_jobs_config)) {
+        $fields = explode(',', $fields);
 
-		$name_query = 'SELECT task_'.implode( ', task_', $fields ).' FROM ('."\n";
-		$first_task = true;
-		foreach( $cron_jobs_config as $ctsk_key => $ctsk_data )
-		{
-			$field_values = '';
-			$field_separator = '';
-			foreach( $fields as $field )
-			{
-				$field_values .= $field_separator.$DB->quote( $field == 'key' ? $ctsk_key : $ctsk_data[ $field ] ).$default_collation.' AS task_'.$field;
-				$field_separator = ', ';
-			}
+        $name_query = 'SELECT task_' . implode(', task_', $fields) . ' FROM (' . "\n";
+        $first_task = true;
+        foreach ($cron_jobs_config as $ctsk_key => $ctsk_data) {
+            $field_values = '';
+            $field_separator = '';
+            foreach ($fields as $field) {
+                $field_values .= $field_separator . $DB->quote($field == 'key' ? $ctsk_key : $ctsk_data[$field]) . $default_collation . ' AS task_' . $field;
+                $field_separator = ', ';
+            }
 
-			if( $first_task )
-			{
-				$name_query .= "\t".'SELECT '.$field_values."\n";
-				$first_task = false;
-			}
-			else
-			{
-				$name_query .= "\t".'UNION SELECT '.$field_values."\n";
-			}
-		}
-		$name_query .= ') AS inner_temp';
-	}
+            if ($first_task) {
+                $name_query .= "\t" . 'SELECT ' . $field_values . "\n";
+                $first_task = false;
+            } else {
+                $name_query .= "\t" . 'UNION SELECT ' . $field_values . "\n";
+            }
+        }
+        $name_query .= ') AS inner_temp';
+    }
 
-	return $name_query;
+    return $name_query;
 }
 
 
@@ -684,39 +620,37 @@ function cron_job_sql_query( $fields = 'key,name' )
  */
 function cron_job_error_handler()
 {
-	$last_error = error_get_last();
+    $last_error = error_get_last();
 
-	if( $last_error['type'] === E_ERROR )
-	{	// If last error is fatal:
-		global $result_message, $error_message, $DB;
+    if ($last_error['type'] === E_ERROR) {	// If last error is fatal:
+        global $result_message, $error_message, $DB;
 
-		if( empty( $result_message ) )
-		{	// Initialize result message of current executing cron job:
-			$result_message = '';
-		}
+        if (empty($result_message)) {	// Initialize result message of current executing cron job:
+            $result_message = '';
+        }
 
-		// Append error info to cron job log:
-		$new_error_message = "\n".'b2evolution caught an UNEXPECTED ERROR: '
-			.( $last_error
-				? '<b>File:</b> '.$last_error['file'].', '
-				 .'<b>Line:</b> '.$last_error['line'].', '
-				 .'<b>Message:</b> '.$last_error['message']
-				: 'Unknown'
-			);
-		if( $new_error_message !== $error_message )
-		{	// Update only really new error, in order to exclude duplicates:
-			$error_message = $new_error_message;
-			$result_message .= $error_message;
-		}
+        // Append error info to cron job log:
+        $new_error_message = "\n" . 'b2evolution caught an UNEXPECTED ERROR: '
+            . (
+                $last_error
+                ? '<b>File:</b> ' . $last_error['file'] . ', '
+                 . '<b>Line:</b> ' . $last_error['line'] . ', '
+                 . '<b>Message:</b> ' . $last_error['message']
+                : 'Unknown'
+            );
+        if ($new_error_message !== $error_message) {	// Update only really new error, in order to exclude duplicates:
+            $error_message = $new_error_message;
+            $result_message .= $error_message;
+        }
 
-		// We must rollback any started transaction in order to proper update a log of the interrupted cron job:
-		$DB->rollback();
+        // We must rollback any started transaction in order to proper update a log of the interrupted cron job:
+        $DB->rollback();
 
-		return true;
-	}
+        return true;
+    }
 
-	// To continue normal error handler:
-	return false;
+    // To continue normal error handler:
+    return false;
 }
 
 
@@ -725,28 +659,28 @@ function cron_job_error_handler()
  */
 function cron_job_shutdown()
 {
-	global $result_message, $ctsk_ID, $ctsk_name, $DB;
+    global $result_message, $ctsk_ID, $ctsk_name, $DB;
 
-	if( empty( $ctsk_ID ) )
-	{	// Run this function to detect only interrupted cron jobs:
-		return;
-	}
+    if (empty($ctsk_ID)) {	// Run this function to detect only interrupted cron jobs:
+        return;
+    }
 
-	// Run error handler to store info of last error in $result_message:
-	cron_job_error_handler();
+    // Run error handler to store info of last error in $result_message:
+    cron_job_error_handler();
 
-	$DB->query( 'UPDATE T_cron__log
+    $DB->query(
+        'UPDATE T_cron__log
 		  SET clog_status = "error",
-		      clog_realstop_datetime = '.$DB->quote( date2mysql( time() ) ).',
-		      clog_messages = '.$DB->quote( $result_message ).'
-		WHERE clog_ctsk_ID = '.$ctsk_ID,
-		'Record task as finished with error by shutdown function.' );
+		      clog_realstop_datetime = ' . $DB->quote(date2mysql(time())) . ',
+		      clog_messages = ' . $DB->quote($result_message) . '
+		WHERE clog_ctsk_ID = ' . $ctsk_ID,
+        'Record task as finished with error by shutdown function.'
+    );
 
-	// Detect timed out tasks and send notification about timed out and error tasks:
-	detect_timeout_cron_jobs( array(
-			'ID'      => $ctsk_ID,
-			'name'    => $ctsk_name,
-			'message' => $result_message,
-		) );
+    // Detect timed out tasks and send notification about timed out and error tasks:
+    detect_timeout_cron_jobs([
+        'ID' => $ctsk_ID,
+        'name' => $ctsk_name,
+        'message' => $result_message,
+    ]);
 }
-?>

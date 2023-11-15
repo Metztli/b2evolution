@@ -7,9 +7,11 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * Goal Category Class
@@ -18,72 +20,69 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class GoalCategory extends DataObject
 {
-	var $name = '';
-	var $color = '';
+    public $name = '';
 
-	/**
-	 * Constructor
-	 *
-	 * @param object Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_track__goalcat', 'gcat_', 'gcat_ID' );
+    public $color = '';
 
-		if( $db_row )
-		{
-			$this->ID            = $db_row->gcat_ID;
-			$this->name          = $db_row->gcat_name;
-			$this->color         = $db_row->gcat_color;
-		}
-		else
-		{ // Create a new goal category:
-		}
-	}
+    /**
+     * Constructor
+     *
+     * @param object Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_track__goalcat', 'gcat_', 'gcat_ID');
 
+        if ($db_row) {
+            $this->ID = $db_row->gcat_ID;
+            $this->name = $db_row->gcat_name;
+            $this->color = $db_row->gcat_color;
+        } else { // Create a new goal category:
+        }
+    }
 
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table'=>'T_track__goal', 'fk'=>'goal_gcat_ID', 'msg'=>T_('%d related goals') ),
-			);
-	}
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_track__goal',
+                'fk' => 'goal_gcat_ID',
+                'msg' => T_('%d related goals'),
+            ],
+        ];
+    }
 
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        // Name
+        $this->set_string_from_param('name', true);
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		// Name
-		$this->set_string_from_param( 'name', true );
+        // Color
+        $color = param('gcat_color', 'string', '');
+        param_check_color('gcat_color', T_('Invalid color code.'), true);
+        $this->set_string_from_param('color', true);
 
-		// Color
-		$color = param( 'gcat_color', 'string', '' );
-		param_check_color( 'gcat_color', T_('Invalid color code.'), true );
-		$this->set_string_from_param( 'color', true );
+        return ! param_errors_detected();
+    }
 
-		return ! param_errors_detected();
-	}
-
-
-	/**
-	 * Get name
-	 *
-	 * @return string Goal category name
-	 */
-	function get_name()
-	{
-		return $this->name;
-	}
+    /**
+     * Get name
+     *
+     * @return string Goal category name
+     */
+    public function get_name()
+    {
+        return $this->name;
+    }
 }
-
-?>

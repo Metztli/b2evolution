@@ -10,49 +10,45 @@
  * {@internal Below is a list of authors who have contributed to design/coding of this file: }}
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 echo '<div class="panel panel-default">';
 
 echo '<div class="panel-heading">'
-			.'<h2 class="panel-title">'.T_('What kind of collection would you like to create?').get_manual_link('create-collection-select-type').'</h2>'
-		.'</div>';
+            . '<h2 class="panel-title">' . T_('What kind of collection would you like to create?') . get_manual_link('create-collection-select-type') . '</h2>'
+        . '</div>';
 
 echo '<div class="panel-body">';
 
-echo '<p>'.T_('A collection is basically a box collecting items (articles, photos, products...) that go together. A collection may be a whole website in itself. It can also be just a section of a larger site.').'</p>';
+echo '<p>' . T_('A collection is basically a box collecting items (articles, photos, products...) that go together. A collection may be a whole website in itself. It can also be just a section of a larger site.') . '</p>';
 
-echo '<p>'.T_('Your selection here will pre-configure your collection in order to optimize it for a particular use. Nothing is final though. You can change all the settings at any time and any kind of collection can be transformed into any other at any time.').'</p>';
+echo '<p>' . T_('Your selection here will pre-configure your collection in order to optimize it for a particular use. Nothing is final though. You can change all the settings at any time and any kind of collection can be transformed into any other at any time.') . '</p>';
 
 echo '<table class="coll_kind">';
 
-if( $blog_kinds = get_collection_kinds() )
-{
-	$coll_url_suffix = get_param( 'sec_ID' ) ? '&amp;sec_ID='.get_param( 'sec_ID' ) : '';
-	foreach( $blog_kinds as $kind => $info )
-	{
-		if( $kind == 'main' && ! check_user_perm( 'blog_admin', 'editAll', false ) )
-		{ // Non-collection admin should not be able to create Home/Main collections
-			continue;
-		}
-		echo '<tr>';
-			echo '<td class="coll_kind"><a href="?ctrl=collections&amp;action=new-selskin&amp;kind='.$kind.$coll_url_suffix.'" class="btn '.( !empty($info['class']) ? $info['class'] : 'btn-default' ).'">'.$info['name'].' &raquo;</a></td>';
-			echo '<td class="coll_kind__desc"><p>'.$info['desc'].'</p>';
-			if( !empty($info['note']) )
-			{
-				echo '<p class="text-muted">'.$info['note'].'</p>';
-			}
-			echo '</td>';
-		echo '</tr>';
-	}
-}
-else
-{
-	echo '<tr>';
-		echo '<td class="coll_kind"><h3><a href="?ctrl=collections&amp;action=new-selskin&amp;kind=std">'.T_('Standard').' &raquo;</a></h3></td>';
-		echo '<td>'.T_('A standard blog with the most common features.').'</td>';
-	echo '</tr>';
+if ($blog_kinds = get_collection_kinds()) {
+    $coll_url_suffix = get_param('sec_ID') ? '&amp;sec_ID=' . get_param('sec_ID') : '';
+    foreach ($blog_kinds as $kind => $info) {
+        if ($kind == 'main' && ! check_user_perm('blog_admin', 'editAll', false)) { // Non-collection admin should not be able to create Home/Main collections
+            continue;
+        }
+        echo '<tr>';
+        echo '<td class="coll_kind"><a href="?ctrl=collections&amp;action=new-selskin&amp;kind=' . $kind . $coll_url_suffix . '" class="btn ' . (! empty($info['class']) ? $info['class'] : 'btn-default') . '">' . $info['name'] . ' &raquo;</a></td>';
+        echo '<td class="coll_kind__desc"><p>' . $info['desc'] . '</p>';
+        if (! empty($info['note'])) {
+            echo '<p class="text-muted">' . $info['note'] . '</p>';
+        }
+        echo '</td>';
+        echo '</tr>';
+    }
+} else {
+    echo '<tr>';
+    echo '<td class="coll_kind"><h3><a href="?ctrl=collections&amp;action=new-selskin&amp;kind=std">' . T_('Standard') . ' &raquo;</a></h3></td>';
+    echo '<td>' . T_('A standard blog with the most common features.') . '</td>';
+    echo '</tr>';
 }
 
 echo '</table>';
@@ -60,5 +56,3 @@ echo '</table>';
 echo '</div>';
 
 echo '</div>';
-
-?>

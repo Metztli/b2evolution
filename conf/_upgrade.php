@@ -8,7 +8,9 @@
  *
  * @package conf
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**#@+
@@ -16,11 +18,11 @@ if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page direct
  *
  * @global string
  */
-$oldtableposts      = 'b2posts';
-$oldtableusers      = 'b2users';
-$oldtablesettings   = 'b2settings';
+$oldtableposts = 'b2posts';
+$oldtableusers = 'b2users';
+$oldtablesettings = 'b2settings';
 $oldtablecategories = 'b2categories';
-$oldtablecomments   = 'b2comments';
+$oldtablecomments = 'b2comments';
 /**#@-*/
 
 
@@ -55,7 +57,7 @@ $use_fileupload = 1;
  * @deprecated 1.6: the user uploads to his own media folder (or somewhere else with write permissions)
  *             This has been used until EVO_NEW_VERSION by XMLRPC/MMS though.
  */
-$fileupload_realpath = $basepath.'media/';	# WARNING: slashes moved!
+$fileupload_realpath = $basepath . 'media/';	# WARNING: slashes moved!
 
 /**
  * Enter the URL of that directory
@@ -68,7 +70,7 @@ $fileupload_realpath = $basepath.'media/';	# WARNING: slashes moved!
  * @deprecated 1.6: the user uploads to his own media folder (or somewhere else with write permissions)
  *             This has been used until EVO_NEW_VERSION by XMLRPC/MMS though.
  */
-$fileupload_url = $baseurl.'media/';				# WARNING: slashes moved!
+$fileupload_url = $baseurl . 'media/';				# WARNING: slashes moved!
 
 
 // Moved from /blogs/conf/_advanced.php:
@@ -106,5 +108,3 @@ $fileupload_maxk = '96'; // in kilo bytes
  * @deprecated 1.6: this is only used for creating the defaults when upgrading
  */
 $stats_autoprune = 30; // Default: 30 days
-
-?>

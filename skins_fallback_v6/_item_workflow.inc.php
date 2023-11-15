@@ -10,17 +10,16 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $disp;
 
-if( ( $disp == 'single' || $disp == 'page' ) &&
-    isset( $Item ) && $Item->ID > 0 &&
+if (($disp == 'single' || $disp == 'page') &&
+    isset($Item) && $Item->ID > 0 &&
     ! $Item->can_meta_comment() && // If user can write internal comment then we display the workflow form in the internal comment form instead of here
-    $Item->can_edit_workflow() )
-{
-	display_rendering_error( 'Please use the Worfklow properties widget to set workflow properties.' );
+    $Item->can_edit_workflow()) {
+    display_rendering_error('Please use the Worfklow properties widget to set workflow properties.');
 }
-
-?>

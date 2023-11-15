@@ -14,7 +14,9 @@
  *
  * @package plugins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -24,123 +26,116 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class webmention_plugin extends Plugin
 {
-	/**
-	 * Variables below MUST be overriden by plugin implementations,
-	 * either in the subclass declaration or in the subclass constructor.
-	 */
-	var $code = 'webmention';
-	var $priority = 50;
-	var $version = '6.10.6';
+    /**
+     * Variables below MUST be overriden by plugin implementations,
+     * either in the subclass declaration or in the subclass constructor.
+     */
+    public $code = 'webmention';
 
-	/*
-	 * These variables MAY be overriden.
-	 */
-	var $group = 'ping';
-	var $number_of_installs = 1;
+    public $priority = 50;
 
+    public $version = '6.10.6';
 
-	/**
-	 * Init
-	 */
-	function PluginInit( & $params )
-	{
-		$this->name = T_('Webmentions plugin');
-		$this->short_desc = T_('Send webmentions to all URLs mentioned in a Post.');
+    /*
+     * These variables MAY be overriden.
+     */
+    public $group = 'ping';
 
-		$this->ping_service_name = 'Webmention';
-		$this->ping_service_note = T_('Send webmentions to all URLs mentioned in a Post.');
-		$this->ping_service_process_message = T_('Sending webmention pings to URLs mentioned in the post').'...';
-		$this->ping_service_setting_title = T_('Send webmentions');
-	}
+    public $number_of_installs = 1;
 
+    /**
+     * Init
+     */
+    public function PluginInit(&$params)
+    {
+        $this->name = T_('Webmentions plugin');
+        $this->short_desc = T_('Send webmentions to all URLs mentioned in a Post.');
 
-	/**
-	 * Ping the detected url to send webmentions
-	 */
-	function ItemSendPing( & $params )
-	{
-		$Item = $params['Item'];
+        $this->ping_service_name = 'Webmention';
+        $this->ping_service_note = T_('Send webmentions to all URLs mentioned in a Post.');
+        $this->ping_service_process_message = T_('Sending webmention pings to URLs mentioned in the post') . '...';
+        $this->ping_service_setting_title = T_('Send webmentions');
+    }
 
-		$check_urls = array();
+    /**
+     * Ping the detected url to send webmentions
+     */
+    public function ItemSendPing(&$params)
+    {
+        $Item = $params['Item'];
 
-		if( preg_match_all( '#href="([^"]+)"#i', $Item->get_prerendered_content( 'htmlbody' ), $match_urls ) )
-		{	// Get URLs from the rendered item content:
-			$check_urls = $match_urls[1];
-		}
+        $check_urls = [];
 
-		if( $Item->get( 'url' ) != '' )
-		{	// Also check item URL:
-			$check_urls[] = $Item->get( 'url' );
-		}
+        if (preg_match_all('#href="([^"]+)"#i', $Item->get_prerendered_content('htmlbody'), $match_urls)) {	// Get URLs from the rendered item content:
+            $check_urls = $match_urls[1];
+        }
 
-		if( empty( $check_urls ) )
-		{	// No urls detected
-			return true;
-		}
+        if ($Item->get('url') != '') {	// Also check item URL:
+            $check_urls[] = $Item->get('url');
+        }
 
-		$check_urls = array_unique( $check_urls );
+        if (empty($check_urls)) {	// No urls detected
+            return true;
+        }
 
-		// Initialize client to send webmentions:
-		require_once( __DIR__.'/MentionClient.php' );
-		$MentionClient = new IndieWeb\MentionClient();
+        $check_urls = array_unique($check_urls);
 
-		$source_url = $Item->get_permanent_url( '', '', '&' );
+        // Initialize client to send webmentions:
+        require_once(__DIR__ . '/MentionClient.php');
+        $MentionClient = new IndieWeb\MentionClient();
 
-		$nosupport_urls = array();
-		$success_urls = array();
-		$failed_urls = array();
-		$skipped_urls = array();
-		foreach( $check_urls as $target_url )
-		{
-			if( is_same_url( $source_url, $target_url ) )
-			{	// If the posted URL is a permanent URL of the target Item:
-				$skipped_urls[] = get_link_tag( $target_url, '', '', 255 ).( empty( $response['body'] ) ? '' : ' (<code>'.T_('Permanent URL of this Item').'</code>)' );
-				continue;
-			}
+        $source_url = $Item->get_permanent_url('', '', '&');
 
-			if( ! $MentionClient->discoverWebmentionEndpoint( $target_url ) )
-			{	// The URL doesn't accept webmention:
-				$nosupport_urls[] = get_link_tag( $target_url, '', '', 255 );
-				continue;
-			}
+        $nosupport_urls = [];
+        $success_urls = [];
+        $failed_urls = [];
+        $skipped_urls = [];
+        foreach ($check_urls as $target_url) {
+            if (is_same_url($source_url, $target_url)) {	// If the posted URL is a permanent URL of the target Item:
+                $skipped_urls[] = get_link_tag($target_url, '', '', 255) . (empty($response['body']) ? '' : ' (<code>' . T_('Permanent URL of this Item') . '</code>)');
+                continue;
+            }
 
-			if( ! ( $response = $MentionClient->sendWebmention( $source_url, $target_url, array( 'excerpt' => $Item->get( 'excerpt' ) ) ) ) ||
-			    $response['code'] < 200 || $response['code'] > 299 ) // Any 2xx response code must be considered a success
-			{	// Webmention couldn't be accepted by some reason:
-				$failed_urls[] = get_link_tag( $target_url, '', '', 255 ).( empty( $response['body'] ) ? '' : ' ('.T_('Error').': <code>'.$response['body'].'</code>)' );
-				continue;
-			}
+            if (! $MentionClient->discoverWebmentionEndpoint($target_url)) {	// The URL doesn't accept webmention:
+                $nosupport_urls[] = get_link_tag($target_url, '', '', 255);
+                continue;
+            }
 
-			// Webmention has been accepted successfully:
-			$success_urls[] = get_link_tag( $target_url, '', '', 255 );
-		}
+            if (! ($response = $MentionClient->sendWebmention($source_url, $target_url, [
+                'excerpt' => $Item->get('excerpt'),
+            ])) ||
+                $response['code'] < 200 || $response['code'] > 299) { // Any 2xx response code must be considered a success
+                // Webmention couldn't be accepted by some reason:
+                $failed_urls[] = get_link_tag($target_url, '', '', 255) . (empty($response['body']) ? '' : ' (' . T_('Error') . ': <code>' . $response['body'] . '</code>)');
+                continue;
+            }
 
-		$messages = array();
+            // Webmention has been accepted successfully:
+            $success_urls[] = get_link_tag($target_url, '', '', 255);
+        }
 
-		if( count( $success_urls ) )
-		{	// Success URLs:
-			$messages[] = sprintf( T_('Webmentions have been accepted for the URLs: %s.'), implode( ', ', $success_urls ) );
-		}
+        $messages = [];
 
-		if( count( $nosupport_urls ) )
-		{	// No support URLs:
-			$messages[] = sprintf( T_('The following URLs do not support webmentions: %s.'), implode( ', ', $nosupport_urls ) );
-		}
+        if (count($success_urls)) {	// Success URLs:
+            $messages[] = sprintf(T_('Webmentions have been accepted for the URLs: %s.'), implode(', ', $success_urls));
+        }
 
-		if( count( $failed_urls ) )
-		{	// Failed URLs:
-			$messages[] = sprintf( T_('Webmentions couldn\'t be accepted for the URLs: %s.'), implode( ', ', $failed_urls ) );
-		}
+        if (count($nosupport_urls)) {	// No support URLs:
+            $messages[] = sprintf(T_('The following URLs do not support webmentions: %s.'), implode(', ', $nosupport_urls));
+        }
 
-		if( count( $skipped_urls ) )
-		{	// Skipped URLs:
-			$messages[] = sprintf( T_('Skipped URLs: %s.'), implode( ', ', $skipped_urls ) );
-		}
+        if (count($failed_urls)) {	// Failed URLs:
+            $messages[] = sprintf(T_('Webmentions couldn\'t be accepted for the URLs: %s.'), implode(', ', $failed_urls));
+        }
 
-		$params['xmlrpcresp'] = array( 'message' => implode( '<br />', $messages ) );
+        if (count($skipped_urls)) {	// Skipped URLs:
+            $messages[] = sprintf(T_('Skipped URLs: %s.'), implode(', ', $skipped_urls));
+        }
 
-		return true;
-	}
+        $params['xmlrpcresp'] = [
+            'message' => implode('<br />', $messages),
+        ];
+
+        return true;
+    }
 }
-
-?>

@@ -17,7 +17,9 @@
  *
  * @author blueyed: Daniel HAHLER
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -27,70 +29,67 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class ping_pingomatic_plugin extends Plugin
 {
-	/**
-	 * Variables below MUST be overriden by plugin implementations,
-	 * either in the subclass declaration or in the subclass constructor.
-	 */
-	var $code = 'ping_pingomatic';
-	var $priority = 50;
-	var $version = '7.2.5';
-	var $author = 'http://daniel.hahler.de/';
+    /**
+     * Variables below MUST be overriden by plugin implementations,
+     * either in the subclass declaration or in the subclass constructor.
+     */
+    public $code = 'ping_pingomatic';
 
-	/*
-	 * These variables MAY be overriden.
-	 */
-	var $group = 'ping';
-	var $number_of_installs = 1;
+    public $priority = 50;
 
+    public $version = '7.2.5';
 
-	/**
-	 * Init
-	 */
-	function PluginInit( & $params )
-	{
-		$this->name = T_('Ping-O-Matic plugin');
-		$this->short_desc = T_('Pings the Ping-O-Matic service, which relays your ping to the most common services.');
+    public $author = 'http://daniel.hahler.de/';
 
-		$this->ping_service_name = 'Ping-O-Matic';
-		$this->ping_service_note = T_('Pings a service that relays the ping to the most common services.');
-	}
+    /*
+     * These variables MAY be overriden.
+     */
+    public $group = 'ping';
 
+    public $number_of_installs = 1;
 
-	/**
-	 * Ping the pingomatic RPC service.
-	 */
-	function ItemSendPing( & $params )
-	{
-		global $debug;
-		global $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password;
+    /**
+     * Init
+     */
+    public function PluginInit(&$params)
+    {
+        $this->name = T_('Ping-O-Matic plugin');
+        $this->short_desc = T_('Pings the Ping-O-Matic service, which relays your ping to the most common services.');
 
-		if( ! defined( 'CANUSEXMLRPC' ) || CANUSEXMLRPC !== true )
-		{	// Could not use xmlrpc client because server has no the requested extensions:
-			$params['xmlrpcresp'] = CANUSEXMLRPC;
-			return false;
-		}
+        $this->ping_service_name = 'Ping-O-Matic';
+        $this->ping_service_note = T_('Pings a service that relays the ping to the most common services.');
+    }
 
-		$item_Blog = $params['Item']->get_Blog();
+    /**
+     * Ping the pingomatic RPC service.
+     */
+    public function ItemSendPing(&$params)
+    {
+        global $debug;
+        global $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password;
 
-		$client = new xmlrpc_client( '/', 'rpc.pingomatic.com', 80 );
-		$client->debug = ($debug && $params['display']);
+        if (! defined('CANUSEXMLRPC') || CANUSEXMLRPC !== true) {	// Could not use xmlrpc client because server has no the requested extensions:
+            $params['xmlrpcresp'] = CANUSEXMLRPC;
+            return false;
+        }
 
-		// Set proxy for outgoing connections:
-		if( ! empty( $outgoing_proxy_hostname ) )
-		{
-			$client->setProxy( $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password );
-		}
+        $item_Blog = $params['Item']->get_Blog();
 
-		$message = new xmlrpcmsg("weblogUpdates.ping", array(
-				new xmlrpcval( $item_Blog->get('name') ),
-				new xmlrpcval( $item_Blog->get('url') ) ));
-		$result = $client->send($message);
+        $client = new xmlrpc_client('/', 'rpc.pingomatic.com', 80);
+        $client->debug = ($debug && $params['display']);
 
-		$params['xmlrpcresp'] = $result;
+        // Set proxy for outgoing connections:
+        if (! empty($outgoing_proxy_hostname)) {
+            $client->setProxy($outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password);
+        }
 
-		return true;
-	}
+        $message = new xmlrpcmsg("weblogUpdates.ping", [
+            new xmlrpcval($item_Blog->get('name')),
+            new xmlrpcval($item_Blog->get('url'))]);
+        $result = $client->send($message);
 
+        $params['xmlrpcresp'] = $result;
+
+        return true;
+    }
 }
-
-?>

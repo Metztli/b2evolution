@@ -25,21 +25,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-if (!defined('__MUSEUM_HANDLER__'))
-	define('__MUSEUM_HANDLER__', 1);
+if (! defined('__MUSEUM_HANDLER__')) {
+    define('__MUSEUM_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class museum_handler
-	{
-	function parse($data_str, $query)
-		{
-		$r['regrinfo'] = generic_parser_b($data_str['rawdata']);
-		$r['regyinfo'] = array(
-                          'referrer' => 'http://musedoma.museum',
-                          'registrar' => 'Museum Domain Management Association'
-                          );
-		return $r;
-		}
-	}
-?>
+{
+    public function parse($data_str, $query)
+    {
+        $r['regrinfo'] = generic_parser_b($data_str['rawdata']);
+        $r['regyinfo'] = [
+            'referrer' => 'http://musedoma.museum',
+            'registrar' => 'Museum Domain Management Association',
+        ];
+        return $r;
+    }
+}

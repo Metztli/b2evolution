@@ -11,59 +11,60 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Check permission:
-check_user_perm( 'files', 'view', true );
+check_user_perm('files', 'view', true);
 
 // Check permission:
-check_user_perm( 'options', 'edit', true );
+check_user_perm('options', 'edit', true);
 
 
 //param( 'action', 'string' );
-param( 'tab', 'string', 'likes', true );
+param('tab', 'string', 'likes', true);
 
 
 /**
  * We need make this call to build menu for all modules
  */
-$AdminUI->set_path( 'files' );
+$AdminUI->set_path('files');
 
 file_controller_build_tabs();
 
-$AdminUI->set_path( 'files', 'moderation', $tab );
+$AdminUI->set_path('files', 'moderation', $tab);
 
 // fp> TODO: this here is a bit sketchy since we have Blog & fileroot not necessarilly in sync. Needs investigation / propositions.
 // Note: having both allows to post from any media dir into any blog.
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( TB_('Files'), '?ctrl=files&amp;blog=$blog$' );
-$AdminUI->breadcrumbpath_add( TB_('Moderation'), '?ctrl=filemod' );
-switch( $tab )
-{
-	case 'likes':
-		$AdminUI->breadcrumbpath_add( TB_('Likes'), '?ctrl=filemod&amp;tab='.$tab );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add(TB_('Files'), '?ctrl=files&amp;blog=$blog$');
+$AdminUI->breadcrumbpath_add(TB_('Moderation'), '?ctrl=filemod');
+switch ($tab) {
+    case 'likes':
+        $AdminUI->breadcrumbpath_add(TB_('Likes'), '?ctrl=filemod&amp;tab=' . $tab);
 
-		// Set an url for manual page:
-		$AdminUI->set_page_manual_link( 'file-moderation-likes' );
-		break;
+        // Set an url for manual page:
+        $AdminUI->set_page_manual_link('file-moderation-likes');
+        break;
 
-	case 'suspicious':
-		$AdminUI->breadcrumbpath_add( TB_('Suspicious'), '?ctrl=filemod&amp;tab='.$tab );
+    case 'suspicious':
+        $AdminUI->breadcrumbpath_add(TB_('Suspicious'), '?ctrl=filemod&amp;tab=' . $tab);
 
-		// Set an url for manual page:
-		$AdminUI->set_page_manual_link( 'file-moderation-suspicious' );
-		break;
+        // Set an url for manual page:
+        $AdminUI->set_page_manual_link('file-moderation-suspicious');
+        break;
 
-	case 'duplicates':
-		$AdminUI->breadcrumbpath_add( TB_('Duplicates'), '?ctrl=filemod&amp;tab='.$tab );
+    case 'duplicates':
+        $AdminUI->breadcrumbpath_add(TB_('Duplicates'), '?ctrl=filemod&amp;tab=' . $tab);
 
-		// Set an url for manual page:
-		$AdminUI->set_page_manual_link( 'file-moderation-duplicates' );
-		break;
+        // Set an url for manual page:
+        $AdminUI->set_page_manual_link('file-moderation-duplicates');
+        break;
 }
 
 // require colorbox js
-require_js_helper( 'colorbox' );
+require_js_helper('colorbox');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -76,24 +77,21 @@ $AdminUI->disp_body_top();
  * Display payload:
  */
 $AdminUI->disp_payload_begin();
-switch( $tab )
-{
-	case 'duplicates':
-		$AdminUI->disp_view( 'files/views/_file_duplicates.view.php' );
-		break;
+switch ($tab) {
+    case 'duplicates':
+        $AdminUI->disp_view('files/views/_file_duplicates.view.php');
+        break;
 
-	case 'suspicious':
-		$AdminUI->disp_view( 'files/views/_file_suspicious.view.php' );
-		break;
+    case 'suspicious':
+        $AdminUI->disp_view('files/views/_file_suspicious.view.php');
+        break;
 
-	case 'likes':
-	default:
-		$AdminUI->disp_view( 'files/views/_file_likes.view.php' );
-		break;
+    case 'likes':
+    default:
+        $AdminUI->disp_view('files/views/_file_likes.view.php');
+        break;
 }
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

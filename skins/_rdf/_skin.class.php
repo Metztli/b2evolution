@@ -8,7 +8,9 @@
  * @package skins
  * @subpackage custom
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Specific code for this skin.
@@ -17,29 +19,26 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class _rdf_Skin extends Skin
 {
-	/**
-	 * Skin version
-	 * @var string
-	 */
-	var $version = '7.2.5';
+    /**
+     * Skin version
+     * @var string
+     */
+    public $version = '7.2.5';
 
-  /**
-	 * Get default name for the skin.
-	 * Note: the admin can customize it.
-	 */
-	function get_default_name()
-	{
-		return 'RDF';
-	}
+    /**
+     * Get default name for the skin.
+     * Note: the admin can customize it.
+     */
+    public function get_default_name()
+    {
+        return 'RDF';
+    }
 
-
-  /**
-	 * Get default type for the skin.
-	 */
-	function get_default_type()
-	{
-		return 'feed';
-	}
+    /**
+     * Get default type for the skin.
+     */
+    public function get_default_type()
+    {
+        return 'feed';
+    }
 }
-
-?>

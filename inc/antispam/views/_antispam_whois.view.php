@@ -11,39 +11,40 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $template_action;
 
-$query = param( 'query', 'string', NULL );
+$query = param('query', 'string', null);
 
-if( empty( $template_action ) )
-{
-	$Form = new Form( NULL, '', 'get' );
+if (empty($template_action)) {
+    $Form = new Form(null, '', 'get');
 
-	$Form->hidden( 'action', 'whois' );
-	$Form->hidden_ctrl();
+    $Form->hidden('action', 'whois');
+    $Form->hidden_ctrl();
 
-	$Form->begin_form( 'fform' );
+    $Form->begin_form('fform');
 
-	$Form->begin_fieldset( T_('Check domain registration (WHOIS)...') );
-	$Form->text_input( 'query', $query, 50, T_('Enter IP address or domain to query'), '', array( 'maxlength' => 255, 'required' => true ) );
-	$Form->end_fieldset();
+    $Form->begin_fieldset(T_('Check domain registration (WHOIS)...'));
+    $Form->text_input('query', $query, 50, T_('Enter IP address or domain to query'), '', [
+        'maxlength' => 255,
+        'required' => true,
+    ]);
+    $Form->end_fieldset();
 
-	$Form->end_form( array( array( 'submit', '', T_( 'Submit' ), 'SaveButton' ) ) );
+    $Form->end_form([['submit', '', T_('Submit'), 'SaveButton']]);
+} else {
+    $block_item_Widget = new Widget('block_item');
+    $block_item_Widget->title = 'WHOIS - ' . $query . get_manual_link('antispam-whois');
+    echo $block_item_Widget->replace_vars($block_item_Widget->params['block_start']);
+
+    echo antispam_get_whois($query);
+
+    $block_item_Widget->disp_template_replaced('block_end');
+
+    echo '<div class="form-group">';
+    echo '<a href="' . regenerate_url('query') . '" class="btn btn-primary">' . T_('Check another domain registration') . '</a>';
+    echo '</div>';
 }
-else
-{
-	$block_item_Widget = new Widget( 'block_item' );
-	$block_item_Widget->title = 'WHOIS - '.$query.get_manual_link('antispam-whois');
-	echo $block_item_Widget->replace_vars( $block_item_Widget->params[ 'block_start' ] );
-
-	echo antispam_get_whois( $query );
-
-	$block_item_Widget->disp_template_replaced( 'block_end' );
-
-	echo '<div class="form-group">';
-	echo '<a href="'.regenerate_url( 'query' ).'" class="btn btn-primary">'.T_('Check another domain registration').'</a>';
-	echo '</div>';
-}
-?>

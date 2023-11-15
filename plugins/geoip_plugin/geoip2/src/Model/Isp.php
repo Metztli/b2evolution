@@ -20,9 +20,13 @@ namespace GeoIp2\Model;
 class Isp extends AbstractModel
 {
     protected $autonomousSystemNumber;
+
     protected $autonomousSystemOrganization;
+
     protected $isp;
+
     protected $organization;
+
     protected $ipAddress;
 
     /**

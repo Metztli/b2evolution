@@ -23,9 +23,11 @@
  *
  * @version $Id: _item_small_print.widget.php 10056 2015-10-16 12:47:15Z yura $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -36,209 +38,205 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class item_small_print_Widget extends ComponentWidget
 {
-	var $icon = 'info-circle';
+    public $icon = 'info-circle';
 
-	/**
-	 * Constructor
-	 * @param object $db_row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'item_small_print' );
-	}
+    /**
+     * Constructor
+     * @param object $db_row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'item_small_print');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('small-print-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'small-print-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Small Print');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('Small Print'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Small Print');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Print small information about item.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param array $params local params like 'for_editing' => true
+     * @return array
+     */
+    public function get_param_definitions($params)
+    {
+        global $admin_url;
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('Small Print') );
-	}
+        // Get available templates:
+        $context = 'item_details';
+        $TemplateCache = &get_TemplateCache();
+        $TemplateCache->load_by_context($context);
 
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+            'template' => [
+                'label' => T_('Template'),
+                'type' => 'select',
+                'options' => $TemplateCache->get_code_option_array(),
+                'defaultvalue' => 'item_details_smallprint_standard',
+                'input_suffix' => (check_user_perm('options', 'edit') ? '&nbsp;'
+                        . action_icon(
+                            '',
+                            'edit',
+                            $admin_url . '?ctrl=templates&amp;context=' . $context,
+                            null,
+                            null,
+                            null,
+                            [
+                                'onclick' => 'return b2template_list_highlight( this )',
+                                'target' => '_blank',
+                            ],
+                            [
+                                'title' => T_('Manage templates') . '...',
+                            ]
+                        ) : ''),
+                'class' => 'evo_template_select',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Print small information about item.');
-	}
+        return $r;
+    }
 
+    /**
+     * Prepare display params
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function init_display($params)
+    {
+        global $preview;
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param array $params local params like 'for_editing' => true
-	 * @return array
-	 */
-	function get_param_definitions( $params )
-	{
-		global $admin_url;
+        parent::init_display($params);
 
-		// Get available templates:
-		$context = 'item_details';
-		$TemplateCache = & get_TemplateCache();
-		$TemplateCache->load_by_context( $context );
+        if ($preview) {	// Disable block caching for this widget when item is previewed currently:
+            $this->disp_params['allow_blockcache'] = 0;
+        }
+    }
 
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display' ),
-					'defaultvalue' => '',
-				),
-				'template' => array(
-					'label' => T_('Template'),
-					'type' => 'select',
-					'options' => $TemplateCache->get_code_option_array(),
-					'defaultvalue' => 'item_details_smallprint_standard',
-					'input_suffix' => ( check_user_perm( 'options', 'edit' ) ? '&nbsp;'
-							.action_icon( '', 'edit', $admin_url.'?ctrl=templates&amp;context='.$context, NULL, NULL, NULL,
-							array( 'onclick' => 'return b2template_list_highlight( this )', 'target' => '_blank' ),
-							array( 'title' => T_('Manage templates').'...' ) ) : '' ),
-					'class' => 'evo_template_select',
-				),
-			), parent::get_param_definitions( $params ) );
+    /**
+     * Display the widget!
+     *
+     * @param array $params MUST contain at least the basic display params
+     * @return bool
+     */
+    public function display($params)
+    {
+        global $Item;
 
-		return $r;
-	}
+        if (empty($Item)) {	// Don't display this widget when no Item object:
+            $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because there is no Item.');
+            return false;
+        }
 
+        $this->init_display($params);
 
-	/**
-	 * Prepare display params
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function init_display( $params )
-	{
-		global $preview;
+        $TemplateCache = &get_TemplateCache();
+        if (! $TemplateCache->get_by_code($this->disp_params['template'], false, false)) {
+            $this->display_error_message(sprintf('Template not found: %s', '<code>' . $this->disp_params['template'] . '</code>'));
+            return false;
+        }
 
-		parent::init_display( $params );
+        $template = $this->disp_params['template'];
 
-		if( $preview )
-		{	// Disable block caching for this widget when item is previewed currently:
-			$this->disp_params['allow_blockcache'] = 0;
-		}
-	}
+        $template_params = array_merge([
+            'author_avatar_class' => 'leftmargin',
+        ], $this->disp_params);
 
+        $small_print = render_template_code($template, $template_params);
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array $params MUST contain at least the basic display params
-	 * @return bool
-	 */
-	function display( $params )
-	{
-		global $Item;
+        if (! empty($small_print)) {
+            echo add_tag_class($this->disp_params['block_start'], 'clearfix');
 
-		if( empty( $Item ) )
-		{	// Don't display this widget when no Item object:
-			$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because there is no Item.' );
-			return false;
-		}
+            $this->disp_title();
 
-		$this->init_display( $params );
+            echo $this->disp_params['block_body_start'];
 
-		$TemplateCache = & get_TemplateCache();
-		if( ! $TemplateCache->get_by_code( $this->disp_params['template'], false, false ) )
-		{
-			$this->display_error_message( sprintf( 'Template not found: %s', '<code>'.$this->disp_params['template'].'</code>' ) );
-			return false;
-		}
+            echo $small_print;
 
-		$template = $this->disp_params['template'];
+            echo $this->disp_params['block_body_end'];
+            echo $this->disp_params['block_end'];
 
-		$template_params = array_merge( array(
-				'author_avatar_class' => 'leftmargin',
-			), $this->disp_params );
-		
-		$small_print = render_template_code( $template, $template_params );
+            return true;
+        }
 
-		if( ! empty( $small_print ) )
-		{
-			echo add_tag_class( $this->disp_params['block_start'], 'clearfix' );
-			
-			$this->disp_title();
-			
-			echo $this->disp_params['block_body_start'];
+        $this->display_debug_message();
+        return false;
+    }
 
-			echo $small_print;
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $current_User, $Item;
 
-			echo $this->disp_params['block_body_end'];
-			echo $this->disp_params['block_end'];
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'user_ID' => (is_logged_in() ? $current_User->ID : 0), // Has the current User changed?
+            'cont_coll_ID' => empty($this->disp_params['blog_ID']) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
+            'item_ID' => (empty($Item->ID) ? 0 : $Item->ID), // Has the Item page changed?
+            'item_user_flag_' . (empty($Item->ID) ? 0 : $Item->ID) => (is_logged_in() ? $current_User->ID : 0), // Has the Item data per current User changed?
+            'template_code' => $this->get_param('template'), // Has the Template changed?
+        ];
+    }
 
-			return true;
-		}
-
-		$this->display_debug_message();
-		return false;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $current_User, $Item;
-
-		return array(
-				'wi_ID'        => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID'  => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'user_ID'      => ( is_logged_in() ? $current_User->ID : 0 ), // Has the current User changed?
-				'cont_coll_ID' => empty( $this->disp_params['blog_ID'] ) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
-				'item_ID'      => ( empty( $Item->ID ) ? 0 : $Item->ID ), // Has the Item page changed?
-				'item_user_flag_'.( empty( $Item->ID ) ? 0 : $Item->ID ) => ( is_logged_in() ? $current_User->ID : 0 ), // Has the Item data per current User changed?
-				'template_code'=> $this->get_param( 'template' ), // Has the Template changed?
-			);
-	}
-
-
-	/**
-	 * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
-	 *
-	 * @param string Message
-	 */
-	function display_debug_message( $message = NULL )
-	{
-		if( $this->mode == 'designer' )
-		{	// Display message on designer mode:
-			echo $this->disp_params['block_start'];
-			$this->disp_title();
-			echo $this->disp_params['block_body_start'];
-			echo $this->disp_params['widget_item_small_print_before'];
-			echo $message;
-			echo $this->disp_params['widget_item_small_print_after'];
-			echo $this->disp_params['block_body_end'];
-			echo $this->disp_params['block_end'];
-		}
-	}
+    /**
+     * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
+     *
+     * @param string Message
+     */
+    public function display_debug_message($message = null)
+    {
+        if ($this->mode == 'designer') {	// Display message on designer mode:
+            echo $this->disp_params['block_start'];
+            $this->disp_title();
+            echo $this->disp_params['block_body_start'];
+            echo $this->disp_params['widget_item_small_print_before'];
+            echo $message;
+            echo $this->disp_params['widget_item_small_print_after'];
+            echo $this->disp_params['block_body_end'];
+            echo $this->disp_params['block_end'];
+        }
+    }
 }
-
-?>

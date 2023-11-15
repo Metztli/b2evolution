@@ -11,10 +11,12 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_class( 'users/model/passwords/_passworddriver.class.php', 'PasswordDriver' );
+load_class('users/model/passwords/_passworddriver.class.php', 'PasswordDriver');
 
 /**
  * evoSaltedPasswordDriver Class
@@ -23,40 +25,36 @@ load_class( 'users/model/passwords/_passworddriver.class.php', 'PasswordDriver' 
  */
 class evoSaltedPasswordDriver extends PasswordDriver
 {
-	protected $code = 'evo$salted';
+    protected $code = 'evo$salted';
 
+    /**
+     * Hash password
+     *
+     * @param string Password
+     * @param string Salt
+     * @return string Hashed password
+     */
+    public function hash($password, $salt = '')
+    {
+        if ($salt == '') {	// Generate new salt:
+            $this->last_generated_salt = generate_random_key(8);
+            $salt = $this->last_generated_salt;
+        }
 
-	/**
-	 * Hash password
-	 *
-	 * @param string Password
-	 * @param string Salt
-	 * @return string Hashed password
-	 */
-	public function hash( $password, $salt = '' )
-	{
-		if( $salt == '' )
-		{	// Generate new salt:
-			$this->last_generated_salt = generate_random_key( 8 );
-			$salt = $this->last_generated_salt;
-		}
+        return md5($salt . $password);
+    }
 
-		return md5( $salt.$password );
-	}
+    /**
+     * Get JavaScript code to hash password on browser/client side
+     *
+     * @param string Name of password variable in JS code
+     * @param string Name of salt variable in JS code
+     * @return string
+     */
+    public function get_javascript_hash_code($var_password_name, $var_salt_name)
+    {
+        $js_code = 'hex_md5( ' . $var_salt_name . ' + ' . $var_password_name . ' )';
 
-
-	/**
-	 * Get JavaScript code to hash password on browser/client side
-	 *
-	 * @param string Name of password variable in JS code
-	 * @param string Name of salt variable in JS code
-	 * @return string
-	 */
-	public function get_javascript_hash_code( $var_password_name, $var_salt_name )
-	{
-		$js_code = 'hex_md5( '.$var_salt_name.' + '.$var_password_name.' )';
-
-		return $js_code;
-	}
+        return $js_code;
+    }
 }
-?>

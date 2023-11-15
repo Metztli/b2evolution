@@ -30,11 +30,17 @@ namespace GeoIp2\Model;
 class Country extends AbstractModel
 {
     protected $continent;
+
     protected $country;
+
     protected $locales;
+
     protected $maxmind;
+
     protected $registeredCountry;
+
     protected $representedCountry;
+
     protected $traits;
 
     /**

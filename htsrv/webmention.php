@@ -16,17 +16,16 @@
 /**
  * Initialize everything:
  */
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
-require_once $inc_path.'_main.inc.php';
+require_once $inc_path . '_main.inc.php';
 
 // Stop a request from the blocked IP addresses or Domains:
 antispam_block_request();
 
-if( $Settings->get('system_lock') )
-{ // System is locked for maintenance, trackbacks are not allowed
-	$Messages->add( T_('You cannot leave a comment at this time because the system is under maintenance. Please try again in a few moments.'), 'error' );
-	header_redirect(); // Will save $Messages into Session
+if ($Settings->get('system_lock')) { // System is locked for maintenance, trackbacks are not allowed
+    $Messages->add(T_('You cannot leave a comment at this time because the system is under maintenance. Please try again in a few moments.'), 'error');
+    header_redirect(); // Will save $Messages into Session
 }
 
 // Do not append Debuglog to response!
@@ -46,52 +45,48 @@ $allow_evo_stats = false;
  * @param integer Error code
  * @param string Error message
  */
-function webmention_response( $error_code = 0, $error_message = '' )
+function webmention_response($error_code = 0, $error_message = '')
 {
-	header_http_response( $error_code.' '.$error_message );
-	die( $error_message );
+    header_http_response($error_code . ' ' . $error_message);
+    die($error_message);
 }
 
 // Mandatory URls to post webmention comment:
-param( 'source', 'url', true );
-param( 'target', 'url', true );
-param( 'excerpt', 'string' );
+param('source', 'url', true);
+param('target', 'url', true);
+param('excerpt', 'string');
 
-if( ! preg_match( '#/([a-z0-9\-_]+)[^/]*$#', $target, $item_url ) ||
-    ! ( $ItemCache = & get_ItemCache() ) ||
-    ! ( $target_Item = & $ItemCache->get_by_urltitle( $item_url[1], false, false ) ) )
-{	// If item cannot be found by the requested absolute url:
-	webmention_response( 400, 'You are sending a webmention to an invalid target URL' );
+if (! preg_match('#/([a-z0-9\-_]+)[^/]*$#', $target, $item_url) ||
+    ! ($ItemCache = &get_ItemCache()) ||
+    ! ($target_Item = &$ItemCache->get_by_urltitle($item_url[1], false, false))) {	// If item cannot be found by the requested absolute url:
+    webmention_response(400, 'You are sending a webmention to an invalid target URL');
 }
 
-if( ! $target_Item->can_receive_webmentions() )
-{	// If collection of the target Item doesn't support accepting webmentions:
-	webmention_response( 400, 'Webmentions are disabled' );
+if (! $target_Item->can_receive_webmentions()) {	// If collection of the target Item doesn't support accepting webmentions:
+    webmention_response(400, 'Webmentions are disabled');
 }
 
-if( is_same_url( $source, $target_Item->get_permanent_url( '', '', '&' ) ) )
-{	// If the posted URL is a permanent URL of the target Item:
-	webmention_response( 400, 'Permanent URL of this Item' );
+if (is_same_url($source, $target_Item->get_permanent_url('', '', '&'))) {	// If the posted URL is a permanent URL of the target Item:
+    webmention_response(400, 'Permanent URL of this Item');
 }
 
 // Initialize new Comment for webmention:
 $webmention_Comment = new Comment();
-$webmention_Comment->set( 'type', 'webmention' );
-$webmention_Comment->set_Item( $target_Item );
-$source_data = parse_url( $source );
-$webmention_Comment->set( 'author', ( isset( $source_data['host'] ) ? $source_data['host'] : '' ) );
-$webmention_Comment->set( 'author_IP', $Hit->IP );
-$webmention_Comment->set( 'date', date('Y-m-d H:i:s', $localtimenow ) );
-$webmention_Comment->set( 'content', $source.( empty( $excerpt ) ? '' : "\n".$excerpt ) );
-$target_Blog = & $target_Item->get_Blog();
-$webmention_Comment->set( 'status', $target_Blog->get_setting( 'new_feedback_status' ) );
+$webmention_Comment->set('type', 'webmention');
+$webmention_Comment->set_Item($target_Item);
+$source_data = parse_url($source);
+$webmention_Comment->set('author', (isset($source_data['host']) ? $source_data['host'] : ''));
+$webmention_Comment->set('author_IP', $Hit->IP);
+$webmention_Comment->set('date', date('Y-m-d H:i:s', $localtimenow));
+$webmention_Comment->set('content', $source . (empty($excerpt) ? '' : "\n" . $excerpt));
+$target_Blog = &$target_Item->get_Blog();
+$webmention_Comment->set('status', $target_Blog->get_setting('new_feedback_status'));
 
-if( ! $webmention_Comment->dbinsert() )
-{	// Insert new "webmention" comment:
-	webmention_response( 500, 'Error while registering the webmention' );
+if (! $webmention_Comment->dbinsert()) {	// Insert new "webmention" comment:
+    webmention_response(500, 'Error while registering the webmention');
 }
 
 // Execute or schedule various notifications:
-$webmention_Comment->handle_notifications( NULL, true );
+$webmention_Comment->handle_notifications(null, true);
 
-webmention_response( 202, 'Webmention has been accepted' );
+webmention_response(202, 'Webmention has been accepted');

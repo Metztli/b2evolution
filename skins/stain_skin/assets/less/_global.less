@@ -1,0 +1,536 @@
+// Bootstrap Gallery styles
+html, body {
+	margin:0;
+	padding:0;
+}
+
+html {
+	@media screen and ( max-width: @S ) {
+		font-size: 9.2857px;
+	}
+}
+
+html, html a {
+    -webkit-font-smoothing: antialiased;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.004);
+}
+
+#skin_wrapper {
+	width: 100%;
+	height: 100%;
+	font-family: @font_body;
+	font-size: 1.4rem;
+	background-color: @bg_body;
+	color: @c5;
+
+    text-rendering: optimizelegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	a {
+		color: @primary;
+
+		&:hover, &:focus, &:active {
+			color: @primary;
+			background-color: transparent;
+			outline: 0;
+		}
+	}
+
+	a[rel~=nofollow]:not([class~=btn]):hover {
+		&:hover, &:active, &:focus {
+			background-color: transparent;
+		}
+	}
+}
+
+
+// ======================================================================== /
+// Global Style
+// ======================================================================== /
+.float-right {
+	float: right;
+}
+
+.float-left {
+   float: left;
+}
+
+.radio,
+.checkbox {
+	display: inline-block;
+}
+
+.no-border {
+	border: none !important;
+}
+
+.label {
+	font-size: 14px !important;
+}
+
+
+// Content Column
+// ======================================================================== /
+.one_column {
+	max-width: @one_column;
+	width: @one_column;
+}
+
+.two_column {
+	max-width: @two_column;
+	width: @two_column;
+	float: left;
+
+	@media screen and ( max-width: @S ) {
+		width: @one_column !important;
+		float: none !important;
+	}
+}
+
+.three_column {
+	max-width: @three_column;
+	width: @three_column;
+	margin: 0 -1px 0 0;
+	float: left;
+
+	@media screen and ( max-width: @M ) {
+		max-width: @two_column !important;
+		width: @two_column !important;
+	}
+
+	@media screen and ( max-width: @S ) {
+		max-width: @one_column !important;
+		width: @one_column !important;
+		float: none !important;
+	}
+}
+
+.four_column {
+	max-width: @four_column;
+	width: @four_column;
+	float: left;
+
+	@media screen and ( min-width: @MF ) and ( max-width: @MM ) {
+		max-width: @three_column !important;
+		width: @three_column !important;
+	}
+	@media screen and ( max-width: @M ) {
+		max-width: @two_column !important;
+		width: @two_column !important;
+	}
+	@media screen and ( max-width: @S ) {
+		max-width: @one_column !important;
+		width: @one_column !important;
+		float: none !important;
+	}
+}
+
+
+// Use full width for all textarea
+.form-horizontal .controls textarea.form-control {
+	width: 100%;
+}
+
+// A search button
+input.search_field {
+	margin-bottom: 0;
+	display: inline-block;
+}
+
+form.search .search_options {
+	width: 100%;
+
+	.search_option input {
+		margin-right: 5px;
+	}
+
+	.search_option label {
+		margin-bottom: 0;
+		margin-top: 5px;
+	}
+}
+
+div.compact_search_form {
+
+	input.search_field {
+		width: 100%;
+		margin: 0;
+	}
+}
+
+div.extended_search_form {
+	text-align: center;
+	margin: 0 auto 2em auto;
+	max-width: 530px;
+
+	.search_options {
+		text-align: center;
+
+		.search_option {
+			display: inline-block;
+			margin-right: 10px;
+		}
+	}
+}
+
+// Table for select categories of item
+table.catselect {
+
+	input#new_category_name {
+		width: 98% !important;
+	}
+}
+
+// Form elements on item edit page
+label.control-label[for=evo_post_title] {
+	width: auto;
+}
+
+// A form to create a new message/thread
+textarea.message_text {
+	width: 95%;
+}
+
+
+// Image
+// ======================================================================== /
+img {
+	max-width: 100%;
+	// max-width: none;
+	height: auto;
+}
+
+.cboxPhoto {
+	max-width: none;
+}
+
+img.loadimg {
+    min-height: 32px;
+    min-width: 32px;
+}
+
+// Button Style
+// ======================================================================== /
+.btn {
+
+	&:hover, &:active, &:focus,
+	&:active:focus {
+		outline: 0;
+		box-shadow: none;
+	}
+}
+
+.alert {
+	border-radius: 0;
+}
+
+
+// Sitewide Custom CSS
+// ======================================================================== /
+.sitewide_header {
+	margin-bottom: 0 !important;
+
+	a.swhead_item.user {
+		img {
+			border-radius: 100%;
+		}
+	}
+
+	a{
+		letter-spacing: 0.2px;
+		// text-shadow: none !important;
+	}
+}
+
+.sitewide_footer {
+	box-shadow: none !important;
+}
+
+
+// Disp=single form
+.evo_form__comment {
+
+	.form-group {
+
+		label, div {
+			text-align: left;
+		}
+
+		.controls {
+
+         #uploadfile_A1 {
+				display: inline-block;
+				margin-right: 2%;
+			}
+
+			.help-inline {
+				height: auto;
+				text-align: left;
+				font-size: 84%;
+				color: #999;
+				display: inline-block;
+			}
+
+			.form-control-static {
+				text-align: left;
+			}
+		}
+	}
+}
+
+.evo_post {
+	margin-bottom: 2em;
+
+	.small.text-muted {
+		margin: 4px 0 10px;
+
+		a, a .glyphicon {
+			color: inherit;
+		}
+	}
+
+	.evo_details {
+		.panel {
+
+			.nav_album_number {
+				display: inline;
+			}
+		}
+	}
+}
+
+// On disp=single, colors links in post to grey
+div.evo_print a {
+	color: #777 !important;
+
+	&:hover {
+		color: #337ab7 !important;
+	}
+}
+
+div.bSideItem {
+	background: #F7F5FA;
+	border-radius: 5px;
+	padding: 10px;
+	margin-bottom: 10px;
+	text-shadow: 0 1px 0 #FFFFFF;
+
+	h4 {
+		margin-top: 0;
+	}
+}
+
+// Login/Register forms:
+.skin-form {
+
+	.panel-body {
+
+		.panel {
+			border: none;
+			box-shadow: none;
+		}
+
+		.panel-body {
+			padding: 0;
+		}
+	}
+
+	.fieldset {
+		margin: 0;
+		div.input {
+			margin: 0;
+		}
+	}
+
+	.control-buttons, div.input {
+		padding: 0;
+		width: 100%;
+		text-align: center;
+	}
+}
+
+.wrap-form-login,
+.wrap-form-lostpass,
+.wrap-form-register,
+.wrap-form-activation {
+	min-width: 290px;
+	margin: 1.5em auto auto;
+
+	.panel {
+		margin: 5px 0;
+	}
+
+	.panel-body {
+		padding: 20px 30px 0;
+	}
+}
+
+.wrap-form-login {
+	max-width: 400px;
+}
+
+.wrap-form-lostpass {
+	max-width: 480px;
+
+	#ffield_x label {
+		display: none;
+	}
+}
+
+.wrap-form-activation {
+	max-width: 530px;
+	#activateinfo_form .control-buttons{
+		text-align: left;
+	}
+}
+
+.wrap-form-register {
+	max-width: 580px;
+
+	.control-buttons{
+		text-align: left;
+	}
+
+	&.register-disabled {
+		width: 350px;
+	}
+
+	.form-control {
+		&#country, &#u {
+			width: 100%;
+		}
+	}
+}
+
+.form-login-links {
+	padding: 0 5px;
+	font-size: 92%;
+}
+
+.form-login {
+
+   fieldset {
+		margin-bottom: 20px;
+	}
+
+	.controls {
+		padding: 0;
+		margin: 0;
+		width: 100%;
+	}
+
+	.control-buttons {
+		margin-left: 0;
+	}
+
+	input.form-control[type=text], input.form-control[type=password] {
+		width: 100%;
+	}
+
+	.btn {
+		margin-top: 5px;
+	}
+}
+
+#login_form {
+	.control-buttons {
+		text-align: left;
+	}
+}
+
+.standard_login_link {
+	text-align: center;
+	margin: 3em 0 1ex 0;
+}
+
+.form_footer_notes {
+	margin-top: 0;
+}
+
+
+// Messages
+div.action_messages, div.log_container {
+	margin: 0;
+}
+
+.evo_post_content .evo_details .evo_form__comment {
+	fieldset .info {
+		margin: 0px 0px 22px 0px;
+	}
+
+	fieldset {
+		margin: 5px 0px !important;
+	}
+
+	fieldset {
+		margin: 0px;
+
+		div.label {
+			float: none !important;
+			padding-left: 0px;
+			text-align: center;
+			.btn {
+				margin: 5px;
+				display: inline-block;
+			}
+		}
+	}
+}
+
+
+// Positions on the action buttons near page titles
+.evo_post_title {
+	display: table;
+	word-wrap: break-word;
+	h2 {
+		display: table-cell;
+		margin: 0;
+		padding: 20px 0 10px;
+	}
+	.btn-group {
+		display: table-cell;
+		padding: 20px 0 10px 30px;
+		vertical-align: middle;
+	}
+}
+
+.post_images img {
+	transition: all 0.15s ease-in-out;
+	-webkit-transition: all 0.15s ease-in-out;
+	-moz-transition: all 0.15s ease-in-out;
+	-o-transition: all 0.15s ease-in-out;
+	-ms-transition: all 0.15s ease-in-out;
+}
+
+.post_images figure:hover img {
+	transform:scale(1.06);
+	-ms-transform:scale(1.06); /* IE 9 */
+	-webkit-transform:scale(1.06); /* Safari and Chrome */
+}
+
+.evo_image_legend {
+	display: table;
+}
+
+// Fixes
+.bt-content {
+	font-size: 14px;
+
+	.bubbletip_user ul li {
+		margin-top: 15px;
+	}
+}
+
+#ffield_uploadfile_A1 {
+
+	.input {
+		text-align: left;
+
+		input, span {
+			display: inline-block;
+		}
+	}
+}

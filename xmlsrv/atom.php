@@ -25,7 +25,6 @@ $tempskin = '_atom';
 /**
  * That's it, now let b2evolution do the rest! :)
  */
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
-require $inc_path.'_blog_main.inc.php';
-?>
+require $inc_path . '_blog_main.inc.php';

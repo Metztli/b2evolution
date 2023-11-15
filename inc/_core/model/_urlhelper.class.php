@@ -13,19 +13,21 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 class UrlHelper
 {
-	private $host;
+    private $host;
 
-	function __construct( $host )
-	{
-		$this->host = $host;
-	}
+    public function __construct($host)
+    {
+        $this->host = $host;
+    }
 
-	public function callback( $matches )
-	{
-		return $matches[1].$matches[2].$matches[3].url_absolute( $matches[4], "'.$this->host.'" ).$matches[5];
-	}
+    public function callback($matches)
+    {
+        return $matches[1] . $matches[2] . $matches[3] . url_absolute($matches[4], "'.$this->host.'") . $matches[5];
+    }
 }

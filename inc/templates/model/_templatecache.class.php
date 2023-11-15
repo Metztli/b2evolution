@@ -11,10 +11,12 @@
  *
  * @package templates
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache' );
-load_class( 'templates/model/_template.class.php', 'Template' );
+load_class('_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache');
+load_class('templates/model/_template.class.php', 'Template');
 
 /**
  * Blog Cache Class
@@ -23,224 +25,196 @@ load_class( 'templates/model/_template.class.php', 'Template' );
  */
 class TemplateCache extends DataObjectCache
 {
-	/**
-	 * Cache by template code
-	 *
-	 * @var cache_by_code array
-	 */
-	var $cache_by_code;
-	
-	var $loaded_contexts = array();
+    /**
+     * Cache by template code
+     *
+     * @var cache_by_code array
+     */
+    public $cache_by_code;
 
+    public $loaded_contexts = [];
 
-	/**
-	 * Constructor
-	 *
-	 * @param string Name of the order field or NULL to use name field
-	 */
-	function __construct()
-	{
-		parent::__construct( 'Template', false, 'T_templates', 'tpl_', 'tpl_ID', 'tpl_name' );
-	}
+    /**
+     * Constructor
+     *
+     * @param string Name of the order field or NULL to use name field
+     */
+    public function __construct()
+    {
+        parent::__construct('Template', false, 'T_templates', 'tpl_', 'tpl_ID', 'tpl_name');
+    }
 
+    /**
+     * Add a template to the cache
+     *
+     * @param object Template
+     * @return boolean true if it was added false otherwise
+     */
+    public function add($Template)
+    {
+        $code = $Template->get('code');
+        $this->cache_by_code[$code] = &$Template;
 
-	/**
-	 * Add a template to the cache
-	 *
-	 * @param object Template
-	 * @return boolean true if it was added false otherwise
-	 */
-	function add( $Template )
-	{
-		$code = $Template->get( 'code' );
-		$this->cache_by_code[$code] = & $Template;
+        return parent::add($Template);
+    }
 
-		return parent::add( $Template );
-	}
+    /**
+     * Get Template by given code
+     *
+     * @param string Code of Template
+     * @param boolean true if function should die on error
+     * @param boolean true if function should die on empty/null
+     * @return object|null|boolean Reference on cached Template, NULL - if request with empty code, FALSE - if requested Template does not exist
+     */
+    public function &get_by_code($code, $halt_on_error = true, $halt_on_empty = true)
+    {
+        global $DB, $Debuglog;
 
+        if (empty($code)) {	// Don't allow request with empty code:
+            if ($halt_on_empty) {
+                debug_die("Requested $this->objtype from $this->dbtablename without code!");
+            }
+            $r = null;
+            return $r;
+        }
 
-	/**
-	 * Get Template by given code
-	 *
-	 * @param string Code of Template
-	 * @param boolean true if function should die on error
-	 * @param boolean true if function should die on empty/null
-	 * @return object|NULL|boolean Reference on cached Template, NULL - if request with empty code, FALSE - if requested Template does not exist
-	 */
-	function & get_by_code( $code, $halt_on_error = true, $halt_on_empty = true )
-	{
-		global $DB, $Debuglog;
+        if (isset($this->cache_by_code[$code])) {	// Get Template from cache by code:
+            $Debuglog->add("Accessing <strong>$this->objtype($code)</strong> from cache by code", 'dataobjects');
+            return $this->cache_by_code[$code];
+        }
 
-		if( empty( $code ) )
-		{	// Don't allow request with empty code:
-			if( $halt_on_empty )
-			{
-				debug_die( "Requested $this->objtype from $this->dbtablename without code!" );
-			}
-			$r = NULL;
-			return $r;
-		}
+        // Load just the requested Template:
+        $Debuglog->add("Loading <strong>$this->objtype($code)</strong>", 'dataobjects');
+        $SQL = $this->get_SQL_object();
+        $SQL->WHERE_and('tpl_code = ' . $DB->quote($code));
 
-		if( isset( $this->cache_by_code[ $code ] ) )
-		{	// Get Template from cache by code:
-			$Debuglog->add( "Accessing <strong>$this->objtype($code)</strong> from cache by code", 'dataobjects' );
-			return $this->cache_by_code[ $code ];
-		}
+        if ($db_row = $DB->get_row($SQL->get(), OBJECT, 0, 'DataObjectCache::get_by_code()')) {
+            $resolved_ID = $db_row->{$this->dbIDname};
+            $Debuglog->add('success; ID = ' . $resolved_ID, 'dataobjects');
+            if (! isset($this->cache[$resolved_ID])) {	// Object is not already in cache:
+                $Debuglog->add('Adding to cache...', 'dataobjects');
+                //$Obj = new $this->objtype( $row ); // COPY !!
+                if (! $this->add($this->new_obj($db_row))) {	// could not add
+                    $Debuglog->add('Could not add() object to cache!', 'dataobjects');
+                }
+            }
+            if (! isset($this->cache_by_code[$code])) {	// Add object in cache by code:
+                $this->cache_by_code[$code] = $this->new_obj($db_row);
+            }
+        }
 
-		// Load just the requested Template:
-		$Debuglog->add( "Loading <strong>$this->objtype($code)</strong>", 'dataobjects' );
-		$SQL = $this->get_SQL_object();
-		$SQL->WHERE_and( 'tpl_code = '.$DB->quote( $code ) );
+        if (empty($this->cache_by_code[$code])) {	// Object does not exist by requested code:
+            $Debuglog->add('Could not get DataObject by code.', 'dataobjects');
+            if ($halt_on_error) {
+                debug_die("Requested $this->objtype does not exist!");
+            }
+            $this->cache_by_code[$code] = false;
+        }
 
-		if( $db_row = $DB->get_row( $SQL->get(), OBJECT, 0, 'DataObjectCache::get_by_code()' ) )
-		{
-			$resolved_ID = $db_row->{$this->dbIDname};
-			$Debuglog->add( 'success; ID = '.$resolved_ID, 'dataobjects' );
-			if( ! isset( $this->cache[$resolved_ID] ) )
-			{	// Object is not already in cache:
-				$Debuglog->add( 'Adding to cache...', 'dataobjects' );
-				//$Obj = new $this->objtype( $row ); // COPY !!
-				if( ! $this->add( $this->new_obj( $db_row ) ) )
-				{	// could not add
-					$Debuglog->add( 'Could not add() object to cache!', 'dataobjects' );
-				}
-			}
-			if( ! isset( $this->cache_by_code[ $code ] ) )
-			{	// Add object in cache by code:
-				$this->cache_by_code[ $code ] = $this->new_obj( $db_row );
-			}
-		}
+        return $this->cache_by_code[$code];
+    }
 
-		if( empty( $this->cache_by_code[ $code ] ) )
-		{	// Object does not exist by requested code:
-			$Debuglog->add( 'Could not get DataObject by code.', 'dataobjects' );
-			if( $halt_on_error )
-			{
-				debug_die( "Requested $this->objtype does not exist!" );
-			}
-			$this->cache_by_code[ $code ] = false;
-		}
+    /**
+     * Returns option array with cache contents
+     *
+     * Load the cache if necessary
+     *
+     * @param string Callback method name
+     * @param array IDs to ignore.
+     * @return string
+     */
+    public function get_code_option_array($method = 'get_name', $ignore_IDs = [])
+    {
+        if (! $this->all_loaded && $this->load_all) { // We have not loaded all items so far, but we're allowed to.
+            if (empty($ignore_IDs)) {	// just load all items
+                $this->load_all();
+            } else {	// only load those items not listed in $ignore_IDs
+                $this->load_list($ignore_IDs, true);
+            }
+        }
 
-		return $this->cache_by_code[ $code ];
-	}
+        $r = [];
 
+        foreach ($this->cache as $loop_Obj) {
+            if (in_array($loop_Obj->code, $ignore_IDs)) {	// Ignore this ID
+                continue;
+            }
 
-	/**
-	 * Returns option array with cache contents
-	 *
-	 * Load the cache if necessary
-	 *
-	 * @param string Callback method name
-	 * @param array IDs to ignore.
-	 * @return string
-	 */
-	function get_code_option_array( $method = 'get_name', $ignore_IDs = array() )
-	{
-		if( ! $this->all_loaded && $this->load_all )
-		{ // We have not loaded all items so far, but we're allowed to.
-			if ( empty( $ignore_IDs ) )
-			{	// just load all items
-				$this->load_all();
-			}
-			else
-			{	// only load those items not listed in $ignore_IDs
-				$this->load_list( $ignore_IDs, true );
-			}
-		}
+            $r[$loop_Obj->code] = $loop_Obj->$method();
+        }
 
-		$r = array();
+        return $r;
+    }
 
-		foreach( $this->cache as $loop_Obj )
-		{
-			if( in_array( $loop_Obj->code, $ignore_IDs ) )
-			{	// Ignore this ID
-				continue;
-			}
+    /**
+     * Get localized Template by given code
+     *
+     * @param string Code of Template
+     * @param boolean true if function should die on error
+     * @param boolean true if function should die on empty/null
+     * @param string Locale, NULL - for current locale
+     * @return object|null|boolean Reference on cached Template, NULL - if request with empty code, FALSE - if requested Template does not exist
+     */
+    public function &get_localized_by_code($code, $halt_on_error = true, $halt_on_empty = true, $locale = null)
+    {
+        if (! ($locale_Template = &$this->get_by_code($code, $halt_on_error, $halt_on_empty))) {	// No template found by code:
+            $r = false;
+            return $r;
+        }
 
-			$r[$loop_Obj->code] = $loop_Obj->$method();
-		}
+        if ($locale === null) {	// Use current locale:
+            global $current_locale;
+            $locale = $current_locale;
+        }
 
-		return $r;
-	}
+        // Check if the template has a child matching the current locale:
+        $localized_templates = $locale_Template->get_localized_templates($locale);
+        if (! empty($localized_templates)) {	// Use localized template:
+            $locale_Template = &$localized_templates[0];
+        }
 
+        if ($halt_on_error && ! $locale_Template) {	// Halt if no template with locale:
+            debug_die('No Template found in ' . $this->dbtablename . ' for locale ' . $locale . ' by code ' . $code . '!');
+        }
 
-	/**
-	 * Get localized Template by given code
-	 *
-	 * @param string Code of Template
-	 * @param boolean true if function should die on error
-	 * @param boolean true if function should die on empty/null
-	 * @param string Locale, NULL - for current locale
-	 * @return object|NULL|boolean Reference on cached Template, NULL - if request with empty code, FALSE - if requested Template does not exist
-	 */
-	function & get_localized_by_code( $code, $halt_on_error = true, $halt_on_empty = true, $locale = NULL )
-	{
-		if( ! ( $locale_Template = & $this->get_by_code( $code, $halt_on_error, $halt_on_empty ) ) )
-		{	// No template found by code:
-			$r = false;
-			return $r;
-		}
+        return $locale_Template;
+    }
 
-		if( $locale === NULL )
-		{	// Use current locale:
-			global $current_locale;
-			$locale = $current_locale;
-		}
+    /**
+     * Load templates for a given context
+     *
+     * @param string Comma-separated list of contexts to load
+     */
+    public function load_by_context($context)
+    {
+        global $DB;
 
-		// Check if the template has a child matching the current locale:
-		$localized_templates = $locale_Template->get_localized_templates( $locale );
-		if( ! empty( $localized_templates ) )
-		{	// Use localized template:
-			$locale_Template = & $localized_templates[0];
-		}
+        if (empty($context)) {	// Nothing to load:
+            return;
+        }
 
-		if( $halt_on_error && ! $locale_Template )
-		{	// Halt if no template with locale:
-			debug_die( 'No Template found in '.$this->dbtablename.' for locale '.$locale.' by code '.$code.'!' );
-		}
+        $context = array_map('trim', explode(',', $context));
 
-		return $locale_Template;
-	}
+        $context_already_loaded = array_intersect(array_keys($this->loaded_contexts), $context);
+        if ($this->all_loaded || (count($context_already_loaded) == count($context))) {	// Already loaded
+            return false;
+        }
 
+        $context_to_load = array_diff($context, $this->loaded_contexts);
 
-	/**
-	 * Load templates for a given context
-	 * 
-	 * @param string Comma-separated list of contexts to load
-	 */
-	function load_by_context( $context )
-	{
-		global $DB;
+        $SQL = new SQL('Get templates with context: ' . implode(', ', $context_to_load));
+        $SQL->SELECT('*');
+        $SQL->FROM('T_templates');
+        $SQL->WHERE('tpl_translates_tpl_ID IS NULL');
+        $SQL->WHERE_and('tpl_context IN (' . $DB->quote($context_to_load) . ')');
+        $SQL->ORDER_BY('tpl_name, tpl_code');
 
-		if( empty( $context ) )
-		{	// Nothing to load:
-			return;
-		}
+        $this->load_by_sql($SQL);
 
-		$context = array_map( 'trim', explode( ',', $context ) );
+        foreach ($context_to_load as $loop_context) {
+            $this->loaded_contexts[$loop_context] = true;
+        }
 
-		$context_already_loaded = array_intersect( array_keys( $this->loaded_contexts ), $context );
-		if( $this->all_loaded || ( count( $context_already_loaded ) == count( $context ) ) )
-		{	// Already loaded
-			return false;
-		}
-
-		$context_to_load = array_diff( $context, $this->loaded_contexts );
-	
-		$SQL = new SQL( 'Get templates with context: '.implode( ', ', $context_to_load ) );
-		$SQL->SELECT( '*' );
-		$SQL->FROM( 'T_templates' );
-		$SQL->WHERE( 'tpl_translates_tpl_ID IS NULL' );
-		$SQL->WHERE_and( 'tpl_context IN ('.$DB->quote( $context_to_load ).')' );
-		$SQL->ORDER_BY( 'tpl_name, tpl_code' );
-
-		$this->load_by_sql( $SQL );
-
-		foreach( $context_to_load as $loop_context )
-		{
-			$this->loaded_contexts[$loop_context] = true;
-		}
-
-		return true;
-	}
+        return true;
+    }
 }

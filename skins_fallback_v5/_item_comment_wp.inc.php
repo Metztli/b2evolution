@@ -12,28 +12,30 @@
  *
  * @deprecated Will be removed in a future version.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Default params:
-$params = array_merge( array(
-    'comment_start'  => '<li>',
-    'comment_end'    => '</li>',
-    'preview_start'  => '<ul><li id="comment_preview">',
-    'preview_end'    => '</li></ul>',
-    'Comment'        => NULL, // This object MUST be passed as a param!
-	), $params );
+$params = array_merge([
+    'comment_start' => '<li>',
+    'comment_end' => '</li>',
+    'preview_start' => '<ul><li id="comment_preview">',
+    'preview_end' => '</li></ul>',
+    'Comment' => null, // This object MUST be passed as a param!
+], $params);
 
 /**
  * @var Comment
  */
-$Comment = & $params['Comment'];
+$Comment = &$params['Comment'];
 
 ?>
 <!-- ========== START of a COMMENT/TB/PB ========== -->
 <?php
-	$Comment->anchor();
-  echo $params['comment_start'];
+    $Comment->anchor();
+echo $params['comment_start'];
 ?>
 
 <?php $Comment->rating(); ?>
@@ -42,68 +44,63 @@ $Comment = & $params['Comment'];
 
 <p><cite>
 	<?php
-		switch( $Comment->get( 'type' ) )
-		{
-			case 'comment': // Display a comment:
-				if( empty($Comment->ID) )
-				{	// PREVIEW comment
-					echo T_('PREVIEW Comment by').' ';
-				}
-				else
-				{	// Normal comment
-					$Comment->permanent_link( array(
-							'before'    => '',
-							'after'     => ' ',
-							'text' 		=> T_('Comment'),
-							'nofollow'	=> true,
-						) );
-				}
-				$Comment->author( /* TRANS: author name */ T_('by').' ' );
-				if( ! $Comment->get_author_User() )
-				{ // Display action icon to message only if this comment is from a visitor
-					$Comment->msgform_link( $Blog->get( 'msgformurl' ) );
-				}
-				$Comment->author_url( '', ' &middot; ', '' );
-				break;
+        switch ($Comment->get('type')) {
+            case 'comment': // Display a comment:
+                if (empty($Comment->ID)) {	// PREVIEW comment
+                    echo T_('PREVIEW Comment by') . ' ';
+                } else {	// Normal comment
+                    $Comment->permanent_link([
+                        'before' => '',
+                        'after' => ' ',
+                        'text' => T_('Comment'),
+                        'nofollow' => true,
+                    ]);
+                }
+                $Comment->author( /* TRANS: author name */ T_('by') . ' ');
+                if (! $Comment->get_author_User()) { // Display action icon to message only if this comment is from a visitor
+                    $Comment->msgform_link($Blog->get('msgformurl'));
+                }
+                $Comment->author_url('', ' &middot; ', '');
+                break;
 
-			case 'trackback': // Display a trackback:
-				$Comment->permanent_link( array(
-						'before'    => '',
-						'after'     => ' ',
-						'text' 			=> T_('Trackback'),
-						'nofollow'	=> true,
-					) );
-				$Comment->author( /* TRANS: author name */ T_('by').' ', '#', '', '#', 'htmlbody', true );
-				break;
+            case 'trackback': // Display a trackback:
+                $Comment->permanent_link([
+                    'before' => '',
+                    'after' => ' ',
+                    'text' => T_('Trackback'),
+                    'nofollow' => true,
+                ]);
+                $Comment->author( /* TRANS: author name */ T_('by') . ' ', '#', '', '#', 'htmlbody', true);
+                break;
 
-			case 'pingback': // Display a pingback:
-				$Comment->permanent_link( array(
-						'before'    => '',
-						'after'     => ' ',
-						'text' 			=> T_('Pingback'),
-						'nofollow'	=> true,
-					) );
-				$Comment->author( /* TRANS: author name */ T_('by').' ', '#', '', '#', 'htmlbody', true );
-				break;
+            case 'pingback': // Display a pingback:
+                $Comment->permanent_link([
+                    'before' => '',
+                    'after' => ' ',
+                    'text' => T_('Pingback'),
+                    'nofollow' => true,
+                ]);
+                $Comment->author( /* TRANS: author name */ T_('by') . ' ', '#', '', '#', 'htmlbody', true);
+                break;
 
-			case 'webmention': // Display a webmention:
-				$Comment->permanent_link( array(
-						'before'   => '',
-						'after'    => ' ',
-						'text'     => T_('Webmention'),
-						'nofollow' => true,
-					) );
-				$Comment->author( /* TRANS: author name */ T_('by').' ', '#', '', '#', 'htmlbody', true );
-				break;
-		}
-	?>
+            case 'webmention': // Display a webmention:
+                $Comment->permanent_link([
+                    'before' => '',
+                    'after' => ' ',
+                    'text' => T_('Webmention'),
+                    'nofollow' => true,
+                ]);
+                $Comment->author( /* TRANS: author name */ T_('by') . ' ', '#', '', '#', 'htmlbody', true);
+                break;
+        }
+?>
 	&#8212;
-	<?php $Comment->date() ?> @ <?php $Comment->time( '#short_time' ) ?>
+	<?php $Comment->date() ?> @ <?php $Comment->time('#short_time') ?>
 </cite>
 
 <?php
-	$Comment->edit_link( '', '', '#', '#', 'permalink_right' ); /* Link to backoffice for editing */
-	$Comment->delete_link( '', '', '#', '#', 'permalink_right' ); /* Link to backoffice for deleting */
+$Comment->edit_link('', '', '#', '#', 'permalink_right'); /* Link to backoffice for editing */
+$Comment->delete_link('', '', '#', '#', 'permalink_right'); /* Link to backoffice for deleting */
 ?>
 </p>
 

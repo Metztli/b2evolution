@@ -12,172 +12,161 @@
  *
  * @package messaging
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $action, $current_User, $Collection, $Blog, $perm_abuse_management, $Plugins, $edited_Message;
 
 // in front office there is no function call, $edited_Thread is available
-if( !isset( $edited_Thread ) )
-{ // $edited thread is global in back office, but we are inside of disp_view function call
-	global $edited_Thread;
+if (! isset($edited_Thread)) { // $edited thread is global in back office, but we are inside of disp_view function call
+    global $edited_Thread;
 
-	if( !isset( $edited_Thread ) )
-	{
-		debug_die( "Missing thread!");
-	}
+    if (! isset($edited_Thread)) {
+        debug_die("Missing thread!");
+    }
 }
 
 global $read_status_list, $leave_status_list;
 
-$creating = is_create_action( $action );
+$creating = is_create_action($action);
 
-if( !isset( $display_params ) )
-{
-	$display_params = array();
+if (! isset($display_params)) {
+    $display_params = [];
 }
 
-if( !isset( $params ) )
-{
-	$params = array();
+if (! isset($params)) {
+    $params = [];
 }
-$params = array_merge( array(
-	'form_class_msg'            => 'fform',
-	'form_action'               => NULL,
-	'form_name'                 => 'messages_checkchanges',
-	'form_layout'               => 'compact',
-	'redirect_to'               => regenerate_url( 'action', '', '', '&' ),
-	'cols'                      => 80,
-	'skin_form_params'          => array(),
-	'display_navigation'        => false,
-	'display_title'             => false,
-	'messages_list_start'       => is_admin_page() ? '<div class="evo_private_messages_list">' : '',
-	'messages_list_end'         => is_admin_page() ? '</div>' : '',
-	'messages_list_title'       => $edited_Thread->title,
-	'messages_list_title_start' => '<div class="panel-heading"><h2 class="panel-title">',
-	'messages_list_title_end'   => '</h2></div>',
-	'messages_list_form_start'  => '<div class="panel panel-default">',
-	'messages_list_form_end'    => '</div>',
-	'messages_list_body_start'  => '<div class="panel-body">',
-	'messages_list_body_end'    => '</div>',
-	), $params );
+$params = array_merge([
+    'form_class_msg' => 'fform',
+    'form_action' => null,
+    'form_name' => 'messages_checkchanges',
+    'form_layout' => 'compact',
+    'redirect_to' => regenerate_url('action', '', '', '&'),
+    'cols' => 80,
+    'skin_form_params' => [],
+    'display_navigation' => false,
+    'display_title' => false,
+    'messages_list_start' => is_admin_page() ? '<div class="evo_private_messages_list">' : '',
+    'messages_list_end' => is_admin_page() ? '</div>' : '',
+    'messages_list_title' => $edited_Thread->title,
+    'messages_list_title_start' => '<div class="panel-heading"><h2 class="panel-title">',
+    'messages_list_title_end' => '</h2></div>',
+    'messages_list_form_start' => '<div class="panel panel-default">',
+    'messages_list_form_end' => '</div>',
+    'messages_list_body_start' => '<div class="panel-body">',
+    'messages_list_body_end' => '</div>',
+], $params);
 
 echo $params['messages_list_start'];
 
-if( $params['display_navigation'] )
-{ // Display navigation
-	echo '<div class="messages_navigation">'
-		.'<div class="floatleft">'
-			.'<a href="'.get_dispctrl_url( 'threads' ).'">&laquo; '.T_('Back to list').'</a>'
-		.'</div>'
-		.get_thread_prevnext_links( $edited_Thread->ID )
-		.'<div class="clear"></div>'
-	.'</div>';
+if ($params['display_navigation']) { // Display navigation
+    echo '<div class="messages_navigation">'
+        . '<div class="floatleft">'
+            . '<a href="' . get_dispctrl_url('threads') . '">&laquo; ' . T_('Back to list') . '</a>'
+        . '</div>'
+        . get_thread_prevnext_links($edited_Thread->ID)
+        . '<div class="clear"></div>'
+    . '</div>';
 }
 
-if( $params['display_title'] )
-{	// Display title:
-	echo '<h2>'.sprintf( T_('Conversation: %s'), $edited_Thread->title ).'</h2>';
+if ($params['display_title']) {	// Display title:
+    echo '<h2>' . sprintf(T_('Conversation: %s'), $edited_Thread->title) . '</h2>';
 }
 
 // load Thread recipients
 $recipient_list = $edited_Thread->load_recipients();
 // load Thread recipient users into the UserCache
-$UserCache = & get_UserCache();
-$UserCache->load_list( $recipient_list );
+$UserCache = &get_UserCache();
+$UserCache->load_list($recipient_list);
 
 // Select all recipients with their statuses
 $recipients_status_SQL = new SQL();
 
-$recipients_status_SQL->SELECT( 'tsta_user_ID as user_ID, tsta_first_unread_msg_ID, tsta_thread_leave_msg_ID' );
+$recipients_status_SQL->SELECT('tsta_user_ID as user_ID, tsta_first_unread_msg_ID, tsta_thread_leave_msg_ID');
 
-$recipients_status_SQL->FROM( 'T_messaging__threadstatus' );
+$recipients_status_SQL->FROM('T_messaging__threadstatus');
 
-$recipients_status_SQL->WHERE( 'tsta_thread_ID = '.$edited_Thread->ID );
+$recipients_status_SQL->WHERE('tsta_thread_ID = ' . $edited_Thread->ID);
 
-$recipient_status_list = $DB->get_results( $recipients_status_SQL->get() );
-$read_status_list = array();
-$leave_status_list = array();
-foreach( $recipient_status_list as $row )
-{
-	$read_status_list[ $row->user_ID ] = $row->tsta_first_unread_msg_ID;
-	$leave_status_list[ $row->user_ID ] = $row->tsta_thread_leave_msg_ID;
+$recipient_status_list = $DB->get_results($recipients_status_SQL->get());
+$read_status_list = [];
+$leave_status_list = [];
+foreach ($recipient_status_list as $row) {
+    $read_status_list[$row->user_ID] = $row->tsta_first_unread_msg_ID;
+    $leave_status_list[$row->user_ID] = $row->tsta_thread_leave_msg_ID;
 }
-$is_recipient = $edited_Thread->check_thread_recipient( $current_User->ID );
-$leave_msg_ID = ( $is_recipient ? $leave_status_list[ $current_User->ID ] : NULL );
+$is_recipient = $edited_Thread->check_thread_recipient($current_User->ID);
+$leave_msg_ID = ($is_recipient ? $leave_status_list[$current_User->ID] : null);
 
 // Create SELECT query:
 $select_SQL = new SQL();
 
-$select_SQL->SELECT( 'mm.msg_ID, mm.msg_author_user_ID, mm.msg_thread_ID, mm.msg_datetime,
+$select_SQL->SELECT('mm.msg_ID, mm.msg_author_user_ID, mm.msg_thread_ID, mm.msg_datetime,
 						u.user_ID AS msg_user_ID, u.user_login AS msg_author,
 						u.user_firstname AS msg_firstname, u.user_lastname AS msg_lastname,
 						u.user_avatar_file_ID AS msg_user_avatar_ID,
 						mm.msg_text, mm.msg_renderers,
-						'.$DB->quote( $edited_Thread->title ).' AS thread_title' );
+						' . $DB->quote($edited_Thread->title) . ' AS thread_title');
 
-$select_SQL->FROM( 'T_messaging__message mm
-						LEFT OUTER JOIN T_users u ON u.user_ID = mm.msg_author_user_ID' );
+$select_SQL->FROM('T_messaging__message mm
+						LEFT OUTER JOIN T_users u ON u.user_ID = mm.msg_author_user_ID');
 
-$select_SQL->WHERE( 'mm.msg_thread_ID = '.$edited_Thread->ID );
-if( !empty( $leave_msg_ID ) && ( !$perm_abuse_management ) )
-{
-	$select_SQL->WHERE_and( 'mm.msg_ID <= '.$leave_msg_ID );
+$select_SQL->WHERE('mm.msg_thread_ID = ' . $edited_Thread->ID);
+if (! empty($leave_msg_ID) && (! $perm_abuse_management)) {
+    $select_SQL->WHERE_and('mm.msg_ID <= ' . $leave_msg_ID);
 }
 
-$select_SQL->ORDER_BY( 'mm.msg_datetime DESC' );
+$select_SQL->ORDER_BY('mm.msg_datetime DESC');
 
 // Create COUNT query
 $count_SQL = new SQL();
-$count_SQL->SELECT( 'COUNT(*)' );
+$count_SQL->SELECT('COUNT(*)');
 
 // Get params from request
-$s = param( 's', 'string', '', true );
+$s = param('s', 'string', '', true);
 
-if( !empty( $s ) )
-{
-	$select_SQL->WHERE_and( 'CONCAT_WS( " ", u.user_login, u.user_firstname, u.user_lastname, u.user_nickname, msg_text ) LIKE "%'.$DB->escape($s).'%"' );
+if (! empty($s)) {
+    $select_SQL->WHERE_and('CONCAT_WS( " ", u.user_login, u.user_firstname, u.user_lastname, u.user_nickname, msg_text ) LIKE "%' . $DB->escape($s) . '%"');
 
-	$count_SQL->FROM( 'T_messaging__message mm LEFT OUTER JOIN T_users u ON u.user_ID = mm.msg_author_user_ID' );
-	$count_SQL->WHERE( 'mm.msg_thread_ID = '.$edited_Thread->ID );
-	$count_SQL->WHERE_and( 'CONCAT_WS( " ", u.user_login, u.user_firstname, u.user_lastname, u.user_nickname, msg_text ) LIKE "%'.$DB->escape($s).'%"' );
-}
-else
-{
-	$count_SQL->FROM( 'T_messaging__message' );
-	$count_SQL->WHERE( 'msg_thread_ID = '.$edited_Thread->ID );
+    $count_SQL->FROM('T_messaging__message mm LEFT OUTER JOIN T_users u ON u.user_ID = mm.msg_author_user_ID');
+    $count_SQL->WHERE('mm.msg_thread_ID = ' . $edited_Thread->ID);
+    $count_SQL->WHERE_and('CONCAT_WS( " ", u.user_login, u.user_firstname, u.user_lastname, u.user_nickname, msg_text ) LIKE "%' . $DB->escape($s) . '%"');
+} else {
+    $count_SQL->FROM('T_messaging__message');
+    $count_SQL->WHERE('msg_thread_ID = ' . $edited_Thread->ID);
 }
 
 $select_sql = $select_SQL->get();
-if( $action == 'preview' )
-{ // Init PREVIEW message
-	global $localtimenow;
+if ($action == 'preview') { // Init PREVIEW message
+    global $localtimenow;
 
-	$count_SQL->SELECT( 'COUNT(*) + 1' );
+    $count_SQL->SELECT('COUNT(*) + 1');
 
-	$select_sql = '(
+    $select_sql = '(
 	SELECT
-		0 AS msg_ID, '.$current_User->ID.' AS msg_author_user_ID, '.$edited_Thread->ID.' AS msg_thread_ID, "'.date( 'Y-m-d H:i:s', $localtimenow ).'" AS msg_datetime,
-		'.$current_User->ID.' AS msg_user_ID, '.$DB->quote( $current_User->login ).' AS msg_author,
-		'.$DB->quote( $current_User->firstname ).' AS msg_firstname, '.$DB->quote( $current_User->lastname ).' AS msg_lastname,
-		'.$DB->quote( $current_User->avatar_file_ID ).' AS msg_user_avatar_ID,
-		'.$DB->quote( $edited_Message->text ).' AS msg_text, '.$DB->quote( $edited_Message->renderers ).' AS msg_renderers,
-		'.$DB->quote( $edited_Thread->title ).' AS thread_title
+		0 AS msg_ID, ' . $current_User->ID . ' AS msg_author_user_ID, ' . $edited_Thread->ID . ' AS msg_thread_ID, "' . date('Y-m-d H:i:s', $localtimenow) . '" AS msg_datetime,
+		' . $current_User->ID . ' AS msg_user_ID, ' . $DB->quote($current_User->login) . ' AS msg_author,
+		' . $DB->quote($current_User->firstname) . ' AS msg_firstname, ' . $DB->quote($current_User->lastname) . ' AS msg_lastname,
+		' . $DB->quote($current_User->avatar_file_ID) . ' AS msg_user_avatar_ID,
+		' . $DB->quote($edited_Message->text) . ' AS msg_text, ' . $DB->quote($edited_Message->renderers) . ' AS msg_renderers,
+		' . $DB->quote($edited_Thread->title) . ' AS thread_title
 	)
 	UNION
-	('.$select_sql.')
+	(' . $select_sql . ')
 	ORDER BY msg_datetime DESC';
 }
 
 // Create result set:
-$Results = new Results( $select_sql, 'msg_', '', 0, $count_SQL->get() );
+$Results = new Results($select_sql, 'msg_', '', 0, $count_SQL->get());
 
-$Results->Cache = & get_MessageCache();
+$Results->Cache = &get_MessageCache();
 
-$Results->title = $params['messages_list_title'].( is_admin_page() ? get_manual_link( 'messages-thread-list' ) : '' );
+$Results->title = $params['messages_list_title'] . (is_admin_page() ? get_manual_link('messages-thread-list') : '');
 
-if( is_admin_page() )
-{
-	$Results->global_icon( T_('Cancel').'!', 'close', '?ctrl=threads' );
+if (is_admin_page()) {
+    $Results->global_icon(T_('Cancel') . '!', 'close', '?ctrl=threads');
 }
 
 /**
@@ -185,271 +174,251 @@ if( is_admin_page() )
  *
  * @param Form
  */
-function filter_messages( & $Form )
+function filter_messages(&$Form)
 {
-	$Form->text( 's', get_param('s'), 30, T_('Search'), '', 255 );
+    $Form->text('s', get_param('s'), 30, T_('Search'), '', 255);
 }
 
-$Results->filter_area = array(
-		'submit_title' => T_('Filter messages'),
-		'callback' => 'filter_messages',
-	);
-$Results->register_filter_preset( 'all', T_('All'), get_dispctrl_url( 'messages', 'thrd_ID='.$edited_Thread->ID ) );
+$Results->filter_area = [
+    'submit_title' => T_('Filter messages'),
+    'callback' => 'filter_messages',
+];
+$Results->register_filter_preset('all', T_('All'), get_dispctrl_url('messages', 'thrd_ID=' . $edited_Thread->ID));
 
 /**
  * Author:
  */
-$Results->cols[] = array(
-		'th' => T_('Author'),
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'center top',
-		'td' => '%col_msg_author( #msg_user_ID#, #msg_datetime#)%'
-	);
+$Results->cols[] = [
+    'th' => T_('Author'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'center top',
+    'td' => '%col_msg_author( #msg_user_ID#, #msg_datetime#)%',
+];
 /**
  * Message:
  */
-$Results->cols[] = array(
-		'th' => T_('Message'),
-		'td_class' => 'left top message_text',
-		'td' => '@get_content()@@get_images()@@get_files()@',
-	);
+$Results->cols[] = [
+    'th' => T_('Message'),
+    'td_class' => 'left top message_text',
+    'td' => '@get_content()@@get_images()@@get_files()@',
+];
 /**
  * Read?:
  */
-$Results->cols[] = array(
-		'th' => T_('Read?'),
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'top',
-		'td' => '%col_msg_read_by( #msg_ID# )%',
-	);
+$Results->cols[] = [
+    'th' => T_('Read?'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'top',
+    'td' => '%col_msg_read_by( #msg_ID# )%',
+];
 
 /**
  * Actions:
  */
-if( check_user_perm( 'perm_messaging', 'delete' ) && ( $Results->get_total_rows() > 1 ) && ( $action != 'preview' ) )
-{	// We have permission to modify and there are more than 1 message (otherwise it's better to delete the whole thread):
-	$Results->cols[] = array(
-							'th' => T_('Del'),
-							'th_class' => 'shrinkwrap',
-							'td_class' => 'shrinkwrap',
-							'td' => '%col_msg_actions( #msg_thread_ID#, #msg_ID#)%',
-						);
+if (check_user_perm('perm_messaging', 'delete') && ($Results->get_total_rows() > 1) && ($action != 'preview')) {	// We have permission to modify and there are more than 1 message (otherwise it's better to delete the whole thread):
+    $Results->cols[] = [
+        'th' => T_('Del'),
+        'th_class' => 'shrinkwrap',
+        'td_class' => 'shrinkwrap',
+        'td' => '%col_msg_actions( #msg_thread_ID#, #msg_ID#)%',
+    ];
 }
 
-if( $is_recipient )
-{ // Current user is involved in this thread, only involved users can send a message
-	// we had to check this because admin user can see all messages in 'Abuse management', but should not be able to reply
-	// get all available recipient in this thread
-	$available_recipients = array();
-	foreach( $recipient_list as $recipient_ID )
-	{
-		$recipient_User = & $UserCache->get_by_ID( $recipient_ID, false );
-		if( ( $recipient_ID != $current_User->ID ) && $recipient_User && !$recipient_User->check_status( 'is_closed' ) && empty( $leave_status_list[ $recipient_ID ] ) )
-		{
-			$available_recipients[ $recipient_ID ] = $recipient_User->login;
-		}
-	}
+if ($is_recipient) { // Current user is involved in this thread, only involved users can send a message
+    // we had to check this because admin user can see all messages in 'Abuse management', but should not be able to reply
+    // get all available recipient in this thread
+    $available_recipients = [];
+    foreach ($recipient_list as $recipient_ID) {
+        $recipient_User = &$UserCache->get_by_ID($recipient_ID, false);
+        if (($recipient_ID != $current_User->ID) && $recipient_User && ! $recipient_User->check_status('is_closed') && empty($leave_status_list[$recipient_ID])) {
+            $available_recipients[$recipient_ID] = $recipient_User->login;
+        }
+    }
 
-	global $Messages;
-	$Messages->clear();
-	if( empty( $available_recipients ) )
-	{ // There are no other existing and not closed users who are still part of this conversation
-		$Messages->add( T_( 'You cannot reply because this conversation was closed.' ), 'warning' );
-		$Messages->display();
-	}
-	elseif( !empty( $leave_msg_ID ) )
-	{ // Current user has already left this conversation
-		$Messages->add( T_( 'You cannot reply because you have already left this conversation.' ), 'warning' );
-		$Messages->display();
-	}
-	else
-	{ // Current user is still part of this conversation, should be able to reply
-		echo $params['messages_list_form_start'];
+    global $Messages;
+    $Messages->clear();
+    if (empty($available_recipients)) { // There are no other existing and not closed users who are still part of this conversation
+        $Messages->add(T_('You cannot reply because this conversation was closed.'), 'warning');
+        $Messages->display();
+    } elseif (! empty($leave_msg_ID)) { // Current user has already left this conversation
+        $Messages->add(T_('You cannot reply because you have already left this conversation.'), 'warning');
+        $Messages->display();
+    } else { // Current user is still part of this conversation, should be able to reply
+        echo $params['messages_list_form_start'];
 
-		$form_title = sprintf( T_('Reply to: %s'), get_avatar_imgtags( $available_recipients, true, true, 'crop-top-15x15', 'avatar_before_login mb1' ) );
-		if( is_admin_page() )
-		{
-			$form_title .= get_manual_link( 'messages-reply-to-thread' );
-		}
+        $form_title = sprintf(T_('Reply to: %s'), get_avatar_imgtags($available_recipients, true, true, 'crop-top-15x15', 'avatar_before_login mb1'));
+        if (is_admin_page()) {
+            $form_title .= get_manual_link('messages-reply-to-thread');
+        }
 
-		if( ! is_admin_page() )
-		{
-			echo $params['messages_list_title_start'].$form_title.$params['messages_list_title_end'];
-		}
+        if (! is_admin_page()) {
+            echo $params['messages_list_title_start'] . $form_title . $params['messages_list_title_end'];
+        }
 
-		echo $params['messages_list_body_start'];
+        echo $params['messages_list_body_start'];
 
-		$Form = new Form( $params[ 'form_action' ], $params[ 'form_name' ], 'post', $params[ 'form_layout' ] );
+        $Form = new Form($params['form_action'], $params['form_name'], 'post', $params['form_layout']);
 
-		if( ! is_admin_page() )
-		{ // Add hidden blog ID to correctly redirect after message posting:
-			$Form->hidden( 'blog', $Blog->ID );
-		}
+        if (! is_admin_page()) { // Add hidden blog ID to correctly redirect after message posting:
+            $Form->hidden('blog', $Blog->ID);
+        }
 
-		$Form->switch_template_parts( $params['skin_form_params'] );
+        $Form->switch_template_parts($params['skin_form_params']);
 
-		$Form->begin_form( $params['form_class_msg'], is_admin_page() ? $form_title : '' );
+        $Form->begin_form($params['form_class_msg'], is_admin_page() ? $form_title : '');
 
-			$Form->add_crumb( 'messaging_messages' );
-			if( $perm_abuse_management )
-			{	// To back in the abuse management
-				memorize_param( 'tab', 'string', 'abuse' );
-			}
-			$Form->hiddens_by_key( get_memorized( 'action'.( $creating ? ',msg_ID' : '' ) ) ); // (this allows to come back to the right list order & page)
-			$Form->hidden( 'redirect_to', $params[ 'redirect_to' ] );
+        $Form->add_crumb('messaging_messages');
+        if ($perm_abuse_management) {	// To back in the abuse management
+            memorize_param('tab', 'string', 'abuse');
+        }
+        $Form->hiddens_by_key(get_memorized('action' . ($creating ? ',msg_ID' : ''))); // (this allows to come back to the right list order & page)
+        $Form->hidden('redirect_to', $params['redirect_to']);
 
-			//$Form->info_field(T_('Reply to'), get_avatar_imgtags( $available_recipients, true, true, 'crop-top-15x15', 'avatar_before_login mb1' ), array('required'=>true));
+        //$Form->info_field(T_('Reply to'), get_avatar_imgtags( $available_recipients, true, true, 'crop-top-15x15', 'avatar_before_login mb1' ), array('required'=>true));
 
-			if( !empty( $closed_recipients ) )
-			{
-				$Form->info_field( '', T_( 'The other users involved in this conversation have closed their account.' ) );
-			}
+        if (! empty($closed_recipients)) {
+            $Form->info_field('', T_('The other users involved in this conversation have closed their account.'));
+        }
 
-			// Display plugin captcha for message form before textarea:
-			$Plugins->display_captcha( array(
-					'Form'              => & $Form,
-					'form_type'         => 'message',
-					'form_position'     => 'before_textarea',
-					'form_use_fieldset' => false,
-				) );
+        // Display plugin captcha for message form before textarea:
+        $Plugins->display_captcha([
+            'Form' => &$Form,
+            'form_type' => 'message',
+            'form_position' => 'before_textarea',
+            'form_use_fieldset' => false,
+        ]);
 
-			if( check_user_perm( 'files', 'view' ) )
-			{	// If current user has a permission to view the files:
-				load_class( 'links/model/_linkmessage.class.php', 'LinkMessage' );
-				// Initialize this object as global because this is used in many link functions:
-				global $LinkOwner;
-				$LinkOwner = new LinkMessage( $edited_Message, param( 'temp_link_owner_ID', 'integer', 0 ) );
-			}
+        if (check_user_perm('files', 'view')) {	// If current user has a permission to view the files:
+            load_class('links/model/_linkmessage.class.php', 'LinkMessage');
+            // Initialize this object as global because this is used in many link functions:
+            global $LinkOwner;
+            $LinkOwner = new LinkMessage($edited_Message, param('temp_link_owner_ID', 'integer', 0));
+        }
 
-			ob_start();
-			echo '<div class="message_toolbars">';
-			// CALL PLUGINS NOW:
-			$message_toolbar_params = array( 'Message' => & $edited_Message );
-			if( isset( $LinkOwner ) && $LinkOwner->is_temp() )
-			{
-				$message_toolbar_params['temp_ID'] = $LinkOwner->get_ID();
-			}
-			$Plugins->trigger_event( 'DisplayMessageToolbar', $message_toolbar_params );
-			echo '</div>';
-			$message_toolbar = ob_get_clean();
+        ob_start();
+        echo '<div class="message_toolbars">';
+        // CALL PLUGINS NOW:
+        $message_toolbar_params = [
+            'Message' => &$edited_Message,
+        ];
+        if (isset($LinkOwner) && $LinkOwner->is_temp()) {
+            $message_toolbar_params['temp_ID'] = $LinkOwner->get_ID();
+        }
+        $Plugins->trigger_event('DisplayMessageToolbar', $message_toolbar_params);
+        echo '</div>';
+        $message_toolbar = ob_get_clean();
 
-			// CALL PLUGINS NOW:
-			ob_start();
-			$admin_editor_params = array(
-					'target_type'   => 'Message',
-					'target_object' => $edited_Message,
-					'content_id'    => 'msg_text',
-					'edit_layout'   => NULL,
-				);
-			if( isset( $LinkOwner) && $LinkOwner->is_temp() )
-			{
-				$admin_editor_params['temp_ID'] = $LinkOwner->get_ID();
-			}
-			$Plugins->trigger_event( 'AdminDisplayEditorButton', $admin_editor_params );
-			$quick_setting_switch = ob_get_clean();
+        // CALL PLUGINS NOW:
+        ob_start();
+        $admin_editor_params = [
+            'target_type' => 'Message',
+            'target_object' => $edited_Message,
+            'content_id' => 'msg_text',
+            'edit_layout' => null,
+        ];
+        if (isset($LinkOwner) && $LinkOwner->is_temp()) {
+            $admin_editor_params['temp_ID'] = $LinkOwner->get_ID();
+        }
+        $Plugins->trigger_event('AdminDisplayEditorButton', $admin_editor_params);
+        $quick_setting_switch = ob_get_clean();
 
-			$form_inputstart = $Form->inputstart;
-			$form_inputend = $Form->inputend;
-			$Form->inputstart .= $message_toolbar;
-			$Form->inputend = $quick_setting_switch.$Form->inputend;
-			$Form->textarea_input( 'msg_text', !empty( $edited_Message ) ? $edited_Message->original_text : '', 10, T_('Message'), array(
-					'cols' => $params['cols'],
-					'required' => true
-				) );
-			$Form->inputstart = $form_inputstart;
-			$Form->inputend = $form_inputend;
+        $form_inputstart = $Form->inputstart;
+        $form_inputend = $Form->inputend;
+        $Form->inputstart .= $message_toolbar;
+        $Form->inputend = $quick_setting_switch . $Form->inputend;
+        $Form->textarea_input('msg_text', ! empty($edited_Message) ? $edited_Message->original_text : '', 10, T_('Message'), [
+            'cols' => $params['cols'],
+            'required' => true,
+        ]);
+        $Form->inputstart = $form_inputstart;
+        $Form->inputend = $form_inputend;
 
-			// set b2evoCanvas for plugins
-			echo '<script>var b2evoCanvas = document.getElementById( "msg_text" );</script>';
+        // set b2evoCanvas for plugins
+        echo '<script>var b2evoCanvas = document.getElementById( "msg_text" );</script>';
 
-			// Display renderers
-			$current_renderers = !empty( $edited_Message ) ? $edited_Message->get_renderers_validated() : array( 'default' );
-			$message_renderer_checkboxes = $Plugins->get_renderer_checkboxes( $current_renderers, array( 'setting_name' => 'msg_apply_rendering' ) );
-			if( !empty( $message_renderer_checkboxes ) )
-			{
-				$Form->info( T_('Text Renderers'), $message_renderer_checkboxes );
-			}
+        // Display renderers
+        $current_renderers = ! empty($edited_Message) ? $edited_Message->get_renderers_validated() : ['default'];
+        $message_renderer_checkboxes = $Plugins->get_renderer_checkboxes($current_renderers, [
+            'setting_name' => 'msg_apply_rendering',
+        ]);
+        if (! empty($message_renderer_checkboxes)) {
+            $Form->info(T_('Text Renderers'), $message_renderer_checkboxes);
+        }
 
-			// ####################### ATTACHMENTS/LINKS #########################
-			$Form->attachments_fieldset( $edited_Message );
+        // ####################### ATTACHMENTS/LINKS #########################
+        $Form->attachments_fieldset($edited_Message);
 
-			// Display plugin captcha for message form before submit button:
-			$Plugins->display_captcha( array(
-					'Form'              => & $Form,
-					'form_type'         => 'message',
-					'form_position'     => 'before_submit_button',
-					'form_use_fieldset' => false,
-				) );
+        // Display plugin captcha for message form before submit button:
+        $Plugins->display_captcha([
+            'Form' => &$Form,
+            'form_type' => 'message',
+            'form_position' => 'before_submit_button',
+            'form_use_fieldset' => false,
+        ]);
 
-		$Form->end_form( array(
-				array( 'submit', 'actionArray[preview]', /* TRANS: Verb */ T_('Preview'), 'SaveButton btn-info' ),
-				array( 'submit', 'actionArray[create]', T_('Send message'), 'SaveButton' )
-			) );
+        $Form->end_form([
+            ['submit', 'actionArray[preview]', /* TRANS: Verb */ T_('Preview'), 'SaveButton btn-info'],
+            ['submit', 'actionArray[create]', T_('Send message'), 'SaveButton'],
+        ]);
 
-		echo $params['messages_list_body_end'];
+        echo $params['messages_list_body_end'];
 
-		echo $params['messages_list_form_end'];
-	}
+        echo $params['messages_list_form_end'];
+    }
 }
 
 // Display Leave or Close conversation action if they are available
-if( $is_recipient && empty( $leave_msg_ID ) && ( count( $available_recipients ) > 0 ) )
-{ // user is recipient and didn't leave this conversation yet and this conversation is not closed
-	echo '<div class="fieldset messages_list_actions">';
-	if( count( $available_recipients ) > 1 )
-	{ // there are more then one recipients
-		$leave_text = T_( 'I want to leave this conversation now!' );
-		$confirm_leave_text = TS_( 'If you leave this conversation,\\nother users can still continue the conversation\\nbut you will not receive their future replies.\\nAre you sure?' );
-		$leave_action = 'leave';
-	}
-	else
-	{ // only one recipient exists if the user leave the conversation then it will be closed.
-		$recipient_ID = key( $available_recipients );
-		$recipient_login = $available_recipients[$recipient_ID];
-		$leave_text = get_icon( 'stop', 'imgtag', array( 'style' => 'margin-right:5px' ) ).T_( 'I want to end this conversation now!' );
-		$block_text = get_icon( 'ban', 'imgtag', array( 'style' => 'margin:0 7px 2px 1px;vertical-align:middle;' ) ).sprintf( T_( 'I want to block %s from sending me any more messages!' ), $recipient_login );
-		$confirm_leave_text = T_( 'Are you sure you want to close this conversation?' );
-		$confirm_block_text = sprintf( TS_( 'This action will close this conversion\\nand will block %s from starting any new\\nconversation with you.\\n(You can see blocked users in your contacts list)\\nAre you sure you want to close and block?' ), $recipient_login );
-		$leave_action = 'close';
-	}
-	if( is_admin_page() )
-	{ // backoffice
-		$leave_url = '?ctrl=threads&thrd_ID='.$edited_Thread->ID.'&action='.$leave_action.'&'.url_crumb( 'messaging_threads' );
-		$close_and_block_url = '?ctrl=threads&thrd_ID='.$edited_Thread->ID.'&action=close_and_block&block_ID='.$recipient_ID.'&'.url_crumb( 'messaging_threads' );
-	}
-	else
-	{ // frontoffice
-		$leave_url = url_add_param( $params[ 'form_action' ], 'disp=threads&thrd_ID='.$edited_Thread->ID.'&action='.$leave_action.'&redirect_to='.rawurlencode( url_add_param( $Blog->gen_blogurl(), 'disp=threads', '&' ) ).'&'.url_crumb( 'messaging_threads' ) );
-		$close_and_block_url = url_add_param( $params[ 'form_action' ], 'disp=threads&thrd_ID='.$edited_Thread->ID.'&action=close_and_block&block_ID='.$recipient_ID.'&redirect_to='.rawurlencode( url_add_param( $Blog->gen_blogurl(), 'disp=threads', '&' ) ).'&'.url_crumb( 'messaging_threads' ) );
-	}
-	echo '<p>';
-	echo '<a href="'.$leave_url.'" onclick="return confirm( \''.$confirm_leave_text.'\' );" class="btn btn-default btn-sm">'.$leave_text.'</a>';
-	if( $leave_action == 'close' )
-	{ // user want's to close this conversation ( there is only one recipient )
-		echo ' <a href="'.$close_and_block_url.'" onclick="return confirm( \''.$confirm_block_text.'\' );" class="btn btn-default btn-sm">'.$block_text.'</a>';
-	}
-	echo '</p>';
-	echo '</div>';
+if ($is_recipient && empty($leave_msg_ID) && (count($available_recipients) > 0)) { // user is recipient and didn't leave this conversation yet and this conversation is not closed
+    echo '<div class="fieldset messages_list_actions">';
+    if (count($available_recipients) > 1) { // there are more then one recipients
+        $leave_text = T_('I want to leave this conversation now!');
+        $confirm_leave_text = TS_('If you leave this conversation,\\nother users can still continue the conversation\\nbut you will not receive their future replies.\\nAre you sure?');
+        $leave_action = 'leave';
+    } else { // only one recipient exists if the user leave the conversation then it will be closed.
+        $recipient_ID = key($available_recipients);
+        $recipient_login = $available_recipients[$recipient_ID];
+        $leave_text = get_icon('stop', 'imgtag', [
+            'style' => 'margin-right:5px',
+        ]) . T_('I want to end this conversation now!');
+        $block_text = get_icon('ban', 'imgtag', [
+            'style' => 'margin:0 7px 2px 1px;vertical-align:middle;',
+        ]) . sprintf(T_('I want to block %s from sending me any more messages!'), $recipient_login);
+        $confirm_leave_text = T_('Are you sure you want to close this conversation?');
+        $confirm_block_text = sprintf(TS_('This action will close this conversion\\nand will block %s from starting any new\\nconversation with you.\\n(You can see blocked users in your contacts list)\\nAre you sure you want to close and block?'), $recipient_login);
+        $leave_action = 'close';
+    }
+    if (is_admin_page()) { // backoffice
+        $leave_url = '?ctrl=threads&thrd_ID=' . $edited_Thread->ID . '&action=' . $leave_action . '&' . url_crumb('messaging_threads');
+        $close_and_block_url = '?ctrl=threads&thrd_ID=' . $edited_Thread->ID . '&action=close_and_block&block_ID=' . $recipient_ID . '&' . url_crumb('messaging_threads');
+    } else { // frontoffice
+        $leave_url = url_add_param($params['form_action'], 'disp=threads&thrd_ID=' . $edited_Thread->ID . '&action=' . $leave_action . '&redirect_to=' . rawurlencode(url_add_param($Blog->gen_blogurl(), 'disp=threads', '&')) . '&' . url_crumb('messaging_threads'));
+        $close_and_block_url = url_add_param($params['form_action'], 'disp=threads&thrd_ID=' . $edited_Thread->ID . '&action=close_and_block&block_ID=' . $recipient_ID . '&redirect_to=' . rawurlencode(url_add_param($Blog->gen_blogurl(), 'disp=threads', '&')) . '&' . url_crumb('messaging_threads'));
+    }
+    echo '<p>';
+    echo '<a href="' . $leave_url . '" onclick="return confirm( \'' . $confirm_leave_text . '\' );" class="btn btn-default btn-sm">' . $leave_text . '</a>';
+    if ($leave_action == 'close') { // user want's to close this conversation ( there is only one recipient )
+        echo ' <a href="' . $close_and_block_url . '" onclick="return confirm( \'' . $confirm_block_text . '\' );" class="btn btn-default btn-sm">' . $block_text . '</a>';
+    }
+    echo '</p>';
+    echo '</div>';
 }
 
-if( $action == 'preview' )
-{ // Display error messages again before preview of message
-	echo '<div class="fieldset messages_list_actions">';
-	global $Messages;
-	$Messages->display();
-	echo '</div>';
+if ($action == 'preview') { // Display error messages again before preview of message
+    echo '<div class="fieldset messages_list_actions">';
+    global $Messages;
+    $Messages->display();
+    echo '</div>';
 }
 
 // Disable rollover effect on table rows
-$Results->display_init( $display_params );
-$display_params['list_start'] = str_replace( 'class="grouped', 'class="grouped nohover', $Results->params['list_start'] );
+$Results->display_init($display_params);
+$display_params['list_start'] = str_replace('class="grouped', 'class="grouped nohover', $Results->params['list_start']);
 
 // Disable highlight on hover
-$display_params['list_start'] = str_replace( 'table-hover', '', $Results->params['list_start'] );
+$display_params['list_start'] = str_replace('table-hover', '', $Results->params['list_start']);
 
 // Dispaly message list
-$Results->display( $display_params );
+$Results->display($display_params);
 
 echo $params['messages_list_end'];
 echo_image_insert_modal();
-?>

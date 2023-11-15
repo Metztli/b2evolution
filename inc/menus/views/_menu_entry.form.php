@@ -12,110 +12,157 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_funcs( 'files/model/_image.funcs.php' );
+load_funcs('files/model/_image.funcs.php');
 
 global $edited_SiteMenuEntry, $admin_url;
 
 // Determine if we are creating or updating...
 global $action;
-$creating = is_create_action( $action );
+$creating = is_create_action($action);
 
-$Form = new Form( NULL, 'menu_checkchanges', 'post', 'compact' );
+$Form = new Form(null, 'menu_checkchanges', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel editing').'!', 'close', regenerate_url( 'action,ment_ID,blog', 'action=edit' ) );
+$Form->global_icon(TB_('Cancel editing') . '!', 'close', regenerate_url('action,ment_ID,blog', 'action=edit'));
 
-$Form->begin_form( 'fform', ( $creating ?  TB_('New Menu Entry') : TB_('Menu Entry') ).get_manual_link( 'menu-entry-form' ) );
+$Form->begin_form('fform', ($creating ? TB_('New Menu Entry') : TB_('Menu Entry')) . get_manual_link('menu-entry-form'));
 
-	$Form->add_crumb( 'menuentry' );
-	$Form->hidden( 'action',  $creating ? 'create_entry' : 'update_entry' );
-	$Form->hiddens_by_key( get_memorized( 'action'.( $creating ? ',ment_ID' : '' ) ) );
+$Form->add_crumb('menuentry');
+$Form->hidden('action', $creating ? 'create_entry' : 'update_entry');
+$Form->hiddens_by_key(get_memorized('action' . ($creating ? ',ment_ID' : '')));
 
-	$SiteMenuCache = & get_SiteMenuCache();
-	$SiteMenuCache->load_all();
-	$Form->select_input_object( 'ment_menu_ID', $edited_SiteMenuEntry->get( 'menu_ID' ), $SiteMenuCache, TB_('Menu'), array( 'required' => true ) );
+$SiteMenuCache = &get_SiteMenuCache();
+$SiteMenuCache->load_all();
+$Form->select_input_object('ment_menu_ID', $edited_SiteMenuEntry->get('menu_ID'), $SiteMenuCache, TB_('Menu'), [
+    'required' => true,
+]);
 
-	$SiteMenuEntryCache = & get_SiteMenuEntryCache();
-	$Form->select_input_options( 'ment_parent_ID', $SiteMenuEntryCache->recurse_select( $edited_SiteMenuEntry->get( 'parent_ID' ), $edited_SiteMenuEntry->get( 'menu_ID' ), true, NULL, 0, array( $edited_SiteMenuEntry->ID ) ), TB_('Parent') );
+$SiteMenuEntryCache = &get_SiteMenuEntryCache();
+$Form->select_input_options('ment_parent_ID', $SiteMenuEntryCache->recurse_select($edited_SiteMenuEntry->get('parent_ID'), $edited_SiteMenuEntry->get('menu_ID'), true, null, 0, [$edited_SiteMenuEntry->ID]), TB_('Parent'));
 
-	$Form->text_input( 'ment_order', $edited_SiteMenuEntry->get( 'order' ), 11, TB_('Order'), '', array( 'maxlength' => 11 ) );
+$Form->text_input('ment_order', $edited_SiteMenuEntry->get('order'), 11, TB_('Order'), '', [
+    'maxlength' => 11,
+]);
 
-	$Form->select_input_array( 'ment_type', $edited_SiteMenuEntry->get( 'type' ), get_site_menu_types(), TB_('Type') );
+$Form->select_input_array('ment_type', $edited_SiteMenuEntry->get('type'), get_site_menu_types(), TB_('Type'));
 
-	$Form->select_input_array( 'ment_coll_logo_size', $edited_SiteMenuEntry->get( 'coll_logo_size' ), get_available_thumb_sizes( TB_('No logo') ), TB_('Collection logo before link text'), NULL, array(
-			'hide' => in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'item', 'admin', 'url', 'text' ) ),
-		) );
+$Form->select_input_array('ment_coll_logo_size', $edited_SiteMenuEntry->get('coll_logo_size'), get_available_thumb_sizes(TB_('No logo')), TB_('Collection logo before link text'), null, [
+    'hide' => in_array($edited_SiteMenuEntry->get('type'), ['item', 'admin', 'url', 'text']),
+]);
 
-	$Form->select_input_array( 'ment_user_pic_size', $edited_SiteMenuEntry->get( 'user_pic_size' ), get_available_thumb_sizes( TB_('No picture') ), TB_('Profile picture before text'), NULL, array(
-			'hide' => ! in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'logout', 'myprofile', 'visits', 'profile', 'avatar', 'useritems', 'usercomments' ) ),
-		) );
+$Form->select_input_array('ment_user_pic_size', $edited_SiteMenuEntry->get('user_pic_size'), get_available_thumb_sizes(TB_('No picture')), TB_('Profile picture before text'), null, [
+    'hide' => ! in_array($edited_SiteMenuEntry->get('type'), ['logout', 'myprofile', 'visits', 'profile', 'avatar', 'useritems', 'usercomments']),
+]);
 
-	$Form->text_input( 'ment_text', $edited_SiteMenuEntry->get( 'text' ), 50, TB_('Text'), ( $edited_SiteMenuEntry->get( 'type' ) != 'text' ? TB_('Leave empty for default').( $edited_SiteMenuEntry->ID > 0 ? ': <code>'.$edited_SiteMenuEntry->get_text( true ).'</code>' : '' ) : '' ), array( 'maxlength' => 128 ) );
+$Form->text_input('ment_text', $edited_SiteMenuEntry->get('text'), 50, TB_('Text'), ($edited_SiteMenuEntry->get('type') != 'text' ? TB_('Leave empty for default') . ($edited_SiteMenuEntry->ID > 0 ? ': <code>' . $edited_SiteMenuEntry->get_text(true) . '</code>' : '') : ''), [
+    'maxlength' => 128,
+]);
 
-	$Form->checkbox_input( 'ment_show_badge', $edited_SiteMenuEntry->get( 'show_badge' ), TB_('Show Badge'), array(
-			'note' => TB_('Show a badge with count.'),
-			'hide' => ! in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'messages', 'flagged' ) )
-		) );
+$Form->checkbox_input('ment_show_badge', $edited_SiteMenuEntry->get('show_badge'), TB_('Show Badge'), [
+    'note' => TB_('Show a badge with count.'),
+    'hide' => ! in_array($edited_SiteMenuEntry->get('type'), ['messages', 'flagged']),
+]);
 
-	$msg_Blog = & get_setting_Blog( 'msg_blog_ID' );
-	$coll_id_is_disabled = in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'ownercontact', 'owneruserinfo', 'myprofile', 'profile', 'avatar', 'messages', 'contacts' ) );
-	$Form->text_input( 'ment_coll_ID', $edited_SiteMenuEntry->get( 'coll_ID' ), 11, TB_('Collection ID'), '', array(
-			'maxlength' => 11,
-			'hide' => in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'item', 'admin', 'url', 'text' ) ),
-			'disabled' => $coll_id_is_disabled,
-			'note' => T_( 'Leave empty for current collection.' )
-				.( $msg_Blog ? ' <span class="evo_setting_coll_disabled red"'.( $coll_id_is_disabled ? '' : ' style="display:none"' ).'>'
-					.sprintf( T_('The site is <a %s>configured</a> to always use collection %s for profiles/messaging functions.'),
-						'href="'.$admin_url.'?ctrl=collections&amp;tab=site_settings"',
-						'<b>'.$msg_Blog->get( 'name' ).'</b>' ).'</span>' : '' ),
-		) );
+$msg_Blog = &get_setting_Blog('msg_blog_ID');
+$coll_id_is_disabled = in_array($edited_SiteMenuEntry->get('type'), ['ownercontact', 'owneruserinfo', 'myprofile', 'profile', 'avatar', 'messages', 'contacts']);
+$Form->text_input('ment_coll_ID', $edited_SiteMenuEntry->get('coll_ID'), 11, TB_('Collection ID'), '', [
+    'maxlength' => 11,
+    'hide' => in_array($edited_SiteMenuEntry->get('type'), ['item', 'admin', 'url', 'text']),
+    'disabled' => $coll_id_is_disabled,
+    'note' => T_('Leave empty for current collection.')
+        . ($msg_Blog ? ' <span class="evo_setting_coll_disabled red"' . ($coll_id_is_disabled ? '' : ' style="display:none"') . '>'
+            . sprintf(
+                T_('The site is <a %s>configured</a> to always use collection %s for profiles/messaging functions.'),
+                'href="' . $admin_url . '?ctrl=collections&amp;tab=site_settings"',
+                '<b>' . $msg_Blog->get('name') . '</b>'
+            ) . '</span>' : ''),
+]);
 
-	$Form->text_input( 'ment_cat_ID', $edited_SiteMenuEntry->get( 'cat_ID' ), 11, TB_('Category ID'), '', array( 'maxlength' => 11, 'hide' => ! in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'recentposts', 'postnew' ) ) ) );
+$Form->text_input('ment_cat_ID', $edited_SiteMenuEntry->get('cat_ID'), 11, TB_('Category ID'), '', [
+    'maxlength' => 11,
+    'hide' => ! in_array($edited_SiteMenuEntry->get('type'), ['recentposts', 'postnew']),
+]);
 
-	$Form->text_input( 'ment_item_ID', $edited_SiteMenuEntry->get( 'item_ID' ), 11, TB_('Item ID'), '', array( 'maxlength' => 11, 'hide' => ( $edited_SiteMenuEntry->get( 'type' ) != 'item' ) ) );
-	
-	$Form->text_input( 'ment_item_slug', $edited_SiteMenuEntry->get( 'item_slug' ), 25, TB_('Item slug'), '', array( 'maxlength' => 255, 'hide' => ( $edited_SiteMenuEntry->get( 'type' ) != 'item' ) ) );
+$Form->text_input('ment_item_ID', $edited_SiteMenuEntry->get('item_ID'), 11, TB_('Item ID'), '', [
+    'maxlength' => 11,
+    'hide' => ($edited_SiteMenuEntry->get('type') != 'item'),
+]);
 
-	$Form->text_input( 'ment_url', $edited_SiteMenuEntry->get( 'url' ), 128, TB_('URL'), '', array( 'maxlength' => 2000, 'hide' => ( $edited_SiteMenuEntry->get( 'type' ) != 'url' ) ) );
+$Form->text_input('ment_item_slug', $edited_SiteMenuEntry->get('item_slug'), 25, TB_('Item slug'), '', [
+    'maxlength' => 255,
+    'hide' => ($edited_SiteMenuEntry->get('type') != 'item'),
+]);
 
-	$Form->radio_input( 'ment_access', $edited_SiteMenuEntry->get( 'access' ),
-		array(
-			array( 'value' => 'any', 'label' => TB_('All users') ),
-			array( 'value' => 'loggedin', 'label' => TB_('Logged in users') ),
-			array( 'value' => 'perms', 'label' => TB_('Users with permissions only') ),
-		), TB_('Show to'), array(
-			'lines' => true,
-			'hide' => ! in_array( $edited_SiteMenuEntry->get( 'type' ), array( 'messages', 'contacts' ) )
-		) );
+$Form->text_input('ment_url', $edited_SiteMenuEntry->get('url'), 128, TB_('URL'), '', [
+    'maxlength' => 2000,
+    'hide' => ($edited_SiteMenuEntry->get('type') != 'url'),
+]);
 
-	$Form->radio( 'ment_highlight', $edited_SiteMenuEntry->get( 'highlight' ),
-		array(
-			array( 1, TB_('Highlight the current item') ),
-			array( 0, TB_('Do not try to highlight') )
-		), TB_('Highlight'), true );
+$Form->radio_input(
+    'ment_access',
+    $edited_SiteMenuEntry->get('access'),
+    [
+        [
+            'value' => 'any',
+            'label' => TB_('All users'),
+        ],
+        [
+            'value' => 'loggedin',
+            'label' => TB_('Logged in users'),
+        ],
+        [
+            'value' => 'perms',
+            'label' => TB_('Users with permissions only'),
+        ],
+    ],
+    TB_('Show to'),
+    [
+        'lines' => true,
+        'hide' => ! in_array($edited_SiteMenuEntry->get('type'), ['messages', 'contacts']),
+    ]
+);
 
-	$Form->text_input( 'ment_class', $edited_SiteMenuEntry->get( 'class' ), 50, TB_('Extra CSS classes'), '', array( 'maxlength' => 128 ) );
+$Form->radio(
+    'ment_highlight',
+    $edited_SiteMenuEntry->get('highlight'),
+    [
+        [1, TB_('Highlight the current item')],
+        [0, TB_('Do not try to highlight')],
+    ],
+    TB_('Highlight'),
+    true
+);
 
-	$Form->checkbox_input( 'ment_hide_empty', $edited_SiteMenuEntry->get( 'hide_empty' ), TB_('Hide if empty'), array(
-			'note' => TB_('Check to hide this menu if the list is empty.'),
-			'hide' => $edited_SiteMenuEntry->get( 'type' ) != 'flagged',
-		) );
+$Form->text_input('ment_class', $edited_SiteMenuEntry->get('class'), 50, TB_('Extra CSS classes'), '', [
+    'maxlength' => 128,
+]);
 
-	$Form->radio( 'ment_visibility', $edited_SiteMenuEntry->get( 'visibility' ),
-		array(
-			array( 'always', TB_( 'Always show') ),
-			array( 'access', TB_( 'Only show if access is allowed' ) )
-		), TB_('Visibility'), true );
+$Form->checkbox_input('ment_hide_empty', $edited_SiteMenuEntry->get('hide_empty'), TB_('Hide if empty'), [
+    'note' => TB_('Check to hide this menu if the list is empty.'),
+    'hide' => $edited_SiteMenuEntry->get('type') != 'flagged',
+]);
 
-	$buttons = array();
-	if( check_user_perm( 'options', 'edit' ) )
-	{	// Allow to save menu if current User has a permission:
-		$buttons[] = array( 'submit', 'submit', ( $creating ? TB_('Record') : TB_('Save Changes!') ), 'SaveButton' );
-	}
+$Form->radio(
+    'ment_visibility',
+    $edited_SiteMenuEntry->get('visibility'),
+    [
+        ['always', TB_('Always show')],
+        ['access', TB_('Only show if access is allowed')],
+    ],
+    TB_('Visibility'),
+    true
+);
 
-$Form->end_form( $buttons );
+$buttons = [];
+if (check_user_perm('options', 'edit')) {	// Allow to save menu if current User has a permission:
+    $buttons[] = ['submit', 'submit', ($creating ? TB_('Record') : TB_('Save Changes!')), 'SaveButton'];
+}
+
+$Form->end_form($buttons);
 ?>
 
 <script>

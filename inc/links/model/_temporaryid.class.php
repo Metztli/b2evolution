@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * Item Link
@@ -22,28 +24,27 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class TemporaryID extends DataObject
 {
-	var $type;
-	var $coll_ID;
-	var $item_ID;
+    public $type;
 
-	/**
-	 * Constructor
-	 *
-	 * @param table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_temporary_ID', 'tmp_', 'tmp_ID' );
+    public $coll_ID;
 
-		if( $db_row != NULL )
-		{
-			$this->ID = $db_row->tmp_ID;
-			$this->type = $db_row->tmp_type;
-			$this->coll_ID = $db_row->tmp_coll_ID;
-			$this->item_ID = $db_row->tmp_item_ID;
-		}
-	}
+    public $item_ID;
+
+    /**
+     * Constructor
+     *
+     * @param table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_temporary_ID', 'tmp_', 'tmp_ID');
+
+        if ($db_row != null) {
+            $this->ID = $db_row->tmp_ID;
+            $this->type = $db_row->tmp_type;
+            $this->coll_ID = $db_row->tmp_coll_ID;
+            $this->item_ID = $db_row->tmp_item_ID;
+        }
+    }
 }
-
-?>

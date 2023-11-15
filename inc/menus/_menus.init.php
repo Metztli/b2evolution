@@ -12,7 +12,9 @@
  *
  * @package menus
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Minimum PHP version required for messaging module to function properly
@@ -31,10 +33,10 @@ $required_mysql_version['menus'] = '5.1';
  *  If you want to have multiple b2evo installations in a single database you should
  *  change {@link $tableprefix} in _basic_config.php)
  */
-$db_config['aliases'] = array_merge( $db_config['aliases'], array(
-		'T_menus__menu'  => $tableprefix.'menus__menu',
-		'T_menus__entry' => $tableprefix.'menus__entry',
-	) );
+$db_config['aliases'] = array_merge($db_config['aliases'], [
+    'T_menus__menu' => $tableprefix . 'menus__menu',
+    'T_menus__entry' => $tableprefix . 'menus__entry',
+]);
 
 /**
  * Controller mappings.
@@ -58,17 +60,16 @@ $ctrl_mappings['menus'] = 'menus/menus.ctrl.php';
  *
  * @return SiteMenuCache
  */
-function & get_SiteMenuCache()
+function &get_SiteMenuCache()
 {
-	global $SiteMenuCache;
+    global $SiteMenuCache;
 
-	if( ! isset( $SiteMenuCache ) )
-	{	// Cache doesn't exist yet:
-		load_class( 'menus/model/_sitemenu.class.php', 'SiteMenu' );
-		$SiteMenuCache = new DataObjectCache( 'SiteMenu', false, 'T_menus__menu', 'menu_', 'menu_ID', 'menu_name' );
-	}
+    if (! isset($SiteMenuCache)) {	// Cache doesn't exist yet:
+        load_class('menus/model/_sitemenu.class.php', 'SiteMenu');
+        $SiteMenuCache = new DataObjectCache('SiteMenu', false, 'T_menus__menu', 'menu_', 'menu_ID', 'menu_name');
+    }
 
-	return $SiteMenuCache;
+    return $SiteMenuCache;
 }
 
 
@@ -77,17 +78,16 @@ function & get_SiteMenuCache()
  *
  * @return MenuCache
  */
-function & get_SiteMenuEntryCache()
+function &get_SiteMenuEntryCache()
 {
-	global $SiteMenuEntryCache;
+    global $SiteMenuEntryCache;
 
-	if( ! isset( $SiteMenuEntryCache ) )
-	{	// Cache doesn't exist yet:
-		load_class( 'menus/model/_sitemenuentrycache.class.php', 'SiteMenuEntryCache' );
-		$SiteMenuEntryCache = new SiteMenuEntryCache(); // COPY (FUNC)
-	}
+    if (! isset($SiteMenuEntryCache)) {	// Cache doesn't exist yet:
+        load_class('menus/model/_sitemenuentrycache.class.php', 'SiteMenuEntryCache');
+        $SiteMenuEntryCache = new SiteMenuEntryCache(); // COPY (FUNC)
+    }
 
-	return $SiteMenuEntryCache;
+    return $SiteMenuEntryCache;
 }
 
 
@@ -96,47 +96,43 @@ function & get_SiteMenuEntryCache()
  */
 class menus_Module extends Module
 {
-	/**
-	 * Do the initializations. Called from in _main.inc.php.
-	 * This is typically where classes matching DB tables for this module are registered/loaded.
-	 *
-	 * Note: this should only load/register things that are going to be needed application wide,
-	 * for example: for constructing menus.
-	 * Anything that is needed only in a specific controller should be loaded only there.
-	 * Anything that is needed only in a specific view should be loaded only there.
-	 */
-	function init()
-	{
-		$this->check_required_php_version( 'menus' );
-		load_funcs( 'menus/model/_menu.funcs.php' );
-	}
+    /**
+     * Do the initializations. Called from in _main.inc.php.
+     * This is typically where classes matching DB tables for this module are registered/loaded.
+     *
+     * Note: this should only load/register things that are going to be needed application wide,
+     * for example: for constructing menus.
+     * Anything that is needed only in a specific controller should be loaded only there.
+     * Anything that is needed only in a specific view should be loaded only there.
+     */
+    public function init()
+    {
+        $this->check_required_php_version('menus');
+        load_funcs('menus/model/_menu.funcs.php');
+    }
 
+    /**
+     * Builds the 2nd half of the menu. This is the one with the configuration features
+     *
+     * At some point this might be displayed differently than the 1st half.
+     */
+    public function build_menu_2()
+    {
+        global $admin_url, $AdminUI;
 
-	/**
-	 * Builds the 2nd half of the menu. This is the one with the configuration features
-	 *
-	 * At some point this might be displayed differently than the 1st half.
-	 */
-	function build_menu_2()
-	{
-		global $admin_url, $AdminUI;
+        if (! check_user_perm('admin', 'restricted')) {	// User must has an access to back-office:
+            return;
+        }
 
-		if( ! check_user_perm( 'admin', 'restricted' ) )
-		{	// User must has an access to back-office:
-			return;
-		}
-
-		if( check_user_perm( 'options', 'view' ) )
-		{	// User has an access to view system settings:
-			$AdminUI->add_menu_entries( array( 'site' ), array(
-				'menus' => array(
-					'text' => T_('Menus'),
-					'href' => $admin_url.'?ctrl=menus' ),
-				), 'skin' );
-		}
-	}
+        if (check_user_perm('options', 'view')) {	// User has an access to view system settings:
+            $AdminUI->add_menu_entries(['site'], [
+                'menus' => [
+                    'text' => T_('Menus'),
+                    'href' => $admin_url . '?ctrl=menus',
+                ],
+            ], 'skin');
+        }
+    }
 }
 
 $menus_Module = new menus_Module();
-
-?>

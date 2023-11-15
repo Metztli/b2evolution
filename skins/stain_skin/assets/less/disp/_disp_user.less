@@ -1,0 +1,118 @@
+// Disp User
+// ======================================================================== /
+.disp_user {
+
+    .pager {
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 30px;
+
+        a {
+            padding: 8px 20px;
+            border-radius: 30px;
+            border-color: @primary;
+            font-weight: 400;
+
+            &:hover, &:active, &:focus {
+                background-color: @primary;
+                color: @w;
+                box-shadow: @box-shadow;
+            }
+        }
+
+    }
+
+    .profile_content {
+
+        .profile_column_right {
+            margin-left: 330px;
+        }
+
+        .profile_column_right,
+        .profile_column_left {
+            @media screen and ( max-width: @MF ) {
+                text-align: center;
+                width: 100%;
+                margin: 0 auto;
+            }
+        }
+
+        .panel {
+            border-radius: 0;
+            box-shadow: @box-shadow;
+            margin-bottom: 30px;
+
+            .panel-heading {
+                font-family: @font_heading;
+                font-weight: 700;
+                border-radius: 0;
+                padding: 15px 20px;
+            }
+
+        }
+
+        .fieldset_wrapper {
+            margin-top: 0 !important;
+        }
+
+        .btn {
+            border-radius: 30px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+    }
+
+}
+
+
+// Disp Users
+// ======================================================================== /
+.disp_users {
+
+    .main_content {
+        background-color: @w;
+        padding: 40px;
+        box-shadow: @box-shadow;
+
+        .title__content {
+            margin-top: 0;
+        }
+
+        .panel {
+            border-radius: 0;
+            border-bottom: 0;
+            box-shadow: @box-shadow;
+            margin-bottom: 0;
+
+            .panel-heading {
+
+                .panel-title {
+                    font-family: @font_heading;
+                    font-weight: 700;
+                }
+
+                padding: 15px 20px;
+                border-radius: 0;
+            }
+
+            .panel-body {
+
+            }
+
+            .btn {
+                border-radius: 30px;
+            }
+
+        }
+
+        .table_scroll {
+            td {
+                padding: 8px 10px !important;
+            }
+        }
+
+    }
+
+}

@@ -1,0 +1,60 @@
+// Contact Disp
+// ======================================================================== /
+.disp_msgform {
+
+    .main_content {
+        padding: 40px;
+        background-color: @w;
+        box-shadow: @box-shadow;
+
+        .title__content {
+            margin-top: 0;
+            padding-bottom: 30px;
+            border-bottom: 1px solid @ce;
+        }
+
+        .evo_form {
+
+            .form_text_input,
+            .form_textarea_input {
+                padding: 15px;
+                box-shadow: none;
+                border-radius: 0;
+                height: auto;
+                font-size: 1.3rem;
+                margin-right: 5px;
+                background-color: @ce;
+                border-color: @ce;
+
+                &:focus {
+                    border-color: @primary;
+                }
+            }
+
+            .control-label {
+                font-weight: 400;
+                padding-bottom: 3px;
+            }
+
+            .submit {
+                font-size: 1.3rem;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                border-radius: 30px;
+                // background-color: @primary;
+                color: @primary;
+                background-color: transparent;
+                border: 2px solid @primary;
+                padding: 12px 25px;
+
+                &:hover, &:active, &:focus {
+                    background-color: @primary;
+                    color: @w;
+                }
+            }
+
+        }
+
+    }
+
+}

@@ -12,56 +12,51 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $action;
 
-$enlt_ID = param( 'enlt_ID', 'integer' );
-$Form = new Form( NULL, 'campaign' );
-$Form->begin_form( 'fform' );
+$enlt_ID = param('enlt_ID', 'integer');
+$Form = new Form(null, 'campaign');
+$Form->begin_form('fform');
 
-$Form->add_crumb( 'campaign' );
-$Form->hidden( 'ctrl', 'campaigns' );
-$Form->hidden( 'action', $action == 'copy' ? 'duplicate' : 'add' );
+$Form->add_crumb('campaign');
+$Form->hidden('ctrl', 'campaigns');
+$Form->hidden('action', $action == 'copy' ? 'duplicate' : 'add');
 
-if( $action == 'copy' )
-{
-	global $edited_EmailCampaign;
-	$fieldset_title = TB_('Duplicate campaign').get_manual_link( 'duplicating-an-email-campaign' );
-	if( empty( $enlt_ID ) )
-	{ // No list specified, use list of original campaign
-		$enlt_ID = $edited_EmailCampaign->enlt_ID;
-	}
-}
-else
-{
-	$fieldset_title = TB_('New campaign').get_manual_link( 'creating-an-email-campaign' );
+if ($action == 'copy') {
+    global $edited_EmailCampaign;
+    $fieldset_title = TB_('Duplicate campaign') . get_manual_link('duplicating-an-email-campaign');
+    if (empty($enlt_ID)) { // No list specified, use list of original campaign
+        $enlt_ID = $edited_EmailCampaign->enlt_ID;
+    }
+} else {
+    $fieldset_title = TB_('New campaign') . get_manual_link('creating-an-email-campaign');
 }
 
-$Form->begin_fieldset( $fieldset_title );
-	$NewsletterCache = & get_NewsletterCache();
-	$NewsletterCache->load_where( 'enlt_active = 1' );
-	$Form->select_input_object( 'ecmp_enlt_ID', $enlt_ID, $NewsletterCache, TB_('Send to subscribers of'), array( 'required' => true ) );
-	if( isset( $edited_EmailCampaign ) )
-	{
-		$campaign_name = $edited_EmailCampaign->get( 'name' );
-	}
-	else
-	{
-		$campaign_name = '';
-	}
-	$Form->text_input( 'ecmp_name', $campaign_name, 60, TB_('Campaign name'), TB_('for internal use'), array( 'maxlength' => 255, 'required' => true ) );
+$Form->begin_fieldset($fieldset_title);
+$NewsletterCache = &get_NewsletterCache();
+$NewsletterCache->load_where('enlt_active = 1');
+$Form->select_input_object('ecmp_enlt_ID', $enlt_ID, $NewsletterCache, TB_('Send to subscribers of'), [
+    'required' => true,
+]);
+if (isset($edited_EmailCampaign)) {
+    $campaign_name = $edited_EmailCampaign->get('name');
+} else {
+    $campaign_name = '';
+}
+$Form->text_input('ecmp_name', $campaign_name, 60, TB_('Campaign name'), TB_('for internal use'), [
+    'maxlength' => 255,
+    'required' => true,
+]);
 $Form->end_fieldset();
 
-if( $action == 'copy' )
-{
-	$Form->hidden( 'ecmp_ID', $edited_EmailCampaign->ID );
-	$buttons[] = array( 'submit', 'submit', sprintf( TB_('Save and duplicate all settings from %s'), $edited_EmailCampaign->get( 'name' ) ), 'SaveButton' );
+if ($action == 'copy') {
+    $Form->hidden('ecmp_ID', $edited_EmailCampaign->ID);
+    $buttons[] = ['submit', 'submit', sprintf(TB_('Save and duplicate all settings from %s'), $edited_EmailCampaign->get('name')), 'SaveButton'];
+} else {
+    $buttons[] = ['submit', 'submit', TB_('Create campaign'), 'SaveButton'];
 }
-else
-{
-	$buttons[] = array( 'submit', 'submit', TB_('Create campaign'), 'SaveButton' );
-}
-$Form->end_form( $buttons );
-
-?>
+$Form->end_form($buttons);

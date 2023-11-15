@@ -25,19 +25,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-if (!defined('__TRAVEL_HANDLER__'))
-	define('__TRAVEL_HANDLER__', 1);
+if (! defined('__TRAVEL_HANDLER__')) {
+    define('__TRAVEL_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class travel_handler
-	{
-	function parse($data_str, $query)
-		{
-		$r['regrinfo'] = generic_parser_b($data_str['rawdata']);
-		$r['regyinfo']['referrer'] = 'http://www.nic.travel/';
-		$r['regyinfo']['registrar'] = 'Tralliance Corporation';
-		return $r;
-		}
-	}
-?>
+{
+    public function parse($data_str, $query)
+    {
+        $r['regrinfo'] = generic_parser_b($data_str['rawdata']);
+        $r['regyinfo']['referrer'] = 'http://www.nic.travel/';
+        $r['regyinfo']['registrar'] = 'Tralliance Corporation';
+        return $r;
+    }
+}

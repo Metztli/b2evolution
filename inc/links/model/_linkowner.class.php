@@ -12,7 +12,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * LinkOwner Abstract Class
@@ -21,582 +23,535 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class LinkOwner
 {
-	/**
-	 * Type of the Link Owner object
-	 *
-	 * @var string
-	 */
-	var $type;
-
-	/**
-	 * The link owner object
-	 *
-	 * @var DataObject
-	 */
-	var $link_Object;
-
-	/**
-	 * Array of Links attached to this object.
-	 *
-	 * NULL when not initialized.
-	 *
-	 * @var array
-	 * @access public
-	 */
-	var $Links = NULL;
-
-	/**
-	 * The link owner Blog
-	 *
-	 * @var Blog
-	 */
-	var $Blog = NULL;
-
-	/**
-	 * The translation map, and it must be initialized in every subclass constructor
-	 *
-	 * @var array
-	 */
-	var $_trans = NULL;
-
-	/**
-	 * Name of ID field in DB without prefix 'link_'
-	 *
-	 * @var string
-	 */
-	var $ID_field_name;
-
-	/**
-	 * @var integer Last order
-	 */
-	var $last_order = NULL;
-
-
-	/**
-	 * Abstract methods that needs to be overriden in every subclass
-	 *
-	 * function check_perm( $perm_name, $assert = false ); // check link owner object ( item, comment, ... ) edit/view permission
-	 * function get_positions( $file_ID = NULL ); // get all positions where link can be displayed ( 'teaser', 'aftermore' )
-	 * function get_edit_url( $glue = '&amp;', $url_type = NULL ); // get link owner edit url
-	 * function get_view_url( $glue = '&amp;', $url_type = NULL ); // get link owner view url
-	 * function load_Links(); // load link owner all links
-	 * function add_link( $file_ID, $position, $order, $update_owner = true ); // add a new link to link owner
-	 * function load_Blog(); // set Link Owner Blog
-	 */
-
-	/**
-	 * Constructor
-	 *
-	 * @protected It is allowed to be called only from subclasses
-	 *
-	 * @param object the link owner object
-	 * @param string the link type ( item, comment, ... )
-	 * @param string Name of ID field ( itm_ID, cmt_ID, usr_ID, ecmp_ID, msg_ID )
-	 * @param integer ID of temporary object
-	 */
-	function __construct( $link_Object, $type, $ID_field_name, $tmp_ID = NULL )
-	{
-		$this->ID_field_name = $ID_field_name;
-		$this->type = $type;
-		$this->set_object( $link_Object, $tmp_ID );
-	}
-
-
-	/**
-	 * Set object of this link owner
-	 * If object is creating currently then new temporary object will be used instead
-	 *
-	 * @param object Object
-	 */
-	function set_object( $link_Object, $tmp_ID = NULL )
-	{
-		$this->link_Object = $link_Object;
-
-		if( empty( $link_Object ) || empty( $link_Object->ID ) )
-		{	// The object is creating currently, we should use a temporary object:
-			if( $tmp_ID )
-			{	// Get already created temporary object:
-				$TemporaryIDCache = & get_TemporaryIDCache();
-				$tmp_link_Object = & $TemporaryIDCache->get_by_ID( $tmp_ID, false, false );
-			}
-			else
-			{	// Create new temporary object:
-				$tmp_link_Object = new TemporaryID();
-				if( $this->type == 'comment' && $link_Object->type == 'meta' )
-				{	// Special case for internal (meta) comment so we can determine between internal and regular comments:
-					$tmp_link_Object_type = 'metacomment';
-				}
-				else
-				{
-					$tmp_link_Object_type = $this->type;
-				}
-				$tmp_link_Object->set( 'type', $tmp_link_Object_type );
-				if( ! empty( $this->link_Object->blog_ID ) )
-				{	// Set parent collection ID of Item:
-					$tmp_link_Object->set( 'coll_ID', $this->link_Object->blog_ID );
-				}
-				if( ! empty( $this->link_Object->item_ID ) )
-				{	// Set parent item ID of Comment:
-					$tmp_link_Object->set( 'item_ID', $this->link_Object->item_ID );
-				}
-				$tmp_link_Object->dbinsert();
-				// Update global param in order to don't create temp object twice:
-				set_param( 'temp_link_owner_ID', $tmp_link_Object->ID );
-			}
-
-			if( ! is_object( $this->link_Object ) || empty( $this->link_Object ) )
-			{	// Try to create object if it is empty by some unknown reason:
-				switch( $this->type )
-				{
-					case 'user':
-						load_class( 'users/model/_user.class.php', 'User' );
-						$this->link_Object = new User();
-						break;
-					case 'item':
-						load_class( 'items/model/_item.class.php', 'Item' );
-						$this->link_Object = new Item();
-						break;
-					case 'comment':
-						load_class( 'comments/model/_comment.class.php', 'Comment' );
-						$this->link_Object = new Comment();
-						break;
-					case 'message':
-						load_class( 'messaging/model/_message.class.php', 'Message' );
-						$this->link_Object = new Message();
-						break;
-					case 'emailcampaign':
-						load_class( 'email_campaigns/model/_emailcampaign.class.php', 'EmailCampaign' );
-						$this->link_Object = new EmailCampaign();
-						break;
-					default:
-						debug_die( 'Unknow LinkOwner type "'.$this->type.'"' );
-				}
-			}
-
-			if( $tmp_link_Object->ID > 0 )
-			{	// Mark this link owner is using a temporary object:
-				$this->link_Object->tmp_ID = $tmp_link_Object->ID;
-				$this->link_Object->tmp_coll_ID = $tmp_link_Object->get( 'coll_ID' );
-				$this->link_Object->tmp_item_ID = $tmp_link_Object->get( 'item_ID' );
-				$this->link_Object->tmp_type = $tmp_link_Object->get( 'type' );
-			}
-		}
-	}
-
-
-	/**
-	 * Get all links
-	 */
-	function & get_Links()
-	{
-		$this->load_Links();
-
-		return $this->Links;
-	}
-
-	/**
-	 * Remove link from the owner
-	 *
-	 * @param object Link
-	 * @return boolean true on success
-	 */
-	function remove_link( & $Link )
-	{
-		$this->load_Links();
-
-		$index = array_search( $Link, $this->Links );
-		if( $index !== false )
-		{
-			unset( $this->Links[ $index ] );
-		}
-		$LinkCacche = & get_LinkCache();
-		$LinkCacche->remove( $Link );
-		return $Link->dbdelete();
-	}
-
-	/**
-	 * Get Link by File ID
-	 */
-	function & get_link_by_file_ID( $file_ID )
-	{
-		$this->load_Links();
-
-		$r = NULL;
-		foreach( $this->Links as $Link )
-		{
-			if( $Link->file_ID == $file_ID )
-			{
-				$r = $Link;
-				break;
-			}
-		}
-
-		return $r;
-	}
-
-	/**
-	 * Get Link by link ID
-	 *
-	 * @param integer link ID
-	 * @return object The Link with the requested ID if it exisits between this owners links, NULL otherwise
-	 */
-	function get_link_by_link_ID( $link_ID )
-	{
-		$this->load_Links();
-
-		if( isset( $this->Links[ $link_ID ] ) )
-		{
-			return $this->Links[ $link_ID ];
-		}
-
-		return NULL;
-	}
-
-	/**
-	 * Count how many files are attached to this link owner owner object
-	 *
-	 * @return int the number of attachments
-	 */
-	function count_links()
-	{
-		$this->load_Links();
-
-		return count( $this->Links );
-	}
-
-
-	/**
-	 * Get collection object
-	 *
-	 * @return object
-	 */
-	function & get_Blog()
-	{
-		$this->load_Blog();
-
-		return $this->Blog;
-	}
-
-
-	/**
-	 * Get collection ID
-	 *
-	 * @return integer
-	 */
-	function get_blog_ID()
-	{
-		$Blog = & $this->get_Blog();
-
-		return $Blog ? $Blog->ID : 0;
-	}
-
-
-	/**
-	 * Get where condition for select query to get owner links
-	 *
-	 * @return string
-	 */
-	function get_where_condition()
-	{
-		return 'link_'.$this->get_ID_field_name().' = '.$this->get_ID();
-	}
-
-
-	/**
-	 * Get SQL query to select all links attached to this owner
-	 *
-	 * @param string links order by
-	 * @return object SQL
-	 */
-	function get_SQL( $order_by = NULL )
-	{
-		$SQL = new SQL();
-
-		/**
-		 * asimo> Replace in select query the link_cmt_ID, link_itm_ID with the following ( it can be used only after MySQL 5.0)
-		 * (CASE
-		 *	WHEN (link_cmt_ID IS NOT NULL) THEN 'comment'
-		 *	WHEN (link_itm_ID IS NOT NULL) THEN 'item'
-		 *	END) as owner_type
-		 */
-		if( $order_by == NULL )
-		{
-			$order_by = 'link_order, link_ID';
-		}
-
-		// Set links query. Note: Use inner join to make sure that result contains only existing files!
-		$SQL->SELECT( 'link_ID, link_position, link_order, link_cmt_ID, link_itm_ID, file_ID, file_creator_user_ID, file_type, file_title, file_root_type, file_root_ID, file_path, file_alt, file_desc, file_path_hash' );
-		$SQL->FROM( 'T_links INNER JOIN T_files ON link_file_ID = file_ID' );
-		$SQL->WHERE( $this->get_where_condition() );
-		$SQL->ORDER_BY( $order_by );
-
-		return $SQL;
-	}
-
-
-	/**
-	 * Check if current link owner is used as temporary for new creating object
-	 *
-	 * @return boolean TRUE if link owner is temporary
-	 */
-	function is_temp()
-	{
-		return ! empty( $this->link_Object->tmp_ID );
-	}
-
-	/**
-	 * Get link owner object ID
-	 */
-	function get_ID()
-	{
-		return $this->is_temp() ? $this->link_Object->tmp_ID : $this->link_Object->ID;
-	}
-
-
-	/**
-	 * Get link owner object ID field name
-	 *
-	 * @return string
-	 */
-	function get_ID_field_name()
-	{
-		return $this->is_temp() ? 'tmp_ID' : $this->ID_field_name;
-	}
-
-
-	/**
-	 * Get link owner object parameter
-	 *
-	 * @param string parameter name to get
-	 */
-	function get( $parname )
-	{
-		return $this->link_Object->dget( $parname );
-	}
-
-	/**
-	 * Get a ready-to-display position name by key value
-	 *
-	 * @param string link position
-	 */
-	function dget_position( $position )
-	{
-		$positions = $this->get_positions();
-		if( isset( $positions[ $position ] ) )
-		{
-			return $positions[ $position ];
-		}
-		return NULL;
-	}
-
-	/**
-	 * Get default position for a new link
-	 *
-	 * @param integer File ID
-	 * @return string Position
-	 */
-	function get_default_position( $file_ID )
-	{
-		// Use by default this position for all simple link owner such as "comment" and "user"
-		// For "item" we set default position depending on file type and order
-		return 'aftermore';
-	}
-
-
-	/**
-	 * Get list of attached files
-	 *
-	 * INNER JOIN on files ensures we only get back file links
-	 *
-	 * @param integer Limit max result
-	 * @param string Restrict to files/images linked to a specific position.
-	 *               Position can be 'teaser'|'aftermore'|'inline'
-	 *               Use comma as separator
-	 * @param string File type: 'image', 'audio', 'other'; NULL - to select all
-	 * @return DataObjectList2 on success or NULL if no linked files found
-	 */
-	function get_attachment_FileList( $limit = 1000, $position = NULL, $file_type = NULL )
-	{
-		if( ! isset($GLOBALS['files_Module']) )
-		{
-			return NULL;
-		}
-
-		global $DB;
-
-		load_class( '_core/model/dataobjects/_dataobjectlist2.class.php', 'DataObjectList2' );
-
-		$FileCache = & get_FileCache();
-
-		$FileList = new DataObjectList2( $FileCache ); // IN FUNC
-
-		$SQL = new SQL();
-		$SQL->SELECT( 'file_ID, file_creator_user_ID, file_type, file_title, file_root_type, file_root_ID, file_path, file_alt, file_desc, file_path_hash, link_ID' );
-		$SQL->FROM( 'T_links INNER JOIN T_files ON link_file_ID = file_ID' );
-		$SQL->WHERE( $this->get_where_condition() );
-		if( !empty($position) )
-		{
-			$position = explode( ',', $position );
-			$SQL->WHERE_and( 'link_position IN ( '.$DB->quote( $position ).' )' );
-		}
-		$SQL->ORDER_BY( 'link_order' );
-		$SQL->LIMIT( $limit );
-
-		if( ! is_null( $file_type ) )
-		{ // Restrict the Links by File type
-			$SQL->WHERE_and( 'file_type = '.$DB->quote( $file_type ).' OR file_type IS NULL' );
-		}
-
-		$FileList->sql = $SQL->get();
-
-		$FileList->run_query( false, false, false, 'get_attachment_FileList' );
-
-		if( $FileList->result_num_rows == 0 )
-		{	// Nothing found
-			$FileList = NULL;
-		}
-
-		return $FileList;
-	}
-
-
-	/**
-	 * Get list of attached Links
-	 *
-	 * @param integer Limit max result
-	 * @param string Restrict to files/images linked to a specific position.
-	 *               Position can be 'teaser'|'aftermore'|'inline'
-	 *               Use comma as separator
-	 * @param string File type: 'image', 'audio', 'other'; NULL - to select all
-	 * @param array Params
-	 * @return DataObjectList2 on success or NULL if no linked files found
-	 */
-	function get_attachment_LinkList( $limit = 1000, $position = NULL, $file_type = NULL, $params = array() )
-	{
-		if( ! isset($GLOBALS['files_Module']) )
-		{
-			return NULL;
-		}
-
-		$params = array_merge( array(
-				'sql_select_add' => '', // Additional fields for SELECT clause
-				'sql_order_by'   => 'link_order', // ORDER BY clause
-			), $params );
-
-		global $DB;
-
-		load_class( '_core/model/dataobjects/_dataobjectlist2.class.php', 'DataObjectList2' );
-
-		$LinkCache = & get_LinkCache();
-
-		$LinkList = new DataObjectList2( $LinkCache ); // IN FUNC
-
-		$SQL = new SQL();
-		$SQL->SELECT( 'l.*' );
-		$SQL->SELECT_add( $params['sql_select_add'] );
-		$SQL->FROM( 'T_links AS l' );
-		$SQL->WHERE( $this->get_where_condition() );
-		if( !empty($position) )
-		{
-			$position = explode( ',', $position );
-			$SQL->WHERE_and( 'link_position IN ( '.$DB->quote( $position ).' )' );
-		}
-		$SQL->ORDER_BY( $params['sql_order_by'] );
-		$SQL->LIMIT( $limit );
-
-		if( ! is_null( $file_type ) )
-		{ // Restrict the Links by File type
-			$SQL->FROM_add( 'INNER JOIN T_files ON link_file_ID = file_ID' );
-			$SQL->WHERE_and( 'file_type = '.$DB->quote( $file_type ).' OR file_type IS NULL' );
-		}
-
-		$LinkList->sql = $SQL->get();
-
-		$LinkList->run_query( false, false, false, 'get_attachment_LinkList' );
-
-		if( $LinkList->result_num_rows == 0 )
-		{ // Nothing found
-			$LinkList = NULL;
-		}
-
-		return $LinkList;
-	}
-
-
-	/**
-	 * Get translated text for the specific link owner class
-	 *
-	 * @param string text key in the translation map
-	 */
-	function translate( $text_key, $text_params = NULL )
-	{
-		if( empty( $this->_trans ) || empty( $text_key ) || ( !array_key_exists( $text_key, $this->_trans ) ) )
-		{ // This text was not listed in translation map
-			return NULL;
-		}
-
-		return sprintf( T_( $this->_trans[ $text_key ] ), $text_params );
-	}
-
-
-	/**
-	 * Update owner last_touched_ts if exists
-	 * This must be override in the subclasses if the owner object has last_touched_ts field
-	 */
-	function update_last_touched_date()
-	{
-		return;
-	}
-
-
-	/**
-	 * Update owner contents_last_updated_ts if exists
-	 * This must be override in the subclasses if the owner object has contents_last_updated_ts field
-	 */
-	function update_contents_last_updated_ts()
-	{
-		return;
-	}
-
-
-	/**
-	 * This function is called after when some file was unlinked from owner
-	 *
-	 * @param integer Link ID
-	 */
-	function after_unlink_action( $link_ID = 0 )
-	{
-		// Update last touched date content last updated date of the Owner:
-		$this->update_last_touched_date();
-		$this->update_contents_last_updated_ts();
-	}
-
-
-	/**
-	 * Get last order number of this Link Owner
-	 *
-	 * @return integer
-	 */
-	function get_last_order()
-	{
-		global $DB;
-
-		if( $this->get_ID() == 0 )
-		{
-			return 0;
-		}
-
-		if( $this->last_order === NULL )
-		{	// Get last order frin DB:
-			$SQL = new SQL( 'Get last order number of the Link Owner ( '.$this->type.', #'.$this->get_ID().' )' );
-			$SQL->SELECT( 'MAX( link_order )' );
-			$SQL->FROM( 'T_links' );
-			$SQL->WHERE( 'link_'.$this->get_ID_field_name().' = '.$this->get_ID() );
-			$this->last_order = intval( $DB->get_var( $SQL ) );
-		}
-
-		return $this->last_order;
-	}
+    /**
+     * Type of the Link Owner object
+     *
+     * @var string
+     */
+    public $type;
+
+    /**
+     * The link owner object
+     *
+     * @var DataObject
+     */
+    public $link_Object;
+
+    /**
+     * Array of Links attached to this object.
+     *
+     * NULL when not initialized.
+     *
+     * @var array
+     * @access public
+     */
+    public $Links = null;
+
+    /**
+     * The link owner Blog
+     *
+     * @var Blog
+     */
+    public $Blog = null;
+
+    /**
+     * The translation map, and it must be initialized in every subclass constructor
+     *
+     * @var array
+     */
+    public $_trans = null;
+
+    /**
+     * Name of ID field in DB without prefix 'link_'
+     *
+     * @var string
+     */
+    public $ID_field_name;
+
+    /**
+     * @var integer Last order
+     */
+    public $last_order = null;
+
+
+    /**
+     * Abstract methods that needs to be overriden in every subclass
+     *
+     * function check_perm( $perm_name, $assert = false ); // check link owner object ( item, comment, ... ) edit/view permission
+     * function get_positions( $file_ID = NULL ); // get all positions where link can be displayed ( 'teaser', 'aftermore' )
+     * function get_edit_url( $glue = '&amp;', $url_type = NULL ); // get link owner edit url
+     * function get_view_url( $glue = '&amp;', $url_type = NULL ); // get link owner view url
+     * function load_Links(); // load link owner all links
+     * function add_link( $file_ID, $position, $order, $update_owner = true ); // add a new link to link owner
+     * function load_Blog(); // set Link Owner Blog
+     */
+
+    /**
+     * Constructor
+     *
+     * @protected It is allowed to be called only from subclasses
+     *
+     * @param object the link owner object
+     * @param string the link type ( item, comment, ... )
+     * @param string Name of ID field ( itm_ID, cmt_ID, usr_ID, ecmp_ID, msg_ID )
+     * @param integer ID of temporary object
+     */
+    public function __construct($link_Object, $type, $ID_field_name, $tmp_ID = null)
+    {
+        $this->ID_field_name = $ID_field_name;
+        $this->type = $type;
+        $this->set_object($link_Object, $tmp_ID);
+    }
+
+    /**
+     * Set object of this link owner
+     * If object is creating currently then new temporary object will be used instead
+     *
+     * @param object Object
+     */
+    public function set_object($link_Object, $tmp_ID = null)
+    {
+        $this->link_Object = $link_Object;
+
+        if (empty($link_Object) || empty($link_Object->ID)) {	// The object is creating currently, we should use a temporary object:
+            if ($tmp_ID) {	// Get already created temporary object:
+                $TemporaryIDCache = &get_TemporaryIDCache();
+                $tmp_link_Object = &$TemporaryIDCache->get_by_ID($tmp_ID, false, false);
+            } else {	// Create new temporary object:
+                $tmp_link_Object = new TemporaryID();
+                if ($this->type == 'comment' && $link_Object->type == 'meta') {	// Special case for internal (meta) comment so we can determine between internal and regular comments:
+                    $tmp_link_Object_type = 'metacomment';
+                } else {
+                    $tmp_link_Object_type = $this->type;
+                }
+                $tmp_link_Object->set('type', $tmp_link_Object_type);
+                if (! empty($this->link_Object->blog_ID)) {	// Set parent collection ID of Item:
+                    $tmp_link_Object->set('coll_ID', $this->link_Object->blog_ID);
+                }
+                if (! empty($this->link_Object->item_ID)) {	// Set parent item ID of Comment:
+                    $tmp_link_Object->set('item_ID', $this->link_Object->item_ID);
+                }
+                $tmp_link_Object->dbinsert();
+                // Update global param in order to don't create temp object twice:
+                set_param('temp_link_owner_ID', $tmp_link_Object->ID);
+            }
+
+            if (! is_object($this->link_Object) || empty($this->link_Object)) {	// Try to create object if it is empty by some unknown reason:
+                switch ($this->type) {
+                    case 'user':
+                        load_class('users/model/_user.class.php', 'User');
+                        $this->link_Object = new User();
+                        break;
+                    case 'item':
+                        load_class('items/model/_item.class.php', 'Item');
+                        $this->link_Object = new Item();
+                        break;
+                    case 'comment':
+                        load_class('comments/model/_comment.class.php', 'Comment');
+                        $this->link_Object = new Comment();
+                        break;
+                    case 'message':
+                        load_class('messaging/model/_message.class.php', 'Message');
+                        $this->link_Object = new Message();
+                        break;
+                    case 'emailcampaign':
+                        load_class('email_campaigns/model/_emailcampaign.class.php', 'EmailCampaign');
+                        $this->link_Object = new EmailCampaign();
+                        break;
+                    default:
+                        debug_die('Unknow LinkOwner type "' . $this->type . '"');
+                }
+            }
+
+            if ($tmp_link_Object->ID > 0) {	// Mark this link owner is using a temporary object:
+                $this->link_Object->tmp_ID = $tmp_link_Object->ID;
+                $this->link_Object->tmp_coll_ID = $tmp_link_Object->get('coll_ID');
+                $this->link_Object->tmp_item_ID = $tmp_link_Object->get('item_ID');
+                $this->link_Object->tmp_type = $tmp_link_Object->get('type');
+            }
+        }
+    }
+
+    /**
+     * Get all links
+     */
+    public function &get_Links()
+    {
+        $this->load_Links();
+
+        return $this->Links;
+    }
+
+    /**
+     * Remove link from the owner
+     *
+     * @param object Link
+     * @return boolean true on success
+     */
+    public function remove_link(&$Link)
+    {
+        $this->load_Links();
+
+        $index = array_search($Link, $this->Links);
+        if ($index !== false) {
+            unset($this->Links[$index]);
+        }
+        $LinkCacche = &get_LinkCache();
+        $LinkCacche->remove($Link);
+        return $Link->dbdelete();
+    }
+
+    /**
+     * Get Link by File ID
+     */
+    public function &get_link_by_file_ID($file_ID)
+    {
+        $this->load_Links();
+
+        $r = null;
+        foreach ($this->Links as $Link) {
+            if ($Link->file_ID == $file_ID) {
+                $r = $Link;
+                break;
+            }
+        }
+
+        return $r;
+    }
+
+    /**
+     * Get Link by link ID
+     *
+     * @param integer link ID
+     * @return object The Link with the requested ID if it exisits between this owners links, NULL otherwise
+     */
+    public function get_link_by_link_ID($link_ID)
+    {
+        $this->load_Links();
+
+        if (isset($this->Links[$link_ID])) {
+            return $this->Links[$link_ID];
+        }
+
+        return null;
+    }
+
+    /**
+     * Count how many files are attached to this link owner owner object
+     *
+     * @return int the number of attachments
+     */
+    public function count_links()
+    {
+        $this->load_Links();
+
+        return count($this->Links);
+    }
+
+    /**
+     * Get collection object
+     *
+     * @return object
+     */
+    public function &get_Blog()
+    {
+        $this->load_Blog();
+
+        return $this->Blog;
+    }
+
+    /**
+     * Get collection ID
+     *
+     * @return integer
+     */
+    public function get_blog_ID()
+    {
+        $Blog = &$this->get_Blog();
+
+        return $Blog ? $Blog->ID : 0;
+    }
+
+    /**
+     * Get where condition for select query to get owner links
+     *
+     * @return string
+     */
+    public function get_where_condition()
+    {
+        return 'link_' . $this->get_ID_field_name() . ' = ' . $this->get_ID();
+    }
+
+    /**
+     * Get SQL query to select all links attached to this owner
+     *
+     * @param string links order by
+     * @return object SQL
+     */
+    public function get_SQL($order_by = null)
+    {
+        $SQL = new SQL();
+
+        /**
+         * asimo> Replace in select query the link_cmt_ID, link_itm_ID with the following ( it can be used only after MySQL 5.0)
+         * (CASE
+         *	WHEN (link_cmt_ID IS NOT NULL) THEN 'comment'
+         *	WHEN (link_itm_ID IS NOT NULL) THEN 'item'
+         *	END) as owner_type
+         */
+        if ($order_by == null) {
+            $order_by = 'link_order, link_ID';
+        }
+
+        // Set links query. Note: Use inner join to make sure that result contains only existing files!
+        $SQL->SELECT('link_ID, link_position, link_order, link_cmt_ID, link_itm_ID, file_ID, file_creator_user_ID, file_type, file_title, file_root_type, file_root_ID, file_path, file_alt, file_desc, file_path_hash');
+        $SQL->FROM('T_links INNER JOIN T_files ON link_file_ID = file_ID');
+        $SQL->WHERE($this->get_where_condition());
+        $SQL->ORDER_BY($order_by);
+
+        return $SQL;
+    }
+
+    /**
+     * Check if current link owner is used as temporary for new creating object
+     *
+     * @return boolean TRUE if link owner is temporary
+     */
+    public function is_temp()
+    {
+        return ! empty($this->link_Object->tmp_ID);
+    }
+
+    /**
+     * Get link owner object ID
+     */
+    public function get_ID()
+    {
+        return $this->is_temp() ? $this->link_Object->tmp_ID : $this->link_Object->ID;
+    }
+
+    /**
+     * Get link owner object ID field name
+     *
+     * @return string
+     */
+    public function get_ID_field_name()
+    {
+        return $this->is_temp() ? 'tmp_ID' : $this->ID_field_name;
+    }
+
+    /**
+     * Get link owner object parameter
+     *
+     * @param string parameter name to get
+     */
+    public function get($parname)
+    {
+        return $this->link_Object->dget($parname);
+    }
+
+    /**
+     * Get a ready-to-display position name by key value
+     *
+     * @param string link position
+     */
+    public function dget_position($position)
+    {
+        $positions = $this->get_positions();
+        if (isset($positions[$position])) {
+            return $positions[$position];
+        }
+        return null;
+    }
+
+    /**
+     * Get default position for a new link
+     *
+     * @param integer File ID
+     * @return string Position
+     */
+    public function get_default_position($file_ID)
+    {
+        // Use by default this position for all simple link owner such as "comment" and "user"
+        // For "item" we set default position depending on file type and order
+        return 'aftermore';
+    }
+
+    /**
+     * Get list of attached files
+     *
+     * INNER JOIN on files ensures we only get back file links
+     *
+     * @param integer Limit max result
+     * @param string Restrict to files/images linked to a specific position.
+     *               Position can be 'teaser'|'aftermore'|'inline'
+     *               Use comma as separator
+     * @param string File type: 'image', 'audio', 'other'; NULL - to select all
+     * @return DataObjectList2 on success or NULL if no linked files found
+     */
+    public function get_attachment_FileList($limit = 1000, $position = null, $file_type = null)
+    {
+        if (! isset($GLOBALS['files_Module'])) {
+            return null;
+        }
+
+        global $DB;
+
+        load_class('_core/model/dataobjects/_dataobjectlist2.class.php', 'DataObjectList2');
+
+        $FileCache = &get_FileCache();
+
+        $FileList = new DataObjectList2($FileCache); // IN FUNC
+
+        $SQL = new SQL();
+        $SQL->SELECT('file_ID, file_creator_user_ID, file_type, file_title, file_root_type, file_root_ID, file_path, file_alt, file_desc, file_path_hash, link_ID');
+        $SQL->FROM('T_links INNER JOIN T_files ON link_file_ID = file_ID');
+        $SQL->WHERE($this->get_where_condition());
+        if (! empty($position)) {
+            $position = explode(',', $position);
+            $SQL->WHERE_and('link_position IN ( ' . $DB->quote($position) . ' )');
+        }
+        $SQL->ORDER_BY('link_order');
+        $SQL->LIMIT($limit);
+
+        if (! is_null($file_type)) { // Restrict the Links by File type
+            $SQL->WHERE_and('file_type = ' . $DB->quote($file_type) . ' OR file_type IS NULL');
+        }
+
+        $FileList->sql = $SQL->get();
+
+        $FileList->run_query(false, false, false, 'get_attachment_FileList');
+
+        if ($FileList->result_num_rows == 0) {	// Nothing found
+            $FileList = null;
+        }
+
+        return $FileList;
+    }
+
+    /**
+     * Get list of attached Links
+     *
+     * @param integer Limit max result
+     * @param string Restrict to files/images linked to a specific position.
+     *               Position can be 'teaser'|'aftermore'|'inline'
+     *               Use comma as separator
+     * @param string File type: 'image', 'audio', 'other'; NULL - to select all
+     * @param array Params
+     * @return DataObjectList2 on success or NULL if no linked files found
+     */
+    public function get_attachment_LinkList($limit = 1000, $position = null, $file_type = null, $params = [])
+    {
+        if (! isset($GLOBALS['files_Module'])) {
+            return null;
+        }
+
+        $params = array_merge([
+            'sql_select_add' => '', // Additional fields for SELECT clause
+            'sql_order_by' => 'link_order', // ORDER BY clause
+        ], $params);
+
+        global $DB;
+
+        load_class('_core/model/dataobjects/_dataobjectlist2.class.php', 'DataObjectList2');
+
+        $LinkCache = &get_LinkCache();
+
+        $LinkList = new DataObjectList2($LinkCache); // IN FUNC
+
+        $SQL = new SQL();
+        $SQL->SELECT('l.*');
+        $SQL->SELECT_add($params['sql_select_add']);
+        $SQL->FROM('T_links AS l');
+        $SQL->WHERE($this->get_where_condition());
+        if (! empty($position)) {
+            $position = explode(',', $position);
+            $SQL->WHERE_and('link_position IN ( ' . $DB->quote($position) . ' )');
+        }
+        $SQL->ORDER_BY($params['sql_order_by']);
+        $SQL->LIMIT($limit);
+
+        if (! is_null($file_type)) { // Restrict the Links by File type
+            $SQL->FROM_add('INNER JOIN T_files ON link_file_ID = file_ID');
+            $SQL->WHERE_and('file_type = ' . $DB->quote($file_type) . ' OR file_type IS NULL');
+        }
+
+        $LinkList->sql = $SQL->get();
+
+        $LinkList->run_query(false, false, false, 'get_attachment_LinkList');
+
+        if ($LinkList->result_num_rows == 0) { // Nothing found
+            $LinkList = null;
+        }
+
+        return $LinkList;
+    }
+
+    /**
+     * Get translated text for the specific link owner class
+     *
+     * @param string text key in the translation map
+     */
+    public function translate($text_key, $text_params = null)
+    {
+        if (empty($this->_trans) || empty($text_key) || (! array_key_exists($text_key, $this->_trans))) { // This text was not listed in translation map
+            return null;
+        }
+
+        return sprintf(T_($this->_trans[$text_key]), $text_params);
+    }
+
+    /**
+     * Update owner last_touched_ts if exists
+     * This must be override in the subclasses if the owner object has last_touched_ts field
+     */
+    public function update_last_touched_date()
+    {
+        return;
+    }
+
+    /**
+     * Update owner contents_last_updated_ts if exists
+     * This must be override in the subclasses if the owner object has contents_last_updated_ts field
+     */
+    public function update_contents_last_updated_ts()
+    {
+        return;
+    }
+
+    /**
+     * This function is called after when some file was unlinked from owner
+     *
+     * @param integer Link ID
+     */
+    public function after_unlink_action($link_ID = 0)
+    {
+        // Update last touched date content last updated date of the Owner:
+        $this->update_last_touched_date();
+        $this->update_contents_last_updated_ts();
+    }
+
+    /**
+     * Get last order number of this Link Owner
+     *
+     * @return integer
+     */
+    public function get_last_order()
+    {
+        global $DB;
+
+        if ($this->get_ID() == 0) {
+            return 0;
+        }
+
+        if ($this->last_order === null) {	// Get last order frin DB:
+            $SQL = new SQL('Get last order number of the Link Owner ( ' . $this->type . ', #' . $this->get_ID() . ' )');
+            $SQL->SELECT('MAX( link_order )');
+            $SQL->FROM('T_links');
+            $SQL->WHERE('link_' . $this->get_ID_field_name() . ' = ' . $this->get_ID());
+            $this->last_order = intval($DB->get_var($SQL));
+        }
+
+        return $this->last_order;
+    }
 }
-
-?>

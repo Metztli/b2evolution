@@ -7,7 +7,9 @@
  * @package skins
  * @subpackage bootstrap_site_navbar_skin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $page_title;
 
@@ -16,10 +18,10 @@ global $page_title;
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<title><?php
-		// ------------------------- TITLE FOR THE CURRENT REQUEST -------------------------
-		echo $page_title;
-		// ------------------------------ END OF REQUEST TITLE -----------------------------
-	?></title>
+        // ------------------------- TITLE FOR THE CURRENT REQUEST -------------------------
+        echo $page_title;
+// ------------------------------ END OF REQUEST TITLE -----------------------------
+?></title>
 	<meta name="generator" content="b2evolution <?php app_version(); ?>" /> <!-- Please leave this for stats -->
 	<?php include_headlines() /* Add javascript and css files included by plugins and skin */ ?>
 </head>
@@ -36,11 +38,11 @@ require skin_fallback_path( '_toolbar.inc.php' );
 echo "\n";
 if( show_toolbar() )
 {
-	echo '<div id="skin_wrapper" class="skin_wrapper_loggedin">';
+    echo '<div id="skin_wrapper" class="skin_wrapper_loggedin">';
 }
 else
 {
-	echo '<div id="skin_wrapper" class="skin_wrapper_anonymous">';
+    echo '<div id="skin_wrapper" class="skin_wrapper_anonymous">';
 }
 echo "\n";
 

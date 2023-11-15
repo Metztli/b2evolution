@@ -26,7 +26,9 @@
  *	[more] - more tag
  *	[nextpage] - pagination
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Settings, $DB;
 global $dre_messages, $dre_emails, $email_cntr, $del_cntr, $is_cron_mode;
@@ -34,62 +36,53 @@ global $dre_messages, $dre_emails, $email_cntr, $del_cntr, $is_cron_mode;
 // Are we in cron job mode?
 $is_cron_mode = 'yes';
 
-load_funcs( 'cron/model/_decode_returned_emails.funcs.php' );
+load_funcs('cron/model/_decode_returned_emails.funcs.php');
 
-if( ! $Settings->get( 'repath_enabled' ) )
-{
-	dre_msg( T_('Return path processing feature is not enabled.'), true );
-	return 1; // success
+if (! $Settings->get('repath_enabled')) {
+    dre_msg(T_('Return path processing feature is not enabled.'), true);
+    return 1; // success
 }
 
-if( ! extension_loaded('imap') )
-{
-	dre_msg( T_('The php_imap extension is not available to PHP on this server. Please load it in php.ini or ask your hosting provider to do so.'), true );
-	return 2; // error
+if (! extension_loaded('imap')) {
+    dre_msg(T_('The php_imap extension is not available to PHP on this server. Please load it in php.ini or ask your hosting provider to do so.'), true);
+    return 2; // error
 }
 
-load_class( '_ext/mime_parser/rfc822_addresses.php', 'rfc822_addresses_class' );
-load_class( '_ext/mime_parser/mime_parser.php', 'mime_parser_class' );
+load_class('_ext/mime_parser/rfc822_addresses.php', 'rfc822_addresses_class');
+load_class('_ext/mime_parser/mime_parser.php', 'mime_parser_class');
 
-if( isset($GLOBALS['files_Module']) )
-{
-	load_funcs( 'files/model/_file.funcs.php');
+if (isset($GLOBALS['files_Module'])) {
+    load_funcs('files/model/_file.funcs.php');
 }
 
-if( ! $mbox = dre_connect( true ) )
-{	// We couldn't connect to the mail server
-	return 20; // IMAP error
+if (! $mbox = dre_connect(true)) {	// We couldn't connect to the mail server
+    return 20; // IMAP error
 }
 
 // Read messages from server
-dre_msg( T_('Reading messages from server'), true );
-$imap_obj = imap_check( $mbox );
-dre_msg( sprintf( T_('Found %d messages'), intval( $imap_obj->Nmsgs ) ), true );
+dre_msg(T_('Reading messages from server'), true);
+$imap_obj = imap_check($mbox);
+dre_msg(sprintf(T_('Found %d messages'), intval($imap_obj->Nmsgs)), true);
 
-if( $imap_obj->Nmsgs == 0 )
-{
-	dre_msg( T_('There are no messages in the mailbox'), true );
-	imap_close( $mbox );
-	return 1; // success
+if ($imap_obj->Nmsgs == 0) {
+    dre_msg(T_('There are no messages in the mailbox'), true);
+    imap_close($mbox);
+    return 1; // success
 }
 
 // Create posts
-dre_process_messages( $mbox, $imap_obj->Nmsgs, true );
+dre_process_messages($mbox, $imap_obj->Nmsgs, true);
 
-if( $del_cntr > 0 )
-{	// We want to delete processed emails from server
-	imap_expunge( $mbox );
-	dre_msg( sprintf( T_('Deleted %d processed message(s) from inbox.'), $del_cntr ), true );
+if ($del_cntr > 0) {	// We want to delete processed emails from server
+    imap_expunge($mbox);
+    dre_msg(sprintf(T_('Deleted %d processed message(s) from inbox.'), $del_cntr), true);
 }
 
-imap_close( $mbox );
+imap_close($mbox);
 
 // Show reports
-if( $email_cntr > 0 )
-{
-	dre_msg( sprintf( T_('New emails saved: %d'), $email_cntr ), true );
+if ($email_cntr > 0) {
+    dre_msg(sprintf(T_('New emails saved: %d'), $email_cntr), true);
 }
 
 return 1; // success
-
-?>

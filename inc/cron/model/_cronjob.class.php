@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * Cronjob
@@ -24,197 +26,179 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class Cronjob extends DataObject
 {
-	var $start_datetime;
-	var $repeat_after = NULL;
-	var $repeat_variation = 0;
-	var $name;
-	var $key;
+    public $start_datetime;
 
-	/**
-	 * @var array
-	 */
-	var $params;
+    public $repeat_after = null;
 
-	/**
-	 * Constructor
-	 *
-	 * @param table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_cron__task', 'ctsk_', 'ctsk_ID', '', '', '', '' );
+    public $repeat_variation = 0;
 
-		if( $db_row != NULL )
-		{	// Loading an object from DB:
-			$this->ID               = $db_row->ctsk_ID;
-			$this->start_datetime   = $db_row->ctsk_start_datetime;
-			$this->start_timestamp  = strtotime( $db_row->ctsk_start_datetime );
-			$this->repeat_after     = $db_row->ctsk_repeat_after;
-			$this->repeat_variation = $db_row->ctsk_repeat_variation;
-			$this->name             = $db_row->ctsk_name;
-			$this->key              = $db_row->ctsk_key;
-			$this->params           = $db_row->ctsk_params;
-		}
-		else
-		{	// New object:
-			global $localtimenow;
-			$this->start_timestamp = $localtimenow;
-		}
-	}
+    public $name;
 
-	/**
-	 * Set param value
-	 *
-	 * By default, all values will be considered strings
-	 *
-	 * @param string parameter name
-	 * @param mixed parameter value
-	 * @param boolean true to set to NULL if empty value
-	 * @return boolean true, if a value has been set; false if it has not changed
-	 */
-	function set( $parname, $parvalue, $make_null = false )
-	{
-		switch( $parname )
-		{
-			case 'params':
-				return $this->set_param( 'params', 'string', serialize($parvalue), false );
+    public $key;
 
-			case 'name':
-				return $this->set_param( $parname, 'string', utf8_substr( $parvalue, 0, 255 ), false );
-		}
+    /**
+     * @var array
+     */
+    public $params;
 
-		return $this->set_param( $parname, 'string', $parvalue, $make_null );
-	}
+    /**
+     * Constructor
+     *
+     * @param table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_cron__task', 'ctsk_', 'ctsk_ID', '', '', '', '');
 
+        if ($db_row != null) {	// Loading an object from DB:
+            $this->ID = $db_row->ctsk_ID;
+            $this->start_datetime = $db_row->ctsk_start_datetime;
+            $this->start_timestamp = strtotime($db_row->ctsk_start_datetime);
+            $this->repeat_after = $db_row->ctsk_repeat_after;
+            $this->repeat_variation = $db_row->ctsk_repeat_variation;
+            $this->name = $db_row->ctsk_name;
+            $this->key = $db_row->ctsk_key;
+            $this->params = $db_row->ctsk_params;
+        } else {	// New object:
+            global $localtimenow;
+            $this->start_timestamp = $localtimenow;
+        }
+    }
 
-	/**
-	 * Get a member param by its name
-	 *
-	 * @param mixed Name of parameter
-	 * @return mixed Value of parameter
-	 */
-	function get( $parname )
-	{
-		switch( $parname )
-		{
-			case 'params':
-				return unserialize( $this->params );
-		}
+    /**
+     * Set param value
+     *
+     * By default, all values will be considered strings
+     *
+     * @param string parameter name
+     * @param mixed parameter value
+     * @param boolean true to set to NULL if empty value
+     * @return boolean true, if a value has been set; false if it has not changed
+     */
+    public function set($parname, $parvalue, $make_null = false)
+    {
+        switch ($parname) {
+            case 'params':
+                return $this->set_param('params', 'string', serialize($parvalue), false);
 
-		return parent::get( $parname );
-	}
+            case 'name':
+                return $this->set_param($parname, 'string', utf8_substr($parvalue, 0, 255), false);
+        }
 
+        return $this->set_param($parname, 'string', $parvalue, $make_null);
+    }
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		$cron_jobs_config = get_cron_jobs_config();
+    /**
+     * Get a member param by its name
+     *
+     * @param mixed Name of parameter
+     * @return mixed Value of parameter
+     */
+    public function get($parname)
+    {
+        switch ($parname) {
+            case 'params':
+                return unserialize($this->params);
+        }
 
-		if( $this->ID > 0 || get_param( 'ctsk_ID' ) > 0 )
-		{ // Update or copy cron job
-			$cjob_name = param( 'cjob_name', 'string', true );
-		}
-		else
-		{ // Create new cron job
-			$cjob_type = param( 'cjob_type', 'string', true );
-			if( !isset( $cron_jobs_config[ $cjob_type ] ) )
-			{ // This cron job type doesn't exist, so this is an invalid state
-				debug_die('Invalid job type received');
-			}
-		}
+        return parent::get($parname);
+    }
 
-		// start datetime:
-		param_date( 'cjob_date', sprintf( T_('Please enter a valid date using the following format: %s'), '<code>'.locale_input_datefmt().'</code>' ), true );
-		param_time( 'cjob_time' );
-		$this->set( 'start_datetime', form_date( get_param( 'cjob_date' ), get_param( 'cjob_time' ) ) );
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        $cron_jobs_config = get_cron_jobs_config();
 
-		// repeat after:
-		$cjob_repeat_after = param_duration( 'cjob_repeat_after' );
-		if( $cjob_repeat_after == 0 )
-		{
-			$cjob_repeat_after = NULL;
-		}
-		$this->set( 'repeat_after', $cjob_repeat_after );
+        if ($this->ID > 0 || get_param('ctsk_ID') > 0) { // Update or copy cron job
+            $cjob_name = param('cjob_name', 'string', true);
+        } else { // Create new cron job
+            $cjob_type = param('cjob_type', 'string', true);
+            if (! isset($cron_jobs_config[$cjob_type])) { // This cron job type doesn't exist, so this is an invalid state
+                debug_die('Invalid job type received');
+            }
+        }
 
-		// repeat after:
-		$this->set( 'repeat_variation', param_duration( 'cjob_repeat_variation' ) );
+        // start datetime:
+        param_date('cjob_date', sprintf(T_('Please enter a valid date using the following format: %s'), '<code>' . locale_input_datefmt() . '</code>'), true);
+        param_time('cjob_time');
+        $this->set('start_datetime', form_date(get_param('cjob_date'), get_param('cjob_time')));
 
-		// name:
-		if( !empty( $cjob_name ) && $cjob_name != $this->get( 'name' ) )
-		{
-			$this->set( 'name', $cjob_name );
-		}
+        // repeat after:
+        $cjob_repeat_after = param_duration('cjob_repeat_after');
+        if ($cjob_repeat_after == 0) {
+            $cjob_repeat_after = null;
+        }
+        $this->set('repeat_after', $cjob_repeat_after);
 
-		if( $this->ID == 0 && get_param( 'ctsk_ID' ) == 0 )
-		{	// Set these params only on creating and copying actions
-			// key:
-			$this->set( 'key', $cjob_type );
+        // repeat after:
+        $this->set('repeat_variation', param_duration('cjob_repeat_variation'));
 
-			// params:
-			$this->set( 'params', $cron_jobs_config[ $cjob_type ]['params'] );
-		}
+        // name:
+        if (! empty($cjob_name) && $cjob_name != $this->get('name')) {
+            $this->set('name', $cjob_name);
+        }
 
-		return ! param_errors_detected();
-	}
+        if ($this->ID == 0 && get_param('ctsk_ID') == 0) {	// Set these params only on creating and copying actions
+            // key:
+            $this->set('key', $cjob_type);
 
+            // params:
+            $this->set('params', $cron_jobs_config[$cjob_type]['params']);
+        }
 
-	/**
-	 * Get status
-	 *
-	 * @return string Status
-	 */
-	function get_status()
-	{
-		global $DB;;
+        return ! param_errors_detected();
+    }
 
-		if( $this->ID > 0 )
-		{
-			$SQL = new SQL( 'Get status of scheduled job' );
-			$SQL->SELECT( 'clog_status' );
-			$SQL->FROM( 'T_cron__log' );
-			$SQL->WHERE( 'clog_ctsk_ID = '.$DB->quote( $this->ID ) );
-			$status = $DB->get_var( $SQL );
-		}
+    /**
+     * Get status
+     *
+     * @return string Status
+     */
+    public function get_status()
+    {
+        global $DB;
+        ;
 
-		if( empty( $status ) )
-		{	// Set default status for new cron jobs and for cron jobs without log
-			$status = 'pending';
-		}
+        if ($this->ID > 0) {
+            $SQL = new SQL('Get status of scheduled job');
+            $SQL->SELECT('clog_status');
+            $SQL->FROM('T_cron__log');
+            $SQL->WHERE('clog_ctsk_ID = ' . $DB->quote($this->ID));
+            $status = $DB->get_var($SQL);
+        }
 
-		return $status;
-	}
+        if (empty($status)) {	// Set default status for new cron jobs and for cron jobs without log
+            $status = 'pending';
+        }
 
+        return $status;
+    }
 
-	/**
-	 * Update the DB based on previously recorded changes
-	 *
-	 * @return boolean true
-	 */
-	function dbupdate()
-	{
-		global $DB;
+    /**
+     * Update the DB based on previously recorded changes
+     *
+     * @return boolean true
+     */
+    public function dbupdate()
+    {
+        global $DB;
 
-		$DB->begin();
+        $DB->begin();
 
-		if( $this->get_status() == 'pending' )
-		{	// Update crob jobs only with "pending" status
-			$result = parent::dbupdate();
-		}
-		else
-		{	// Don't update this cron job
-			$DB->rollback();
-			return false;
-		}
+        if ($this->get_status() == 'pending') {	// Update crob jobs only with "pending" status
+            $result = parent::dbupdate();
+        } else {	// Don't update this cron job
+            $DB->rollback();
+            return false;
+        }
 
-		$DB->commit();
+        $DB->commit();
 
-		return $result;
-	}
+        return $result;
+    }
 }
-
-?>

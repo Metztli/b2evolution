@@ -8,31 +8,33 @@
  * @package evoskins
  * @subpackage rss
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$Timer->resume( 'prepare list' );
+$Timer->resume('prepare list');
 
-load_class( '/items/model/_itemlistlight.class.php', 'ItemListLight' );
+load_class('/items/model/_itemlistlight.class.php', 'ItemListLight');
 
 // Use a LIGHT Item List:  (Sitemap = 50000 entries max)
-$MainList = new ItemListLight( $Blog, $Blog->get_timestamp_min(), $Blog->get_timestamp_max(), 50000 );
+$MainList = new ItemListLight($Blog, $Blog->get_timestamp_min(), $Blog->get_timestamp_max(), 50000);
 
 // By default we only want items that have the MAIN cat in this blog,
 // i-e with its canonical URL in this blog (cross posted stuff will be listed in its main blog)
 // However this may be overriden in a stub (or param)
-param( 'cat_focus', 'string', 'main' );
+param('cat_focus', 'string', 'main');
 
 // Filter list:
-$MainList->set_filters( array(
-		// We only want to advertised published items:
-		'visibility_array' => array( 'published' ),
-		// Keep normal posts, pages and intro (excluding intro-front and intro-main because they have same URL as collection homepage)
-		// BUT STILL EXCLUDE all others special(sidebar link, advertisement), content blocks:
-		'itemtype_usage' => 'post,page,intro-cat,intro-tag,intro-sub,intro-all',
-		// We want to advertise all items (not just a page or a day):
-		'unit' => 'all',
-		'cat_focus' => $cat_focus,
-	) );
+$MainList->set_filters([
+    // We only want to advertised published items:
+    'visibility_array' => ['published'],
+    // Keep normal posts, pages and intro (excluding intro-front and intro-main because they have same URL as collection homepage)
+    // BUT STILL EXCLUDE all others special(sidebar link, advertisement), content blocks:
+    'itemtype_usage' => 'post,page,intro-cat,intro-tag,intro-sub,intro-all',
+    // We want to advertise all items (not just a page or a day):
+    'unit' => 'all',
+    'cat_focus' => $cat_focus,
+]);
 
 // pre_dump( $cat_focus, $MainList->filters );
 
@@ -44,9 +46,9 @@ $MainList->query();
 $postIDlist = $MainList->get_page_ID_list();
 $postIDarray = $MainList->get_page_ID_array();
 
-$Timer->stop( 'prepare list' );
+$Timer->stop('prepare list');
 
-$Timer->resume( 'display list' );
+$Timer->resume('display list');
 
 // TODO: dh> add entry for homepage (lastmod of latest item)
 // TODO: dh> take comments into consideration for prio
@@ -54,57 +56,46 @@ $Timer->resume( 'display list' );
 // (see sitemap_plugin)
 
 // Note: since URLs are likely to be clean ASCII, $io_charset can probably be faked to UTF-8 here
-headers_content_mightcache( 'application/xml', '#', 'UTF-8' );		// In most situations, you do NOT want to cache dynamic content!
+headers_content_mightcache('application/xml', '#', 'UTF-8');		// In most situations, you do NOT want to cache dynamic content!
 
-echo '<?xml version="1.0" encoding="UTF-8"?'.'>';
+echo '<?xml version="1.0" encoding="UTF-8"?' . '>';
 ?>
 
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc><?php echo $Blog->get( 'url' ); ?></loc>
-		<lastmod><?php echo $Blog->get_last_touched_date( 'isoZ', true ); ?></lastmod>
+		<loc><?php echo $Blog->get('url'); ?></loc>
+		<lastmod><?php echo $Blog->get_last_touched_date('isoZ', true); ?></lastmod>
 		<priority>1</priority>
 		<changefreq>daily</changefreq>
 	</url>
 <?php
-while( $Item = & mainlist_get_item() )
-{	// For each blog post, do everything below up to the closing curly brace "}"
+while ($Item = &mainlist_get_item()) {	// For each blog post, do everything below up to the closing curly brace "}"
+    // Age in days of the post
+    $age = ($localtimenow - mysql2timestamp($Item->datemodified)) / 86400;
 
-	// Age in days of the post
-	$age = ($localtimenow - mysql2timestamp($Item->datemodified)) / 86400;
-
-	// Prio: Recent posts will get higher priority compared to older posts, in case the SE doesn't want to index all posts!
-	// Change frequency: recent posts are more likely to change often than older posts, especially regarding comments.
-	// We hint SEs to check back more often (and not to waste indexing credits on old stuff).
-	if( $age < 8 )
-	{
-		$prio = 0.9;
-		$changefreq = 'hourly';
-	}
-	elseif( $age < 30 )
-	{
-		$prio = 0.8;
-		$changefreq = 'daily';
-	}
-	elseif( $age < 90 )
-	{
-		$prio = 0.7;
-		$changefreq = 'daily';
-	}
-	elseif( $age < 365 )
-	{
-		$prio = 0.6;
-		$changefreq = 'weekly';
-	}
-	else
-	{
-		$prio = 0.5;
-		$changefreq = 'monthly';
-	}
-	?>
+    // Prio: Recent posts will get higher priority compared to older posts, in case the SE doesn't want to index all posts!
+    // Change frequency: recent posts are more likely to change often than older posts, especially regarding comments.
+    // We hint SEs to check back more often (and not to waste indexing credits on old stuff).
+    if ($age < 8) {
+        $prio = 0.9;
+        $changefreq = 'hourly';
+    } elseif ($age < 30) {
+        $prio = 0.8;
+        $changefreq = 'daily';
+    } elseif ($age < 90) {
+        $prio = 0.7;
+        $changefreq = 'daily';
+    } elseif ($age < 365) {
+        $prio = 0.6;
+        $changefreq = 'weekly';
+    } else {
+        $prio = 0.5;
+        $changefreq = 'monthly';
+    }
+    ?>
 	<url>
-		<loc><?php $Item->permanent_url( 'single' ) ?></loc>
-		<lastmod><?php $Item->mod_date( 'isoZ', true ) /* fp> date_touched including comments would be even better */ ?></lastmod>
+		<loc><?php $Item->permanent_url('single') ?></loc>
+		<lastmod><?php $Item->mod_date('isoZ', true) /* fp> date_touched including comments would be even better */ ?></lastmod>
 		<priority><?php echo $prio; ?></priority>
 		<changefreq><?php echo $changefreq; ?></changefreq>
 	</url>
@@ -113,5 +104,5 @@ while( $Item = & mainlist_get_item() )
 </urlset>
 <?php
 
-$Timer->stop( 'display list' );
+$Timer->stop('display list');
 ?>

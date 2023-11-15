@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,432 +26,395 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class content_hierarchy_Widget extends ComponentWidget
 {
-	var $icon = 'sitemap';
+    public $icon = 'sitemap';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'content_hierarchy' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'content_hierarchy');
+    }
 
-
-	/**
-	 * Get JavaScript code which helps to edit widget form
-	 *
-	 * @return string
-	 */
-	function get_edit_form_javascript()
-	{
-		if( ( $widget_Blog = & $this->get_Blog() ) &&
-		    $widget_Blog->get_setting( 'cache_enabled_widgets' ) )
-		{	// Disable "Allow caching" when "Highlight current page" OR "Mark flagged posts" is enabled:
-			return 'jQuery( "#'.$this->get_param_prefix().'highlight_current, #'.$this->get_param_prefix().'show_flags" ).click( function()
+    /**
+     * Get JavaScript code which helps to edit widget form
+     *
+     * @return string
+     */
+    public function get_edit_form_javascript()
+    {
+        if (($widget_Blog = &$this->get_Blog()) &&
+            $widget_Blog->get_setting('cache_enabled_widgets')) {	// Disable "Allow caching" when "Highlight current page" OR "Mark flagged posts" is enabled:
+            return 'jQuery( "#' . $this->get_param_prefix() . 'highlight_current, #' . $this->get_param_prefix() . 'show_flags" ).click( function()
 {
-	jQuery( "#'.$this->get_param_prefix().'allow_blockcache" ).prop( "disabled",
-		jQuery( "#'.$this->get_param_prefix().'highlight_current" ).prop( "checked" ) ||
-		jQuery( "#'.$this->get_param_prefix().'show_flags" ).prop( "checked" ) )
+	jQuery( "#' . $this->get_param_prefix() . 'allow_blockcache" ).prop( "disabled",
+		jQuery( "#' . $this->get_param_prefix() . 'highlight_current" ).prop( "checked" ) ||
+		jQuery( "#' . $this->get_param_prefix() . 'show_flags" ).prop( "checked" ) )
 } );';
-		}
-	}
+        }
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('content-hierarchy-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'content-hierarchy-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Content Hierarchy');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return T_('Full hierarchical list Collection\'s Categories and Posts');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Content Hierarchy');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Displays a nested list of the full content hierarchy (Categories/Chapters and Post/Items) of a Collection.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        load_funcs('files/model/_image.funcs.php');
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return T_('Full hierarchical list Collection\'s Categories and Posts');
-	}
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'note' => T_('Title to display in your skin.'),
+                'size' => 40,
+                'defaultvalue' => T_('Content Hierarchy'),
+            ],
+            'display_blog_title' => [
+                'label' => T_('Root line'),
+                'note' => T_('Display collection name above categories.'),
+                'type' => 'checkbox',
+                'defaultvalue' => false,
+            ],
+            'open_children_levels' => [
+                'label' => T_('Open children levels'),
+                'note' => T_('From 0 to 20.'),
+                'type' => 'integer',
+                'defaultvalue' => '0',
+                'valid_pattern' => [
+                    'pattern' => '~^(1?\d|20)$~i',
+                    'error' => T_('We can display from 0 to 20 children levels.'),
+                ],
+            ],
+            'blog_ID' => [
+                'label' => T_('Collection'),
+                'note' => T_('ID of the collection to use, leave empty for the current collection.'),
+                'size' => 4,
+                'type' => 'integer',
+                'allow_empty' => true,
+            ],
+            'exclude_cats' => [
+                'type' => 'text',
+                'label' => T_('Exclude categories'),
+                'note' => T_('A comma-separated list of category IDs that you want to exclude from the list.'),
+                'valid_pattern' => [
+                    'pattern' => '/^(\d+(,\d+)*|-|\*)?$/',
+                    'error' => T_('Invalid list of Category IDs.'),
+                ],
+            ],
+            'highlight_current' => [
+                'label' => T_('Highlight current page'),
+                'note' => T_('If checked, the widget will open the current branch and highlight the current page or chapter.'),
+                'type' => 'checkbox',
+                'defaultvalue' => 1,
+            ],
+            'show_flags' => [
+                'label' => T_('Mark flagged posts'),
+                'note' => T_('If checked, the widget will display a flag icon after each flagged post.'),
+                'type' => 'checkbox',
+                'defaultvalue' => 1,
+            ],
+        ], parent::get_param_definitions($params));
 
+        if (isset($r['allow_blockcache']) && (
+            // Check for editing form:
+            (empty($params['for_updating']) && ($this->get_param('highlight_current', 1) || $this->get_param('show_flags', 1))) ||
+            // Check for updating action:
+            (! empty($params['for_updating']) && (param($this->get_param_prefix() . 'highlight_current', 'integer') || param($this->get_param_prefix() . 'show_flags', 'integer')))
+        )) {	// Disable "Allow caching" because this widget:
+            // - highlights the current page and opens the branch of the current page automatically,
+            // - display a falg icon after each flagged post by current User.
+            $r['allow_blockcache']['disabled'] = 'disabled';
+        }
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Displays a nested list of the full content hierarchy (Categories/Chapters and Post/Items) of a Collection.');
-	}
+        return $r;
+    }
 
+    /**
+     * Prepare display params
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function init_display($params)
+    {
+        // Set default params for this widget:
+        $params = array_merge([
+            'block_start' => '',
+            'block_end' => '',
+            'block_body_start' => '',
+            'block_body_end' => '',
+            'list_start' => '<ul class="chapters_list">',
+            'list_end' => '</ul>',
+            'list_subs_start' => '<ul>',
+            'list_subs_end' => '</ul>',
+            'item_start' => '<li>',
+            'item_end' => '</li>',
+            'item_before_opened' => '',
+            'item_before_closed' => '',
+            'item_before_post' => '',
+            'item_title_fields' => 'title',
+            'link_type' => 'permalink',
+            'class_opened' => 'opened',
+            'class_closed' => 'closed',
+            'class_selected' => 'selected',
+            'class_post' => 'post',
+            'display_blog_title' => false,
+            'custom_title' => '',
+            'open_children_levels' => 0,
+            'highlight_current' => true,
+            'list_posts' => true,
+            // Don't expand all categories by default for this widget, because it has a separate parameter 'open_children_levels':
+            'expand_all' => false,
+        ], $params);
 
+        if (isset($params['widget_content_hierarchy_params']) &&
+            is_array($params['widget_content_hierarchy_params'])) {	// Override with special params for this widget:
+            $params = array_merge($params, $params['widget_content_hierarchy_params']);
+        }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		load_funcs( 'files/model/_image.funcs.php' );
+        parent::init_display($params);
 
-		$r = array_merge( array(
-				'title' => array(
-					'label'        => T_('Block title'),
-					'note'         => T_( 'Title to display in your skin.' ),
-					'size'         => 40,
-					'defaultvalue' => T_('Content Hierarchy'),
-				),
-				'display_blog_title' => array(
-					'label' => T_('Root line'),
-					'note' => T_('Display collection name above categories.'),
-					'type' => 'checkbox',
-					'defaultvalue' => false,
-				),
-				'open_children_levels' => array(
-					'label' => T_('Open children levels'),
-					'note' => T_('From 0 to 20.'),
-					'type' => 'integer',
-					'defaultvalue' => '0',
-					'valid_pattern' => array( 'pattern'=>'~^(1?\d|20)$~i',
-						'error'=>T_('We can display from 0 to 20 children levels.') ),
-				),
-				'blog_ID' => array(
-					'label' => T_( 'Collection' ),
-					'note' => T_( 'ID of the collection to use, leave empty for the current collection.' ),
-					'size' => 4,
-					'type' => 'integer',
-					'allow_empty' => true,
-				),
-				'exclude_cats' => array(
-					'type' => 'text',
-					'label' => T_('Exclude categories'),
-					'note' => T_('A comma-separated list of category IDs that you want to exclude from the list.'),
-					'valid_pattern' => array( 'pattern' => '/^(\d+(,\d+)*|-|\*)?$/',
-																		'error'   => T_('Invalid list of Category IDs.') ),
-				),
-				'highlight_current' => array(
-					'label' => T_('Highlight current page'),
-					'note' => T_('If checked, the widget will open the current branch and highlight the current page or chapter.'),
-					'type' => 'checkbox',
-					'defaultvalue' => 1,
-				),
-				'show_flags' => array(
-					'label' => T_('Mark flagged posts'),
-					'note' => T_('If checked, the widget will display a flag icon after each flagged post.'),
-					'type' => 'checkbox',
-					'defaultvalue' => 1,
-				),
-			), parent::get_param_definitions( $params ) );
+        if ($this->disp_params['highlight_current'] || $this->disp_params['show_flags']) {	// Disable block caching for this widget when it highlights the opened Item or Chapter:
+            $this->disp_params['allow_blockcache'] = 0;
+        }
+    }
 
-		if( isset( $r['allow_blockcache'] ) && (
-		    // Check for editing form:
-		    ( empty( $params['for_updating'] ) && ( $this->get_param( 'highlight_current', 1 ) || $this->get_param( 'show_flags', 1 ) ) ) ||
-		    // Check for updating action:
-		    ( ! empty( $params['for_updating'] ) && ( param( $this->get_param_prefix().'highlight_current', 'integer' ) || param( $this->get_param_prefix().'show_flags', 'integer' ) ) )
-		  ) )
-		{	// Disable "Allow caching" because this widget:
-			// - highlights the current page and opens the branch of the current page automatically,
-			// - display a falg icon after each flagged post by current User.
-			$r['allow_blockcache']['disabled'] = 'disabled';
-		}
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Item, $disp, $blog, $cat;
 
-		return $r;
-	}
+        $this->init_display($params);
 
-	/**
-	 * Prepare display params
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function init_display( $params )
-	{
-		// Set default params for this widget:
-		$params = array_merge( array(
-				'block_start'          => '',
-				'block_end'            => '',
-				'block_body_start'     => '',
-				'block_body_end'       => '',
-				'list_start'           => '<ul class="chapters_list">',
-				'list_end'             => '</ul>',
-				'list_subs_start'      => '<ul>',
-				'list_subs_end'        => '</ul>',
-				'item_start'           => '<li>',
-				'item_end'             => '</li>',
-				'item_before_opened'   => '',
-				'item_before_closed'   => '',
-				'item_before_post'     => '',
-				'item_title_fields'    => 'title',
-				'link_type'            => 'permalink',
-				'class_opened'         => 'opened',
-				'class_closed'         => 'closed',
-				'class_selected'       => 'selected',
-				'class_post'           => 'post',
-				'display_blog_title'   => false,
-				'custom_title'         => '',
-				'open_children_levels' => 0,
-				'highlight_current'    => true,
-				'list_posts'           => true,
-				// Don't expand all categories by default for this widget, because it has a separate parameter 'open_children_levels':
-				'expand_all'           => false,
-			), $params );
+        if (($disp == 'single' || $disp == 'page') && ! empty($Item)) {	// Set selected Item in the params ONLY if we really view item page:
+            $this->disp_params['selected_item_ID'] = $Item->ID;
+        }
 
-		if( isset( $params['widget_content_hierarchy_params'] ) &&
-		    is_array( $params['widget_content_hierarchy_params'] ) )
-		{	// Override with special params for this widget:
-			$params = array_merge( $params, $params['widget_content_hierarchy_params'] );
-		}
+        // Get IDs of categories that must be exluded:
+        $this->disp_params['excluded_cat_IDs'] = sanitize_id_list($this->disp_params['exclude_cats'], true);
 
-		parent::init_display( $params );
+        // Set param to sort categories and items inside callback functions of ChapterCache->recurse():
+        $this->disp_params['sorted'] = true;
 
-		if( $this->disp_params['highlight_current'] || $this->disp_params['show_flags'] )
-		{	// Disable block caching for this widget when it highlights the opened Item or Chapter:
-			$this->disp_params['allow_blockcache'] = 0;
-		}
-	}
+        $BlogCache = &get_BlogCache();
+        $ChapterCache = &get_ChapterCache();
 
+        if (! empty($this->disp_params['blog_ID'])) { // Set a Blog from widget setting
+            $this->Blog = &$BlogCache->get_by_ID(intval($this->disp_params['blog_ID']), false, false);
+        }
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Item, $disp, $blog, $cat;
+        if (empty($this->Blog) && ! empty($blog)) { // Use current Blog
+            $this->Blog = &$BlogCache->get_by_ID($blog, false, false);
+        }
 
-		$this->init_display( $params );
+        if (empty($this->Blog)) { // No Blog, Exit here
+            $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because the requested Collection #' . $this->disp_params['blog_ID'] . ' doesn\'t exist any more.');
+            return false;
+        }
 
-		if( ( $disp == 'single' || $disp == 'page' ) && ! empty( $Item ) )
-		{	// Set selected Item in the params ONLY if we really view item page:
-			$this->disp_params['selected_item_ID'] = $Item->ID;
-		}
+        $chapter_path = [];
+        if (! empty($cat)) { // A category is opened
+            $this->disp_params['chapter_path'] = $ChapterCache->get_chapter_path($this->Blog->ID, $cat);
+        } elseif (! empty($Item) && ! $Item->is_intro()) { // A post is opened (Ignore intro posts)
+            $this->disp_params['chapter_path'] = $ChapterCache->get_chapter_path($this->Blog->ID, $Item->main_cat_ID);
+        }
 
-		// Get IDs of categories that must be exluded:
-		$this->disp_params['excluded_cat_IDs'] = sanitize_id_list( $this->disp_params['exclude_cats'], true );
+        // START DISPLAY:
+        echo $this->disp_params['block_start'];
 
-		// Set param to sort categories and items inside callback functions of ChapterCache->recurse():
-		$this->disp_params['sorted'] = true;
+        // Display title if requested
+        $this->disp_title();
 
-		$BlogCache = & get_BlogCache();
-		$ChapterCache = & get_ChapterCache();
+        echo $this->disp_params['block_body_start'];
 
-		if( ! empty( $this->disp_params['blog_ID'] ) )
-		{ // Set a Blog from widget setting
-			$this->Blog = & $BlogCache->get_by_ID( intval( $this->disp_params['blog_ID'] ), false, false );
-		}
+        echo $this->disp_params['list_start'];
 
-		if( empty( $this->Blog ) && ! empty( $blog ) )
-		{ // Use current Blog
-			$this->Blog = & $BlogCache->get_by_ID( $blog, false, false );
-		}
+        if ($this->disp_params['display_blog_title']) {	// Display "root level" line:
+            if (empty($this->disp_params['custom_title'])) {
+                echo str_replace('>', ' class="title ' . $this->disp_params['class_selected'] . '">', $this->disp_params['item_start']);
+                echo '<a href="' . $this->Blog->get('url') . '" class="link">' . $this->Blog->get('name') . '</a>';
+                echo $this->disp_params['item_end'];
+            } else {
+                echo $this->disp_params['custom_title'];
+            }
+        }
 
-		if( empty( $this->Blog ) )
-		{ // No Blog, Exit here
-			$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because the requested Collection #'.$this->disp_params['blog_ID'].' doesn\'t exist any more.' );
-			return false;
-		}
+        $callbacks = [
+            'line' => [$this, 'display_chapter'],
+            'before_level' => [$this, 'cat_before_level'],
+            'after_level' => [$this, 'cat_after_level'],
+            'posts' => [$this, 'display_post_row'],
+        ];
 
-		$chapter_path = array();
-		if( !empty( $cat ) )
-		{ // A category is opened
-			$this->disp_params['chapter_path'] = $ChapterCache->get_chapter_path( $this->Blog->ID, $cat );
-		}
-		elseif( ! empty( $Item ) && ! $Item->is_intro() )
-		{ // A post is opened (Ignore intro posts)
-			$this->disp_params['chapter_path'] = $ChapterCache->get_chapter_path( $this->Blog->ID, $Item->main_cat_ID );
-		}
+        if (strpos($this->disp_params['item_title_fields'], 'short_title') !== false) {	// Use function to order items/posts by short title if this field is used to display instead of default title field:
+            $this->disp_params['items_order_alpha_func'] = 'compare_items_by_short_title';
+        }
 
-		// START DISPLAY:
-		echo $this->disp_params['block_start'];
+        echo $ChapterCache->recurse($callbacks, $this->Blog->ID, null, 0, $this->disp_params['open_children_levels'] + 1, $this->disp_params);
 
-		// Display title if requested
-		$this->disp_title();
+        echo $this->disp_params['list_end'];
 
-		echo $this->disp_params['block_body_start'];
+        echo $this->disp_params['block_body_end'];
 
-		echo $this->disp_params['list_start'];
+        echo $this->disp_params['block_end'];
 
-		if( $this->disp_params['display_blog_title'] )
-		{	// Display "root level" line:
-			if( empty( $this->disp_params['custom_title'] ) )
-			{
-				echo str_replace( '>', ' class="title '.$this->disp_params['class_selected'].'">', $this->disp_params['item_start'] );
-				echo '<a href="'.$this->Blog->get( 'url' ).'" class="link">'.$this->Blog->get( 'name' ).'</a>';
-				echo $this->disp_params['item_end'];
-			}
-			else
-			{
-				echo $this->disp_params['custom_title'];
-			}
-		}
+        return true;
+    }
 
-		$callbacks = array(
-			'line' => array( $this, 'display_chapter' ),
-			'before_level' => array( $this, 'cat_before_level' ),
-			'after_level'  => array( $this, 'cat_after_level' ),
-			'posts' => array( $this, 'display_post_row' ),
-		);
+    public function cat_before_level($level)
+    {
+        return '';
+    }
 
-		if( strpos( $this->disp_params['item_title_fields'], 'short_title' ) !== false )
-		{	// Use function to order items/posts by short title if this field is used to display instead of default title field:
-			$this->disp_params['items_order_alpha_func'] = 'compare_items_by_short_title';
-		}
+    public function cat_after_level($level)
+    {
+        return '';
+    }
 
-		echo $ChapterCache->recurse( $callbacks, $this->Blog->ID, NULL, 0, $this->disp_params['open_children_levels'] + 1, $this->disp_params );
+    /**
+     * Display a chapter and the children of the given chapter
+     *
+     * @param object Chapter
+     * @param integer level
+     * @param array params
+     */
+    public function display_chapter($Chapter, $level, $params = [])
+    {
+        // What display before link text, Used for icon
+        $item_before = $params['item_before_closed'];
 
-		echo $this->disp_params['list_end'];
+        $classes = [];
 
-		echo $this->disp_params['block_body_end'];
+        if ($params['is_selected'] && $params['highlight_current']) { // A category is selected
+            $is_selected = true;
+            $classes[] = $params['class_selected'];
+        }
+        if ($params['is_opened']) { // A category is opened/expanded
+            $classes[] = $params['class_opened'];
+            $item_before = $params['item_before_opened'];
+        }
 
-		echo $this->disp_params['block_end'];
+        // Display a category
+        if (empty($classes)) {
+            $r = $params['item_start'];
+        } else { // Add attr "class" for item start tag
+            $r = str_replace('>', ' class="' . implode(' ', $classes) . '">', $params['item_start']);
+        }
 
-		return true;
-	}
+        $r .= '<a href="' . $Chapter->get_permanent_url() . '" class="link">' . $item_before . $Chapter->get_name() . '</a>';
 
+        $r .= $params['item_end'];
+        return $r;
+    }
 
-	function cat_before_level( $level )
-	{
-		return '';
-	}
+    /**
+     * Display a post row into string
+     *
+     * @param object Item
+     * @param integer level
+     * @param array params
+     * @return string the Item row display
+     */
+    public function display_post_row($Item, $level, $params = [])
+    {
+        $classes = ['post'];
+        if (isset($params['selected_item_ID']) && $params['selected_item_ID'] == $Item->ID && $params['highlight_current']) { // This post is selected
+            $classes[] = $params['class_selected'];
+        }
 
-	function cat_after_level( $level )
-	{
-		return '';
-	}
+        // Display a post
+        if (empty($classes)) {
+            $r = $params['item_start'];
+        } else { // Add attr "class" for item start tag
+            $r = str_replace('>', ' class="' . implode(' ', $classes) . '">', $params['item_start']);
+        }
 
+        $display_params = array_merge([
+            'before_title' => $params['item_before_post'],
+            'post_navigation' => 'same_category', // we are always navigating through category in this skin
+            'nav_target' => $params['chapter_ID'], // set the category ID as nav target
+            'target_blog' => 'auto',
+            'link_type' => 'permalink',
+            'link_class' => 'link',
+            'title_field' => $params['item_title_fields'],
+        ], $params);
 
-	/**
-	 * Display a chapter and the children of the given chapter
-	 *
-	 * @param Object Chapter
-	 * @param integer level
-	 * @param array params
-	 */
-	function display_chapter( $Chapter, $level, $params = array() )
-	{
-		// What display before link text, Used for icon
-		$item_before = $params['item_before_closed'];
+        if ($Item->main_cat_ID != $params['chapter_ID']) { // Posts from extracats are displayed with italic
+            $display_params['before'] = '<i>';
+            $display_params['after'] = '</i>';
+        }
 
-		$classes = array();
+        // Display a permanent link to post:
+        $r .= $Item->get_title($display_params);
 
-		if( $params['is_selected'] && $params['highlight_current'] )
-		{ // A category is selected
-			$is_selected = true;
-			$classes[] = $params['class_selected'];
-		}
-		if( $params['is_opened'] )
-		{ // A category is opened/expanded
-			$classes[] = $params['class_opened'];
-			$item_before = $params['item_before_opened'];
-		}
+        if ($params['show_flags']) {	// Flag:
+            $r .= $Item->get_flag([
+                'before' => ' ',
+                'only_flagged' => true,
+                'allow_toggle' => false,
+            ]);
+        }
 
-		// Display a category
-		if( empty( $classes ) )
-		{
-			$r = $params['item_start'];
-		}
-		else
-		{ // Add attr "class" for item start tag
-			$r = str_replace( '>', ' class="'.implode( ' ', $classes ).'">', $params['item_start'] );
-		}
+        $r .= $params['item_end'];
+        return $r;
+    }
 
-		$r .= '<a href="'.$Chapter->get_permanent_url().'" class="link">'.$item_before.$Chapter->get_name().'</a>';
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $current_User;
 
-		$r .= $params['item_end'];
-		return $r;
-	}
+        $blog_ID = intval($this->disp_params['blog_ID']);
 
-
-	/**
-	 * Display a post row into string
-	 *
-	 * @param object Item
-	 * @param integer level
-	 * @param array params
-	 * @return string the Item row display
-	 */
-	function display_post_row( $Item, $level, $params = array() )
-	{
-		$classes = array( 'post' );
-		if( isset( $params['selected_item_ID'] ) && $params['selected_item_ID'] == $Item->ID  && $params['highlight_current'] )
-		{ // This post is selected
-			$classes[] = $params['class_selected'];
-		}
-
-		// Display a post
-		if( empty( $classes ) )
-		{
-			$r = $params['item_start'];
-		}
-		else
-		{ // Add attr "class" for item start tag
-			$r = str_replace( '>', ' class="'.implode( ' ', $classes ).'">', $params['item_start'] );
-		}
-
-		$display_params = array_merge( array(
-				'before_title'    => $params['item_before_post'],
-				'post_navigation' => 'same_category', // we are always navigating through category in this skin
-				'nav_target'      => $params['chapter_ID'], // set the category ID as nav target
-				'target_blog'     => 'auto',
-				'link_type'       => 'permalink',
-				'link_class'      => 'link',
-				'title_field'     => $params['item_title_fields'],
-			), $params );
-
-		if( $Item->main_cat_ID != $params['chapter_ID'] )
-		{ // Posts from extracats are displayed with italic
-			$display_params['before'] = '<i>';
-			$display_params['after'] = '</i>';
-		}
-
-		// Display a permanent link to post:
-		$r .= $Item->get_title( $display_params );
-
-		if( $params['show_flags'] )
-		{	// Flag:
-			$r .= $Item->get_flag( array(
-				'before'       => ' ',
-				'only_flagged' => true,
-				'allow_toggle' => false,
-			) );
-		}
-
-		$r .= $params['item_end'];
-		return $r;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $current_User;
-
-		$blog_ID = intval( $this->disp_params['blog_ID'] );
-
-		return array(
-				'wi_ID'        => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID'  => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'user_ID'      => ( is_logged_in() ? $current_User->ID : 0 ), // Has the current User changed?
-				'cont_coll_ID' => empty( $blog_ID ) ? $Blog->ID : $blog_ID, // Has the content of the displayed blog changed ?
-			);
-	}
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'user_ID' => (is_logged_in() ? $current_User->ID : 0), // Has the current User changed?
+            'cont_coll_ID' => empty($blog_ID) ? $Blog->ID : $blog_ID, // Has the content of the displayed blog changed ?
+        ];
+    }
 }
-
-?>

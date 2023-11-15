@@ -18,18 +18,17 @@
  * Initialize everything:
  */
 
-if( isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'POST' )
-{
-	header('Content-Type: text/plain');
-	die('XML-RPC server accepts POST requests only.');
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Content-Type: text/plain');
+    die('XML-RPC server accepts POST requests only.');
 }
 
 // Disable Cookies
-$_COOKIE = array();
+$_COOKIE = [];
 
 
 // Initialize config:
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
 /**
  * @global boolean Is this an API request?
@@ -37,17 +36,16 @@ require_once dirname(__FILE__).'/../conf/_config.php';
 $is_api_request = true;
 
 // Initialize main functions:
-require_once $inc_path.'_main.inc.php';
+require_once $inc_path . '_main.inc.php';
 
 load_funcs('xmlrpc/model/_xmlrpc.funcs.php');
 
-if( CANUSEXMLRPC !== TRUE || ! $Settings->get('general_xmlrpc') )
-{	// We cannot use XML-RPC: send an error response ( "17 Internal server error" ).
-	$errMessage = CANUSEXMLRPC !== TRUE
-					? ( 'Cannot use XML-RPC. Probably the server is missing the XML extension. Error: '.CANUSEXMLRPC )
-					: 'XML-RPC services are disabled on this system.';
-	$errResponse = new xmlrpcresp( 0, 17, $errMessage );
-	die( $errResponse->serialize() );
+if (CANUSEXMLRPC !== true || ! $Settings->get('general_xmlrpc')) {	// We cannot use XML-RPC: send an error response ( "17 Internal server error" ).
+    $errMessage = CANUSEXMLRPC !== true
+                    ? ('Cannot use XML-RPC. Probably the server is missing the XML extension. Error: ' . CANUSEXMLRPC)
+                    : 'XML-RPC services are disabled on this system.';
+    $errResponse = new xmlrpcresp(0, 17, $errMessage);
+    die($errResponse->serialize());
 }
 
 
@@ -61,16 +59,16 @@ $post_default_title = ''; // posts submitted via the xmlrpc interface get that t
 /**
  * Array defining the available Remote Procedure Calls:
  */
-$xmlrpc_procs = array();
+$xmlrpc_procs = [];
 
 
 // Load APIs:
-include_once $inc_path.'xmlrpc/apis/_blogger.api.php';
-include_once $inc_path.'xmlrpc/apis/_b2.api.php';
-include_once $inc_path.'xmlrpc/apis/_metaweblog.api.php';
-include_once $inc_path.'xmlrpc/apis/_mt.api.php';
-include_once $inc_path.'xmlrpc/apis/_wordpress.api.php';
-include_once $inc_path.'xmlrpc/apis/_antispam.api.php';
+include_once $inc_path . 'xmlrpc/apis/_blogger.api.php';
+include_once $inc_path . 'xmlrpc/apis/_b2.api.php';
+include_once $inc_path . 'xmlrpc/apis/_metaweblog.api.php';
+include_once $inc_path . 'xmlrpc/apis/_mt.api.php';
+include_once $inc_path . 'xmlrpc/apis/_wordpress.api.php';
+include_once $inc_path . 'xmlrpc/apis/_antispam.api.php';
 
 
 // fp> xmlrpc.php should actually only load the function/api/plugin to execute once it has been identified
@@ -80,10 +78,8 @@ include_once $inc_path.'xmlrpc/apis/_antispam.api.php';
 load_funcs('xmlrpc/model/_xmlrpcs.funcs.php'); // This will add generic remote calls
 
 // Set up the XML-RPC server:
-$s = new xmlrpc_server( $xmlrpc_procs, false );
+$s = new xmlrpc_server($xmlrpc_procs, false);
 // Use the request encoding for the response:
 $s->response_charset_encoding = 'auto';
 // DO THE SERVING:
 $s->service();
-
-?>

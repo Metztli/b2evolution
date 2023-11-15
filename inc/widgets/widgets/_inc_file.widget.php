@@ -23,9 +23,11 @@
  *
  * @version $Id: _inc_file.widget.php 10060 2016-03-09 10:40:31Z yura $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * Widget Class
@@ -36,109 +38,99 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class inc_file_Widget extends ComponentWidget
 {
-	var $icon = 'file';
+    public $icon = 'file';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'inc_file' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'inc_file');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('inc-file-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'inc-file-widget' );
-	}
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Blog;
 
+        $this->init_display($params);
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Blog;
+        // Collection common links:
+        echo $this->disp_params['block_start'];
 
-		$this->init_display( $params );
+        $this->disp_title($this->disp_params['title']);
 
-		// Collection common links:
-		echo $this->disp_params['block_start'];
+        echo $this->disp_params['block_body_start'];
 
-		$this->disp_title( $this->disp_params['title'] );
+        skin_include($this->disp_params['file_name'], $params);
 
-		echo $this->disp_params['block_body_start'];
+        echo $this->disp_params['block_body_end'];
 
-		skin_include( $this->disp_params['file_name'], $params );
+        echo $this->disp_params['block_end'];
 
-		echo $this->disp_params['block_body_end'];
+        return true;
+    }
 
-		echo $this->disp_params['block_end'];
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        $title = T_('.inc file');
+        return $title;
+    }
 
-		return true;
-	}
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->disp_params['title']);
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Embed any ".inc.php" file content found in the current skin. Useful for upgrades/backwards compatibility.');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		$title = T_( '.inc file' );
-		return $title;
-	}
+    /**
+     * Get definitions for editable params
+     */
+    public function get_param_definitions($params)
+    {
+        // Demo data:
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'size' => 60,
+            ],
+            'file_name' => [
+                'label' => T_('.inc file name'),
+                'note' => T_('The name of the ".inc.php" file which should be embedded.'),
+                'type' => 'text',
+                'size' => 40,
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
 
-
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( $this->disp_params['title'] );
-	}
-
-
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Embed any ".inc.php" file content found in the current skin. Useful for upgrades/backwards compatibility.');
-	}
-
-
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @param $params
-	 */
-	function get_param_definitions( $params )
-	{
-		// Demo data:
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_('Block title'),
-					'size' => 60,
-				),
-				'file_name' => array(
-					'label' => T_('.inc file name'),
-					'note' => T_( 'The name of the ".inc.php" file which should be embedded.' ),
-					'type' => 'text',
-					'size' => 40,
-					'defaultvalue' => ''
-				),
-			), parent::get_param_definitions( $params )	);
-
-		return $r;
-	}
+        return $r;
+    }
 }
-
-?>

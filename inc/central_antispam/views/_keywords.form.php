@@ -16,91 +16,87 @@
  * @author fplanque: Francois PLANQUE.
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $central_antispam_Module, $edited_CaKeyword, $UserSettings, $DB;
 
-param_action( '', true );
+param_action('', true);
 $creating = $edited_CaKeyword->ID == 0;
 
 // Form to edit the keyword:
 $Form = new Form();
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-$Form->add_crumb( 'cakeyword' );
+$Form->add_crumb('cakeyword');
 $Form->hidden_ctrl();
-$Form->hidden( 'tab', 'keywords' );
-if( ! $creating )
-{
-	$Form->hidden( 'cakw_ID', $edited_CaKeyword->ID );
+$Form->hidden('tab', 'keywords');
+if (! $creating) {
+    $Form->hidden('cakw_ID', $edited_CaKeyword->ID);
 }
 
-$Form->begin_fieldset( $creating ? TB_('Add keyword') : TB_('Edit keyword') );
+$Form->begin_fieldset($creating ? TB_('Add keyword') : TB_('Edit keyword'));
 
-$Form->text_input( 'cakw_keyword', $edited_CaKeyword->keyword, 32, TB_('Keyword'), '', array( 'maxlength' => 2000, 'required' => true ) );
+$Form->text_input('cakw_keyword', $edited_CaKeyword->keyword, 32, TB_('Keyword'), '', [
+    'maxlength' => 2000,
+    'required' => true,
+]);
 
-$Form->select_input_array( 'cakw_status', $edited_CaKeyword->status, ca_get_keyword_statuses(), TB_('Status') );
+$Form->select_input_array('cakw_status', $edited_CaKeyword->status, ca_get_keyword_statuses(), TB_('Status'));
 
 $Form->end_fieldset();
 
-if( $creating )
-{
-	$Form->end_form( array( array( 'submit', 'actionArray[keyword_create]', TB_('Add keyword'), 'SaveButton' ) ) );
-}
-else
-{
-	$Form->end_form( array( array( 'submit', 'actionArray[keyword_save]', TB_('Save changes!'), 'SaveButton' ) ) );
+if ($creating) {
+    $Form->end_form([['submit', 'actionArray[keyword_create]', TB_('Add keyword'), 'SaveButton']]);
+} else {
+    $Form->end_form([['submit', 'actionArray[keyword_save]', TB_('Save changes!'), 'SaveButton']]);
 }
 
 
-if( ! $creating )
-{
-	// Reports of the edited keyword:
-	$SQL = new SQL();
-	$SQL->SELECT( 'casrc_ID, casrc_baseurl, carpt_ts' );
-	$SQL->FROM( 'T_centralantispam__report' );
-	$SQL->FROM_add( 'INNER JOIN T_centralantispam__source ON carpt_casrc_ID = casrc_ID' );
-	$SQL->WHERE( 'carpt_cakw_ID = '.$DB->quote( $edited_CaKeyword->ID ) );
+if (! $creating) {
+    // Reports of the edited keyword:
+    $SQL = new SQL();
+    $SQL->SELECT('casrc_ID, casrc_baseurl, carpt_ts');
+    $SQL->FROM('T_centralantispam__report');
+    $SQL->FROM_add('INNER JOIN T_centralantispam__source ON carpt_casrc_ID = casrc_ID');
+    $SQL->WHERE('carpt_cakw_ID = ' . $DB->quote($edited_CaKeyword->ID));
 
-	$CountSQL = new SQL();
-	$CountSQL->SELECT( 'SQL_NO_CACHE COUNT( carpt_cakw_ID )' );
-	$CountSQL->FROM( 'T_centralantispam__report' );
-	$CountSQL->WHERE( 'carpt_cakw_ID = '.$DB->quote( $edited_CaKeyword->ID ) );
+    $CountSQL = new SQL();
+    $CountSQL->SELECT('SQL_NO_CACHE COUNT( carpt_cakw_ID )');
+    $CountSQL->FROM('T_centralantispam__report');
+    $CountSQL->WHERE('carpt_cakw_ID = ' . $DB->quote($edited_CaKeyword->ID));
 
-	$Results = new Results( $SQL->get(), 'carpt_', '-D', $UserSettings->get( 'results_per_page' ), $CountSQL->get() );
+    $Results = new Results($SQL->get(), 'carpt_', '-D', $UserSettings->get('results_per_page'), $CountSQL->get());
 
-	$Results->title = TB_('Reports');
+    $Results->title = TB_('Reports');
 
-	function get_link_for_url( $id, $url )
-	{
-		if( check_user_perm( 'centralantispam', 'edit' ) )
-		{ // Not reserved id AND current User has permission to edit the global settings
-			$ret_url = '<a href="'.regenerate_url( 'action,tab,cakw_ID', 'action=source_edit&amp;tab=reporters&amp;casrc_ID='.$id ).'">'.$url.'</a>';
-		}
-		else
-		{
-			$ret_url = $url;
-		}
+    function get_link_for_url($id, $url)
+    {
+        if (check_user_perm('centralantispam', 'edit')) { // Not reserved id AND current User has permission to edit the global settings
+            $ret_url = '<a href="' . regenerate_url('action,tab,cakw_ID', 'action=source_edit&amp;tab=reporters&amp;casrc_ID=' . $id) . '">' . $url . '</a>';
+        } else {
+            $ret_url = $url;
+        }
 
-		return '<strong>'.$ret_url.'</strong>';
-	}
+        return '<strong>' . $ret_url . '</strong>';
+    }
 
-	$Results->cols[] = array(
-			'th' => TB_('Url'),
-			'order' => 'casrc_baseurl',
-			'td' => '%get_link_for_url( #casrc_ID#, #casrc_baseurl# )%',
-		);
+    $Results->cols[] = [
+        'th' => TB_('Url'),
+        'order' => 'casrc_baseurl',
+        'td' => '%get_link_for_url( #casrc_ID#, #casrc_baseurl# )%',
+    ];
 
-	$Results->cols[] = array(
-			'th' => TB_('Date'),
-			'th_class' => 'shrinkwrap',
-			'order' => 'carpt_ts',
-			'td' => '%mysql2localedatetime_spans( #carpt_ts# )%',
-			'td_class' => 'timestamp',
-		);
+    $Results->cols[] = [
+        'th' => TB_('Date'),
+        'th_class' => 'shrinkwrap',
+        'order' => 'carpt_ts',
+        'td' => '%mysql2localedatetime_spans( #carpt_ts# )%',
+        'td_class' => 'timestamp',
+    ];
 
-	// Display results:
-	$Results->display();
+    // Display results:
+    $Results->display();
 }
-?>

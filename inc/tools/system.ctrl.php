@@ -12,28 +12,29 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
-
-load_funcs( 'tools/model/_system.funcs.php' );
-
-// Check minimum permission:
-check_user_perm( 'admin', 'normal', true );
-check_user_perm( 'options', 'view', true );
-
-if( check_user_perm( 'options', 'edit' ) && system_check_charset_update() )
-{ // DB charset is required to update
-	$Messages->add( sprintf( TB_('WARNING: Your database and/or some of your tables have a different charset/collation than the expected. It is strongly recommended to upgrade your database charset by running the tool <a %s>Check/Convert/Normalize the charsets/collations used by the DB (UTF-8 / ASCII)</a>.'), 'href="'.$admin_url.'?ctrl=tools&amp;action=utf8check&amp;'.url_crumb( 'tools' ).'"' ) );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
 }
 
-$AdminUI->set_path( 'options', 'system' );
+load_funcs('tools/model/_system.funcs.php');
+
+// Check minimum permission:
+check_user_perm('admin', 'normal', true);
+check_user_perm('options', 'view', true);
+
+if (check_user_perm('options', 'edit') && system_check_charset_update()) { // DB charset is required to update
+    $Messages->add(sprintf(TB_('WARNING: Your database and/or some of your tables have a different charset/collation than the expected. It is strongly recommended to upgrade your database charset by running the tool <a %s>Check/Convert/Normalize the charsets/collations used by the DB (UTF-8 / ASCII)</a>.'), 'href="' . $admin_url . '?ctrl=tools&amp;action=utf8check&amp;' . url_crumb('tools') . '"'));
+}
+
+$AdminUI->set_path('options', 'system');
 
 
-$AdminUI->breadcrumbpath_init( false );  // fp> I'm playing with the idea of keeping the current blog in the path here...
-$AdminUI->breadcrumbpath_add( TB_('System'), $admin_url.'?ctrl=system' );
-$AdminUI->breadcrumbpath_add( TB_('Status'), $admin_url.'?ctrl=system' );
+$AdminUI->breadcrumbpath_init(false);  // fp> I'm playing with the idea of keeping the current blog in the path here...
+$AdminUI->breadcrumbpath_add(TB_('System'), $admin_url . '?ctrl=system');
+$AdminUI->breadcrumbpath_add(TB_('Status'), $admin_url . '?ctrl=system');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'system-status-tab' );
+$AdminUI->set_page_manual_link('system-status-tab');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -44,21 +45,21 @@ $AdminUI->disp_body_top();
 // Begin payload block:
 $AdminUI->disp_payload_begin();
 
-$facilitate_exploits = '<p>'.TB_('When enabled, this feature is known to facilitate hacking exploits in any PHP application.')."</p>\n<p>"
-	.TB_('b2evolution includes additional measures in order not to be affected by this. However, for maximum security, we still recommend disabling this PHP feature.')."</p>\n";
-$change_ini = '<p>'.TB_('If possible, change this setting to <code>%s</code> in your php.ini or ask your hosting provider about it.').'</p>';
+$facilitate_exploits = '<p>' . TB_('When enabled, this feature is known to facilitate hacking exploits in any PHP application.') . "</p>\n<p>"
+    . TB_('b2evolution includes additional measures in order not to be affected by this. However, for maximum security, we still recommend disabling this PHP feature.') . "</p>\n";
+$change_ini = '<p>' . TB_('If possible, change this setting to <code>%s</code> in your php.ini or ask your hosting provider about it.') . '</p>';
 
 
-echo '<h2 class="page-title">'.TB_('System status').'</h2>';
+echo '<h2 class="page-title">' . TB_('System status') . '</h2>';
 
-$block_item_Widget = new Widget( 'block_item' );
+$block_item_Widget = new Widget('block_item');
 $block_item_Widget->title = '#section_title#';
 
-display_system_check( array(
-		'mode'          => 'backoffice',
-		'section_start' => $block_item_Widget->replace_vars( $block_item_Widget->params['block_start'] ),
-		'section_end'   => $block_item_Widget->params['block_end'],
-	) );
+display_system_check([
+    'mode' => 'backoffice',
+    'section_start' => $block_item_Widget->replace_vars($block_item_Widget->params['block_start']),
+    'section_end' => $block_item_Widget->params['block_end'],
+]);
 
 
 // TODO: dh> output_buffering (recommend off)
@@ -76,5 +77,3 @@ $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

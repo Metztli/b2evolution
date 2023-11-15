@@ -1,0 +1,47 @@
+// Disp Postidx
+// ======================================================================== /
+.disp_postidx {
+
+    .widget_core_coll_post_list {
+        background-color: @w;
+        padding: 30px;
+        box-shadow: @box-shadow;
+
+        ul {
+
+            list-style-type: circle;
+
+            li {
+                margin: 0;
+                padding: 0;
+
+                &:first-child {
+                    a {
+                        padding-top: 0;
+                    }
+                }
+
+                &:last-child {
+                    a {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+
+            a {
+                display: block;
+                margin: 0;
+                padding: 15px 15px 15px 0;
+                font-size: 1.5rem;
+                border-bottom: 1px dashed @c7;
+
+                &:hover, &:active, &:focus {
+                    text-decoration: none;
+                    border-bottom: 1px dashed @primary;
+                }
+            }
+
+        }
+    }
+
+}

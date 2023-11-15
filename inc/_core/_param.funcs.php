@@ -25,7 +25,9 @@
  * @author blueyed: Daniel HAHLER.
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // DEBUG: (Turn switch on or off to log debug info for specified category)
@@ -48,76 +50,71 @@ $GLOBALS['debug_params'] = false;
  * - htmlspecialchars (convert all html to special characters)
  * @return mixed Formated param value
  */
-function param_format( $value, $type = 'raw' )
+function param_format($value, $type = 'raw')
 {
-	switch( $type )
-	{
-		case 'html': // Technically does the same as "raw", but may do more in the future.
-		case 'raw':
-			// Clean utf8:
-			return utf8_clean( $value );
+    switch ($type) {
+        case 'html': // Technically does the same as "raw", but may do more in the future.
+        case 'raw':
+            // Clean utf8:
+            return utf8_clean($value);
 
-		case 'htmlspecialchars':
-			global $evo_charset;
-			// convert all html to special characters:
-			$value = utf8_trim( htmlspecialchars( $value, ENT_COMPAT, $evo_charset ) );
-			// cross-platform newlines:
-			return preg_replace( "~(\r\n|\r)~", "\n", $value );
+        case 'htmlspecialchars':
+            global $evo_charset;
+            // convert all html to special characters:
+            $value = utf8_trim(htmlspecialchars($value, ENT_COMPAT, $evo_charset));
+            // cross-platform newlines:
+            return preg_replace("~(\r\n|\r)~", "\n", $value);
 
-		case 'text':
-			// strip out any html:
-			$value = utf8_trim( utf8_strip_tags( $value ) );
-			// cross-platform newlines:
-			return preg_replace( "~(\r\n|\r)~", "\n", $value );
+        case 'text':
+            // strip out any html:
+            $value = utf8_trim(utf8_strip_tags($value));
+            // cross-platform newlines:
+            return preg_replace("~(\r\n|\r)~", "\n", $value);
 
-		case 'string':
-			// Make sure the string is a single line
-			$value = preg_replace( '~\r|\n~', '', $value );
-			// strip out any html:
-			$value = utf8_strip_tags( $value );
-			return utf8_trim( $value );
+        case 'string':
+            // Make sure the string is a single line
+            $value = preg_replace('~\r|\n~', '', $value);
+            // strip out any html:
+            $value = utf8_strip_tags($value);
+            return utf8_trim($value);
 
-		case 'url':
-			// strip out any html:
-			$value = utf8_trim( utf8_strip_tags( $value ) );
-			// Remove new line chars and double quote from url
-			return preg_replace( '~\r|\n|"~', '', $value );
+        case 'url':
+            // strip out any html:
+            $value = utf8_trim(utf8_strip_tags($value));
+            // Remove new line chars and double quote from url
+            return preg_replace('~\r|\n|"~', '', $value);
 
-		case 'filepath':
-			// Fiel path must be a string:
-			$value = param_format( $value, 'string' );
-			// Replace windows backslashes:
-			return str_replace( '\\', '/', $value );
+        case 'filepath':
+            // Fiel path must be a string:
+            $value = param_format($value, 'string');
+            // Replace windows backslashes:
+            return str_replace('\\', '/', $value);
 
-		case 'boolean':
-			return (bool)$value;
+        case 'boolean':
+            return (bool) $value;
 
-		case 'integer':
-			return intval( $value );
+        case 'integer':
+            return intval($value);
 
-		case 'float':
-		case 'double':
-			// Remove all thousand separators:
-			$value = str_replace( array( ' ', '\'' ), '', $value );
-			if( preg_match( '/([\.,])\d+$/', $value, $dec_point ) )
-			{	// If value contains decimal point:
-				if( substr_count( $value, $dec_point[1] ) > 1 )
-				{	// If decimal point is used more than 1 time then consider this as thousand separator and remove them all:
-					$value = str_replace( $dec_point[1], '', $value );
-				}
-				else
-				{	// Remove decimal points what used as thousand separators:
-					$value = str_replace( array( ',', '.' ), '', $value );
-					$dec_point_pos = strlen( $value ) - strlen( $dec_point[0] ) + 1;
-					$value = substr( $value, 0, $dec_point_pos ).'.'.substr( $value, $dec_point_pos );
-				}
-			}
-			return floatval( $value );
+        case 'float':
+        case 'double':
+            // Remove all thousand separators:
+            $value = str_replace([' ', '\''], '', $value);
+            if (preg_match('/([\.,])\d+$/', $value, $dec_point)) {	// If value contains decimal point:
+                if (substr_count($value, $dec_point[1]) > 1) {	// If decimal point is used more than 1 time then consider this as thousand separator and remove them all:
+                    $value = str_replace($dec_point[1], '', $value);
+                } else {	// Remove decimal points what used as thousand separators:
+                    $value = str_replace([',', '.'], '', $value);
+                    $dec_point_pos = strlen($value) - strlen($dec_point[0]) + 1;
+                    $value = substr($value, 0, $dec_point_pos) . '.' . substr($value, $dec_point_pos);
+                }
+            }
+            return floatval($value);
 
-		default:
-			// Unknown format type:
-			return $value;
-	}
+        default:
+            // Unknown format type:
+            return $value;
+    }
 }
 
 /**
@@ -163,387 +160,333 @@ function param_format( $value, $type = 'raw' )
  *              'allow_empty' will refuse illegal values but will always accept empty values (This helps blocking dirty spambots or borked index bots. Saves a lot of processor time by killing invalid requests)
  * @return mixed Final value of Variable, or false if we don't force setting and did not set
  */
-function param( $var, $type, $default = '', $memorize = false,
-								$override = false, $use_default = true, $strict_typing = 'allow_empty' )
-{
-	global $Debuglog, $debug, $evo_charset, $io_charset, $is_cli;
-	// NOTE: we use $GLOBALS[$var] instead of $$var, because otherwise it would conflict with param names which are used as function params ("var", "type", "default", ..)!
+function param(
+    $var,
+    $type,
+    $default = '',
+    $memorize = false,
+    $override = false,
+    $use_default = true,
+    $strict_typing = 'allow_empty'
+) {
+    global $Debuglog, $debug, $evo_charset, $io_charset, $is_cli;
+    // NOTE: we use $GLOBALS[$var] instead of $$var, because otherwise it would conflict with param names which are used as function params ("var", "type", "default", ..)!
 
-	if( $is_cli )
-	{	// For CLI mode use only default values:
-		if( in_array( $type, array( 'array', 'array:integer', 'array:string', 'array:array:integer', 'array:array:string' ) ) && $default === '' )
-		{	// Change default '' into array() to avoid a notice:
-			$default = array();
-		}
-		$GLOBALS[$var] = $default;
-		$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+    if ($is_cli) {	// For CLI mode use only default values:
+        if (in_array($type, ['array', 'array:integer', 'array:string', 'array:array:integer', 'array:array:string']) && $default === '') {	// Change default '' into array() to avoid a notice:
+            $default = [];
+        }
+        $GLOBALS[$var] = $default;
+        $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-		return $GLOBALS[$var];
-		// EXIT HERE, Don't do other code below for params from CLI mode.
-	}
+        return $GLOBALS[$var];
+        // EXIT HERE, Don't do other code below for params from CLI mode.
+    }
 
-	/*
-	 * STEP 1 : Set the variable
-	 *
-	 * Check if already set
-	 * WARNING: when PHP register globals is ON, COOKIES get priority over GET and POST with this!!!
-	 *   dh> I never understood that comment.. does it refer to "variables_order" php.ini setting?
-	 *		fp> I guess
-	 */
-	if( ! isset( $GLOBALS[$var] ) || $override )
-	{
-		if( isset($_POST[$var]) )
-		{
-			$GLOBALS[$var] = $_POST[$var];
-			// if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by POST', 'params' );
-		}
-		elseif( isset($_GET[$var]) )
-		{
-			$GLOBALS[$var] = $_GET[$var];
-			// if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by GET', 'params' );
-		}
-		elseif( isset($_COOKIE[$var]))
-		{
-			$GLOBALS[$var] = $_COOKIE[$var];
-			// if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by COOKIE', 'params' );
-		}
-		elseif( $default === true )
-		{
-			bad_request_die( sprintf( T_('Parameter &laquo;%s&raquo; is required!'), $var ) );
-		}
-		elseif( $use_default )
-		{	// We haven't set any value yet and we really want one: use default:
-			if( in_array( $type, array( 'array', 'array:integer', 'array:string', 'array:array:integer', 'array:array:string' ) ) && $default === '' )
-			{ // Change default '' into array() (otherwise there would be a notice with settype() below)
-				$default = array();
-			}
-			$GLOBALS[$var] = $default;
-			// echo '<br>param(-): '.$var.'='.$GLOBALS[$var].' set by default';
-			// if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by default', 'params' );
-		}
-		else
-		{ // param not found! don't set the variable.
-			// Won't be memorized nor type-forced!
-			return false;
-		}
-	}
-	else
-	{	// Variable was already set
-		// if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.' already set to ['.var_export($GLOBALS[$var], true).']!', 'params' );
-	}
+    /*
+     * STEP 1 : Set the variable
+     *
+     * Check if already set
+     * WARNING: when PHP register globals is ON, COOKIES get priority over GET and POST with this!!!
+     *   dh> I never understood that comment.. does it refer to "variables_order" php.ini setting?
+     *		fp> I guess
+     */
+    if (! isset($GLOBALS[$var]) || $override) {
+        if (isset($_POST[$var])) {
+            $GLOBALS[$var] = $_POST[$var];
+            // if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by POST', 'params' );
+        } elseif (isset($_GET[$var])) {
+            $GLOBALS[$var] = $_GET[$var];
+            // if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by GET', 'params' );
+        } elseif (isset($_COOKIE[$var])) {
+            $GLOBALS[$var] = $_COOKIE[$var];
+            // if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by COOKIE', 'params' );
+        } elseif ($default === true) {
+            bad_request_die(sprintf(T_('Parameter &laquo;%s&raquo; is required!'), $var));
+        } elseif ($use_default) {	// We haven't set any value yet and we really want one: use default:
+            if (in_array($type, ['array', 'array:integer', 'array:string', 'array:array:integer', 'array:array:string']) && $default === '') { // Change default '' into array() (otherwise there would be a notice with settype() below)
+                $default = [];
+            }
+            $GLOBALS[$var] = $default;
+            // echo '<br>param(-): '.$var.'='.$GLOBALS[$var].' set by default';
+            // if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.'='.$GLOBALS[$var].' set by default', 'params' );
+        } else { // param not found! don't set the variable.
+            // Won't be memorized nor type-forced!
+            return false;
+        }
+    } else {	// Variable was already set
+        // if( isset($Debuglog) ) $Debuglog->add( 'param(-): '.$var.' already set to ['.var_export($GLOBALS[$var], true).']!', 'params' );
+    }
 
-	if( isset($io_charset) && ! empty($evo_charset) )
-	{
-		$GLOBALS[$var] = convert_charset( $GLOBALS[$var], $evo_charset, $io_charset );
-	}
+    if (isset($io_charset) && ! empty($evo_charset)) {
+        $GLOBALS[$var] = convert_charset($GLOBALS[$var], $evo_charset, $io_charset);
+    }
 
-	// Check if the type is the special array or regexp
-	if( substr( $type, 0, 7 ) == 'array:/' )
-	{ // It is an array type param which may contains elements matching to the given regular expression
-		$elements_regexp = substr( $type, 6 );
-		$elements_type = 'string';
-		$type = 'array:regexp';
-	}
+    // Check if the type is the special array or regexp
+    if (substr($type, 0, 7) == 'array:/') { // It is an array type param which may contains elements matching to the given regular expression
+        $elements_regexp = substr($type, 6);
+        $elements_type = 'string';
+        $type = 'array:regexp';
+    }
 
-	/*
-	 * STEP 2: make sure the data fits the expected type
-	 *
-	 * type will be forced even if it was set before and not overriden
-	 */
-	if( !empty($type) && $GLOBALS[$var] !== NULL )
-	{ // Force the type
-		// echo "forcing type!";
-		switch( $type )
-		{
-			case 'html': // Technically does the same as "raw", but may do more in the future.
-			case 'raw':
-				if( ! is_scalar($GLOBALS[$var]) )
-				{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+    /*
+     * STEP 2: make sure the data fits the expected type
+     *
+     * type will be forced even if it was set before and not overriden
+     */
+    if (! empty($type) && $GLOBALS[$var] !== null) { // Force the type
+        // echo "forcing type!";
+        switch ($type) {
+            case 'html': // Technically does the same as "raw", but may do more in the future.
+            case 'raw':
+                if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-				// do nothing
-				if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.$var.'</strong> as RAW Unsecure HTML', 'params' );
-				break;
+                // do nothing
+                if (isset($Debuglog)) {
+                    $Debuglog->add('param(-): <strong>' . $var . '</strong> as RAW Unsecure HTML', 'params');
+                }
+                break;
 
-			case 'htmlspecialchars':
-				if( ! is_scalar($GLOBALS[$var]) )
-				{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+            case 'htmlspecialchars':
+                if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as text with html special chars', 'params' );
-				break;
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as text with html special chars', 'params');
+                break;
 
-			case 'text':
-				if( ! is_scalar($GLOBALS[$var]) )
-				{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+            case 'text':
+                if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as text', 'params' );
-				break;
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as text', 'params');
+                break;
 
-			case 'string':
-				if( ! is_scalar($GLOBALS[$var]) )
-				{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+            case 'string':
+                if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as string', 'params' );
-				break;
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as string', 'params');
+                break;
 
-			case 'url':
-				if( ! is_scalar($GLOBALS[$var]) )
-				{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+            case 'url':
+                if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-				if( ! empty( $GLOBALS[$var] ) && ! preg_match( '#^(/|\?|https?://)#i', $GLOBALS[$var] ) )
-				{ // We cannot accept this MISMATCH:
-					bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-				}
+                if (! empty($GLOBALS[$var]) && ! preg_match('#^(/|\?|https?://)#i', $GLOBALS[$var])) { // We cannot accept this MISMATCH:
+                    bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                }
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as url', 'params' );
-				break;
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as url', 'params');
+                break;
 
-			case 'filepath':
-				if( ! is_scalar( $GLOBALS[$var] ) )
-				{	// This happens if someone uses "foo[]=x" where "foo" is expected as string
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-				}
+            case 'filepath':
+                if (! is_scalar($GLOBALS[$var])) {	// This happens if someone uses "foo[]=x" where "foo" is expected as string
+                    debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                }
 
-				// Format param to valid value:
-				$GLOBALS[$var] = param_format( $GLOBALS[$var], 'filepath' );
+                // Format param to valid value:
+                $GLOBALS[$var] = param_format($GLOBALS[$var], 'filepath');
 
-				if( ! is_safe_filepath( $GLOBALS[$var] ) )
-				{	// We cannot accept this unsecure file path:
-					bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-				}
+                if (! is_safe_filepath($GLOBALS[$var])) {	// We cannot accept this unsecure file path:
+                    bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                }
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as filepath', 'params' );
-				break;
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as filepath', 'params');
+                break;
 
-			case 'array:integer':
-			case 'array:array:integer':
-				// Set elements type to integer, and set the corresponding regular expression
-				$elements_type = 'integer';
-				$elements_regexp = '/^(\+|-)?[0-9]+$/';
-			case 'array':
-			case 'array:string':
-			case 'array:filepath':
-			case 'array:regexp':
-			case 'array:array:string':
-			case 'array:array:filepath':
-				if( ! is_array( $GLOBALS[$var] ) )
-				{ // This param must be array
-					debug_die( 'param(-): <strong>'.$var.'</strong> is not array!' );
-				}
+            case 'array:integer':
+            case 'array:array:integer':
+                // Set elements type to integer, and set the corresponding regular expression
+                $elements_type = 'integer';
+                $elements_regexp = '/^(\+|-)?[0-9]+$/';
+                // no break
+            case 'array':
+            case 'array:string':
+            case 'array:filepath':
+            case 'array:regexp':
+            case 'array:array:string':
+            case 'array:array:filepath':
+                if (! is_array($GLOBALS[$var])) { // This param must be array
+                    debug_die('param(-): <strong>' . $var . '</strong> is not array!');
+                }
 
-				// Store current array in temp var for checking and preparing:
-				$globals_var = $GLOBALS[$var];
-				// Check if the given array type is one dimensional array:
-				$one_dimensional = ( ( $type == 'array' ) || ( $type == 'array:integer' ) || ( $type == 'array:string' ) || ( $type == 'array:filepath' ) || ( $type == 'array:regexp' ) );
-				// Check if the given array type should contains string elements:
-				$contains_strings = ( ( $type == 'array:string' ) || ( $type == 'array:array:string' ) || ( $type == 'array:filepath' ) || ( $type == 'array:array:filepath' ) );
-				if( $one_dimensional )
-				{ // Convert to a two dimensional array to handle one and two dimensional arrays the same way
-					$globals_var = array( $globals_var );
-				}
+                // Store current array in temp var for checking and preparing:
+                $globals_var = $GLOBALS[$var];
+                // Check if the given array type is one dimensional array:
+                $one_dimensional = (($type == 'array') || ($type == 'array:integer') || ($type == 'array:string') || ($type == 'array:filepath') || ($type == 'array:regexp'));
+                // Check if the given array type should contains string elements:
+                $contains_strings = (($type == 'array:string') || ($type == 'array:array:string') || ($type == 'array:filepath') || ($type == 'array:array:filepath'));
+                if ($one_dimensional) { // Convert to a two dimensional array to handle one and two dimensional arrays the same way
+                    $globals_var = [$globals_var];
+                }
 
-				foreach( $globals_var as $i => $var_array )
-				{
-					if( ! is_array( $var_array ) )
-					{ // This param must be array
-						// Note: In case of one dimensional array params this will never happen
-						debug_die( 'param(-): <strong>'.$var.'['.$i.']</strong> is not array!' );
-					}
+                foreach ($globals_var as $i => $var_array) {
+                    if (! is_array($var_array)) { // This param must be array
+                        // Note: In case of one dimensional array params this will never happen
+                        debug_die('param(-): <strong>' . $var . '[' . $i . ']</strong> is not array!');
+                    }
 
-					if( $type == 'array' )
-					{ // This param may contain any kind of elements we need to check and validate it recursively
-						$globals_var[$i] = param_check_general_array( $var_array );
-						break;
-					}
+                    if ($type == 'array') { // This param may contain any kind of elements we need to check and validate it recursively
+                        $globals_var[$i] = param_check_general_array($var_array);
+                        break;
+                    }
 
-					foreach( $var_array as $j => $var_value )
-					{
-						if( ! is_scalar( $var_value ) )
-						{ // This happens if someone uses "foo[][]=x" where "foo[]" is expected as string
-							debug_die( 'param(-): element of array <strong>'.$var.'</strong> is not scalar!' );
-						}
+                    foreach ($var_array as $j => $var_value) {
+                        if (! is_scalar($var_value)) { // This happens if someone uses "foo[][]=x" where "foo[]" is expected as string
+                            debug_die('param(-): element of array <strong>' . $var . '</strong> is not scalar!');
+                        }
 
-						if( $contains_strings )
-						{	// Prepare string elements of array:
-							if( $type == 'array:filepath' || $type == 'array:array:filepath' )
-							{	// Special verifying for file path params:
-								// Format param to valid file path value:
-								$var_value = param_format( $var_value, 'filepath' );
-								if( ( ! is_safe_filepath( $var_value ) ) || $var_value == '.' )
-								{	// We cannot accept this unsecure file path:
-									bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-								}
-								$globals_var[$i][$j] = $var_value;
-							}
-							else
-							{	// Format param to valid string value:
-								$globals_var[$i][$j] = param_format( $var_value, 'string' );
-							}
-							continue;
-						}
+                        if ($contains_strings) {	// Prepare string elements of array:
+                            if ($type == 'array:filepath' || $type == 'array:array:filepath') {	// Special verifying for file path params:
+                                // Format param to valid file path value:
+                                $var_value = param_format($var_value, 'filepath');
+                                if ((! is_safe_filepath($var_value)) || $var_value == '.') {	// We cannot accept this unsecure file path:
+                                    bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                                }
+                                $globals_var[$i][$j] = $var_value;
+                            } else {	// Format param to valid string value:
+                                $globals_var[$i][$j] = param_format($var_value, 'string');
+                            }
+                            continue;
+                        }
 
-						if( isset( $elements_regexp ) )
-						{ // Array contains elements which must match to the given regular expression
-							if( ( $strict_typing == 'allow_empty' && empty( $var_value ) )
-							    || preg_match( $elements_regexp, $var_value ) )
-							{ // OK match, set the corresponding type
-								settype( $globals_var[$i][$j], $elements_type );
-							}
-							else
-							{ // No match, cannot accept this MISMATCH
-								// Note: In case of array:integer or array:regexp we always use strict typing for the array elements
-								bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-							}
-						}
-					}
-				}
+                        if (isset($elements_regexp)) { // Array contains elements which must match to the given regular expression
+                            if (($strict_typing == 'allow_empty' && empty($var_value))
+                                || preg_match($elements_regexp, $var_value)) { // OK match, set the corresponding type
+                                settype($globals_var[$i][$j], $elements_type);
+                            } else { // No match, cannot accept this MISMATCH
+                                // Note: In case of array:integer or array:regexp we always use strict typing for the array elements
+                                bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                            }
+                        }
+                    }
+                }
 
-				if( $one_dimensional )
-				{ // Extract real array from temp array
-					$globals_var = $globals_var[0];
-				}
-				// Restore current array with prepared data
-				$GLOBALS[$var] = $globals_var;
+                if ($one_dimensional) { // Extract real array from temp array
+                    $globals_var = $globals_var[0];
+                }
+                // Restore current array with prepared data
+                $GLOBALS[$var] = $globals_var;
 
-				$Debuglog->add( 'param(-): <strong>'.$var.'</strong> as '.$type, 'params' );
+                $Debuglog->add('param(-): <strong>' . $var . '</strong> as ' . $type, 'params');
 
-				if( $GLOBALS[$var] === array() && ( $strict_typing === false ) && $use_default )
-				{ // We want to consider empty values as invalid and fall back to the default value:
-					$GLOBALS[$var] = $default;
-				}
-				break;
+                if ($GLOBALS[$var] === [] && ($strict_typing === false) && $use_default) { // We want to consider empty values as invalid and fall back to the default value:
+                    $GLOBALS[$var] = $default;
+                }
+                break;
 
-			default:
-				if( utf8_substr( $type, 0, 1 ) == '/' )
-				{	// We want to match against a REGEXP:
-					if( ! is_scalar( $GLOBALS[$var] ) )
-					{ // This happens if someone uses "foo[]=x" where "foo" is expected as string
-						debug_die( 'param(-): <strong>'.$var.'</strong> is not scalar!' );
-					}
-					elseif( preg_match( $type, $GLOBALS[$var] ) )
-					{	// Okay, match
-						if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.$var.'</strong> matched against '.$type, 'params' );
-					}
-					elseif( $strict_typing == 'allow_empty' && empty($GLOBALS[$var]) )
-					{	// No match but we accept empty value:
-						if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.$var.'</strong> is empty: ok', 'params' );
-					}
-					elseif( $strict_typing )
-					{	// We cannot accept this MISMATCH:
-						bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-					}
-					else
-					{ // Fall back to default:
-						$GLOBALS[$var] = $default;
-						if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.$var.'</strong> DID NOT match '.$type.' set to default value='.$GLOBALS[$var], 'params' );
-					}
+            default:
+                if (utf8_substr($type, 0, 1) == '/') {	// We want to match against a REGEXP:
+                    if (! is_scalar($GLOBALS[$var])) { // This happens if someone uses "foo[]=x" where "foo" is expected as string
+                        debug_die('param(-): <strong>' . $var . '</strong> is not scalar!');
+                    } elseif (preg_match($type, $GLOBALS[$var])) {	// Okay, match
+                        if (isset($Debuglog)) {
+                            $Debuglog->add('param(-): <strong>' . $var . '</strong> matched against ' . $type, 'params');
+                        }
+                    } elseif ($strict_typing == 'allow_empty' && empty($GLOBALS[$var])) {	// No match but we accept empty value:
+                        if (isset($Debuglog)) {
+                            $Debuglog->add('param(-): <strong>' . $var . '</strong> is empty: ok', 'params');
+                        }
+                    } elseif ($strict_typing) {	// We cannot accept this MISMATCH:
+                        bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                    } else { // Fall back to default:
+                        $GLOBALS[$var] = $default;
+                        if (isset($Debuglog)) {
+                            $Debuglog->add('param(-): <strong>' . $var . '</strong> DID NOT match ' . $type . ' set to default value=' . $GLOBALS[$var], 'params');
+                        }
+                    }
 
-					// From now on, consider this as a string: (we need this when memorizing)
-					$type = 'string';
-				}
-				elseif( $GLOBALS[$var] === '' )
-				{ // Special handling of empty values.
-					if( $strict_typing === false && $use_default )
-					{	// ADDED BY FP 2006-07-06
-						// We want to consider empty values as invalid and fall back to the default value:
-						$GLOBALS[$var] = $default;
-					}
-					else
-					{	// We memorize the empty value as NULL:
-						// fplanque> note: there might be side effects to this, but we need
-						// this to distinguish between 0 and 'no input'
-						// Note: we do this after regexps because we may or may not want to allow empty strings in regexps
-						$GLOBALS[$var] = NULL;
-						if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.$var.'</strong> set to NULL', 'params' );
-					}
-				}
-				else
-				{
-					if( $strict_typing )
-					{	// We want to make sure the value is valid:
-						$regexp = '';
-						switch( $type )
-						{
-							case 'boolean':
-								$regexp = '/^(0|1|false|true)$/i';
-								break;
+                    // From now on, consider this as a string: (we need this when memorizing)
+                    $type = 'string';
+                } elseif ($GLOBALS[$var] === '') { // Special handling of empty values.
+                    if ($strict_typing === false && $use_default) {	// ADDED BY FP 2006-07-06
+                        // We want to consider empty values as invalid and fall back to the default value:
+                        $GLOBALS[$var] = $default;
+                    } else {	// We memorize the empty value as NULL:
+                        // fplanque> note: there might be side effects to this, but we need
+                        // this to distinguish between 0 and 'no input'
+                        // Note: we do this after regexps because we may or may not want to allow empty strings in regexps
+                        $GLOBALS[$var] = null;
+                        if (isset($Debuglog)) {
+                            $Debuglog->add('param(-): <strong>' . $var . '</strong> set to NULL', 'params');
+                        }
+                    }
+                } else {
+                    if ($strict_typing) {	// We want to make sure the value is valid:
+                        $regexp = '';
+                        switch ($type) {
+                            case 'boolean':
+                                $regexp = '/^(0|1|false|true)$/i';
+                                break;
 
-							case 'integer':
-								$regexp = '/^(\+|-)?[0-9]+$/';
-								break;
+                            case 'integer':
+                                $regexp = '/^(\+|-)?[0-9]+$/';
+                                break;
 
-							case 'float':
-							case 'double':
-								$regexp = '/^(\+|-)?[0-9 \'.,]+([.,][0-9]+)?$/';
-								break;
+                            case 'float':
+                            case 'double':
+                                $regexp = '/^(\+|-)?[0-9 \'.,]+([.,][0-9]+)?$/';
+                                break;
 
-							default:
-								// Note: other types are not tested and they are not allowed without testing.
-								debug_die( 'Invalid parameter type!' );
-						}
-						if( $strict_typing == 'allow_empty' && empty($GLOBALS[$var]) )
-						{ // We have an empty value and we accept it
-							// ok..
-						}
-						elseif( !empty( $regexp ) )
-						{
-							if( ( $type == 'boolean' ) && ( strtolower( $GLOBALS[$var] ) == 'false' ) )
-							{ // 'false' string must be interpreted as boolean false value
-								$GLOBALS[$var] = false;
-							}
-							elseif( !is_scalar( $GLOBALS[$var] ) || !preg_match( $regexp, $GLOBALS[$var] ) )
-							{ // Value of scalar var does not match!
-								bad_request_die( sprintf( T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var ) );
-							}
-						}
-					}
+                            default:
+                                // Note: other types are not tested and they are not allowed without testing.
+                                debug_die('Invalid parameter type!');
+                        }
+                        if ($strict_typing == 'allow_empty' && empty($GLOBALS[$var])) { // We have an empty value and we accept it
+                            // ok..
+                        } elseif (! empty($regexp)) {
+                            if (($type == 'boolean') && (strtolower($GLOBALS[$var]) == 'false')) { // 'false' string must be interpreted as boolean false value
+                                $GLOBALS[$var] = false;
+                            } elseif (! is_scalar($GLOBALS[$var]) || ! preg_match($regexp, $GLOBALS[$var])) { // Value of scalar var does not match!
+                                bad_request_die(sprintf(T_('Illegal value received for parameter &laquo;%s&raquo;!'), $var));
+                            }
+                        }
+                    }
 
-					// Format param:
-					$GLOBALS[$var] = param_format( $GLOBALS[$var], $type );
+                    // Format param:
+                    $GLOBALS[$var] = param_format($GLOBALS[$var], $type);
 
-					// Change the variable type:
-					settype( $GLOBALS[$var], $type );
-					if( isset($Debuglog) ) $Debuglog->add( 'param(-): <strong>'.var_export($var, true).'</strong> typed to '.$type.', new value='.var_export($GLOBALS[$var], true), 'params' );
-				}
-		}
-	}
+                    // Change the variable type:
+                    settype($GLOBALS[$var], $type);
+                    if (isset($Debuglog)) {
+                        $Debuglog->add('param(-): <strong>' . var_export($var, true) . '</strong> typed to ' . $type . ', new value=' . var_export($GLOBALS[$var], true), 'params');
+                    }
+                }
+        }
+    }
 
-	/*
-	 * STEP 3: memorize the value for later url regeneration
-	 */
-	if( $memorize === true ||
-	    ( $memorize === 'auto' && ( isset( $_POST[$var] ) || isset( $_GET[$var] ) || isset( $_COOKIE[$var] ) ) ) ||
-	    ( $memorize === 'ifnotyet' && ! param_ismemorized( $var ) ) )
-	{	// Memorize this parameter:
-		memorize_param( $var, $type, $default );
-	}
+    /*
+     * STEP 3: memorize the value for later url regeneration
+     */
+    if ($memorize === true ||
+        ($memorize === 'auto' && (isset($_POST[$var]) || isset($_GET[$var]) || isset($_COOKIE[$var]))) ||
+        ($memorize === 'ifnotyet' && ! param_ismemorized($var))) {	// Memorize this parameter:
+        memorize_param($var, $type, $default);
+    }
 
-	// echo $var, '(', gettype($GLOBALS[$var]), ')=', $GLOBALS[$var], '<br />';
-	return $GLOBALS[$var];
+    // echo $var, '(', gettype($GLOBALS[$var]), ')=', $GLOBALS[$var], '<br />';
+    return $GLOBALS[$var];
 }
 
 
@@ -558,24 +501,19 @@ function param( $var, $type, $default = '', $memorize = false,
  * @param mixed Default to use
  * @return string
  */
-function param_arrayindex( $param_name, $default = '' )
+function param_arrayindex($param_name, $default = '')
 {
-	$array = array_keys( param( $param_name, 'array', array() ) );
-	$value = array_pop( $array );
-	if( is_string($value) )
-	{
-		$value = utf8_substr( utf8_strip_tags( $value ), 0, 50 );  // sanitize it
-	}
-	elseif( ! empty( $value ) )
-	{ // this is probably a numeric index from '<input name="array[]" .. />'
-		debug_die( 'Invalid array param!' );
-	}
-	else
-	{
-		$value = $default;
-	}
+    $array = array_keys(param($param_name, 'array', []));
+    $value = array_pop($array);
+    if (is_string($value)) {
+        $value = utf8_substr(utf8_strip_tags($value), 0, 50);  // sanitize it
+    } elseif (! empty($value)) { // this is probably a numeric index from '<input name="array[]" .. />'
+        debug_die('Invalid array param!');
+    } else {
+        $value = $default;
+    }
 
-	return $value;
+    return $value;
 }
 
 
@@ -591,21 +529,19 @@ function param_arrayindex( $param_name, $default = '' )
  * @param mixed Default to use.
  * @return string
  */
-function param_action( $default = '', $memorize = false )
+function param_action($default = '', $memorize = false)
 {
-	if( ! isset($_POST['actionArray']) )
-	{ // if actionArray is POSTed, use this instead of any "action" (which might come via GET)
-		$action = param( 'action', 'string', $default, $memorize );
-	}
+    if (! isset($_POST['actionArray'])) { // if actionArray is POSTed, use this instead of any "action" (which might come via GET)
+        $action = param('action', 'string', $default, $memorize);
+    }
 
-	if( ! isset( $action ) )
-	{ // Check $actionArray
-		$action = param_arrayindex( 'actionArray', $default );
+    if (! isset($action)) { // Check $actionArray
+        $action = param_arrayindex('actionArray', $default);
 
-		set_param( 'action', $action ); // always set "action"
-	}
+        set_param('action', $action); // always set "action"
+    }
 
-	return $action;
+    return $action;
 }
 
 
@@ -619,20 +555,26 @@ function param_action( $default = '', $memorize = false )
  * @uses param()
  * @see param()
  */
-function param_cookie($var, $type = '', $default = '', $memorize = false,
-		$override = false, $use_default = true, $strict_typing = 'allow_empty')
-{
-	$save_GET = $_GET;
-	$save_POST = $_POST;
+function param_cookie(
+    $var,
+    $type = '',
+    $default = '',
+    $memorize = false,
+    $override = false,
+    $use_default = true,
+    $strict_typing = 'allow_empty'
+) {
+    $save_GET = $_GET;
+    $save_POST = $_POST;
 
-	unset( $_GET, $_POST );
+    unset($_GET, $_POST);
 
-	$r = param( $var, $type, $default, $memorize, $override, $use_default, $strict_typing );
+    $r = param($var, $type, $default, $memorize, $override, $use_default, $strict_typing);
 
-	$_GET = $save_GET;
-	$_POST = $save_POST;
+    $_GET = $save_GET;
+    $_POST = $save_POST;
 
-	return $r;
+    return $r;
 }
 
 
@@ -642,63 +584,60 @@ function param_cookie($var, $type = '', $default = '', $memorize = false,
  * @param string param name
  * @return integer seconds
  */
-function param_duration( $var )
+function param_duration($var)
 {
-	$periods = array(
-			'second' => 1,        // 1 second
-			'minute' => 60,       // 60 seconds
-			'hour'   => 3600,     // 60 minutes
-			'day'    => 86400,    // 24 hours
-			'month'  => 2592000,  // 30 days
-			'year'   => 31536000, // 365 days
-		);
+    $periods = [
+        'second' => 1,        // 1 second
+        'minute' => 60,       // 60 seconds
+        'hour' => 3600,     // 60 minutes
+        'day' => 86400,    // 24 hours
+        'month' => 2592000,  // 30 days
+        'year' => 31536000, // 365 days
+    ];
 
-	$value = param( $var.'_value', 'integer', 0 );
-	$name = param( $var.'_name', 'string', '' );
+    $value = param($var . '_value', 'integer', 0);
+    $name = param($var . '_name', 'string', '');
 
-	$seconds = 0;
-	if( !empty( $periods[ $name ] ) && !empty( $value ) )
-	{	// Convert time period to seconds
-		$seconds = $periods[ $name ] * $value;
-	}
+    $seconds = 0;
+    if (! empty($periods[$name]) && ! empty($value)) {	// Convert time period to seconds
+        $seconds = $periods[$name] * $value;
+    }
 
-	return $seconds;
+    return $seconds;
 }
 
 
 /**
  * @param string param name
  * @param string error message
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
  * @return boolean true if OK
  */
-function param_string_not_empty( $var, $err_msg, $field_err_msg = NULL )
+function param_string_not_empty($var, $err_msg, $field_err_msg = null)
 {
-	param( $var, 'string', true );
-	return param_check_not_empty( $var, $err_msg, $field_err_msg );
+    param($var, 'string', true);
+    return param_check_not_empty($var, $err_msg, $field_err_msg);
 }
 
 
 /**
  * @param string param name
  * @param string error message
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
  * @return boolean true if OK
  */
-function param_check_not_empty( $var, $err_msg = NULL, $field_err_msg = NULL )
+function param_check_not_empty($var, $err_msg = null, $field_err_msg = null)
 {
-	if( empty( $GLOBALS[$var] ) )
-	{
-		if( empty($err_msg) )
-		{
-			$err_msg = sprintf( T_('The field &laquo;%s&raquo; cannot be empty.'), substr( $var, strpos( $var, '_' )+1 ) );
-			$field_err_msg = T_('This field cannot be empty.');
-		}
+    if (empty($GLOBALS[$var])) {
+        if (empty($err_msg)) {
+            $err_msg = sprintf(T_('The field &laquo;%s&raquo; cannot be empty.'), substr($var, strpos($var, '_') + 1));
+            $field_err_msg = T_('This field cannot be empty.');
+        }
 
-		param_error( $var, $err_msg, $field_err_msg );
-		return false;
-	}
-	return true;
+        param_error($var, $err_msg, $field_err_msg);
+        return false;
+    }
+    return true;
 }
 
 
@@ -709,9 +648,9 @@ function param_check_not_empty( $var, $err_msg = NULL, $field_err_msg = NULL )
  * @param string error message
  * @return boolean true if OK
  */
-function param_check_number( $var, $err_msg, $required = false )
+function param_check_number($var, $err_msg, $required = false)
 {
-	return param_validate( $var, 'check_is_number', $required, $err_msg );
+    return param_validate($var, 'check_is_number', $required, $err_msg);
 }
 
 
@@ -724,31 +663,27 @@ function param_check_number( $var, $err_msg, $required = false )
  * @param string error message if min value greater than max
  * @return boolean true if OK
  */
-function param_check_interval( $var_min, $var_max, $err_msg_number, $err_msg_compare, $required = false )
+function param_check_interval($var_min, $var_max, $err_msg_number, $err_msg_compare, $required = false)
 {
-	$result_min = param_validate( $var_min, 'check_is_number', $required, $err_msg_number );
-	$result_max = param_validate( $var_max, 'check_is_number', $required, $err_msg_number );
-	$result_compare = true;
+    $result_min = param_validate($var_min, 'check_is_number', $required, $err_msg_number);
+    $result_max = param_validate($var_max, 'check_is_number', $required, $err_msg_number);
+    $result_compare = true;
 
-	if( $result_min && $result_max )
-	{
-		if( empty( $GLOBALS[$var_min] ) && $GLOBALS[$var_min] !== 0 && !empty( $GLOBALS[$var_max] ) )
-		{ // Get min value from max value
-			$GLOBALS[$var_min] = $GLOBALS[$var_max];
-		}
-		if( !empty( $GLOBALS[$var_min] ) && empty( $GLOBALS[$var_max] ) && $GLOBALS[$var_max] !== 0 )
-		{ // Get max value from min value
-			$GLOBALS[$var_max] = $GLOBALS[$var_min];
-		}
+    if ($result_min && $result_max) {
+        if (empty($GLOBALS[$var_min]) && $GLOBALS[$var_min] !== 0 && ! empty($GLOBALS[$var_max])) { // Get min value from max value
+            $GLOBALS[$var_min] = $GLOBALS[$var_max];
+        }
+        if (! empty($GLOBALS[$var_min]) && empty($GLOBALS[$var_max]) && $GLOBALS[$var_max] !== 0) { // Get max value from min value
+            $GLOBALS[$var_max] = $GLOBALS[$var_min];
+        }
 
-		$result_compare = $GLOBALS[$var_min] <= $GLOBALS[$var_max];
-		if( !$result_compare )
-		{	// Min value greater than max
-			param_error( $var_min, $err_msg_compare );
-		}
-	}
+        $result_compare = $GLOBALS[$var_min] <= $GLOBALS[$var_max];
+        if (! $result_compare) {	// Min value greater than max
+            param_error($var_min, $err_msg_compare);
+        }
+    }
 
-	return $result_min && $result_max && $result_compare;
+    return $result_min && $result_max && $result_compare;
 }
 
 
@@ -758,12 +693,11 @@ function param_check_interval( $var_min, $var_max, $err_msg_number, $err_msg_com
  * @param string number to check
  * @return string error message if number is not valid
  */
-function check_is_number( $number )
+function check_is_number($number)
 {
-	if( !is_number( $number ) )
-	{
-		return T_('The number value is invalid.');
-	}
+    if (! is_number($number)) {
+        return T_('The number value is invalid.');
+    }
 }
 
 
@@ -774,9 +708,9 @@ function check_is_number( $number )
  * @param string error message
  * @return boolean true if OK
  */
-function param_check_decimal( $var, $err_msg, $required = false )
+function param_check_decimal($var, $err_msg, $required = false)
 {
-	return param_validate( $var, 'check_is_decimal', $required, $err_msg );
+    return param_validate($var, 'check_is_decimal', $required, $err_msg);
 }
 
 
@@ -786,12 +720,11 @@ function param_check_decimal( $var, $err_msg, $required = false )
  * @param string decimal to check
  * @return string error message if decimal is not valid
  */
-function check_is_decimal( $decimal )
+function check_is_decimal($decimal)
 {
-	if( !is_decimal( $decimal ) )
-	{
-		return T_('The decimal value is invalid.');
-	}
+    if (! is_decimal($decimal)) {
+        return T_('The decimal value is invalid.');
+    }
 }
 
 
@@ -804,10 +737,10 @@ function check_is_decimal( $decimal )
  * @param string error message (gets printf'ed with $min and $max)
  * @return boolean true if OK
  */
-function param_integer_range( $var, $min, $max, $err_msg, $required = true )
+function param_integer_range($var, $min, $max, $err_msg, $required = true)
 {
-	param( $var, 'integer', $required ? true : '' );
-	return param_check_range( $var, $min, $max, $err_msg, $required );
+    param($var, 'integer', $required ? true : '');
+    return param_check_range($var, $min, $max, $err_msg, $required);
 }
 
 
@@ -821,19 +754,17 @@ function param_integer_range( $var, $min, $max, $err_msg, $required = true )
  * @param boolean Is the param required?
  * @return boolean true if OK
  */
-function param_check_range( $var, $min, $max, $err_msg, $required = true )
+function param_check_range($var, $min, $max, $err_msg, $required = true)
 {
-	if( empty( $GLOBALS[$var] ) && ! $required )
-	{ // empty is OK:
-		return true;
-	}
+    if (empty($GLOBALS[$var]) && ! $required) { // empty is OK:
+        return true;
+    }
 
-	if( ! preg_match( '~^[-+]?\d+$~', $GLOBALS[$var] ) || $GLOBALS[$var] < $min || $GLOBALS[$var] > $max )
-	{
-		param_error( $var, sprintf( $err_msg, $min, $max ) );
-		return false;
-	}
-	return true;
+    if (! preg_match('~^[-+]?\d+$~', $GLOBALS[$var]) || $GLOBALS[$var] < $min || $GLOBALS[$var] > $max) {
+        param_error($var, sprintf($err_msg, $min, $max));
+        return false;
+    }
+    return true;
 }
 
 
@@ -841,9 +772,9 @@ function param_check_range( $var, $min, $max, $err_msg, $required = true )
  * @param string param name
  * @return boolean true if OK
  */
-function param_check_email( $var, $required = false )
+function param_check_email($var, $required = false)
 {
-	return param_validate( $var, 'check_is_email', $required, NULL );
+    return param_validate($var, 'check_is_email', $required, null);
 }
 
 
@@ -853,12 +784,11 @@ function param_check_email( $var, $required = false )
  * @param string email address to check
  * @return string error message if address is not valid
  */
-function check_is_email( $email )
+function check_is_email($email)
 {
-	if( !is_email( $email ) )
-	{
-		return T_( 'The email address is invalid.' );
-	}
+    if (! is_email($email)) {
+        return T_('The email address is invalid.');
+    }
 }
 
 
@@ -870,113 +800,102 @@ function check_is_email( $email )
  * @param object Collection
  * @return boolean TRUE on success email address for new user
  */
-function param_check_new_user_email( $var, $value = NULL, $link_Blog = NULL )
+function param_check_new_user_email($var, $value = null, $link_Blog = null)
 {
-	global $DB;
+    global $DB;
 
-	if( $value === NULL )
-	{	// Try to get email value:
-		$value = param( $var, 'string' );
-	}
+    if ($value === null) {	// Try to get email value:
+        $value = param($var, 'string');
+    }
 
-	if( ! param_check_not_empty( $var, sprintf( T_('The field &laquo;%s&raquo; cannot be empty.'), T_('Email') ) ) )
-	{	// Email address cannot be empty for new registering user:
-		return false;
-	}
+    if (! param_check_not_empty($var, sprintf(T_('The field &laquo;%s&raquo; cannot be empty.'), T_('Email')))) {	// Email address cannot be empty for new registering user:
+        return false;
+    }
 
-	// Make sure email is valid first and that it only contains ASCII characters
-	if( $error_message = check_is_email( $value ) )
-	{
-		param_error( $var, $error_message );
-		return false;
-	}
+    // Make sure email is valid first and that it only contains ASCII characters
+    if ($error_message = check_is_email($value)) {
+        param_error($var, $error_message);
+        return false;
+    }
 
-	$SQL = new SQL( 'Check if already registered user has the same email address on new user registration' );
-	$SQL->SELECT( 'user_ID, user_email, user_pass, user_pass_driver' );
-	$SQL->FROM( 'T_users' );
-	$SQL->WHERE( 'user_email = '.$DB->quote( utf8_strtolower( $value ) ) );
-	$SQL->LIMIT( 1 );
-	$result = $DB->get_row( $SQL );
-	if( $result )
-	{	// Don't allow the duplicate emails:
-		if( $link_Blog === NULL )
-		{
-			global $Blog;
-			$link_Blog = $Blog;
-		}
-		global $dummy_fields;
-		$lostpassword_url = ( $link_Blog === NULL ? get_lostpassword_url() : $link_Blog->get( 'lostpasswordurl' ) );
-		$lostpassword_url = url_add_param( $lostpassword_url, $dummy_fields['login'].'='.urlencode( $value ) );
+    $SQL = new SQL('Check if already registered user has the same email address on new user registration');
+    $SQL->SELECT('user_ID, user_email, user_pass, user_pass_driver');
+    $SQL->FROM('T_users');
+    $SQL->WHERE('user_email = ' . $DB->quote(utf8_strtolower($value)));
+    $SQL->LIMIT(1);
+    $result = $DB->get_row($SQL);
+    if ($result) {	// Don't allow the duplicate emails:
+        if ($link_Blog === null) {
+            global $Blog;
+            $link_Blog = $Blog;
+        }
+        global $dummy_fields;
+        $lostpassword_url = ($link_Blog === null ? get_lostpassword_url() : $link_Blog->get('lostpasswordurl'));
+        $lostpassword_url = url_add_param($lostpassword_url, $dummy_fields['login'] . '=' . urlencode($value));
 
-		$error_message = sprintf( T_('You already have an account with email address "%s" on this site.'), $value );
+        $error_message = sprintf(T_('You already have an account with email address "%s" on this site.'), $value);
 
-		if( ! empty( $result->user_pass ) )
-		{
-			$error_message .= ' '.sprintf( T_('You can <a %s>log in with your password here</a>.'), 'href="'.( $link_Blog === NULL ? get_login_url( '' ) : $link_Blog->get( 'loginurl' ) ).'"' );
-		}
+        if (! empty($result->user_pass)) {
+            $error_message .= ' ' . sprintf(T_('You can <a %s>log in with your password here</a>.'), 'href="' . ($link_Blog === null ? get_login_url('') : $link_Blog->get('loginurl')) . '"');
+        }
 
-		// Check for linked social networks:
-		$UserCache = & get_UserCache();
-		if( $User = & $UserCache->get_by_ID( $result->user_ID, false, false ) )
-		{
-			global $Plugins;
-			$SQL = new SQL( 'Check if some social networks are linked to the account' );
-			$SQL->SELECT( 'usn_user_ID, usn_sn_ID, sn_name' );
-			$SQL->FROM( 'T_users__social_network' );
-			$SQL->FROM_add( 'LEFT JOIN T_social__network ON sn_id = usn_sn_ID' );
-			$SQL->WHERE( 'usn_user_ID = '.$DB->quote( $result->user_ID ) );
-			$SQL->ORDER_BY( 'sn_name ASC' );
-			$results = $DB->get_results( $SQL );
+        // Check for linked social networks:
+        $UserCache = &get_UserCache();
+        if ($User = &$UserCache->get_by_ID($result->user_ID, false, false)) {
+            global $Plugins;
+            $SQL = new SQL('Check if some social networks are linked to the account');
+            $SQL->SELECT('usn_user_ID, usn_sn_ID, sn_name');
+            $SQL->FROM('T_users__social_network');
+            $SQL->FROM_add('LEFT JOIN T_social__network ON sn_id = usn_sn_ID');
+            $SQL->WHERE('usn_user_ID = ' . $DB->quote($result->user_ID));
+            $SQL->ORDER_BY('sn_name ASC');
+            $results = $DB->get_results($SQL);
 
-			$links = array();
-			$providers = array();
-			foreach( $results as $row )
-			{
-				$providers[] = $row->sn_name;
-			}
+            $links = [];
+            $providers = [];
+            foreach ($results as $row) {
+                $providers[] = $row->sn_name;
+            }
 
-			$params = array(
-					'providers'   => $providers,
-					'links'       => & $links,
-					'link_params' => array(
-							'redirect_to' => param( 'redirect_to', 'url', get_current_url() ),
-							'return_to'   => param( 'return_to', 'url', get_current_url() ),
-							'show_icon'   => false,
-							'link_class'  => '',
-							'link_text_login'    => '$provider$',
-							'link_text_register' => '$provider$',
-						),
-				);
+            $params = [
+                'providers' => $providers,
+                'links' => &$links,
+                'link_params' => [
+                    'redirect_to' => param('redirect_to', 'url', get_current_url()),
+                    'return_to' => param('return_to', 'url', get_current_url()),
+                    'show_icon' => false,
+                    'link_class' => '',
+                    'link_text_login' => '$provider$',
+                    'link_text_register' => '$provider$',
+                ],
+            ];
 
-			$temp_params = $params;
-			foreach( $params as $param_key => $param_value )
-			{ // Pass all params by reference, in order to give possibility to modify them by plugin
-				// So plugins can add some data before/after processing
-				$params[ $param_key ] = & $params[ $param_key ];
-			}
+            $temp_params = $params;
+            foreach ($params as $param_key => $param_value) { // Pass all params by reference, in order to give possibility to modify them by plugin
+                // So plugins can add some data before/after processing
+                $params[$param_key] = &$params[$param_key];
+            }
 
-			if( ! empty( $providers ) )
-			{
-				$Plugins->trigger_event_first_true_with_params( 'GetAuthLinksForSocialNetworks', $params );
-				if( ! empty( $params['links'] ) )
-				{
-					$error_message .= ' '.sprintf( T_('You can log in with %s.'), implode( ' / ', $params['links'] ) );
-				}
-			}
-			$params = $temp_params;
-		}
+            if (! empty($providers)) {
+                $Plugins->trigger_event_first_true_with_params('GetAuthLinksForSocialNetworks', $params);
+                if (! empty($params['links'])) {
+                    $error_message .= ' ' . sprintf(T_('You can log in with %s.'), implode(' / ', $params['links']));
+                }
+            }
+            $params = $temp_params;
+        }
 
-		$error_message .= ' '.sprintf( T_('If you don\'t know it or have forgotten your password, you can <a %s>reset it here</a>.'), 'href="'.$lostpassword_url.'"' );
+        $error_message .= ' ' . sprintf(T_('If you don\'t know it or have forgotten your password, you can <a %s>reset it here</a>.'), 'href="' . $lostpassword_url . '"');
 
-		param_error( $var, $error_message );
+        param_error($var, $error_message);
 
-		// param_error( $var, sprintf( T_('You already registered on this site. You can <a %s>log in here</a>. If you don\'t know it or have forgotten it, you can <a %s>reset your password here</a>.'),
-		// 	'href="'.( $link_Blog === NULL ? get_login_url( '' ) : $link_Blog->get( 'loginurl' ) ).'"',
-		// 	'href="'.$lostpassword_url.'"' ) );
-		return false;
-	}
+        // param_error( $var, sprintf( T_('You already registered on this site. You can <a %s>log in here</a>. If you don\'t know it or have forgotten it, you can <a %s>reset your password here</a>.'),
+        // 	'href="'.( $link_Blog === NULL ? get_login_url( '' ) : $link_Blog->get( 'loginurl' ) ).'"',
+        // 	'href="'.$lostpassword_url.'"' ) );
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -986,39 +905,30 @@ function param_check_new_user_email( $var, $value = NULL, $link_Blog = NULL )
  * @param string param name
  * @return boolean true if OK
  */
-function param_check_valid_login( $var )
+function param_check_valid_login($var)
 {
-	global $Settings;
+    global $Settings;
 
-	if( empty( $GLOBALS[$var] ) )
-	{ // empty variable is OK
-		return T_('Please choose a username.' );
-	}
+    if (empty($GLOBALS[$var])) { // empty variable is OK
+        return T_('Please choose a username.');
+    }
 
-	$check = is_valid_login( $GLOBALS[$var] );
+    $check = is_valid_login($GLOBALS[$var]);
 
-	if( $check !== true )
-	{
-		if( $check === 'usr' )
-		{	// Special case, the login is valid however we forbid it's usage.
-			$msg = sprintf( T_('Logins cannot start with %s, this prefix is reserved for system use.'), '<code>usr_</code>' );
-		}
-		elseif( $check === 'long' )
-		{	// Special case for long logins:
-			$msg = sprintf( T_('Logins cannot be longer than %d characters.'), 20 );
-		}
-		elseif( ! isset( $Settings ) || $Settings->get('strict_logins') )
-		{
-			$msg = /* TRANS: %s gets replaced with list of valid characters */ sprintf( T_('Logins can only contain letters, digits and %s'), '<code>-</code> <code>.</code> <code>_</code>' );
-		}
-		else
-		{
-			$msg = sprintf( T_('Logins cannot contain whitespace and the following characters: %s'), '<code>\'</code> <code>"</code> <code>></code> <code><</code> <code>@</code> <code>&</code>' );
-		}
-		param_error( $var, $msg );
-		return false;
-	}
-	return true;
+    if ($check !== true) {
+        if ($check === 'usr') {	// Special case, the login is valid however we forbid it's usage.
+            $msg = sprintf(T_('Logins cannot start with %s, this prefix is reserved for system use.'), '<code>usr_</code>');
+        } elseif ($check === 'long') {	// Special case for long logins:
+            $msg = sprintf(T_('Logins cannot be longer than %d characters.'), 20);
+        } elseif (! isset($Settings) || $Settings->get('strict_logins')) {
+            $msg = /* TRANS: %s gets replaced with list of valid characters */ sprintf(T_('Logins can only contain letters, digits and %s'), '<code>-</code> <code>.</code> <code>_</code>');
+        } else {
+            $msg = sprintf(T_('Logins cannot contain whitespace and the following characters: %s'), '<code>\'</code> <code>"</code> <code>></code> <code><</code> <code>@</code> <code>&</code>');
+        }
+        param_error($var, $msg);
+        return false;
+    }
+    return true;
 }
 
 
@@ -1028,9 +938,9 @@ function param_check_valid_login( $var )
  * @param string User login
  * @return boolean TRUE if OK
  */
-function param_check_login( $var, $required = false )
+function param_check_login($var, $required = false)
 {
-	return param_validate( $var, 'check_is_login', $required, NULL );
+    return param_validate($var, 'check_is_login', $required, null);
 }
 
 
@@ -1040,12 +950,11 @@ function param_check_login( $var, $required = false )
  * @param string login to check
  * @return string error message if login is not valid
  */
-function check_is_login( $login )
+function check_is_login($login)
 {
-	if( ! user_exists( $login ) )
-	{
-		return sprintf( T_( 'There is no user with username &laquo;%s&raquo;.' ), $login );
-	}
+    if (! user_exists($login)) {
+        return sprintf(T_('There is no user with username &laquo;%s&raquo;.'), $login);
+    }
 }
 
 
@@ -1057,49 +966,40 @@ function check_is_login( $login )
  * @param string Error message under field OR NULL to use default mesage
  * @return boolean true if OK
  */
-function param_check_url( $var, $context, $field_err_msg = NULL )
+function param_check_url($var, $context, $field_err_msg = null)
 {
-	/**
-	 * @var User
-	 */
-	global $current_User;
+    /**
+     * @var User
+     */
+    global $current_User;
 
-	if( is_logged_in() )
-	{	// Use antispam checking depending on current user group setting:
-		$Group = $current_User->get_Group();
-		$antispam_check = ! $Group->perm_bypass_antispam;
-	}
-	else
-	{	// Use antispam checking always for anonymous users:
-		$antispam_check = true;
-	}
+    if (is_logged_in()) {	// Use antispam checking depending on current user group setting:
+        $Group = $current_User->get_Group();
+        $antispam_check = ! $Group->perm_bypass_antispam;
+    } else {	// Use antispam checking always for anonymous users:
+        $antispam_check = true;
+    }
 
-	if( strpos( $var, '[' ) !== false )
-	{	// Variable is array, for example 'input_name[group_name][123][]'
-		// We should get a value from $GLOBALS[input_name][group_name][123][0]
-		$var_array = explode( '[', $var );
-		$url_value = $GLOBALS;
-		foreach( $var_array as $var_item )
-		{
-			$var_item = str_replace( ']', '', $var_item);
-			if( empty( $var_item ) )
-			{	// Case for []
-				$var_item = '0';
-			}
-			$url_value = $url_value[$var_item];
-		}
-	}
-	else
-	{	// Variable with simple name
-		$url_value = $GLOBALS[$var];
-	}
+    if (strpos($var, '[') !== false) {	// Variable is array, for example 'input_name[group_name][123][]'
+        // We should get a value from $GLOBALS[input_name][group_name][123][0]
+        $var_array = explode('[', $var);
+        $url_value = $GLOBALS;
+        foreach ($var_array as $var_item) {
+            $var_item = str_replace(']', '', $var_item);
+            if (empty($var_item)) {	// Case for []
+                $var_item = '0';
+            }
+            $url_value = $url_value[$var_item];
+        }
+    } else {	// Variable with simple name
+        $url_value = $GLOBALS[$var];
+    }
 
-	if( $error_detail = validate_url( $url_value, $context, $antispam_check ) )
-	{
-		param_error( $var, /* TRANS: %s contains error details */ sprintf( T_('Supplied URL is invalid. (%s)'), $error_detail ), $field_err_msg );
-		return false;
-	}
-	return true;
+    if ($error_detail = validate_url($url_value, $context, $antispam_check)) {
+        param_error($var, /* TRANS: %s contains error details */ sprintf(T_('Supplied URL is invalid. (%s)'), $error_detail), $field_err_msg);
+        return false;
+    }
+    return true;
 }
 
 
@@ -1109,12 +1009,11 @@ function param_check_url( $var, $context, $field_err_msg = NULL )
  * @param string url to check
  * @return string error message if url is not valid
  */
-function check_is_url( $url )
+function check_is_url($url)
 {
-	if( !is_url( $url ) )
-	{
-		return sprintf( T_('Please enter a valid URL, like for example: %s.'), 'http://www.b2evolution.net/' );
-	}
+    if (! is_url($url)) {
+        return sprintf(T_('Please enter a valid URL, like for example: %s.'), 'http://www.b2evolution.net/');
+    }
 }
 
 
@@ -1125,15 +1024,14 @@ function check_is_url( $url )
  * @param string error message
  * @return boolean true if OK
  */
-function param_check_filename( $var, $err_msg )
+function param_check_filename($var, $err_msg)
 {
-	if( $error_filename = validate_filename( $GLOBALS[$var] ) )
-	{
-		param_error( $var, $error_filename );
-		syslog_insert( sprintf( 'File %s is invalid or has an unrecognized extension', '[['.$GLOBALS[$var].']]' ), 'warning', 'file' );
-		return false;
-	}
-	return true;
+    if ($error_filename = validate_filename($GLOBALS[$var])) {
+        param_error($var, $error_filename);
+        syslog_insert(sprintf('File %s is invalid or has an unrecognized extension', '[[' . $GLOBALS[$var] . ']]'), 'warning', 'file');
+        return false;
+    }
+    return true;
 }
 
 
@@ -1142,17 +1040,16 @@ function param_check_filename( $var, $err_msg )
  *
  * @param string param name
  * @param string error message
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
  * @return boolean true if OK
  */
-function param_check_isregexp( $var, $err_msg, $field_err_msg = NULL )
+function param_check_isregexp($var, $err_msg, $field_err_msg = null)
 {
-	if( ! is_regexp( $GLOBALS[$var] ) )
-	{
-		param_error( $var, $err_msg, $field_err_msg );
-		return false;
-	}
-	return true;
+    if (! is_regexp($GLOBALS[$var])) {
+        param_error($var, $err_msg, $field_err_msg);
+        return false;
+    }
+    return true;
 }
 
 
@@ -1162,26 +1059,24 @@ function param_check_isregexp( $var, $err_msg, $field_err_msg = NULL )
  * @param string param name
  * @param string regexp
  * @param string error message
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
  * @param boolean TRUE if the param value cannot be empty
  * @param boolean FALSE to check the param value DOES NOT MATCH a regexp
  * @return boolean true if OK
  */
-function param_check_regexp( $var, $regexp, $err_msg, $field_err_msg = NULL, $required = true, $match = true )
+function param_check_regexp($var, $regexp, $err_msg, $field_err_msg = null, $required = true, $match = true)
 {
-	if( empty( $GLOBALS[$var] ) && ! $required )
-	{ // empty variable is OK
-		return true;
-	}
+    if (empty($GLOBALS[$var]) && ! $required) { // empty variable is OK
+        return true;
+    }
 
-	$result = preg_match( $regexp, $GLOBALS[$var] );
-	if( ( $match && ! $result ) || // Match
-	    ( ! $match && $result ) )  // Does NOT match
-	{
-		param_error( $var, $err_msg, $field_err_msg );
-		return false;
-	}
-	return true;
+    $result = preg_match($regexp, $GLOBALS[$var]);
+    if (($match && ! $result) || // Match
+        (! $match && $result)) {  // Does NOT match
+        param_error($var, $err_msg, $field_err_msg);
+        return false;
+    }
+    return true;
 }
 
 
@@ -1196,18 +1091,17 @@ function param_check_regexp( $var, $regexp, $err_msg, $field_err_msg = NULL, $re
  * @param string Default (in the format of $date_format)
  * @param string date format (php format), defaults to {@link locale_datefmt()}
  */
-function param_date( $var, $err_msg, $required, $default = '', $date_format = NULL )
+function param_date($var, $err_msg, $required, $default = '', $date_format = null)
 {
-	param( $var, 'string', $default );
+    param($var, 'string', $default);
 
-	$iso_date = param_check_date( $var, $err_msg, $required, $date_format );
+    $iso_date = param_check_date($var, $err_msg, $required, $date_format);
 
-	if( $iso_date )
-	{
-		set_param( $var, $iso_date );
-	}
+    if ($iso_date) {
+        set_param($var, $iso_date);
+    }
 
-	return $iso_date;
+    return $iso_date;
 }
 
 
@@ -1218,106 +1112,98 @@ function param_date( $var, $err_msg, $required, $default = '', $date_format = NU
  * @param string Source date format, NULL - to use format of current locale
  * @return string|boolean Formated date OR FALSE if date cannot be converted
  */
-function format_input_date_to_iso( $date, $date_format = NULL )
+function format_input_date_to_iso($date, $date_format = null)
 {
-	if( empty( $date_format ) )
-	{	// Use locale input date format:
-		$date_format = locale_input_datefmt();
-	}
+    if (empty($date_format)) {	// Use locale input date format:
+        $date_format = locale_input_datefmt();
+    }
 
-	// Convert PHP date format to regexp pattern:
-	$date_regexp = '~^'.preg_replace_callback( '~(\\\)?(\w)~', '_format_input_date_to_iso_callback', $date_format ).'$~i'; // case-insensitive?
-	// Allow additional spaces, e.g. "03  May 2007" when format is "d F Y":
-	$date_regexp = preg_replace( '~ +~', '\s+', $date_regexp );
-	// echo $date_format.'...'.$date_regexp;
+    // Convert PHP date format to regexp pattern:
+    $date_regexp = '~^' . preg_replace_callback('~(\\\)?(\w)~', '_format_input_date_to_iso_callback', $date_format) . '$~i'; // case-insensitive?
+    // Allow additional spaces, e.g. "03  May 2007" when format is "d F Y":
+    $date_regexp = preg_replace('~ +~', '\s+', $date_regexp);
+    // echo $date_format.'...'.$date_regexp;
 
-	// Check that the numbers match the date pattern:
-	if( preg_match( $date_regexp, $date, $numbers ) )
-	{	// Date does match pattern:
-		//pre_dump( $numbers );
+    // Check that the numbers match the date pattern:
+    if (preg_match($date_regexp, $date, $numbers)) {	// Date does match pattern:
+        //pre_dump( $numbers );
 
-		// Get all date pattern parts. We should get 3 parts!:
-		preg_match_all( '/(?<!\\\\)[A-Za-z]/', $date_format, $parts ); // "(?<!\\\\)" means that the letter is not escaped with "\"
-		//pre_dump( $parts );
-		$day = null;
-		$month = null;
-		$year = null;
+        // Get all date pattern parts. We should get 3 parts!:
+        preg_match_all('/(?<!\\\\)[A-Za-z]/', $date_format, $parts); // "(?<!\\\\)" means that the letter is not escaped with "\"
+        //pre_dump( $parts );
+        $day = null;
+        $month = null;
+        $year = null;
 
-		foreach( $parts[0] as $position => $part )
-		{
-			switch( $part )
-			{
-				case 'd':
-				case 'j':
-					$day = $numbers[$position+1];
-					break;
+        foreach ($parts[0] as $position => $part) {
+            switch ($part) {
+                case 'd':
+                case 'j':
+                    $day = $numbers[$position + 1];
+                    break;
 
-				case 'm':
-				case 'n':
-					$month = $numbers[$position+1];
-					break;
-				case 'F': // full month name
-					$month = array_search( strtolower($numbers[$position+1]), array_map('strtolower', array_map('trim', array_map('T_', $GLOBALS['month']))) );
-					break;
-				case 'M':
-					$month = array_search( strtolower($numbers[$position+1]), array_map('strtolower', array_map('trim', array_map('T_', $GLOBALS['month_abbrev']))) );
-					break;
+                case 'm':
+                case 'n':
+                    $month = $numbers[$position + 1];
+                    break;
+                case 'F': // full month name
+                    $month = array_search(strtolower($numbers[$position + 1]), array_map('strtolower', array_map('trim', array_map('T_', $GLOBALS['month']))));
+                    break;
+                case 'M':
+                    $month = array_search(strtolower($numbers[$position + 1]), array_map('strtolower', array_map('trim', array_map('T_', $GLOBALS['month_abbrev']))));
+                    break;
 
-				case 'y':
-				case 'Y':
-					$year = $numbers[$position+1];
-					if( $year < 50 )
-					{
-						$year = 2000 + $year;
-					}
-					elseif( $year < 100 )
-					{
-						$year = 1900 + $year;
-					}
-					break;
-			}
-		}
+                case 'y':
+                case 'Y':
+                    $year = $numbers[$position + 1];
+                    if ($year < 50) {
+                        $year = 2000 + $year;
+                    } elseif ($year < 100) {
+                        $year = 1900 + $year;
+                    }
+                    break;
+            }
+        }
 
-		if( checkdate( $month, $day, $year ) )
-		{ // all clean! :)
+        if (checkdate($month, $day, $year)) { // all clean! :)
+            // We convert the value to ISO:
+            $iso_date = substr('0' . $year, -4) . '-' . substr('0' . $month, -2) . '-' . substr('0' . $day, -2);
 
-			// We convert the value to ISO:
-			$iso_date = substr( '0'.$year, -4 ).'-'.substr( '0'.$month, -2 ).'-'.substr( '0'.$day, -2 );
+            return $iso_date;
+        }
+    }
 
-			return $iso_date;
-		}
-	}
-
-	return false;
+    return false;
 }
 
 
 /**
  * Callback for preg_replace_callback in format_input_date_to_iso()
  */
-function _format_input_date_to_iso_callback( $matches )
+function _format_input_date_to_iso_callback($matches)
 {
-	if( $matches[1] == "\\" ) return $matches[2]; // escaped
-	switch( $matches[2] )
-	{
-		case "d": return "([0-3]\\d)"; // day, 01-31
-		case "j": return "([1-3]?\\d)"; // day, 1-31
-		case "l": return "(".str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday"])))).")";
-		case "D": return "(".str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_abbrev"])))).")";
-		case "e": // b2evo extension!
-			return "(".str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_letter"])))).")";
-		case "S": return "(st|nd|rd|th)?"; // english suffix for day. Made optional as jQuery formatDate does not support this format.
+    if ($matches[1] == "\\") {
+        return $matches[2];
+    } // escaped
+    switch ($matches[2]) {
+        case "d": return "([0-3]\\d)"; // day, 01-31
+        case "j": return "([1-3]?\\d)"; // day, 1-31
+        case "l": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday"])))) . ")";
+        case "D": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_abbrev"])))) . ")";
+        case "e": // b2evo extension!
+            return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_letter"])))) . ")";
+        case "S": return "(st|nd|rd|th)?"; // english suffix for day. Made optional as jQuery formatDate does not support this format.
 
-		case "m": return "([0-1]\\d)"; // month, 01-12
-		case "n": return "(1?\\d)"; // month, 1-12
-		case "F": return "(".str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month"])))).")"; //  A full textual representation of a month, such as January or March
-		case "M": return "(".str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month_abbrev"])))).")";
+        case "m": return "([0-1]\\d)"; // month, 01-12
+        case "n": return "(1?\\d)"; // month, 1-12
+        case "F": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month"])))) . ")"; //  A full textual representation of a month, such as January or March
+        case "M": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month_abbrev"])))) . ")";
 
-		case "y": return "(\\d\\d)"; // year, 00-99
-		case "Y": return "(\\d{4})"; // year, XXXX
-		default:
-			return $matches[0];
-	}
+        case "y": return "(\\d\\d)"; // year, 00-99
+        case "Y": return "(\\d{4})"; // year, XXXX
+        default:
+            return $matches[0];
+    }
 }
 
 
@@ -1332,29 +1218,26 @@ function _format_input_date_to_iso_callback( $matches )
  * @param string date format (php format)
  * @return boolean|string false if not OK, ISO date if OK
  */
-function param_check_date( $var, $err_msg, $required = false, $date_format = NULL )
+function param_check_date($var, $err_msg, $required = false, $date_format = null)
 {
-	if( empty( $GLOBALS[$var] ) )
-	{ // empty is OK if not required:
-		if( $required )
-		{
-			param_error( $var, $err_msg );
-			return false;
-		}
-		return '';
-	}
+    if (empty($GLOBALS[$var])) { // empty is OK if not required:
+        if ($required) {
+            param_error($var, $err_msg);
+            return false;
+        }
+        return '';
+    }
 
-	$iso_date = format_input_date_to_iso( $GLOBALS[$var], $date_format );
-	if( $iso_date !== false )
-	{	// Return iso date if it is converted successfully:
-		return $iso_date;
-	}
+    $iso_date = format_input_date_to_iso($GLOBALS[$var], $date_format);
+    if ($iso_date !== false) {	// Return iso date if it is converted successfully:
+        return $iso_date;
+    }
 
-	// Date did not pass all tests:
+    // Date did not pass all tests:
 
-	param_error( $var, $err_msg );
+    param_error($var, $err_msg);
 
-	return false;
+    return false;
 }
 
 
@@ -1365,9 +1248,9 @@ function param_check_date( $var, $err_msg, $required = false, $date_format = NUL
  * @param string error message
  * @return boolean true if OK
  */
-function param_check_color( $var, $err_msg, $required = false )
+function param_check_color($var, $err_msg, $required = false)
 {
-	return param_validate( $var, 'check_is_color', $required, $err_msg );
+    return param_validate($var, 'check_is_color', $required, $err_msg);
 }
 
 
@@ -1377,12 +1260,11 @@ function param_check_color( $var, $err_msg, $required = false )
  * @param string decimal to check
  * @return string error message if decimal is not valid
  */
-function check_is_color( $color )
+function check_is_color($color)
 {
-	if( ! is_color( $color ) )
-	{
-		return T_('The color value is invalid.');
-	}
+    if (! is_color($color)) {
+        return T_('The color value is invalid.');
+    }
 }
 
 
@@ -1398,28 +1280,26 @@ function check_is_color( $color )
  *
  * @return string the compact date value ( yyyymmdd )
  */
-function param_compact_date( $var, $default = '', $memorize = false, $err_msg, $required = false )
+function param_compact_date($var, $default = '', $memorize = false, $err_msg, $required = false)
 {
-	global $$var;
+    global $$var;
 
-	param( $var, 'string', $default, $memorize );
+    param($var, 'string', $default, $memorize);
 
-	if( preg_match( '#^[0-9]{4,}$#', $$var ) )
-	{	// Valid compact date, all good.
-		return $$var;
-	}
+    if (preg_match('#^[0-9]{4,}$#', $$var)) {	// Valid compact date, all good.
+        return $$var;
+    }
 
-	// We do not have a compact date, try normal date matching:
-	$iso_date = param_check_date( $var, $err_msg, $required );
+    // We do not have a compact date, try normal date matching:
+    $iso_date = param_check_date($var, $err_msg, $required);
 
-	if( $iso_date )
-	{
-		set_param( $var, compact_date( $iso_date ) );
-		return $$var;
-	}
+    if ($iso_date) {
+        set_param($var, compact_date($iso_date));
+        return $$var;
+    }
 
-	// Nothing valid found....
-	return '';
+    // Nothing valid found....
+    return '';
 }
 
 
@@ -1436,49 +1316,41 @@ function param_compact_date( $var, $default = '', $memorize = false, $err_msg, $
  * @param boolean Allow to use empty value
  * @return mixed Final value of Variable, or false if we don't force setting and did not set
  */
-function param_time( $var, $default = '', $memorize = false, $override = false, $forceset = true, $allow_empty = false )
+function param_time($var, $default = '', $memorize = false, $override = false, $forceset = true, $allow_empty = false)
 {
-	global $$var;
+    global $$var;
 
-	$got_time = false;
+    $got_time = false;
 
-	if( param( $var, 'string', $default, $memorize, $override, $forceset ) )
-	{ // Got a time from text field:
-		if( preg_match( '/^(\d\d):(\d\d)(:(\d\d))?$/', $$var, $matches ) )
-		{
-			$time_h = $matches[1];
-			$time_mn = $matches[2];
-			$time_s = empty( $matches[4] ) ? 0 : $matches[4];
-			$got_time = true;
-		}
-	}
-	elseif( ( $time_h = param( $var.'_h', 'integer', -1 ) ) != -1
-				&& ( $time_mn = param( $var.'_mn', 'integer', -1 ) ) != -1 )
-	{	// Got a time from selects:
-		$time_s = param( $var.'_s', 'integer', 0 );
-		$$var = substr('0'.$time_h,-2).':'.substr('0'.$time_mn,-2).':'.substr('0'.$time_s,-2);
-		$got_time = true;
-	}
+    if (param($var, 'string', $default, $memorize, $override, $forceset)) { // Got a time from text field:
+        if (preg_match('/^(\d\d):(\d\d)(:(\d\d))?$/', $$var, $matches)) {
+            $time_h = $matches[1];
+            $time_mn = $matches[2];
+            $time_s = empty($matches[4]) ? 0 : $matches[4];
+            $got_time = true;
+        }
+    } elseif (($time_h = param($var . '_h', 'integer', -1)) != -1
+                && ($time_mn = param($var . '_mn', 'integer', -1)) != -1) {	// Got a time from selects:
+        $time_s = param($var . '_s', 'integer', 0);
+        $$var = substr('0' . $time_h, -2) . ':' . substr('0' . $time_mn, -2) . ':' . substr('0' . $time_s, -2);
+        $got_time = true;
+    }
 
-	if( $allow_empty && empty( $$var ) )
-	{ // Allow to use empty time value
-		return $$var;
-	}
-	elseif( $got_time )
-	{ // We got a time...
-		// Check if ranges are correct:
-		if( $time_h >= 0 && $time_h <= 23
-			&& $time_mn >= 0 && $time_mn <= 59
-			&& $time_s >= 0 && $time_s <= 59 )
-		{
-			// Time is correct
-			return $$var;
-		}
-	}
+    if ($allow_empty && empty($$var)) { // Allow to use empty time value
+        return $$var;
+    } elseif ($got_time) { // We got a time...
+        // Check if ranges are correct:
+        if ($time_h >= 0 && $time_h <= 23
+            && $time_mn >= 0 && $time_mn <= 59
+            && $time_s >= 0 && $time_s <= 59) {
+            // Time is correct
+            return $$var;
+        }
+    }
 
-	param_error( $var, T_('Please enter a valid time.') );
+    param_error($var, T_('Please enter a valid time.'));
 
-	return false;
+    return false;
 }
 
 
@@ -1493,52 +1365,42 @@ function param_time( $var, $default = '', $memorize = false, $override = false, 
  * @param string Name of array Variable to use as an extension
  * @param boolean Save non numeric prefix?  ( 1 char -- can be used as a modifier, e-g: - + * )
  */
-function param_extend_list( $var, $var_ext_array, $save_prefix = true )
+function param_extend_list($var, $var_ext_array, $save_prefix = true)
 {
-	// Make sure original var exists:
-	if( !isset($GLOBALS[$var]) )
-	{
-		debug_die( 'Cannot extend non existing param : '.$var );
-	}
-	$original_val = $GLOBALS[$var];
+    // Make sure original var exists:
+    if (! isset($GLOBALS[$var])) {
+        debug_die('Cannot extend non existing param : ' . $var);
+    }
+    $original_val = $GLOBALS[$var];
 
-	// Get extension array:
-	$ext_values_array = param( $var_ext_array, 'array', array(), false );
-	if( empty($ext_values_array) )
-	{	// No extension required:
-		return $original_val;
-	}
+    // Get extension array:
+    $ext_values_array = param($var_ext_array, 'array', [], false);
+    if (empty($ext_values_array)) {	// No extension required:
+        return $original_val;
+    }
 
-	// Handle prefix:
-	$prefix = '';
-	if( $save_prefix )
-	{	// We might want to save a prefix:
-		$prefix = substr( $original_val, 0, 1 );
-		if( is_numeric( $prefix ) )
-		{	// The prefix is numeric, so it's NOT a prefix
-			$prefix = '';
-		}
-		else
-		{	// We save the prefix, we must crop if off from the values:
-			$original_val = substr( $original_val, 1 );
-		}
-	}
+    // Handle prefix:
+    $prefix = '';
+    if ($save_prefix) {	// We might want to save a prefix:
+        $prefix = substr($original_val, 0, 1);
+        if (is_numeric($prefix)) {	// The prefix is numeric, so it's NOT a prefix
+            $prefix = '';
+        } else {	// We save the prefix, we must crop if off from the values:
+            $original_val = substr($original_val, 1);
+        }
+    }
 
-	// Merge values:
-	if( empty($original_val) )
-	{
-		$original_values_array = array();
-	}
-	else
-	{
-		$original_values_array = explode( ',', $original_val );
-	}
-	$new_values = array_merge( $original_values_array, $ext_values_array );
-	$new_values = array_unique( $new_values );
-	$GLOBALS[$var] = $prefix.implode( ',', $new_values );
+    // Merge values:
+    if (empty($original_val)) {
+        $original_values_array = [];
+    } else {
+        $original_values_array = explode(',', $original_val);
+    }
+    $new_values = array_merge($original_values_array, $ext_values_array);
+    $new_values = array_unique($new_values);
+    $GLOBALS[$var] = $prefix . implode(',', $new_values);
 
-
-	return $GLOBALS[$var];
+    return $GLOBALS[$var];
 }
 
 
@@ -1550,42 +1412,40 @@ function param_extend_list( $var, $var_ext_array, $save_prefix = true )
  * @param integer Default category ID
  * @param array Default categories IDs
  */
-function param_compile_cat_array( $restrict_to_blog = 0, $cat_default = NULL, $catsel_default = array() )
+function param_compile_cat_array($restrict_to_blog = 0, $cat_default = null, $catsel_default = [])
 {
-	// For now, we'll need those as globals!
-	// fp> this is used for the categories widget
-	// fp> we want might to use a $set_globals params to compile_cat_array()
-	global $cat_array, $cat_modifier;
+    // For now, we'll need those as globals!
+    // fp> this is used for the categories widget
+    // fp> we want might to use a $set_globals params to compile_cat_array()
+    global $cat_array, $cat_modifier;
 
-	$cat = param( 'cat', '/^[*\-\|]?([0-9]+(,[0-9]+)*)?$/', $cat_default, true ); // List of cats to restrict to
-	$catsel = param( 'catsel', 'array:integer', $catsel_default, true );  // Array of cats to restrict to
+    $cat = param('cat', '/^[*\-\|]?([0-9]+(,[0-9]+)*)?$/', $cat_default, true); // List of cats to restrict to
+    $catsel = param('catsel', 'array:integer', $catsel_default, true);  // Array of cats to restrict to
 
-	$cat_array = array();
-	$cat_modifier = '';
+    $cat_array = [];
+    $cat_modifier = '';
 
-	compile_cat_array( $cat, $catsel, /* by ref */ $cat_array, /* by ref */ $cat_modifier, $restrict_to_blog );
+    compile_cat_array($cat, $catsel, /* by ref */ $cat_array, /* by ref */ $cat_modifier, $restrict_to_blog);
 }
 
 
 /**
  * @param array of param names
  * @param string error message
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
  * @return boolean true if OK
  */
-function params_check_at_least_one( $vars, $err_msg, $field_err_msg = NULL )
+function params_check_at_least_one($vars, $err_msg, $field_err_msg = null)
 {
-	foreach( $vars as $var )
-	{
-		if( !empty( $GLOBALS[$var] ) )
-		{ // Okay, we got at least one:
-			return true;
-		}
-	}
+    foreach ($vars as $var) {
+        if (! empty($GLOBALS[$var])) { // Okay, we got at least one:
+            return true;
+        }
+    }
 
-	// Error!
-	param_error_multiple( $vars, $err_msg, $field_err_msg );
-	return false;
+    // Error!
+    param_error_multiple($vars, $err_msg, $field_err_msg);
+    return false;
 }
 
 
@@ -1600,30 +1460,25 @@ function params_check_at_least_one( $vars, $err_msg, $field_err_msg = NULL )
  * @param string error message
  *
  * @return string position status ID or 'new' or '' if new is seleted but not input text value
- *
  */
-function param_combo( $var, $default, $allow_none, $err_msg = ''  )
+function param_combo($var, $default, $allow_none, $err_msg = '')
 {
-	param( $var, 'string', $default );
+    param($var, 'string', $default);
 
-	if( $GLOBALS[$var] == 'new' )
-	{	// The new option is selected in the combo select, so we need to check if we have a value in the combo input text:
-		$GLOBALS[$var.'_combo'] = param( $var.'_combo', 'string' );
+    if ($GLOBALS[$var] == 'new') {	// The new option is selected in the combo select, so we need to check if we have a value in the combo input text:
+        $GLOBALS[$var . '_combo'] = param($var . '_combo', 'string');
 
-		if( empty( $GLOBALS[$var.'_combo'] ) )
-		{ // We have no value in the combo input text
+        if (empty($GLOBALS[$var . '_combo'])) { // We have no value in the combo input text
+            // Set request param to null
+            $GLOBALS[$var] = null;
 
-			// Set request param to null
-			$GLOBALS[$var] = NULL;
+            if (! $allow_none) { // it's not allowed, so display error:
+                param_error($var, $err_msg);
+            }
+        }
+    }
 
-			if( !$allow_none )
-			{ // it's not allowed, so display error:
-				param_error( $var, $err_msg );
-			}
-		}
-	}
-
-	return $GLOBALS[$var];
+    return $GLOBALS[$var];
 }
 
 
@@ -1631,23 +1486,20 @@ function param_combo( $var, $default, $allow_none, $err_msg = ''  )
  * set a parameter with the second part(X2) of the value from request ( X1-X2 )
  *
  * @param string Variable to set
- *
  */
-function param_child_select_value( $var )
+function param_child_select_value($var)
 {
-	global $$var;
+    global $$var;
 
-	if( $val = param( $var, 'string' ) )
-	{ // keep only the second part of val
-		preg_match( '/^[0-9]+-([0-9]+)$/', $val, $res );
+    if ($val = param($var, 'string')) { // keep only the second part of val
+        preg_match('/^[0-9]+-([0-9]+)$/', $val, $res);
 
-		if( isset( $res[1] ) )
-		{ //set to the var the second part of val
-			$$var = $res[1];
-			return $$var;
-		}
-	}
-	return '';
+        if (isset($res[1])) { //set to the var the second part of val
+            $$var = $res[1];
+            return $$var;
+        }
+    }
+    return '';
 }
 
 
@@ -1655,25 +1507,21 @@ function param_child_select_value( $var )
  * @param string param name
  * @return boolean true if OK
  */
-function param_check_phone( $var, $required = false )
+function param_check_phone($var, $required = false)
 {
-	global $$var;
+    global $$var;
 
-	if( empty( $$var ) && ! $required )
-	{ // empty is OK:
-		return true;
-	}
+    if (empty($$var) && ! $required) { // empty is OK:
+        return true;
+    }
 
-	if( ! preg_match( '|^\+?[\-*#/(). 0-9]+$|', $$var ) )
-	{
-		param_error( $var, T_('The phone number is invalid.') );
-		return false;
-	}
-	else
-	{ // Keep only 0123456789+ caracters
-		$$var = preg_replace( '#[^0-9+]#', '', $$var );
-	}
-	return true;
+    if (! preg_match('|^\+?[\-*#/(). 0-9]+$|', $$var)) {
+        param_error($var, T_('The phone number is invalid.'));
+        return false;
+    } else { // Keep only 0123456789+ caracters
+        $$var = preg_replace('#[^0-9+]#', '', $$var);
+    }
+    return true;
 }
 
 
@@ -1683,12 +1531,11 @@ function param_check_phone( $var, $required = false )
  * @param string phone number to check
  * @return string error message if phone number is not valid
  */
-function check_is_phone( $phone )
+function check_is_phone($phone)
 {
-	if( !is_phone( $phone ) )
-	{
-		return sprintf( T_('Please enter a valid phone number like for example: %s.'), '+1 401-555-1234' );
-	}
+    if (! is_phone($phone)) {
+        return sprintf(T_('Please enter a valid phone number like for example: %s.'), '+1 401-555-1234');
+    }
 }
 
 
@@ -1700,56 +1547,50 @@ function check_is_phone( $phone )
  * @param array Params
  * @return boolean true if OK
  */
-function param_check_passwords( $var1, $var2, $required = false, $min_length = 6, $params = array() )
+function param_check_passwords($var1, $var2, $required = false, $min_length = 6, $params = [])
 {
-	$params = array_merge( array(
-			'msg_pass_wrong' => T_('Passwords cannot contain the characters &lt;, &gt; and &amp;.'),
-			'msg_pass_new'   => T_('Please enter your new password.'),
-			'msg_pass_twice' => T_('Please enter your new password twice.'),
-			'msg_pass_diff'  => T_('You typed two different passwords.'),
-			'msg_pass_min'   => T_('The minimum password length is %d characters.'),
-		), $params );
+    $params = array_merge([
+        'msg_pass_wrong' => T_('Passwords cannot contain the characters &lt;, &gt; and &amp;.'),
+        'msg_pass_new' => T_('Please enter your new password.'),
+        'msg_pass_twice' => T_('Please enter your new password twice.'),
+        'msg_pass_diff' => T_('You typed two different passwords.'),
+        'msg_pass_min' => T_('The minimum password length is %d characters.'),
+    ], $params);
 
-	$pass1 = get_param( $var1 );
-	$pass2 = get_param( $var2 );
+    $pass1 = get_param($var1);
+    $pass2 = get_param($var2);
 
-	if( ! strlen( $pass1 ) && ! strlen( $pass2 ) && ! $required )
-	{ // empty is OK:
-		return true;
-	}
+    if (! strlen($pass1) && ! strlen($pass2) && ! $required) { // empty is OK:
+        return true;
+    }
 
-	if( ! strlen( $pass1 ) )
-	{
-		param_error( $var1, '<span class="pass_check_new">'.$params['msg_pass_new'].'</span>' );
-		param_error( $var2, '<span class="pass_check_twice">'.$params['msg_pass_twice'].'</span>' );
-		return false;
-	}
-	if( ! strlen( $pass2 ) )
-	{
-		param_error( $var2, '<span class="pass_check_twice">'.$params['msg_pass_twice'].'</span>' );
-		return false;
-	}
+    if (! strlen($pass1)) {
+        param_error($var1, '<span class="pass_check_new">' . $params['msg_pass_new'] . '</span>');
+        param_error($var2, '<span class="pass_check_twice">' . $params['msg_pass_twice'] . '</span>');
+        return false;
+    }
+    if (! strlen($pass2)) {
+        param_error($var2, '<span class="pass_check_twice">' . $params['msg_pass_twice'] . '</span>');
+        return false;
+    }
 
-	// checking the password has been typed twice the same:
-	if( $pass1 != $pass2 )
-	{
-		param_error_multiple( array( $var1, $var2 ), '<span class="pass_check_diff">'.$params['msg_pass_diff'].'</span>' );
-		return false;
-	}
+    // checking the password has been typed twice the same:
+    if ($pass1 != $pass2) {
+        param_error_multiple([$var1, $var2], '<span class="pass_check_diff">' . $params['msg_pass_diff'] . '</span>');
+        return false;
+    }
 
-	if( utf8_strlen( $pass1 ) < $min_length )
-	{ // Checking min length
-		param_error_multiple( array( $var1, $var2 ), '<span class="pass_check_min">'.sprintf( $params['msg_pass_min'], $min_length ).'</span>' );
-		return false;
-	}
+    if (utf8_strlen($pass1) < $min_length) { // Checking min length
+        param_error_multiple([$var1, $var2], '<span class="pass_check_min">' . sprintf($params['msg_pass_min'], $min_length) . '</span>');
+        return false;
+    }
 
-	if( preg_match( '/[<>&]/', isset( $_POST[ $var1 ] ) ? $_POST[ $var1 ] : $_GET[ $var1 ] ) )
-	{ // Checking the not allowed chars
-		param_error_multiple( array( $var1, $var2 ), $params['msg_pass_wrong'] );
-		return false;
-	}
+    if (preg_match('/[<>&]/', isset($_POST[$var1]) ? $_POST[$var1] : $_GET[$var1])) { // Checking the not allowed chars
+        param_error_multiple([$var1, $var2], $params['msg_pass_wrong']);
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -1759,12 +1600,11 @@ function param_check_passwords( $var1, $var2, $required = false, $min_length = 6
  * @param string word to check
  * @return string error message if word is not valid
  */
-function check_is_word( $word )
+function check_is_word($word)
 {
-	if( !is_word( $word ) )
-	{
-		return T_('This field should be a single word; A-Z only.');
-	}
+    if (! is_word($word)) {
+        return T_('This field should be a single word; A-Z only.');
+    }
 }
 
 
@@ -1777,20 +1617,20 @@ function check_is_word( $word )
  */
 function param_errors_detected()
 {
-	global $Messages;
+    global $Messages;
 
-	return $Messages->has_errors();
+    return $Messages->has_errors();
 }
 
 
 /**
  * Tell if there is an error on given field.
  */
-function param_has_error( $var )
+function param_has_error($var)
 {
-	global $param_input_err_messages;
+    global $param_input_err_messages;
 
-	return isset( $param_input_err_messages[$var] );
+    return isset($param_input_err_messages[$var]);
 }
 
 
@@ -1799,16 +1639,15 @@ function param_has_error( $var )
  *
  * @return string
  */
-function param_get_error_msg( $var )
+function param_get_error_msg($var)
 {
-	global $param_input_err_messages;
+    global $param_input_err_messages;
 
-	if( empty( $param_input_err_messages[$var] ) )
-	{
-		return '';
-	}
+    if (empty($param_input_err_messages[$var])) {
+        return '';
+    }
 
-	return $param_input_err_messages[$var];
+    return $param_input_err_messages[$var];
 }
 
 
@@ -1816,32 +1655,28 @@ function param_get_error_msg( $var )
  * Add an error for a variable, either to the Form's field and/or the global {@link $Messages} object.
  *
  * @param string param name
- * @param string|NULL error message (by using NULL you can only add an error to the field, but not the $Message object)
- * @param string|NULL error message for form field ($err_msg gets used if === NULL).
- * @param string|NULL error message
+ * @param string|null error message (by using NULL you can only add an error to the field, but not the $Message object)
+ * @param string|null error message for form field ($err_msg gets used if === NULL).
+ * @param string|null error message
  */
-function param_error( $var, $err_msg, $field_err_msg = NULL, $group_header = NULL )
+function param_error($var, $err_msg, $field_err_msg = null, $group_header = null)
 {
-	global $param_input_err_messages;
+    global $param_input_err_messages;
 
-	if( is_null( $group_header ) )
-	{
-		$group_header = T_('Validation errors:');
-	}
+    if (is_null($group_header)) {
+        $group_header = T_('Validation errors:');
+    }
 
-	if( ! isset( $param_input_err_messages[$var] ) )
-	{ // We haven't already recorded an error for this field:
-		if( $field_err_msg === NULL )
-		{
-			$field_err_msg = $err_msg;
-		}
-		$param_input_err_messages[$var] = $field_err_msg;
+    if (! isset($param_input_err_messages[$var])) { // We haven't already recorded an error for this field:
+        if ($field_err_msg === null) {
+            $field_err_msg = $err_msg;
+        }
+        $param_input_err_messages[$var] = $field_err_msg;
 
-		if( isset($err_msg) )
-		{
-			param_add_message_to_Log( $var, $err_msg, 'error', $group_header );
-		}
-	}
+        if (isset($err_msg)) {
+            param_add_message_to_Log($var, $err_msg, 'error', $group_header);
+        }
+    }
 }
 
 
@@ -1849,30 +1684,26 @@ function param_error( $var, $err_msg, $field_err_msg = NULL, $group_header = NUL
  * Add an error for multiple variables, either to the Form's field and/or the global {@link $Messages} object.
  *
  * @param array of param names
- * @param string|NULL error message (by using NULL you can only add an error to the field, but not the $Message object)
- * @param string|NULL error message for form fields ($err_msg gets used if === NULL).
+ * @param string|null error message (by using NULL you can only add an error to the field, but not the $Message object)
+ * @param string|null error message for form fields ($err_msg gets used if === NULL).
  */
-function param_error_multiple( $vars, $err_msg, $field_err_msg = NULL )
+function param_error_multiple($vars, $err_msg, $field_err_msg = null)
 {
-	global $param_input_err_messages;
+    global $param_input_err_messages;
 
-	if( $field_err_msg === NULL )
-	{
-		$field_err_msg = $err_msg;
-	}
+    if ($field_err_msg === null) {
+        $field_err_msg = $err_msg;
+    }
 
-	foreach( $vars as $var )
-	{
-		if( ! isset( $param_input_err_messages[$var] ) )
-		{ // We haven't already recorded an error for this field:
-			$param_input_err_messages[$var] = $field_err_msg;
-		}
-	}
+    foreach ($vars as $var) {
+        if (! isset($param_input_err_messages[$var])) { // We haven't already recorded an error for this field:
+            $param_input_err_messages[$var] = $field_err_msg;
+        }
+    }
 
-	if( isset($err_msg) )
-	{
-		param_add_message_to_Log( $var, $err_msg, 'error' );
-	}
+    if (isset($err_msg)) {
+        param_add_message_to_Log($var, $err_msg, 'error');
+    }
 }
 
 
@@ -1885,55 +1716,39 @@ function param_error_multiple( $vars, $err_msg, $field_err_msg = NULL )
  * @param string param name
  * @param string error message
  */
-function param_add_message_to_Log( $var, $err_msg, $log_category = 'error', $group_header = NULL )
+function param_add_message_to_Log($var, $err_msg, $log_category = 'error', $group_header = null)
 {
-	global $link_param_err_messages_to_field_IDs;
-	global $Messages;
+    global $link_param_err_messages_to_field_IDs;
+    global $Messages;
 
-	if( !empty($link_param_err_messages_to_field_IDs) )
-	{
-		$var_id = Form::get_valid_id($var);
-		$start_link = '<a href="#'.$var_id.'" onclick="var form_elem = document.getElementById(\''.$var_id.'\'); if( form_elem ) { if(form_elem.select) { form_elem.select(); } else if(form_elem.focus) { form_elem.focus(); } }">'; // "SELECT" does not have .select()
+    if (! empty($link_param_err_messages_to_field_IDs)) {
+        $var_id = Form::get_valid_id($var);
+        $start_link = '<a href="#' . $var_id . '" onclick="var form_elem = document.getElementById(\'' . $var_id . '\'); if( form_elem ) { if(form_elem.select) { form_elem.select(); } else if(form_elem.focus) { form_elem.focus(); } }">'; // "SELECT" does not have .select()
 
-		if( strpos( $err_msg, '<a' ) !== false )
-		{ // there is at least one link in $err_msg, link those parts that are no links
-			$err_msg = preg_replace( '~(\s*)(<a\s+[^>]+>[^<]*</a>\s*)~i', '</a>$1&raquo;$2'.$start_link, $err_msg );
-		}
+        if (strpos($err_msg, '<a') !== false) { // there is at least one link in $err_msg, link those parts that are no links
+            $err_msg = preg_replace('~(\s*)(<a\s+[^>]+>[^<]*</a>\s*)~i', '</a>$1&raquo;$2' . $start_link, $err_msg);
+        }
 
-		if( substr($err_msg, 0, 4) == '</a>' )
-		{ // There was a link at the beginning of $err_msg: we do not prepend an emtpy link before it
-			if( empty( $group_header ) )
-			{
-				$Messages->add( substr( $err_msg, 4 ).'</a>', $log_category );
-			}
-			else
-			{
-				$Messages->add_to_group( substr( $err_msg, 4 ).'</a>', $log_category, $group_header );
-			}
-		}
-		else
-		{
-			if( empty( $group_header ) )
-			{
-				$Messages->add( $start_link.$err_msg.'</a>', $log_category );
-			}
-			else
-			{
-				$Messages->add_to_group( $start_link.$err_msg.'</a>', $log_category, $group_header );
-			}
-		}
-	}
-	else
-	{
-		if( empty( $group_header ) )
-		{
-			$Messages->add( $err_msg, $log_category );
-		}
-		else
-		{
-			$Messages->add_to_group( $err_msg, $log_category, $group_header );
-		}
-	}
+        if (substr($err_msg, 0, 4) == '</a>') { // There was a link at the beginning of $err_msg: we do not prepend an emtpy link before it
+            if (empty($group_header)) {
+                $Messages->add(substr($err_msg, 4) . '</a>', $log_category);
+            } else {
+                $Messages->add_to_group(substr($err_msg, 4) . '</a>', $log_category, $group_header);
+            }
+        } else {
+            if (empty($group_header)) {
+                $Messages->add($start_link . $err_msg . '</a>', $log_category);
+            } else {
+                $Messages->add_to_group($start_link . $err_msg . '</a>', $log_category, $group_header);
+            }
+        }
+    } else {
+        if (empty($group_header)) {
+            $Messages->add($err_msg, $log_category);
+        } else {
+            $Messages->add_to_group($err_msg, $log_category, $group_header);
+        }
+    }
 }
 
 
@@ -1946,25 +1761,28 @@ function param_add_message_to_Log( $var, $err_msg, $log_category = 'error', $gro
  * @param mixed Default value to compare to when regenerating url
  * @param mixed Value to set
  */
-function memorize_param( $var, $type, $default, $value = NULL )
+function memorize_param($var, $type, $default, $value = null)
 {
-	global $Debuglog, $global_param_list, $$var;
+    global $Debuglog, $global_param_list, $$var;
 
-	if( !isset($global_param_list) )
-	{ // Init list if necessary:
-		if( isset($Debuglog) ) $Debuglog->add( 'init $global_param_list', 'params' );
-		$global_param_list = array();
-	}
+    if (! isset($global_param_list)) { // Init list if necessary:
+        if (isset($Debuglog)) {
+            $Debuglog->add('init $global_param_list', 'params');
+        }
+        $global_param_list = [];
+    }
 
-	$Debuglog->add( 'memorize_param: '.var_export($var, true).' '.var_export($type, true).' default='.var_export($default, true).
-				( is_null($value) ? '' : ' value='.var_export($value, true) ), 'params' );
+    $Debuglog->add('memorize_param: ' . var_export($var, true) . ' ' . var_export($type, true) . ' default=' . var_export($default, true) .
+                (is_null($value) ? '' : ' value=' . var_export($value, true)), 'params');
 
-	$global_param_list[$var] = array( 'type' => $type, 'default' => (($default===true) ? NULL : $default) );
+    $global_param_list[$var] = [
+        'type' => $type,
+        'default' => (($default === true) ? null : $default),
+    ];
 
-	if( !is_null( $value ) )
-	{	// We want to set the variable too.
-		set_param( $var, $value );
-	}
+    if (! is_null($value)) {	// We want to set the variable too.
+        set_param($var, $value);
+    }
 }
 
 
@@ -1972,24 +1790,24 @@ function memorize_param( $var, $type, $default, $value = NULL )
  * Forget a param so that is will not get included in subsequent {@link regenerate_url()} calls.
  * @param string Param name
  */
-function forget_param( $var )
+function forget_param($var)
 {
-	global $Debuglog, $global_param_list;
+    global $Debuglog, $global_param_list;
 
-	$Debuglog->add( 'forget_param('.$var.')', 'params' );
+    $Debuglog->add('forget_param(' . $var . ')', 'params');
 
-	unset( $global_param_list[$var] );
+    unset($global_param_list[$var]);
 }
 
 
 /**
  * Has the param already been memorized?
  */
-function param_ismemorized( $var )
+function param_ismemorized($var)
 {
-	global $global_param_list;
+    global $global_param_list;
 
-	return isset($global_param_list[$var]);
+    return isset($global_param_list[$var]);
 }
 
 
@@ -2002,9 +1820,9 @@ function param_ismemorized( $var )
  * @param mixed Value
  * @return mixed Value
  */
-function set_param( $var, $value )
+function set_param($var, $value)
 {
-	return $GLOBALS[$var] = $value;
+    return $GLOBALS[$var] = $value;
 }
 
 
@@ -2012,16 +1830,15 @@ function set_param( $var, $value )
 /**
  * Get the value of a param.
  *
- * @return NULL|mixed The value of the param, if set. NULL otherwise.
+ * @return null|mixed The value of the param, if set. NULL otherwise.
  */
-function get_param( $var )
+function get_param($var)
 {
-	if( ! isset($GLOBALS[$var]) )
-	{
-		return NULL;
-	}
+    if (! isset($GLOBALS[$var])) {
+        return null;
+    }
 
-	return $GLOBALS[$var];
+    return $GLOBALS[$var];
 }
 
 
@@ -2030,36 +1847,30 @@ function get_param( $var )
  *
  * @param mixed string or array of ignore params
  */
-function get_memorized( $ignore = '' )
+function get_memorized($ignore = '')
 {
-	global $global_param_list;
+    global $global_param_list;
 
-	$memo = array();
+    $memo = [];
 
-	// Transform ignore params into an array:
-	if( empty ( $ignore ) )
-	{
-		$ignore = array();
-	}
-	elseif( !is_array($ignore) )
-	{
-		$ignore = explode( ',', $ignore );
-	}
+    // Transform ignore params into an array:
+    if (empty($ignore)) {
+        $ignore = [];
+    } elseif (! is_array($ignore)) {
+        $ignore = explode(',', $ignore);
+    }
 
-	// Loop on memorize params
-	if( isset($global_param_list) )
-	{
-		foreach( $global_param_list as $var => $thisparam )
-		{
-			if( !in_array( $var, $ignore ) )
-			{
-				global $$var;
-				$value = $$var;
-				$memo[$var] = $$var;
-			}
-		}
-	}
-	return $memo;
+    // Loop on memorize params
+    if (isset($global_param_list)) {
+        foreach ($global_param_list as $var => $thisparam) {
+            if (! in_array($var, $ignore)) {
+                global $$var;
+                $value = $$var;
+                $memo[$var] = $$var;
+            }
+        }
+    }
+    return $memo;
 }
 
 
@@ -2077,157 +1888,127 @@ function get_memorized( $ignore = '' )
  * @param mixed|string Alternative URL we want to point to if not the current URL (may be absolute if BASE tag gets used)
  * @param string Delimiter to use for multiple params (typically '&amp;' or '&')
  */
-function regenerate_url( $ignore = '', $set = '', $pagefileurl = '', $glue = '&amp;' )
+function regenerate_url($ignore = '', $set = '', $pagefileurl = '', $glue = '&amp;')
 {
-	global $Debuglog, $global_param_list, $ReqHost, $ReqPath;
-	global $base_tag_set;
+    global $Debuglog, $global_param_list, $ReqHost, $ReqPath;
+    global $base_tag_set;
 
-	// Transform ignore param into an array:
-	if( empty($ignore) )
-	{
-		$ignore = array();
-	}
-	elseif( !is_array($ignore) )
-	{
-		$ignore = explode( ',', $ignore );
-	}
+    // Transform ignore param into an array:
+    if (empty($ignore)) {
+        $ignore = [];
+    } elseif (! is_array($ignore)) {
+        $ignore = explode(',', $ignore);
+    }
 
-	// Construct array of all params that have been memorized:
-	// (Note: we only include values if they differ from the default and they are not in the ignore list)
-	$params = array();
-	if( isset($global_param_list) ) foreach( $global_param_list as $var => $thisparam )
-	{	// For each saved param...
-		$type = $thisparam['type'];
-		$defval = $thisparam['default'];
+    // Construct array of all params that have been memorized:
+    // (Note: we only include values if they differ from the default and they are not in the ignore list)
+    $params = [];
+    if (isset($global_param_list)) {
+        foreach ($global_param_list as $var => $thisparam) {	// For each saved param...
+            $type = $thisparam['type'];
+            $defval = $thisparam['default'];
 
-		$value = $GLOBALS[$var];
+            $value = $GLOBALS[$var];
 
-		// Check if the param should to be ignored:
-		$skip = false;
-		foreach( $ignore as $ignore_pattern )
-		{
-			if( substr( $ignore_pattern, 0, 1 ) == '/' )
-			{ // regexp:
-				if( preg_match( $ignore_pattern, $var ) )
-				{	// Skip this param!
-					$skip = true;
-					break;
-				}
-			}
-			else
-			{
-				$ignore_value = NULL;
-				if( strpos( $ignore_pattern, '=' ) !== false )
-				{ // Ignore only one value from array param
-					$ignore_pattern = explode( '=', $ignore_pattern );
-					$ignore_value = $ignore_pattern[1];
-					$ignore_pattern = $ignore_pattern[0];
-				}
-				if( $var == $ignore_pattern )
-				{ // Skip this param!
-					if( $ignore_value === NULL )
-					{ // Skip var only by param name
-						$skip = true;
-						break;
-					}
-					elseif( ! empty( $value ) )
-					{ // Exclude only the selected values of the var
-						$value_is_string = ! is_array( $value );
-						$value_is_negative = false;
-						if( $value_is_string )
-						{ // Convert string param to array to remove one value
-							$string_separator = ( strpos( $value, ',' ) !== false ) ? ',' : ' ';
-							if( substr( $value, 0, 1 ) == '-' && substr( $ignore_value, 0, 1 ) != '-' )
-							{ // If value is negative
-								$value = substr( $value, 1 );
-								$value_is_negative = true;
-							}
-							$value = explode( ' ', str_replace( ',', ' ', $value ) );
-						}
-						foreach( $value as $v => $global_var_value )
-						{
-							if( $global_var_value == $ignore_value || ( $value_is_negative && $global_var_value == '-'.$ignore_value ) )
-							{ // Unset the ignored value from array
-								unset( $value[ $v ] );
-								break;
-							}
-						}
-						if( $value_is_string && ! empty( $value ) )
-						{ // Revert back value to string format
-							$value = ( $value_is_negative ? '-' : '' ).implode( $string_separator, $value );
-						}
-						if( empty( $value ) || $value == $ignore_value )
-						{ // Skin var if it is empty OR it is string var and equals the ignored value
-							$skip = true;
-							break;
-						}
-					}
-				}
-			}
-		}
-		if( $skip )
-		{ // we don't want to include that param
-			// echo 'regenerate_url(): EXPLICIT IGNORE '.$var;
-			// $Debuglog->add( 'regenerate_url(): EXPLICIT IGNORE '.$var, 'params' );
-			continue;
-		}
+            // Check if the param should to be ignored:
+            $skip = false;
+            foreach ($ignore as $ignore_pattern) {
+                if (substr($ignore_pattern, 0, 1) == '/') { // regexp:
+                    if (preg_match($ignore_pattern, $var)) {	// Skip this param!
+                        $skip = true;
+                        break;
+                    }
+                } else {
+                    $ignore_value = null;
+                    if (strpos($ignore_pattern, '=') !== false) { // Ignore only one value from array param
+                        $ignore_pattern = explode('=', $ignore_pattern);
+                        $ignore_value = $ignore_pattern[1];
+                        $ignore_pattern = $ignore_pattern[0];
+                    }
+                    if ($var == $ignore_pattern) { // Skip this param!
+                        if ($ignore_value === null) { // Skip var only by param name
+                            $skip = true;
+                            break;
+                        } elseif (! empty($value)) { // Exclude only the selected values of the var
+                            $value_is_string = ! is_array($value);
+                            $value_is_negative = false;
+                            if ($value_is_string) { // Convert string param to array to remove one value
+                                $string_separator = (strpos($value, ',') !== false) ? ',' : ' ';
+                                if (substr($value, 0, 1) == '-' && substr($ignore_value, 0, 1) != '-') { // If value is negative
+                                    $value = substr($value, 1);
+                                    $value_is_negative = true;
+                                }
+                                $value = explode(' ', str_replace(',', ' ', $value));
+                            }
+                            foreach ($value as $v => $global_var_value) {
+                                if ($global_var_value == $ignore_value || ($value_is_negative && $global_var_value == '-' . $ignore_value)) { // Unset the ignored value from array
+                                    unset($value[$v]);
+                                    break;
+                                }
+                            }
+                            if ($value_is_string && ! empty($value)) { // Revert back value to string format
+                                $value = ($value_is_negative ? '-' : '') . implode($string_separator, $value);
+                            }
+                            if (empty($value) || $value == $ignore_value) { // Skin var if it is empty OR it is string var and equals the ignored value
+                                $skip = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if ($skip) { // we don't want to include that param
+                // echo 'regenerate_url(): EXPLICIT IGNORE '.$var;
+                // $Debuglog->add( 'regenerate_url(): EXPLICIT IGNORE '.$var, 'params' );
+                continue;
+            }
 
-		if( $value != $defval )
-		{ // Value is not set to default value:
-			// Note: sometimes we will want to include an empty value, especially blog=0 ! In that case we set the default for blog to -1.
-			// echo "adding $var \n";
-			// $Debuglog->add( "regenerate_url(): Using var=$var, type=$type, defval=[$defval], val=[$value]", 'params' );
-			// echo "regenerate_url(): Using var=$var, type=$type, defval=[$defval], val=[$value]";
+            if ($value != $defval) { // Value is not set to default value:
+                // Note: sometimes we will want to include an empty value, especially blog=0 ! In that case we set the default for blog to -1.
+                // echo "adding $var \n";
+                // $Debuglog->add( "regenerate_url(): Using var=$var, type=$type, defval=[$defval], val=[$value]", 'params' );
+                // echo "regenerate_url(): Using var=$var, type=$type, defval=[$defval], val=[$value]";
 
-			$params[] = get_param_urlencoded( $var, $value, $glue );
-		}
-		else // if( $var == 's' )
-		{
-			// $Debuglog->add( "regenerate_url(): DEFAULT ignore var=$var, type=$type, defval=[$defval], val=[$value]", 'params' );
-			// echo "regenerate_url(): DEFAULT ignore var=$var, type=$type, defval=[$defval], val=[$value]";
-		}
-	}
+                $params[] = get_param_urlencoded($var, $value, $glue);
+            } else { // if( $var == 's' )
+                // $Debuglog->add( "regenerate_url(): DEFAULT ignore var=$var, type=$type, defval=[$defval], val=[$value]", 'params' );
+                // echo "regenerate_url(): DEFAULT ignore var=$var, type=$type, defval=[$defval], val=[$value]";
+            }
+        }
+    }
 
-	// Merge in the params we want to force to a specific value:
-	if( !empty( $set ) )
-	{	// We got some forced params:
-		// Transform set param into an array:
-		if( !is_array($set) )
-		{
-			if( $set[0] == '?' )
-			{ // Remove leading question mark, e.g. from QUERY_STRING
-				$set = substr($set, 1);
-			}
-			$set = preg_split( '~&(amp;)?~', $set, NULL, PREG_SPLIT_NO_EMPTY );
-		}
-		// Merge them in:
-		$params = array_merge( $params, $set );
-	}
+    // Merge in the params we want to force to a specific value:
+    if (! empty($set)) {	// We got some forced params:
+        // Transform set param into an array:
+        if (! is_array($set)) {
+            if ($set[0] == '?') { // Remove leading question mark, e.g. from QUERY_STRING
+                $set = substr($set, 1);
+            }
+            $set = preg_split('~&(amp;)?~', $set, null, PREG_SPLIT_NO_EMPTY);
+        }
+        // Merge them in:
+        $params = array_merge($params, $set);
+    }
 
-	// Construct URL:
-	if( ! empty($pagefileurl) )
-	{
-		$url = $pagefileurl;
-	}
-	else
-	{
-		if( ! empty($base_tag_set) )
-		{
-			if( isset($Debuglog) ) $Debuglog->add( 'regenerate_url(): Using full URL because of $base_tag_set.', 'params' );
-			$url = $ReqHost.$ReqPath;
-		}
-		else
-		{	// Use just absolute path, because there's no <base> tag used
-			$url = $ReqPath;
-		}
-	}
+    // Construct URL:
+    if (! empty($pagefileurl)) {
+        $url = $pagefileurl;
+    } else {
+        if (! empty($base_tag_set)) {
+            if (isset($Debuglog)) {
+                $Debuglog->add('regenerate_url(): Using full URL because of $base_tag_set.', 'params');
+            }
+            $url = $ReqHost . $ReqPath;
+        } else {	// Use just absolute path, because there's no <base> tag used
+            $url = $ReqPath;
+        }
+    }
 
-	if( !empty( $params ) )
-	{
-		$url = url_add_param( $url, implode( $glue, $params ), $glue );
-	}
-	// if( isset($Debuglog) ) $Debuglog->add( 'regenerate_url(): ['.$url.']', 'params' );
-	return $url;
+    if (! empty($params)) {
+        $url = url_add_param($url, implode($glue, $params), $glue);
+    }
+    // if( isset($Debuglog) ) $Debuglog->add( 'regenerate_url(): ['.$url.']', 'params' );
+    return $url;
 }
 
 
@@ -2238,20 +2019,16 @@ function regenerate_url( $ignore = '', $set = '', $pagefileurl = '', $glue = '&a
  */
 function get_param_urlencoded($var, $value, $glue = '&amp;')
 {
-	if( is_array($value) )
-	{ // there is a special formatting in case of arrays
-		$r = array();
-		$keep_keys = array_diff( array_keys($value), array_keys(array_values($value)) );
-		foreach( $value as $key => $value )
-		{
-			$r[] = get_param_urlencoded($var.'['.($keep_keys ? $key : '').']', $value, $glue);
-		}
-		return implode($glue, $r);
-	}
-	else
-	{ // not an array : normal formatting
-		return rawurlencode($var).'='.rawurlencode($value);
-	}
+    if (is_array($value)) { // there is a special formatting in case of arrays
+        $r = [];
+        $keep_keys = array_diff(array_keys($value), array_keys(array_values($value)));
+        foreach ($value as $key => $value) {
+            $r[] = get_param_urlencoded($var . '[' . ($keep_keys ? $key : '') . ']', $value, $glue);
+        }
+        return implode($glue, $r);
+    } else { // not an array : normal formatting
+        return rawurlencode($var) . '=' . rawurlencode($value);
+    }
 }
 
 
@@ -2265,17 +2042,16 @@ function get_param_urlencoded($var, $value, $glue = '&amp;')
  * @param boolean does the regular expression includes delimiters (and optionally modifiers)?
  * @return boolean
  */
-function is_regexp( $reg_exp, $includes_delim = false )
+function is_regexp($reg_exp, $includes_delim = false)
 {
-	set_error_handler( '_trapError' );
-	if( ! $includes_delim )
-	{
-		$reg_exp = '#'.str_replace( '#', '\#', $reg_exp ).'#';
-	}
-	preg_match( $reg_exp, '' );
-	restore_error_handler();
+    set_error_handler('_trapError');
+    if (! $includes_delim) {
+        $reg_exp = '#' . str_replace('#', '\#', $reg_exp) . '#';
+    }
+    preg_match($reg_exp, '');
+    restore_error_handler();
 
-	return !_trapError();
+    return ! _trapError();
 }
 
 
@@ -2284,20 +2060,17 @@ function is_regexp( $reg_exp, $includes_delim = false )
  *
  * @return integer number of errors
  */
-function _trapError( $reset = 1 )
+function _trapError($reset = 1)
 {
-	static $iERRORES;
+    static $iERRORES;
 
-	if( !func_num_args() )
-	{
-		$iRETORNO = $iERRORES;
-		$iERRORES = 0;
-		return $iRETORNO;
-	}
-	else
-	{
-		$iERRORES++;
-	}
+    if (! func_num_args()) {
+        $iRETORNO = $iERRORES;
+        $iERRORES = 0;
+        return $iRETORNO;
+    } else {
+        $iERRORES++;
+    }
 }
 
 
@@ -2317,9 +2090,8 @@ function _trapError( $reset = 1 )
  *
  * @return string
  */
-function param_html( $var, $default = '', $memorize = false, $err_msg )
+function param_html($var, $default = '', $memorize = false, $err_msg)
 {
-
 }
 
 
@@ -2336,32 +2108,29 @@ function param_html( $var, $default = '', $memorize = false, $err_msg )
  * @param string the context of this function call
  * @return boolean|string
  */
-function param_check_html( $var, $err_msg = '#', $field_err_msg = '#', $context = 'posting' )
+function param_check_html($var, $err_msg = '#', $field_err_msg = '#', $context = 'posting')
 {
-	global $Messages, $evo_charset;
+    global $Messages, $evo_charset;
 
-	// The param was already converted to the $evo_charset in the param() function, we need to use that charset!
-	$altered_html = check_html_sanity( $GLOBALS[$var], $context, NULL, $evo_charset );
+    // The param was already converted to the $evo_charset in the param() function, we need to use that charset!
+    $altered_html = check_html_sanity($GLOBALS[$var], $context, null, $evo_charset);
 
- 	if( $altered_html === false )
-	{	// We have errors, do not keep sanitization attemps:
-		if( $err_msg == '#' )
-		{
-			$err_msg = T_('Invalid XHTML.');
-		}
-		if( $field_err_msg == '#' )
-		{
-			$field_err_msg = T_('Invalid XHTML.');
-		}
+    if ($altered_html === false) {	// We have errors, do not keep sanitization attemps:
+        if ($err_msg == '#') {
+            $err_msg = T_('Invalid XHTML.');
+        }
+        if ($field_err_msg == '#') {
+            $field_err_msg = T_('Invalid XHTML.');
+        }
 
-		param_error( $var, $err_msg, $field_err_msg );
-		return false;
-	}
+        param_error($var, $err_msg, $field_err_msg);
+        return false;
+    }
 
-	// Keep the altered HTML (balanced tags, etc.) - NOT necessarily safe if loose checking has been allowed.
-	$GLOBALS[$var] = $altered_html;
+    // Keep the altered HTML (balanced tags, etc.) - NOT necessarily safe if loose checking has been allowed.
+    $GLOBALS[$var] = $altered_html;
 
-	return $altered_html;
+    return $altered_html;
 }
 
 
@@ -2370,26 +2139,23 @@ function param_check_html( $var, $err_msg = '#', $field_err_msg = '#', $context 
  * @param boolean required
  * @return booelan true if OK
  */
-function param_check_gender( $var, $required = false )
+function param_check_gender($var, $required = false)
 {
-	if( empty( $GLOBALS[$var] ) )
-	{	// empty is OK if not required:
-		if( $required )
-		{
-			param_error( $var, T_( 'Please select a gender.' ) );
-			return false;
-		}
-		return true;
-	}
+    if (empty($GLOBALS[$var])) {	// empty is OK if not required:
+        if ($required) {
+            param_error($var, T_('Please select a gender.'));
+            return false;
+        }
+        return true;
+    }
 
-	$gender_value = $GLOBALS[$var];
-	if( ( $gender_value != 'M' ) && ( $gender_value != 'F' ) && ( $gender_value != 'O' ) )
-	{
-		param_error( $var, 'Gender value is invalid' );
-		return false;
-	}
+    $gender_value = $GLOBALS[$var];
+    if (($gender_value != 'M') && ($gender_value != 'F') && ($gender_value != 'O')) {
+        param_error($var, 'Gender value is invalid');
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -2399,42 +2165,38 @@ function param_check_gender( $var, $required = false )
  * @param array the value of an 'array' type param
  * @return array the validated/modified content
  */
-function param_check_general_array( $param_value )
+function param_check_general_array($param_value)
 {
-	if( is_array( $param_value ) )
-	{ // This param is an array, validate all of the elements
-		foreach( $param_value as $i => $var_value )
-		{ // Check array content recursively
-			$param_value[$i] = param_check_general_array( $var_value );
-		}
-		return $param_value;
-	}
+    if (is_array($param_value)) { // This param is an array, validate all of the elements
+        foreach ($param_value as $i => $var_value) { // Check array content recursively
+            $param_value[$i] = param_check_general_array($var_value);
+        }
+        return $param_value;
+    }
 
-	if( ! ( is_numeric( $param_value ) || is_object( $param_value ) ) )
-	{ // This value is not numeric and not an object, we consider it as string
-		// Check the content html sanity
-		$param_value = check_html_sanity( $param_value, 'general_array_params' );
-	}
+    if (! (is_numeric($param_value) || is_object($param_value))) { // This value is not numeric and not an object, we consider it as string
+        // Check the content html sanity
+        $param_value = check_html_sanity($param_value, 'general_array_params');
+    }
 
-	return $param_value;
+    return $param_value;
 }
 
 
 /**
  * DEPRECATED Stub for plugin compatibility:
  */
-function format_to_post( $content, $is_comment = 0, $encoding = NULL )
+function format_to_post($content, $is_comment = 0, $encoding = null)
 {
-	global $current_User;
+    global $current_User;
 
-	$ret = check_html_sanity( $content, ( $is_comment ? 'commenting' : 'posting' ), $current_User, $encoding );
-	if( $ret === false )
-	{	// ERROR
-		return $content;
-	}
+    $ret = check_html_sanity($content, ($is_comment ? 'commenting' : 'posting'), $current_User, $encoding);
+    if ($ret === false) {	// ERROR
+        return $content;
+    }
 
-	// return altered content
-	return $ret;
+    // return altered content
+    return $ret;
 }
 
 
@@ -2458,242 +2220,217 @@ function format_to_post( $content, $is_comment = 0, $encoding = NULL )
  * @param string Encoding (used for XHTML_Validator only!); defaults to $io_charset
  * @return boolean|string
  */
-function check_html_sanity( $content, $context = 'posting', $User = NULL, $encoding = NULL )
+function check_html_sanity($content, $context = 'posting', $User = null, $encoding = null)
 {
-	global $use_balanceTags, $admin_url;
-	global $io_charset, $use_xhtmlvalidation_for_comments, $comment_allowed_tags, $comments_allow_css_tweaks;
-	global $Messages;
+    global $use_balanceTags, $admin_url;
+    global $io_charset, $use_xhtmlvalidation_for_comments, $comment_allowed_tags, $comments_allow_css_tweaks;
+    global $Messages;
 
-	if( empty($User) )
-	{
-		/**
-		 * @var User
-		 */
-		global $current_User;
-		$User = $current_User;
-	}
+    if (empty($User)) {
+        /**
+         * @var User
+         */
+        global $current_User;
+        $User = $current_User;
+    }
 
-	// Add error messages
-	$verbose = true;
+    // Add error messages
+    $verbose = true;
 
-	switch( $context )
-	{
-		case 'posting':
-		case 'xmlrpc_posting':
-			$Group = $User ? $User->get_Group() : false;
-			if( $context == 'posting' )
-			{
-				$xhtmlvalidation  = ( $Group && $Group->perm_xhtmlvalidation == 'always' );
-			}
-			else
-			{
-				$xhtmlvalidation  = ( $Group && $Group->perm_xhtmlvalidation_xmlrpc == 'always' );
-			}
-			$allow_css_tweaks = $Group && $Group->perm_xhtml_css_tweaks;
-			$allow_javascript = $Group && $Group->perm_xhtml_javascript;
-			$allow_iframes    = $Group && $Group->perm_xhtml_iframes;
-			$allow_objects    = $Group && $Group->perm_xhtml_objects;
-			$bypass_antispam  = $Group && $Group->perm_bypass_antispam;
-			break;
+    switch ($context) {
+        case 'posting':
+        case 'xmlrpc_posting':
+            $Group = $User ? $User->get_Group() : false;
+            if ($context == 'posting') {
+                $xhtmlvalidation = ($Group && $Group->perm_xhtmlvalidation == 'always');
+            } else {
+                $xhtmlvalidation = ($Group && $Group->perm_xhtmlvalidation_xmlrpc == 'always');
+            }
+            $allow_css_tweaks = $Group && $Group->perm_xhtml_css_tweaks;
+            $allow_javascript = $Group && $Group->perm_xhtml_javascript;
+            $allow_iframes = $Group && $Group->perm_xhtml_iframes;
+            $allow_objects = $Group && $Group->perm_xhtml_objects;
+            $bypass_antispam = $Group && $Group->perm_bypass_antispam;
+            break;
 
-		case 'commenting':
-			$xhtmlvalidation  = $use_xhtmlvalidation_for_comments;
-			$allow_css_tweaks = $comments_allow_css_tweaks;
-			$allow_javascript = false;
-			$allow_iframes    = false;
-			$allow_objects    = false;
-			// fp> I don't know if it makes sense to bypass antispam in commenting context if the user has that kind of permissions.
-			// If so, then we also need to bypass in several other places.
-			$bypass_antispam  = false;
-			break;
+        case 'commenting':
+            $xhtmlvalidation = $use_xhtmlvalidation_for_comments;
+            $allow_css_tweaks = $comments_allow_css_tweaks;
+            $allow_javascript = false;
+            $allow_iframes = false;
+            $allow_objects = false;
+            // fp> I don't know if it makes sense to bypass antispam in commenting context if the user has that kind of permissions.
+            // If so, then we also need to bypass in several other places.
+            $bypass_antispam = false;
+            break;
 
-		case 'general_array_params':
-			$xhtmlvalidation  = false;
-			$allow_css_tweaks = true;
-			$allow_javascript = false;
-			$allow_iframes    = false;
-			$allow_objects    = false;
-			$bypass_antispam  = false;
-			$trim_content     = false;
-			// Do not add error messages in this context
-			$verbose = false;
-			break;
+        case 'general_array_params':
+            $xhtmlvalidation = false;
+            $allow_css_tweaks = true;
+            $allow_javascript = false;
+            $allow_iframes = false;
+            $allow_objects = false;
+            $bypass_antispam = false;
+            $trim_content = false;
+            // Do not add error messages in this context
+            $verbose = false;
+            break;
 
-		case 'head_extension':
-		case 'body_extension':
-		case 'footer_extension':
-			$Group = $User->get_Group();
-			$xhtmlvalidation = $Group->perm_xhtmlvalidation == 'always';
-			if( $xhtmlvalidation )
-			{ // We disable everything else, because the XMHTML validator will set explicit rules for the 'head_extension' context
-				$allow_css_tweaks = false;
-				$allow_javascript = false;
-				$allow_iframes    = false;
-				$allow_objects    = false;
-				$bypass_antispam  = false;
-			}
-			else
-			{ // Use basic checking
-				$allow_css_tweaks = $Group->perm_xhtml_css_tweaks;
-				$allow_javascript = $Group->perm_xhtml_javascript;
-				$allow_iframes    = $Group->perm_xhtml_iframes;
-				$allow_objects    = $Group->perm_xhtml_objects;
-				$bypass_antispam  = $Group->perm_bypass_antispam;
-			}
-			// Do not add error messages in this context
-			$verbose = false;
-			break;
+        case 'head_extension':
+        case 'body_extension':
+        case 'footer_extension':
+            $Group = $User->get_Group();
+            $xhtmlvalidation = $Group->perm_xhtmlvalidation == 'always';
+            if ($xhtmlvalidation) { // We disable everything else, because the XMHTML validator will set explicit rules for the 'head_extension' context
+                $allow_css_tweaks = false;
+                $allow_javascript = false;
+                $allow_iframes = false;
+                $allow_objects = false;
+                $bypass_antispam = false;
+            } else { // Use basic checking
+                $allow_css_tweaks = $Group->perm_xhtml_css_tweaks;
+                $allow_javascript = $Group->perm_xhtml_javascript;
+                $allow_iframes = $Group->perm_xhtml_iframes;
+                $allow_objects = $Group->perm_xhtml_objects;
+                $bypass_antispam = $Group->perm_bypass_antispam;
+            }
+            // Do not add error messages in this context
+            $verbose = false;
+            break;
 
-		case 'quick_template':
-			$Group = ( $User ? $User->get_Group() : false );
-			$xhtmlvalidation  = false;
-			$allow_css_tweaks = $Group && $Group->perm_xhtml_css_tweaks;
-			$allow_javascript = $Group && $Group->perm_xhtml_javascript;
-			$allow_iframes    = $Group && $Group->perm_xhtml_iframes;
-			$allow_objects    = $Group && $Group->perm_xhtml_objects;
-			$bypass_antispam  = $Group && $Group->perm_bypass_antispam;
-			break;
+        case 'quick_template':
+            $Group = ($User ? $User->get_Group() : false);
+            $xhtmlvalidation = false;
+            $allow_css_tweaks = $Group && $Group->perm_xhtml_css_tweaks;
+            $allow_javascript = $Group && $Group->perm_xhtml_javascript;
+            $allow_iframes = $Group && $Group->perm_xhtml_iframes;
+            $allow_objects = $Group && $Group->perm_xhtml_objects;
+            $bypass_antispam = $Group && $Group->perm_bypass_antispam;
+            break;
 
-		default:
-			debug_die( 'unknown context: '.$context );
-	}
+        default:
+            debug_die('unknown context: ' . $context);
+    }
 
-	$error = false;
+    $error = false;
 
-	// Replace any & that is not a character or entity reference with &amp;
-	$content = preg_replace( '/&(?!#[0-9]+;|#x[0-9a-fA-F]+;|[a-zA-Z_:][a-zA-Z0-9._:-]*;)/', '&amp;', $content );
+    // Replace any & that is not a character or entity reference with &amp;
+    $content = preg_replace('/&(?!#[0-9]+;|#x[0-9a-fA-F]+;|[a-zA-Z_:][a-zA-Z0-9._:-]*;)/', '&amp;', $content);
 
-	// ANTISPAM check:
-	$error = ( ( ! $bypass_antispam ) && ( $block = antispam_check($content) ) );
+    // ANTISPAM check:
+    $error = ((! $bypass_antispam) && ($block = antispam_check($content)));
 
-	// Log incident in system log
-	if( $error )
-	{
-		switch( $context )
-		{
-			case 'commenting':
-				$object_type = 'comment';
-				break;
+    // Log incident in system log
+    if ($error) {
+        switch ($context) {
+            case 'commenting':
+                $object_type = 'comment';
+                break;
 
-			case 'posting':
-			case 'xmlrpc_posting':
-				$object_type = 'item';
-				break;
+            case 'posting':
+            case 'xmlrpc_posting':
+                $object_type = 'item';
+                break;
 
-			default:
-				$object_type = NULL;
-		}
-		syslog_insert( sprintf( 'Antispam: Illegal content found. Content contains blacklisted word "%s".', $block ), 'error', $object_type );
-	}
+            default:
+                $object_type = null;
+        }
+        syslog_insert(sprintf('Antispam: Illegal content found. Content contains blacklisted word "%s".', $block), 'error', $object_type);
+    }
 
-	if( $error && $verbose )
-	{ // Add error message
-		if( $context == 'xmlrpc_posting' )
-		{
-			$errmsg = ($context == 'commenting')
-				? T_('Illegal content found (spam?)')
-				: sprintf( T_('Illegal content found: blacklisted word "%s".'), $block );
-		}
-		else
-		{
-			$errmsg = ($context == 'commenting')
-				? T_('Illegal content found (spam?)').'.'
-				: sprintf( T_('Illegal content found: blacklisted word "%s".'), htmlspecialchars($block) );
-		}
+    if ($error && $verbose) { // Add error message
+        if ($context == 'xmlrpc_posting') {
+            $errmsg = ($context == 'commenting')
+                ? T_('Illegal content found (spam?)')
+                : sprintf(T_('Illegal content found: blacklisted word "%s".'), $block);
+        } else {
+            $errmsg = ($context == 'commenting')
+                ? T_('Illegal content found (spam?)') . '.'
+                : sprintf(T_('Illegal content found: blacklisted word "%s".'), htmlspecialchars($block));
+        }
 
-		$Messages->add_to_group(	$errmsg, 'error', T_('Validation errors:') );
-	}
+        $Messages->add_to_group($errmsg, 'error', T_('Validation errors:'));
+    }
 
-	if( ! isset( $trim_content ) || $trim_content )
-	{	// Trim content if it is allowed for the requested context:
-		$content = trim( $content );
-	}
+    if (! isset($trim_content) || $trim_content) {	// Trim content if it is allowed for the requested context:
+        $content = trim($content);
+    }
 
-	if( $use_balanceTags && ( $context != 'general_array_params' ) )
-	{ // Auto close open tags:
-		// Auto close only if the content is NOT from a general array param where open and closed html tags may appear separately
-		$content = balance_tags( $content );
-	}
+    if ($use_balanceTags && ($context != 'general_array_params')) { // Auto close open tags:
+        // Auto close only if the content is NOT from a general array param where open and closed html tags may appear separately
+        $content = balance_tags($content);
+    }
 
-	if( $xhtmlvalidation )
-	{ // We want to validate XHTML:
-		load_class( 'xhtml_validator/_xhtml_validator.class.php', 'XHTML_Validator' );
+    if ($xhtmlvalidation) { // We want to validate XHTML:
+        load_class('xhtml_validator/_xhtml_validator.class.php', 'XHTML_Validator');
 
-		$XHTML_Validator = new XHTML_Validator( $context, $allow_css_tweaks, $allow_iframes, $allow_javascript, $allow_objects, $encoding );
+        $XHTML_Validator = new XHTML_Validator($context, $allow_css_tweaks, $allow_iframes, $allow_javascript, $allow_objects, $encoding);
 
-		if( ! $XHTML_Validator->check( $content ) ) // TODO: see if we need to use convert_chars( $content, 'html' )
-		{
-			$error = true;
-		}
-	}
-	else
-	{	// We do not WANT to validate XHTML, fall back to basic security checking:
-		// This is only as strong as its regexps can parse xhtml. This is significantly inferior to the XHTML checker above.
-		// The only advantage of this checker is that it can check for a little security without requiring VALID XHTML.
+        if (! $XHTML_Validator->check($content)) { // TODO: see if we need to use convert_chars( $content, 'html' )
+            $error = true;
+        }
+    } else {	// We do not WANT to validate XHTML, fall back to basic security checking:
+        // This is only as strong as its regexps can parse xhtml. This is significantly inferior to the XHTML checker above.
+        // The only advantage of this checker is that it can check for a little security without requiring VALID XHTML.
 
-		if( $context == 'commenting' )
-		{	// DEPRECATED but still...
-			// echo 'allowed tags:',htmlspecialchars($comment_allowed_tags);
-			$content = strip_tags( $content, $comment_allowed_tags );
-		}
+        if ($context == 'commenting') {	// DEPRECATED but still...
+            // echo 'allowed tags:',htmlspecialchars($comment_allowed_tags);
+            $content = strip_tags($content, $comment_allowed_tags);
+        }
 
-		// Security checking:
-		$check = $content;
-		// Open comments or '<![CDATA[' are dangerous
-		$check = str_replace('<!', '<', $check);
-		// # # are delimiters
-		// i modifier at the end means caseless
+        // Security checking:
+        $check = $content;
+        // Open comments or '<![CDATA[' are dangerous
+        $check = str_replace('<!', '<', $check);
+        // # # are delimiters
+        // i modifier at the end means caseless
 
-		// CHECK Styling restictions:
-		$css_tweaks_error = ( ( ! $allow_css_tweaks ) && preg_match( '#\s((style|class|id)\s*=)#i', $check, $matches ) );
-		if( $css_tweaks_error && $verbose )
-		{
-			$Messages->add_to_group( T_('Illegal CSS markup found: ').htmlspecialchars($matches[1]), 'error', T_('Validation errors:') );
-		}
+        // CHECK Styling restictions:
+        $css_tweaks_error = ((! $allow_css_tweaks) && preg_match('#\s((style|class|id)\s*=)#i', $check, $matches));
+        if ($css_tweaks_error && $verbose) {
+            $Messages->add_to_group(T_('Illegal CSS markup found: ') . htmlspecialchars($matches[1]), 'error', T_('Validation errors:'));
+        }
 
-		// CHECK JAVASCRIPT:
-		$javascript_error = ( ( ! $allow_javascript )
-			&& ( preg_match( '~( < \s* //? \s* (script|noscript) )~xi', $check, $matches )
-				|| preg_match( '#\s((on[a-z]+)\s*=)#i', $check, $matches )
-				// action=, background=, cite=, classid=, codebase=, data=, href=, longdesc=, profile=, src=, usemap=
-				|| preg_match( '#=["\'\s]*((javascript|vbscript|about):)#i', $check, $matches ) ) );
-		if( $javascript_error && $verbose )
-		{
-			$Messages->add_to_group( T_('Illegal javascript markup found: ').htmlspecialchars($matches[1]), 'error', T_('Validation errors:') );
-		}
+        // CHECK JAVASCRIPT:
+        $javascript_error = ((! $allow_javascript)
+            && (preg_match('~( < \s* //? \s* (script|noscript) )~xi', $check, $matches)
+                || preg_match('#\s((on[a-z]+)\s*=)#i', $check, $matches)
+                // action=, background=, cite=, classid=, codebase=, data=, href=, longdesc=, profile=, src=, usemap=
+                || preg_match('#=["\'\s]*((javascript|vbscript|about):)#i', $check, $matches)));
+        if ($javascript_error && $verbose) {
+            $Messages->add_to_group(T_('Illegal javascript markup found: ') . htmlspecialchars($matches[1]), 'error', T_('Validation errors:'));
+        }
 
-		// CHECK IFRAMES:
-		$iframe_error = ( ( ! $allow_iframes ) && preg_match( '~( < \s* //? \s* (frame|iframe) )~xi', $check, $matches ) );
-		if( $iframe_error && $verbose )
-		{
-			$Messages->add_to_group( T_('Illegal frame markup found: ').htmlspecialchars($matches[1]), 'error', T_('Validation errors:') );
-		}
+        // CHECK IFRAMES:
+        $iframe_error = ((! $allow_iframes) && preg_match('~( < \s* //? \s* (frame|iframe) )~xi', $check, $matches));
+        if ($iframe_error && $verbose) {
+            $Messages->add_to_group(T_('Illegal frame markup found: ') . htmlspecialchars($matches[1]), 'error', T_('Validation errors:'));
+        }
 
-		// CHECK OBJECTS:
-		$object_error = ( ( ! $allow_objects ) && preg_match( '~( < \s* //? \s* (applet|object|param|embed) )~xi', $check, $matches ) );
-		if( $object_error && $verbose )
-		{
-			$Messages->add_to_group( T_('Illegal object markup found: ').htmlspecialchars($matches[1]), 'error', T_('Validation errors:') );
-		}
+        // CHECK OBJECTS:
+        $object_error = ((! $allow_objects) && preg_match('~( < \s* //? \s* (applet|object|param|embed) )~xi', $check, $matches));
+        if ($object_error && $verbose) {
+            $Messages->add_to_group(T_('Illegal object markup found: ') . htmlspecialchars($matches[1]), 'error', T_('Validation errors:'));
+        }
 
-		// Set the final error value based on all of the results
-		$error = $error || $css_tweaks_error || $javascript_error || $iframe_error || $object_error;
-	}
+        // Set the final error value based on all of the results
+        $error = $error || $css_tweaks_error || $javascript_error || $iframe_error || $object_error;
+    }
 
-	if( $error )
-	{
-		if( $verbose && ( ! empty( $User ) )
-			&& ( ! empty( $Group ) ) // This one will basically prevent this case from happening when commenting
-			&& $User->check_perm( 'users', 'edit', false ) )
-		{
-			$Messages->add_to_group( sprintf( T_('To get rid of the above validation warnings, you can deactivate unwanted validation rules in your <a %s>Group settings</a>.'),
-										'href="'.$admin_url.'?ctrl=groups&amp;grp_ID='.$Group->ID.'"' ), 'error', T_('Validation errors:') );
-		}
-		return false;
-	}
+    if ($error) {
+        if ($verbose && (! empty($User))
+            && (! empty($Group)) // This one will basically prevent this case from happening when commenting
+            && $User->check_perm('users', 'edit', false)) {
+            $Messages->add_to_group(sprintf(
+                T_('To get rid of the above validation warnings, you can deactivate unwanted validation rules in your <a %s>Group settings</a>.'),
+                'href="' . $admin_url . '?ctrl=groups&amp;grp_ID=' . $Group->ID . '"'
+            ), 'error', T_('Validation errors:'));
+        }
+        return false;
+    }
 
-	// Return sanitized content
-	return $content;
+    // Return sanitized content
+    return $content;
 }
 
 
@@ -2703,109 +2440,99 @@ function check_html_sanity( $content, $context = 'posting', $User = NULL, $encod
  * @param string HTML to be balanced
  * @return string Balanced HTML
  */
-function balance_tags( $text )
+function balance_tags($text)
 {
-	$tagstack = array();
-	$stacksize = 0;
-	$tagqueue = '';
-	$newtext = '';
+    $tagstack = [];
+    $stacksize = 0;
+    $tagqueue = '';
+    $newtext = '';
 
-	# b2 bug fix for comments - in case you REALLY meant to type '< !--'
-	// $text = str_replace('< !--', '<    !--', $text);
+    # b2 bug fix for comments - in case you REALLY meant to type '< !--'
+    // $text = str_replace('< !--', '<    !--', $text);
 
-	// escape any < that does not look like a tag, i-e: that is not followed by a letter like in <a> or a / like in </a>:
-	// (also not escaping comments like <!-- )
-	$text = preg_replace('#<([^a-z/!]{1})#i', '&lt;$1', $text);
+    // escape any < that does not look like a tag, i-e: that is not followed by a letter like in <a> or a / like in </a>:
+    // (also not escaping comments like <!-- )
+    $text = preg_replace('#<([^a-z/!]{1})#i', '&lt;$1', $text);
 
-	while( preg_match('~<(\s*/?\w+)\s*(.*?)/?>~s', $text, $regex) )
-	{
-		$newtext = $newtext . $tagqueue;
+    while (preg_match('~<(\s*/?\w+)\s*(.*?)/?>~s', $text, $regex)) {
+        $newtext = $newtext . $tagqueue;
 
-		$i = strpos($text,$regex[0]);
-		$l = strlen($tagqueue) + strlen($regex[0]);
+        $i = strpos($text, $regex[0]);
+        $l = strlen($tagqueue) + strlen($regex[0]);
 
-		// clear the shifter
-		$tagqueue = '';
+        // clear the shifter
+        $tagqueue = '';
 
-		// Pop or Push
-		if( substr($regex[1],0,1) == '/' )
-		{ // End Tag
-			$tag = strtolower(substr($regex[1],1));
+        // Pop or Push
+        if (substr($regex[1], 0, 1) == '/') { // End Tag
+            $tag = strtolower(substr($regex[1], 1));
 
-			// if too many closing tags
-			if($stacksize <= 0)
-			{
-				$tag = '';
-				//or close to be safe $tag = '/' . $tag;
-			}
-			// if stacktop value = tag close value then pop
-			else if ($tagstack[$stacksize - 1] == $tag)
-			{ // found closing tag
-				$tag = '</'.$tag.'>'; // Close Tag
-				// Pop
-				array_pop ($tagstack);
-				$stacksize--;
-			} else { // closing tag not at top, search for it
-				for ($j=$stacksize-1;$j>=0;$j--) {
-					if ($tagstack[$j] == $tag) {
-					// add tag to tagqueue
-						for ($k=$stacksize-1;$k>=$j;$k--){
-							$tagqueue .= '</' . array_pop ($tagstack) . '>';
-							$stacksize--;
-						}
-						break;
-					}
-				}
-				$tag = '';
-			}
-		}
-		else
-		{ // Begin Tag
-			$tag = strtolower($regex[1]);
+            // if too many closing tags
+            if ($stacksize <= 0) {
+                $tag = '';
+                //or close to be safe $tag = '/' . $tag;
+            }
+            // if stacktop value = tag close value then pop
+            elseif ($tagstack[$stacksize - 1] == $tag) { // found closing tag
+                $tag = '</' . $tag . '>'; // Close Tag
+                // Pop
+                array_pop($tagstack);
+                $stacksize--;
+            } else { // closing tag not at top, search for it
+                for ($j = $stacksize - 1; $j >= 0; $j--) {
+                    if ($tagstack[$j] == $tag) {
+                        // add tag to tagqueue
+                        for ($k = $stacksize - 1; $k >= $j; $k--) {
+                            $tagqueue .= '</' . array_pop($tagstack) . '>';
+                            $stacksize--;
+                        }
+                        break;
+                    }
+                }
+                $tag = '';
+            }
+        } else { // Begin Tag
+            $tag = strtolower($regex[1]);
 
-			// Tag Cleaning
+            // Tag Cleaning
 
-			// Push if not void HTML tags:
-			if( ! in_array( $tag, array( 'br', 'img', 'hr', 'param', 'input', 'link', 'meta', 'base', 'area', 'col', 'command', 'embed', 'keygen', 'source', 'track', 'wbr' ) ) )
-			{
-				$stacksize = array_push( $tagstack, $tag );
-				$closing = '>';
-			}
-			else
-			{
-				$closing = ' />';
-			}
-			// Attributes
-			// $attributes = $regex[2];
-			$attributes = $regex[2];
-			if($attributes)
-			{
-				$attributes = ' '.trim($attributes);
-			}
+            // Push if not void HTML tags:
+            if (! in_array($tag, ['br', 'img', 'hr', 'param', 'input', 'link', 'meta', 'base', 'area', 'col', 'command', 'embed', 'keygen', 'source', 'track', 'wbr'])) {
+                $stacksize = array_push($tagstack, $tag);
+                $closing = '>';
+            } else {
+                $closing = ' />';
+            }
+            // Attributes
+            // $attributes = $regex[2];
+            $attributes = $regex[2];
+            if ($attributes) {
+                $attributes = ' ' . trim($attributes);
+            }
 
-			$tag = '<'.$tag.$attributes.$closing;
-		}
+            $tag = '<' . $tag . $attributes . $closing;
+        }
 
-		$newtext .= substr($text,0,$i) . $tag;
-		$text = substr($text,$i+$l);
-	}
+        $newtext .= substr($text, 0, $i) . $tag;
+        $text = substr($text, $i + $l);
+    }
 
-	// Clear Tag Queue
-	$newtext = $newtext . $tagqueue;
+    // Clear Tag Queue
+    $newtext = $newtext . $tagqueue;
 
-	// Add Remaining text
-	$newtext .= $text;
+    // Add Remaining text
+    $newtext .= $text;
 
-	// Empty Stack
-	while($x = array_pop($tagstack)) {
-		$newtext = $newtext . '</' . $x . '>'; // Add remaining tags to close
-	}
+    // Empty Stack
+    while ($x = array_pop($tagstack)) {
+        $newtext = $newtext . '</' . $x . '>'; // Add remaining tags to close
+    }
 
-	# b2 fix for the bug with HTML comments
-	// $newtext = str_replace( '< !--', '<'.'!--', $newtext ); // the concatenation is needed to work around some strange parse error in PHP 4.3.1
-	// $newtext = str_replace( '<    !--', '< !--', $newtext );
+    # b2 fix for the bug with HTML comments
+    // $newtext = str_replace( '< !--', '<'.'!--', $newtext ); // the concatenation is needed to work around some strange parse error in PHP 4.3.1
+    // $newtext = str_replace( '<    !--', '< !--', $newtext );
 
-	return $newtext;
+    return $newtext;
 }
 
 
@@ -2817,9 +2544,9 @@ function balance_tags( $text )
  * @param string parameter name
  * @return boolean true if parameter is set
  */
-function isset_param( $var )
+function isset_param($var)
 {
-	return isset($_POST[$var]) || isset($_GET[$var]);
+    return isset($_POST[$var]) || isset($_GET[$var]);
 }
 
 
@@ -2829,43 +2556,38 @@ function isset_param( $var )
  * @param string Param name from request
  * @return boolean TRUE on expected data
  */
-function param_check_serialized_array( $param_name )
+function param_check_serialized_array($param_name)
 {
-	$param_value = get_param( $param_name );
+    $param_value = get_param($param_name);
 
-	if( ! is_string( $param_value ) )
-	{	// A serialized data must be a string:
-		return false;
-	}
+    if (! is_string($param_value)) {	// A serialized data must be a string:
+        return false;
+    }
 
-	// Search all string items in the serialized array:
-	preg_match_all( '/[{;]s:(\d+):"/i', $param_value, $matches, PREG_OFFSET_CAPTURE );
-	foreach( $matches[0] as $m => $match )
-	{	// And replace its values with spaces in order to don't decide below the following string values as object structures:
-		//    a:2:{s:1:"a";s:1:"b";i:123;O:8:"stdClass":1:{s:1:"a";s:1:"b";}}
-		$param_value = substr_replace( $param_value, str_repeat( ' ', (int)$matches[1][ $m ][0] ), $match[1] + strlen( $match[0] ), (int)$matches[1][ $m ][0] );
-	}
+    // Search all string items in the serialized array:
+    preg_match_all('/[{;]s:(\d+):"/i', $param_value, $matches, PREG_OFFSET_CAPTURE);
+    foreach ($matches[0] as $m => $match) {	// And replace its values with spaces in order to don't decide below the following string values as object structures:
+        //    a:2:{s:1:"a";s:1:"b";i:123;O:8:"stdClass":1:{s:1:"a";s:1:"b";}}
+        $param_value = substr_replace($param_value, str_repeat(' ', (int) $matches[1][$m][0]), $match[1] + strlen($match[0]), (int) $matches[1][$m][0]);
+    }
 
-	if(
-		// Allow to unserialize only arrays, main reason is an excluding of object structure like:
-		//     - O:7:"Results":1:{s:3:"sql";s:21:"SELECT * FROM T_users";}
-		( stripos( $param_value, 'a:' ) === 0 ) &&
-		// + Check there is no Object in the array (We NEVER want to unserialize an object):
-		//     a:1:{s:3:"key";O:8:"stdClass":1:{s:1:"x";i:1;}}
-		//     a:1:{i:123;O:8:"stdClass":1:{s:1:"x";i:1;}}
-		//     a:1:{s:3:"key";a:1:{s:3:"sub";O:8:"stdClass":1:{s:1:"x";i:1;}}}
-		//     a:1:{s:3:"key";a:1:{i:456;O:8:"stdClass":1:{s:1:"x";i:1;}}}
-		//   This checking exclude real string with object structure value like ';O:8:':
-		//     a:1:{s:3:"key";s:5:";O:8:";}
-		( ! preg_match( '/(s:\d+:"[^"]*"|i:\d+);O:\+?[0-9]+:"/i', $param_value ) )
-	)
-	{	// Correct data:
-		return true;
-	}
-	else
-	{	// Wrong data:
-		return false;
-	}
+    if (
+        // Allow to unserialize only arrays, main reason is an excluding of object structure like:
+        //     - O:7:"Results":1:{s:3:"sql";s:21:"SELECT * FROM T_users";}
+        (stripos($param_value, 'a:') === 0) &&
+        // + Check there is no Object in the array (We NEVER want to unserialize an object):
+        //     a:1:{s:3:"key";O:8:"stdClass":1:{s:1:"x";i:1;}}
+        //     a:1:{i:123;O:8:"stdClass":1:{s:1:"x";i:1;}}
+        //     a:1:{s:3:"key";a:1:{s:3:"sub";O:8:"stdClass":1:{s:1:"x";i:1;}}}
+        //     a:1:{s:3:"key";a:1:{i:456;O:8:"stdClass":1:{s:1:"x";i:1;}}}
+        //   This checking exclude real string with object structure value like ';O:8:':
+        //     a:1:{s:3:"key";s:5:";O:8:";}
+        (! preg_match('/(s:\d+:"[^"]*"|i:\d+);O:\+?[0-9]+:"/i', $param_value))
+    ) {	// Correct data:
+        return true;
+    } else {	// Wrong data:
+        return false;
+    }
 }
 
 
@@ -2875,39 +2597,33 @@ function param_check_serialized_array( $param_name )
  * @param string File path
  * @return boolean
  */
-function is_safe_filepath( $filepath )
+function is_safe_filepath($filepath)
 {
-	global $filemanager_allow_dotdot_in_filenames;
+    global $filemanager_allow_dotdot_in_filenames;
 
-	if( ! isset( $filemanager_allow_dotdot_in_filenames ) )
-	{	// This config var is required:
-		debug_die( 'The var <strong>$filemanager_allow_dotdot_in_filenames</strong> must be defined in config file.' );
-	}
+    if (! isset($filemanager_allow_dotdot_in_filenames)) {	// This config var is required:
+        debug_die('The var <strong>$filemanager_allow_dotdot_in_filenames</strong> must be defined in config file.');
+    }
 
-	if( empty( $filepath ) )
-	{	// Allow empty file path:
-		return true;
-	}
+    if (empty($filepath)) {	// Allow empty file path:
+        return true;
+    }
 
-	if( ! $filemanager_allow_dotdot_in_filenames &&
-	    strpos( $filepath, '..' ) !== false )
-	{	// Don't allow .. in file path because it is disable by config:
-		return false;
-	}
+    if (! $filemanager_allow_dotdot_in_filenames &&
+        strpos($filepath, '..') !== false) {	// Don't allow .. in file path because it is disable by config:
+        return false;
+    }
 
-	do
-	{	// Recursively decode file path as long as it is possible:
-		$orig_filepath = $filepath;
-		$filepath = urldecode( $filepath );
+    do {	// Recursively decode file path as long as it is possible:
+        $orig_filepath = $filepath;
+        $filepath = urldecode($filepath);
 
-		if( strpos( $filepath, '../' ) !== false || strpos( $filepath, '..\\' ) !== false )
-		{	// Don't allow a traversal directory:
-			return false;
-		}
-	}
-	while( $filepath != $orig_filepath );
+        if (strpos($filepath, '../') !== false || strpos($filepath, '..\\') !== false) {	// Don't allow a traversal directory:
+            return false;
+        }
+    } while ($filepath != $orig_filepath);
 
-	return true;
+    return true;
 }
 
 
@@ -2920,17 +2636,17 @@ function is_safe_filepath( $filepath )
  * @return string Validated and formatted value of condition param which is ready to be stored in DB
  * @param string|array Allowed rules separated by comma, Use char "-" before each rule to deny it, NULL - to allow all rules
  */
-function param_condition( $var, $default = '', $memorize = false, $rules = NULL )
+function param_condition($var, $default = '', $memorize = false, $rules = null)
 {
-	$condition = param( $var, 'string', $default, $memorize );
+    $condition = param($var, 'string', $default, $memorize);
 
-	// Format condition to database format:
-	$condition = param_format_condition( $condition, 'db', $rules );
+    // Format condition to database format:
+    $condition = param_format_condition($condition, 'db', $rules);
 
-	// Update condition param with validated and formatted value:
-	set_param( $var, $condition );
+    // Update condition param with validated and formatted value:
+    set_param($var, $condition);
 
-	return $condition;
+    return $condition;
 }
 
 
@@ -2943,97 +2659,75 @@ function param_condition( $var, $default = '', $memorize = false, $rules = NULL 
  * @param string|array Allowed rules separated by comma, Use char "-" before each rule to deny it, NULL - to allow all rules
  * @return object
  */
-function param_format_condition( $condition, $action, $rules = NULL )
+function param_format_condition($condition, $action, $rules = null)
 {
-	$is_encoded = ! is_object( $condition );
+    $is_encoded = ! is_object($condition);
 
-	if( $is_encoded )
-	{	// If source param is an encoded string, we should decode it firstly before formatting:
-		$condition = json_decode( $condition );
+    if ($is_encoded) {	// If source param is an encoded string, we should decode it firstly before formatting:
+        $condition = json_decode($condition);
 
-		if( $condition === NULL || ! isset( $condition->valid ) || $condition->valid !== true )
-		{	// Wrong condition object:
-			return $action == 'db' ? '' : 'null';
-		}
+        if ($condition === null || ! isset($condition->valid) || $condition->valid !== true) {	// Wrong condition object:
+            return $action == 'db' ? '' : 'null';
+        }
 
-		if( ! isset( $condition->condition ) )
-		{	// Set default condition:
-			$condition->condition = 'AND';
-		}
-	}
+        if (! isset($condition->condition)) {	// Set default condition:
+            $condition->condition = 'AND';
+        }
+    }
 
-	if( empty( $condition->rules ) )
-	{	// No rules, Skip it:
-		if( $is_encoded )
-		{	// If the source param has been passed here as encoded we should return it in the same format:
-			$condition = json_encode( $condition );
-		}
-		return $condition;
-	}
+    if (empty($condition->rules)) {	// No rules, Skip it:
+        if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
+            $condition = json_encode($condition);
+        }
+        return $condition;
+    }
 
-	if( $rules !== NULL )
-	{
-		if( is_string( $rules ) )
-		{	// Convert string to array:
-			$rules = array_map( 'trim', explode( ',', $rules ) );
-		}
-		$allowed_rules = array();
-		$denied_rules = array();
-		foreach( $rules as $r => $rule )
-		{
-			if( substr( $rule, 0, 1 ) == '-' )
-			{	// Deny this rule:
-				$denied_rules[] = substr( $rule, 1 );
-			}
-			else
-			{	// Allow this rule:
-				$allowed_rules[] = $rule;
-			}
-		}
-	}
+    if ($rules !== null) {
+        if (is_string($rules)) {	// Convert string to array:
+            $rules = array_map('trim', explode(',', $rules));
+        }
+        $allowed_rules = [];
+        $denied_rules = [];
+        foreach ($rules as $r => $rule) {
+            if (substr($rule, 0, 1) == '-') {	// Deny this rule:
+                $denied_rules[] = substr($rule, 1);
+            } else {	// Allow this rule:
+                $allowed_rules[] = $rule;
+            }
+        }
+    }
 
-	$condition_rules = array();
-	foreach( $condition->rules as $r => $rule )
-	{
-		if( isset( $rule->rules ) && is_array( $rule->rules ) )
-		{	// This is a group of conditions, Run this function recursively:
-			$condition_rules[] = param_format_condition( $rule, $action, $rules );
-		}
-		elseif( $rules === NULL ||
-		        ( $rules !== NULL && in_array( $rule->id, $allowed_rules ) && ! in_array( $rule->id, $denied_rules ) ) )
-		{	// This is a single allowed field, Format condition only for this field:
-			if( ! isset( $rule->type ) )
-			{	// Set default type:
-				$rule->type = 'string';
-			}
-			if( is_array( $rule->value ) )
-			{	// Field with multiple values like 'between'(field BETWEEN value_1 AND value_2):
-				foreach( $rule->value as $v => $rule_value )
-				{
-					$rule->value[ $v ] = param_format_condition_rule( $rule_value, $rule->type, $action );
-				}
-			}
-			else
-			{	// Field with single value like 'equal'(field = value):
-				$rule->value = param_format_condition_rule( $rule->value, $rule->type, $action );
-			}
-			$condition_rules[] = $rule;
-		}
-	}
+    $condition_rules = [];
+    foreach ($condition->rules as $r => $rule) {
+        if (isset($rule->rules) && is_array($rule->rules)) {	// This is a group of conditions, Run this function recursively:
+            $condition_rules[] = param_format_condition($rule, $action, $rules);
+        } elseif ($rules === null ||
+                ($rules !== null && in_array($rule->id, $allowed_rules) && ! in_array($rule->id, $denied_rules))) {	// This is a single allowed field, Format condition only for this field:
+            if (! isset($rule->type)) {	// Set default type:
+                $rule->type = 'string';
+            }
+            if (is_array($rule->value)) {	// Field with multiple values like 'between'(field BETWEEN value_1 AND value_2):
+                foreach ($rule->value as $v => $rule_value) {
+                    $rule->value[$v] = param_format_condition_rule($rule_value, $rule->type, $action);
+                }
+            } else {	// Field with single value like 'equal'(field = value):
+                $rule->value = param_format_condition_rule($rule->value, $rule->type, $action);
+            }
+            $condition_rules[] = $rule;
+        }
+    }
 
-	$condition->rules = $condition_rules;
+    $condition->rules = $condition_rules;
 
-	if( empty( $condition->rules ) )
-	{	// Return empty string if condition has no allowed rules:
-		return $action == 'db' ? '' : 'null';
-	}
+    if (empty($condition->rules)) {	// Return empty string if condition has no allowed rules:
+        return $action == 'db' ? '' : 'null';
+    }
 
-	if( $is_encoded )
-	{	// If the source param has been passed here as encoded we should return it in the same format:
-		$condition = json_encode( $condition );
-	}
+    if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
+        $condition = json_encode($condition);
+    }
 
-	return $condition;
+    return $condition;
 }
 
 
@@ -3044,27 +2738,23 @@ function param_format_condition( $condition, $action, $rules = NULL )
  * @param string Rule type
  * @param string Format action: 'db' - to database format, 'js' - from database to JavaScript format
  */
-function param_format_condition_rule( $rule_value, $rule_type, $action )
+function param_format_condition_rule($rule_value, $rule_type, $action)
 {
-	switch( $rule_type )
-	{
-		case 'date':
-			switch( $action )
-			{
-				case 'db':
-					// To database format:
-					$formatted_date = format_input_date_to_iso( $rule_value );
-					return $formatted_date ? $formatted_date : $rule_value;
+    switch ($rule_type) {
+        case 'date':
+            switch ($action) {
+                case 'db':
+                    // To database format:
+                    $formatted_date = format_input_date_to_iso($rule_value);
+                    return $formatted_date ? $formatted_date : $rule_value;
 
-				case 'js':
-					// To JavaScript format:
-					$formatted_date = mysql2date( locale_input_datefmt(), $rule_value );
-					return $formatted_date ? $formatted_date : $rule_value;
-			}
-			break;
-	}
+                case 'js':
+                    // To JavaScript format:
+                    $formatted_date = mysql2date(locale_input_datefmt(), $rule_value);
+                    return $formatted_date ? $formatted_date : $rule_value;
+            }
+            break;
+    }
 
-	return $rule_value;
+    return $rule_value;
 }
-
-?>

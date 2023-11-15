@@ -11,35 +11,38 @@
  * @package evocore
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $admin_url;
 
-load_class( 'regional/model/_country.class.php', 'Country' );
+load_class('regional/model/_country.class.php', 'Country');
 
-$Form = new Form( NULL, 'city_checkchanges' );
+$Form = new Form(null, 'city_checkchanges');
 
-$Form->global_icon( TB_('Cancel importing!'), 'close', regenerate_url( 'action' ) );
+$Form->global_icon(TB_('Cancel importing!'), 'close', regenerate_url('action'));
 
-$Form->begin_form( 'fform', TB_('Import cities') );
+$Form->begin_form('fform', TB_('Import cities'));
 
-	$Form->add_crumb( 'city' );
-	$Form->hiddens_by_key( get_memorized( 'action' ) ); // (this allows to come back to the right list order & page)
+$Form->add_crumb('city');
+$Form->hiddens_by_key(get_memorized('action')); // (this allows to come back to the right list order & page)
 
-	// Display a panel to upload files before import:
-	$import_files = display_importer_upload_panel( array(
-			'folder'      => 'cities',
-			'help_slug'   => 'cities-import',
-			'refresh_url' => $admin_url.'?ctrl=cities&amp;action=csv',
-		) );
+// Display a panel to upload files before import:
+$import_files = display_importer_upload_panel([
+    'folder' => 'cities',
+    'help_slug' => 'cities-import',
+    'refresh_url' => $admin_url . '?ctrl=cities&amp;action=csv',
+]);
 
-	if( ! empty( $import_files ) )
-	{
-		$CountryCache = & get_CountryCache();
-		$Form->select_country( 'ctry_ID', get_param( 'ctry_ID' ), $CountryCache, TB_('Country'), array( 'allow_none' => true, 'required' => true ) );
+if (! empty($import_files)) {
+    $CountryCache = &get_CountryCache();
+    $Form->select_country('ctry_ID', get_param('ctry_ID'), $CountryCache, TB_('Country'), [
+        'allow_none' => true,
+        'required' => true,
+    ]);
 
-		$Form->buttons( array( array( 'submit', 'actionArray[import]', TB_('Import'), 'SaveButton' ) ) );
-	}
+    $Form->buttons([['submit', 'actionArray[import]', TB_('Import'), 'SaveButton']]);
+}
 
 $Form->end_form();
-?>

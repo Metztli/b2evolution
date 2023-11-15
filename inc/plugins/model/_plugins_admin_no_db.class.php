@@ -15,10 +15,12 @@
  *
  * @author blueyed: Daniel HAHLER
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_class( 'plugins/model/_plugins_admin.class.php', 'Plugins_admin' );
+load_class('plugins/model/_plugins_admin.class.php', 'Plugins_admin');
 
 
 /**
@@ -33,19 +35,17 @@ load_class( 'plugins/model/_plugins_admin.class.php', 'Plugins_admin' );
  */
 class Plugins_admin_no_DB extends Plugins_admin
 {
-	/**
-	 * No-operation.
-	 */
-	function load_plugins_table()
-	{
-	}
+    /**
+     * No-operation.
+     */
+    public function load_plugins_table()
+    {
+    }
 
-	/**
-	 * No-operation.
-	 */
-	function load_events()
-	{
-	}
+    /**
+     * No-operation.
+     */
+    public function load_events()
+    {
+    }
 }
-
-?>

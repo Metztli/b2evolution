@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,141 +26,130 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class free_text_Widget extends ComponentWidget
 {
-	var $icon = 'file-text-o';
+    public $icon = 'file-text-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'free_text' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'free_text');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('free-text-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'free-text-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        $title = T_('Text');
+        return $title;
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     *
+     * @return string The block title, the first 60 characters of the block
+     *                content or an empty string.
+     */
+    public function get_short_desc()
+    {
+        if (empty($this->disp_params['title'])) {
+            return strmaxlen($this->disp_params['content'], 60, null, /* use htmlspecialchars() */ 'formvalue');
+        }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		$title = T_('Text');
-		return $title;
-	}
+        return format_to_output($this->disp_params['title']);
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display custom text, with renderers applied (Markdown, etc.)');
+    }
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 *
-	 * @return string The block title, the first 60 characters of the block
-	 *                content or an empty string.
-	 */
-	function get_short_desc()
-	{
-		if( empty( $this->disp_params['title'] ) )
-		{
-			return strmaxlen( $this->disp_params['content'], 60, NULL, /* use htmlspecialchars() */ 'formvalue' );
-		}
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        global $Plugins;
 
-		return format_to_output( $this->disp_params['title'] );
-	}
+        // Initialize checkboxes options for text renderers setting:
+        $renderers = $Plugins->get_renderer_options('default', [
+            'Blog' => $this->get_Blog(),
+            'setting_name' => 'shared_apply_rendering',
+        ]);
+        $renderer_checkbox_options = [];
+        foreach ($renderers as $renderer) {
+            $renderer_checkbox_options[] = [
+                $renderer['code'],
+                $renderer['name'] . ' ' . $renderer['help_link'],
+                $renderer['checked'],
+                '',
+                $renderer['disabled'],
+            ];
+        }
 
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'size' => 60,
+            ],
+            'content' => [
+                'type' => 'html_textarea',
+                'label' => T_('Block content'),
+                'rows' => 10,
+            ],
+            'renderers' => [
+                'label' => T_('Text Renderers'),
+                'type' => 'checklist',
+                'options' => $renderer_checkbox_options,
+            ],
+        ], parent::get_param_definitions($params));
 
-  /**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display custom text, with renderers applied (Markdown, etc.)');
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Plugins;
 
-  /**
-   * Get definitions for editable params
-   *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		global $Plugins;
+        $this->init_display($params);
 
-		// Initialize checkboxes options for text renderers setting:
-		$renderers = $Plugins->get_renderer_options( 'default', array(
-				'Blog'         => $this->get_Blog(),
-				'setting_name' => 'shared_apply_rendering',
-			) );
-		$renderer_checkbox_options = array();
-		foreach( $renderers as $renderer )
-		{
-			$renderer_checkbox_options[] = array(
-				$renderer['code'],
-				$renderer['name'].' '.$renderer['help_link'],
-				$renderer['checked'],
-				'',
-				$renderer['disabled']
-			);
-		}
+        // Collection common links:
+        echo $this->disp_params['block_start'];
 
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_('Block title'),
-					'size' => 60,
-				),
-				'content' => array(
-					'type' => 'html_textarea',
-					'label' => T_('Block content'),
-					'rows' => 10,
-				),
-				'renderers' => array(
-					'label' => T_('Text Renderers'),
-					'type' => 'checklist',
-					'options' => $renderer_checkbox_options,
-				),
-			), parent::get_param_definitions( $params ) );
+        $this->disp_title();
 
-		return $r;
+        echo $this->disp_params['block_body_start'];
 
-	}
+        // Display the rendered block content:
+        echo $this->get_rendered_content($this->disp_params['content']);
 
+        echo $this->disp_params['block_body_end'];
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Plugins;
+        echo $this->disp_params['block_end'];
 
-		$this->init_display( $params );
-
-		// Collection common links:
-		echo $this->disp_params['block_start'];
-
-		$this->disp_title();
-
-		echo $this->disp_params['block_body_start'];
-
-		// Display the rendered block content:
-		echo $this->get_rendered_content( $this->disp_params['content'] );
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

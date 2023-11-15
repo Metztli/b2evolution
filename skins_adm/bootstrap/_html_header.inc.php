@@ -16,7 +16,9 @@
  * @author fplanque
  * @author mbruneau: Marc BRUNEAU / PROGIDISTRI
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $io_charset, $rsc_url, $UserSettings, $Debuglog, $Plugins;
 global $month, $month_abbrev, $weekday, $weekday_abbrev; /* for localized calendar */
@@ -25,7 +27,7 @@ global $debug, $Hit, $AdminUI;
 // Send the predefined cookies:
 evo_sendcookies();
 
-headers_content_mightcache( 'text/html', 0 );		// Make extra sure we don't cache the admin pages!
+headers_content_mightcache('text/html', 0);		// Make extra sure we don't cache the admin pages!
 ?>
 <!DOCTYPE html>
 <html lang="<?php locale_lang() ?>">
@@ -35,68 +37,65 @@ headers_content_mightcache( 'text/html', 0 );		// Make extra sure we don't cache
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $io_charset ?>" />
 	<title><?php echo $this->get_html_title(); ?></title>
 	<?php
-	global $robots_index, $robots_follow;
-	$robots_index = false;
-	$robots_follow = false;
-	robots_tag();
+    global $robots_index, $robots_follow;
+$robots_index = false;
+$robots_follow = false;
+robots_tag();
 
-	global $rsc_path, $rsc_url;
+global $rsc_path, $rsc_url;
 
-	// var htsrv_url is used for AJAX callbacks
-	add_js_headline( "// Paths and vars are used by JS functions:
-		var htsrv_url = '".get_htsrv_url()."';
-		var restapi_url = '".get_restapi_url()."';
-		var blog_id = '".param( 'blog', 'integer' )."';
-		var b2evo_icons_type = '".get_param( 'b2evo_icons_type' )."';
-		var is_backoffice = true;" );
+// var htsrv_url is used for AJAX callbacks
+add_js_headline("// Paths and vars are used by JS functions:
+		var htsrv_url = '" . get_htsrv_url() . "';
+		var restapi_url = '" . get_restapi_url() . "';
+		var blog_id = '" . param('blog', 'integer') . "';
+		var b2evo_icons_type = '" . get_param('b2evo_icons_type') . "';
+		var is_backoffice = true;");
 
-	init_bubbletip_js( 'rsc_url', $AdminUI->get_template( 'tooltip_plugin' ) ); // Init popover windows for usernames
-	init_results_js(); // Add functions to work with Results tables
-	init_affix_messages_js();
+init_bubbletip_js('rsc_url', $AdminUI->get_template('tooltip_plugin')); // Init popover windows for usernames
+init_results_js(); // Add functions to work with Results tables
+init_affix_messages_js();
 
-	require_js_defer( '#jqueryUI#' ); // Need to animate background, e.g. in function evoFadeBg()
+require_js_defer('#jqueryUI#'); // Need to animate background, e.g. in function evoFadeBg()
 
 
-	global $UserSettings;
-	if( $UserSettings->get('control_form_abortions') )
-	{	// Activate bozo validator
-		require_js_defer( 'bozo_validator.js' );
-	}
+global $UserSettings;
+if ($UserSettings->get('control_form_abortions')) {	// Activate bozo validator
+    require_js_defer('bozo_validator.js');
+}
 
-	if( $UserSettings->get('focus_on_first_input') )
-	{	// Activate focus on first form <input type="text">:
-		add_js_headline( 'jQuery( function() { focus_on_first_input() } )' );
-	}
+if ($UserSettings->get('focus_on_first_input')) {	// Activate focus on first form <input type="text">:
+    add_js_headline('jQuery( function() { focus_on_first_input() } )');
+}
 
-	global $Debuglog;
-	$Debuglog->add( 'Admin-Path: '.var_export($this->path, true), 'skins' );
+global $Debuglog;
+$Debuglog->add('Admin-Path: ' . var_export($this->path, true), 'skins');
 
-	if( $this->get_path( 0 ) == 'files'
-			|| ( $this->get_path_range( 0, 2 ) == array( 'collections', 'settings', 'perm' ) )
-			|| ( $this->get_path_range( 0, 2 ) == array( 'collections', 'settings', 'permgroup' ) )
-			|| ( $this->get_path_range( 0, 2 ) == array( 'users', 'groups', 'collection' ) ) )
-	{{{ // -- Inject javascript ----------------
-		// gets initialized in _footer.php
+if ($this->get_path(0) == 'files'
+        || ($this->get_path_range(0, 2) == ['collections', 'settings', 'perm'])
+        || ($this->get_path_range(0, 2) == ['collections', 'settings', 'permgroup'])
+        || ($this->get_path_range(0, 2) == ['users', 'groups', 'collection'])) {
+    {{ // -- Inject javascript ----------------
+        // gets initialized in _footer.php
 
-		$begin_script = <<<JS
+        $begin_script = <<<JS
 		<script>
 		<!--
 		  var allchecked = Array();
 		  var idprefix;
 JS;
-			add_headline( $begin_script );
+        add_headline($begin_script);
 
-			switch( $this->get_path( 0 ) )
-			{
-				case 'files':
-				/**
-				 * Toggles status of a bunch of checkboxes in a form
-				 *
-				 * @param string the form name
-				 * @param string the checkbox(es) element(s) name
-				 * @param string number/name of the checkall set to use. Defaults to 0 and is needed when there are several "checkall-sets" on one page.
-				 */
-				$toggleCheckboxes_script = "
+        switch ($this->get_path(0)) {
+            case 'files':
+                /**
+                 * Toggles status of a bunch of checkboxes in a form
+                 *
+                 * @param string the form name
+                 * @param string the checkbox(es) element(s) name
+                 * @param string number/name of the checkall set to use. Defaults to 0 and is needed when there are several "checkall-sets" on one page.
+                 */
+                $toggleCheckboxes_script = "
 				function toggleCheckboxes(the_form, the_elements, set_name )
 				{
 					if( typeof set_name == 'undefined' )
@@ -126,18 +125,18 @@ JS;
 					setcheckallspan( set_name );
 				}
 ";
-				add_headline( $toggleCheckboxes_script );
-				break;
-			}
+                add_headline($toggleCheckboxes_script);
+                break;
+        }
 
-			// --- general functions ----------------
-			/**
-			 * replaces the text of the checkall-html-ID for set_name
-			 *
-			 * @param integer|string number or name of the checkall "set" to use
-			 * @param boolean force setting to true/false
-			 */
-			$setcheckallspan_script = "
+        // --- general functions ----------------
+        /**
+         * replaces the text of the checkall-html-ID for set_name
+         *
+         * @param integer|string number or name of the checkall "set" to use
+         * @param boolean force setting to true/false
+         */
+        $setcheckallspan_script = "
 			function setcheckallspan( set_name, set )
 			{
 				if( typeof(allchecked[set_name]) == 'undefined' || typeof(set) != 'undefined' )
@@ -161,13 +160,13 @@ JS;
 				//else alert('no element with id '+idprefix+'_'+String(set_name));
 			}
 ";
-			add_headline( $setcheckallspan_script );
-			/**
-			 * inits the checkall functionality.
-			 *
-			 * @param string the prefix of the IDs where the '(un)check all' text should be set
-			 * @param boolean initial state of the text (if there is no checkbox with ID htmlid + '_state_' + nr)
-			 */ $initcheckall_script = <<<JS
+        add_headline($setcheckallspan_script);
+        /**
+         * inits the checkall functionality.
+         *
+         * @param string the prefix of the IDs where the '(un)check all' text should be set
+         * @param boolean initial state of the text (if there is no checkbox with ID htmlid + '_state_' + nr)
+         */ $initcheckall_script = <<<JS
 			function initcheckall( htmlid, init )
 			{
 				// initialize array
@@ -196,15 +195,15 @@ JS;
 			//-->
 		</script>
 JS;
-		add_headline( $initcheckall_script );
-	}}}
+        add_headline($initcheckall_script);
+    }}
+}
 
-	// Add event to the item title field to update document title and init it (important when switching tabs/blogs):
-	global $js_doc_title_prefix;
-	if( isset($js_doc_title_prefix) )
-	{ // dynamic document.title handling:
-		$base_title = preg_quote( trim($js_doc_title_prefix) /* e.g. FF2 trims document.title */ );
-		add_js_headline( 'jQuery(function(){
+// Add event to the item title field to update document title and init it (important when switching tabs/blogs):
+global $js_doc_title_prefix;
+if (isset($js_doc_title_prefix)) { // dynamic document.title handling:
+    $base_title = preg_quote(trim($js_doc_title_prefix) /* e.g. FF2 trims document.title */);
+    add_js_headline('jQuery(function(){
 			var generateTitle = function()
 			{
 				currentPostTitle = jQuery(\'#post_title\').val()
@@ -212,13 +211,13 @@ JS;
 			}
 			generateTitle()
 			jQuery(\'#post_title\').keyup(generateTitle)
-		})' );
-	}
+		})');
+}
 
-	// CALL PLUGINS NOW:
-	global $Plugins;
-	$Plugins->trigger_event( 'AdminEndHtmlHead', array() );
+// CALL PLUGINS NOW:
+global $Plugins;
+$Plugins->trigger_event('AdminEndHtmlHead', []);
 
-	include_headlines(); // Add javascript and css files included by plugins and skin
+include_headlines(); // Add javascript and css files included by plugins and skin
 ?>
 </head>

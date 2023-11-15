@@ -1,0 +1,148 @@
+// Disp Thread
+// ======================================================================== /
+.disp_threads,
+.disp_contacts {
+
+    .main_content {
+        background-color: @w;
+        padding: 40px;
+        box-shadow: @box-shadow;
+
+        @media screen and ( max-width: @MX ) {
+            padding: 25px;
+        }
+
+        .title__content {
+            margin-top: 0;
+            padding-bottom: 20px !important;
+            border-bottom: 1px solid @e;
+        }
+
+        // Evo Form Thread
+        // ======================================================================== /
+        .evo_form__thread {
+
+            .control-label {
+                margin-bottom: 5px;
+                font-weight: 400;
+            }
+
+            .token-input-list-facebook {
+                box-shadow: none;
+                border-radius: 0;
+                padding: 6px 15px;
+                background-color: @e;
+                border-color: @e;
+            }
+
+            .form_text_input,
+            .form_textarea_input {
+                box-shadow: none;
+                border-radius: 0;
+                height: auto;
+                padding: 10px 15px;
+                background-color: @e;
+                border-color: @e;
+
+                &:focus {
+                    border-color: @primary;
+                }
+            }
+
+        }
+
+        // Result
+        // ======================================================================== /
+        .results {
+            border-radius: 0;
+            border-bottom: 1px;
+            margin-bottom: 0;
+            box-shadow: @box-shadow;
+
+            .panel-heading,
+            .panel-body {
+                padding: 15px 25px;
+
+                .btn {
+                    font-size: 1.2rem;
+                    padding: 6px 15px;
+                    border-radius: 30px;
+                }
+            }
+
+            .panel-heading {
+                border-radius: 0;
+
+                .btn-primary {
+                    background-color: @primary;
+                    color: @w;
+                    border-color: @primary;
+                }
+
+                .pull-right {
+                    margin-top: -11px;
+                }
+            }
+
+            .table_scroll {
+
+                th, td {
+                    padding: 10px;
+                }
+
+                td.firstcol {
+                    img {
+                        max-width: 32px;
+                    }
+                }
+
+                img {
+                    border-radius: 2px;
+                    margin-right: 10px;
+                }
+
+                .fa-check {
+                    padding-right: 5px;
+                }
+
+            }
+
+            & > div .panel-footer {
+                border-bottom: 1px solid @cd;
+            }
+
+        }
+
+        .form_send_contacts {
+            margin-top: 20px;
+
+            .btn {
+                border-radius: 30px;
+                font-size: 1.2rem;
+                border-color: @primary;
+                color: @primary;
+                padding: 6px 12px;
+
+                &:hover, &:active, &:focus {
+                    background-color: @primary;
+                    color: @w;
+                }
+            }
+        }
+
+        .form_add_contacts {
+            .SaveButton {
+                border: 1px solid @primary;
+                padding: 6px 12px;
+                text-transform: capitalize;
+
+                &:hover, &:active, &:focus {
+                    background-color: @primary;
+                    color: @w;
+                }
+            }
+        }
+
+    }
+
+}

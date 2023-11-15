@@ -23,10 +23,15 @@ namespace GeoIp2\Model;
 class AnonymousIp extends AbstractModel
 {
     protected $isAnonymous;
+
     protected $isAnonymousVpn;
+
     protected $isHostingProvider;
+
     protected $isPublicProxy;
+
     protected $isTorExitNode;
+
     protected $ipAddress;
 
     /**

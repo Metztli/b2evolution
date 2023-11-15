@@ -7,7 +7,9 @@
  *
  * @package conf
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -37,7 +39,7 @@ $debug_pwd = '';
 
 // Most of the time you'll want to see all errors, including notices, to alert you on potential issues:
 // b2evo should run without any notices! (same for plugins!)
-error_reporting( E_ALL | E_STRICT );
+error_reporting(E_ALL | E_STRICT);
 /**
  * Do we want to display errors, even when not in debug mode?
  *
@@ -93,57 +95,57 @@ $date_default_timezone = '';
  *
  * @global array
  */
-$thumbnail_sizes = array(
-	// FIT: Typical images that will be shrunk to max width and/or max height but keep original aspect ratio (the ratios below are only for reference)
-		// 16:9 ratio 1.77
-			'fit-2880x1620'			=> array( 'fit', 2880, 1620, 80 ),		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
-			'fit-2560x1440'			=> array( 'fit', 2560, 1440, 80 ),		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
-			'fit-1920x1080'			=> array( 'fit', 1920, 1080, 80 ),		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
-			'fit-1600x900'			=> array( 'fit', 1600, 900, 80 ),		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
-			'fit-1280x720'			=> array( 'fit', 1280, 720, 85 ),		// 16:9 ratio 1.77
-			'fit-960x540'			=> array( 'fit', 960, 540, 85 ),			// 16:9 ratio 1.77	EXPERIMENTAL
-			'fit-720x500'			=> array( 'fit', 720, 500, 90 ),			// ratio 1.44
-			'fit-640x480'			=> array( 'fit', 640, 480, 90 ),			// 4:3 ratio 1.33
-			'fit-520x390'			=> array( 'fit', 520, 390, 90 ),			// 4:3 ratio 1.33
-			'fit-400x320'			=> array( 'fit', 400, 320, 85 ),			// 5:4 ratio 1.25
-			'fit-320x320'			=> array( 'fit', 320, 320, 85 ),			// 1:1 square ratio 1
-			'fit-256x256'			=> array( 'fit', 256, 256, 85 ),			// 1:1 square ratio 1
-			'fit-192x192'			=> array( 'fit', 192, 192, 85 ),			// 1:1 square ratio 1
-			'fit-160x160'			=> array( 'fit', 160, 160, 85 ),			// 1:1 square ratio 1
-			'fit-160x120'			=> array( 'fit', 160, 120, 85 ),			// 1:1 square ratio 1
-			'fit-128x128'			=> array( 'fit', 128, 128, 85 ),			// 1:1 square ratio 1
-			'fit-128x16'			=> array( 'fit', 128, 16, 85 ),				// 8:1 square ratio 8
-			'fit-80x80'				=> array( 'fit', 80, 80, 85 ),				// 1:1 square ratio 1
-	// FIT+BLUR: Blurred images (probably no need for Retina support, because the intended effect is to be blurred)
-			'fit-160x160-blur-13'		=> array( 'fit', 160, 160, 80, 13 ),
-			'fit-160x160-blur-18'		=> array( 'fit', 160, 160, 80, 18 ),
-	// CROPPED: Images that will be shrunk AND cropped to completely FILL the request aspect ratio
-		// 3:2 ratio 1.5
-			'crop-480x320'			=> array( 'crop', 480, 320, 90 ),
-		// 1:1 square ratio 1
-			'crop-512x512'			=> array( 'crop', 512, 512, 85 ),		// EXPERIMENTAL For Retina
-			'crop-320x320'			=> array( 'crop', 320, 320, 85 ),
-			'crop-256x256'			=> array( 'crop', 256, 256, 85 ),
-			'crop-192x192'			=> array( 'crop', 192, 192, 85 ),
-			'crop-128x128'			=> array( 'crop', 128, 128, 85 ),
-			'crop-80x80'			=> array( 'crop', 80, 80, 85 ),
-			'crop-64x64'			=> array( 'crop', 64, 64, 85 ),
-			'crop-48x48'			=> array( 'crop', 48, 48, 85 ),
-			'crop-32x32'			=> array( 'crop', 32, 32, 85 ),
-			'crop-15x15'			=> array( 'crop', 15, 15, 85 ),
-	// CROPPED near TOP: Images that will be shrunk with preference towards the top AND cropped to completely FILL the request aspect ratio (typically used for profile pictures)
-			'crop-top-640x640'		=> array( 'crop-top', 640, 640, 85 ),		// EXPERIMENTAL For Retina
-			'crop-top-320x320'		=> array( 'crop-top', 320, 320, 85 ),
-			'crop-top-200x200'		=> array( 'crop-top', 200, 200, 85 ),
-			'crop-top-160x160'		=> array( 'crop-top', 160, 160, 85 ),
-			'crop-top-80x80'		=> array( 'crop-top', 80, 80, 85 ),
-			'crop-top-64x64'		=> array( 'crop-top', 64, 64, 85 ),
-			'crop-top-48x48'		=> array( 'crop-top', 48, 48, 85 ),
-			'crop-top-32x32'		=> array( 'crop-top', 32, 32, 85 ),
-			'crop-top-15x15'		=> array( 'crop-top', 15, 15, 85 ),
-	// CROPPED near TOP + BLUR  (typically used to obfuscate profile pictures) (probably no need for Retina support, because the intended effect is to be blurred)
-			'crop-top-320x320-blur-8' => array( 'crop-top', 320, 320, 80, 8 ),
-	);
+$thumbnail_sizes = [
+    // FIT: Typical images that will be shrunk to max width and/or max height but keep original aspect ratio (the ratios below are only for reference)
+    // 16:9 ratio 1.77
+    'fit-2880x1620' => ['fit', 2880, 1620, 80],		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
+    'fit-2560x1440' => ['fit', 2560, 1440, 80],		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
+    'fit-1920x1080' => ['fit', 1920, 1080, 80],		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
+    'fit-1600x900' => ['fit', 1600, 900, 80],		// 16:9 ratio 1.77	EXPERIMENTAL For Retina displays
+    'fit-1280x720' => ['fit', 1280, 720, 85],		// 16:9 ratio 1.77
+    'fit-960x540' => ['fit', 960, 540, 85],			// 16:9 ratio 1.77	EXPERIMENTAL
+    'fit-720x500' => ['fit', 720, 500, 90],			// ratio 1.44
+    'fit-640x480' => ['fit', 640, 480, 90],			// 4:3 ratio 1.33
+    'fit-520x390' => ['fit', 520, 390, 90],			// 4:3 ratio 1.33
+    'fit-400x320' => ['fit', 400, 320, 85],			// 5:4 ratio 1.25
+    'fit-320x320' => ['fit', 320, 320, 85],			// 1:1 square ratio 1
+    'fit-256x256' => ['fit', 256, 256, 85],			// 1:1 square ratio 1
+    'fit-192x192' => ['fit', 192, 192, 85],			// 1:1 square ratio 1
+    'fit-160x160' => ['fit', 160, 160, 85],			// 1:1 square ratio 1
+    'fit-160x120' => ['fit', 160, 120, 85],			// 1:1 square ratio 1
+    'fit-128x128' => ['fit', 128, 128, 85],			// 1:1 square ratio 1
+    'fit-128x16' => ['fit', 128, 16, 85],				// 8:1 square ratio 8
+    'fit-80x80' => ['fit', 80, 80, 85],				// 1:1 square ratio 1
+    // FIT+BLUR: Blurred images (probably no need for Retina support, because the intended effect is to be blurred)
+    'fit-160x160-blur-13' => ['fit', 160, 160, 80, 13],
+    'fit-160x160-blur-18' => ['fit', 160, 160, 80, 18],
+    // CROPPED: Images that will be shrunk AND cropped to completely FILL the request aspect ratio
+    // 3:2 ratio 1.5
+    'crop-480x320' => ['crop', 480, 320, 90],
+    // 1:1 square ratio 1
+    'crop-512x512' => ['crop', 512, 512, 85],		// EXPERIMENTAL For Retina
+    'crop-320x320' => ['crop', 320, 320, 85],
+    'crop-256x256' => ['crop', 256, 256, 85],
+    'crop-192x192' => ['crop', 192, 192, 85],
+    'crop-128x128' => ['crop', 128, 128, 85],
+    'crop-80x80' => ['crop', 80, 80, 85],
+    'crop-64x64' => ['crop', 64, 64, 85],
+    'crop-48x48' => ['crop', 48, 48, 85],
+    'crop-32x32' => ['crop', 32, 32, 85],
+    'crop-15x15' => ['crop', 15, 15, 85],
+    // CROPPED near TOP: Images that will be shrunk with preference towards the top AND cropped to completely FILL the request aspect ratio (typically used for profile pictures)
+    'crop-top-640x640' => ['crop-top', 640, 640, 85],		// EXPERIMENTAL For Retina
+    'crop-top-320x320' => ['crop-top', 320, 320, 85],
+    'crop-top-200x200' => ['crop-top', 200, 200, 85],
+    'crop-top-160x160' => ['crop-top', 160, 160, 85],
+    'crop-top-80x80' => ['crop-top', 80, 80, 85],
+    'crop-top-64x64' => ['crop-top', 64, 64, 85],
+    'crop-top-48x48' => ['crop-top', 48, 48, 85],
+    'crop-top-32x32' => ['crop-top', 32, 32, 85],
+    'crop-top-15x15' => ['crop-top', 15, 15, 85],
+    // CROPPED near TOP + BLUR  (typically used to obfuscate profile pictures) (probably no need for Retina support, because the intended effect is to be blurred)
+    'crop-top-320x320-blur-8' => ['crop-top', 320, 320, 80, 8],
+];
 
 
 /**
@@ -193,25 +195,22 @@ $resample_all_images = false;
 
 // Decompose the baseurl
 // YOU SHOULD NOT EDIT THIS unless you know what you're doing
-if( preg_match( '#^((https?)://(www\.)?(.+?)(:.+?)?)(/.*)$#', $baseurl, $matches ) )
-{
-	$baseurlroot = $matches[1]; // no ending slash!
-	// echo "baseurlroot=$baseurlroot <br />";
+if (preg_match('#^((https?)://(www\.)?(.+?)(:.+?)?)(/.*)$#', $baseurl, $matches)) {
+    $baseurlroot = $matches[1]; // no ending slash!
+    // echo "baseurlroot=$baseurlroot <br />";
 
-	$baseprotocol = $matches[2];
+    $baseprotocol = $matches[2];
 
-	$basehost = $matches[4]; // Will NEVER include "www." at the beginning.
-	// echo "basehost=$basehost <br />";
+    $basehost = $matches[4]; // Will NEVER include "www." at the beginning.
+    // echo "basehost=$basehost <br />";
 
-	$baseport =  $matches[5]; // Will start with ":" if a port is specified.
-	// echo "baseport=$baseport <br />";
+    $baseport = $matches[5]; // Will start with ":" if a port is specified.
+    // echo "baseport=$baseport <br />";
 
-	$basesubpath =  $matches[6];
-	// echo "basesubpath=$basesubpath <br />";
-}
-else
-{
-	die( 'Your baseurl ('.$baseurl.') set in _basic_config.php seems invalid. You probably missed the "http://" prefix or the trailing slash. Please correct that.' );
+    $basesubpath = $matches[6];
+    // echo "basesubpath=$basesubpath <br />";
+} else {
+    die('Your baseurl (' . $baseurl . ') set in _basic_config.php seems invalid. You probably missed the "http://" prefix or the trailing slash. Please correct that.');
 }
 
 
@@ -282,7 +281,7 @@ $obhandler_debug = false;
  *
  * @global string Default: preg_replace( '#https?://[^/]+#', '', $baseurl )
  */
-$cookie_path = preg_replace( '#https?://[^/]+#', '', $baseurl );
+$cookie_path = preg_replace('#https?://[^/]+#', '', $baseurl);
 
 /**
  * Cookie domain.
@@ -301,41 +300,38 @@ $cookie_path = preg_replace( '#https?://[^/]+#', '', $baseurl );
  *
  * @global string
  */
-if( strpos($basehost, '.') === false )
-{	// "localhost" or windows machine name:
-	$cookie_domain = '';
-}
-else
-{
-	$cookie_domain = $basehost;
+if (strpos($basehost, '.') === false) {	// "localhost" or windows machine name:
+    $cookie_domain = '';
+} else {
+    $cookie_domain = $basehost;
 }
 
 /* The following is no longer needed because we already strip away "www." from $basehost, so now in all cases the cookie domain should just be the base domain
 
 elseif( preg_match( '~^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$~i', $basehost ) )
 {	// The basehost is an IP address, use the basehost as it is:
-	$cookie_domain = $basehost;
+    $cookie_domain = $basehost;
 }
 else
 {
-	// Keep the part of the basehost after the www. :
-	//	$cookie_domain = preg_replace( '/^(www\. )? (.+)$/xi', '.$2', $basehost );
+    // Keep the part of the basehost after the www. :
+    //	$cookie_domain = preg_replace( '/^(www\. )? (.+)$/xi', '.$2', $basehost );
 }
 */
 
 /**
  * Name used for session cookies.
  */
-$cookie_session = 'session_'.$instance_name;
+$cookie_session = 'session_' . $instance_name;
 
 /**
  * Names used for other cookies.
  *
  * The following remember the comment meta data for non registered users:
  */
-$cookie_name    = 'cookie'.$instance_name.'name';
-$cookie_email   = 'cookie'.$instance_name.'email';
-$cookie_url     = 'cookie'.$instance_name.'url';
+$cookie_name = 'cookie' . $instance_name . 'name';
+$cookie_email = 'cookie' . $instance_name . 'email';
+$cookie_url = 'cookie' . $instance_name . 'url';
 
 /**
  * Expiration for comment meta data cookies.
@@ -386,32 +382,32 @@ $pagecache_max_age = 900;
  *
  * We use funky field names to defeat the most basic spambots in the front office public forms
  */
-$dummy_fields = array(
-	'login' => 'x',
-	'pwd' => 'q',
-	'pass1' => 'm',
-	'pass2' => 'c',
-	'email' => 'u',
-	'name' => 'i',
-	'url' => 'h',
-	'subject' => 'd',
-	'content' => 'g'
-);
+$dummy_fields = [
+    'login' => 'x',
+    'pwd' => 'q',
+    'pass1' => 'm',
+    'pass2' => 'c',
+    'email' => 'u',
+    'name' => 'i',
+    'url' => 'h',
+    'subject' => 'd',
+    'content' => 'g',
+];
 
 
 // ** Location of the b2evolution subdirectories **
 
 /*
-	- You should only move these around if you really need to.
-	- You should keep everything as subdirectories of the base folder
-		($baseurl which is set in _basic_config.php, default is the /blogs/ folder)
-	- Remember you can set the baseurl to your website root (-> _basic_config.php).
+    - You should only move these around if you really need to.
+    - You should keep everything as subdirectories of the base folder
+        ($baseurl which is set in _basic_config.php, default is the /blogs/ folder)
+    - Remember you can set the baseurl to your website root (-> _basic_config.php).
 
-	NOTE: All paths must have a trailing slash!
+    NOTE: All paths must have a trailing slash!
 
-	Example of a possible setting:
-		$conf_subdir = 'settings/b2evo/';   // Subdirectory relative to base
-		$conf_subdir = '../../';            // Relative path to go back to base
+    Example of a possible setting:
+        $conf_subdir = 'settings/b2evo/';   // Subdirectory relative to base
+        $conf_subdir = '../../';            // Relative path to go back to base
 */
 /**
  * Location of the configuration files.
@@ -421,13 +417,13 @@ $dummy_fields = array(
  * @global string $conf_subdir
  */
 $conf_subdir = 'conf/';                  // Subdirectory relative to base
-$conf_path = str_replace( '\\', '/', dirname(__FILE__) ).'/';
+$conf_path = str_replace('\\', '/', dirname(__FILE__)) . '/';
 
 /**
  * @global string Path of the base.
  *                fp> made [i]nsensitive to case because of Windows URL oddities)
  */
-$basepath = preg_replace( '#/'.preg_quote( $conf_subdir, '#' ).'$#i', '', $conf_path ).'/';
+$basepath = preg_replace('#/' . preg_quote($conf_subdir, '#') . '$#i', '', $conf_path) . '/';
 // echo '<br/>basepath='.$basepath;
 
 /**
@@ -438,8 +434,8 @@ $basepath = preg_replace( '#/'.preg_quote( $conf_subdir, '#' ).'$#i', '', $conf_
  * @global string $inc_subdir
  */
 $inc_subdir = 'inc/';   		             	// Subdirectory relative to base
-$inc_path = $basepath.$inc_subdir; 		   	// You should not need to change this
-$misc_inc_path = $inc_path.'_misc/';	   	// You should not need to change this
+$inc_path = $basepath . $inc_subdir; 		   	// You should not need to change this
+$misc_inc_path = $inc_path . '_misc/';	   	// You should not need to change this
 
 /**
  * Location of the HTml SeRVices folder.
@@ -451,15 +447,15 @@ $misc_inc_path = $inc_path.'_misc/';	   	// You should not need to change this
  * @global string $htsrv_url This applies only to the backoffice. For the frontoffice, the URL will be dynamically generated by function get_htsrv_url( false )
  */
 $htsrv_subdir = 'htsrv/';                // Subdirectory relative to base
-$htsrv_path = $basepath.$htsrv_subdir;   // You should not need to change this
-$htsrv_url = $baseurl.$htsrv_subdir;     // You should not need to change this
+$htsrv_path = $basepath . $htsrv_subdir;   // You should not need to change this
+$htsrv_url = $baseurl . $htsrv_subdir;     // You should not need to change this
 
 /**
  * Location of the XML SeRVices folder.
  * @global string $xmlsrv_subdir
  */
 $xmlsrv_subdir = 'xmlsrv/';              // Subdirectory relative to base
-$xmlsrv_url = $baseurl.$xmlsrv_subdir;   // You should not need to change this
+$xmlsrv_url = $baseurl . $xmlsrv_subdir;   // You should not need to change this
 
 /**
  * URL of the REST API.
@@ -468,7 +464,7 @@ $xmlsrv_url = $baseurl.$xmlsrv_subdir;   // You should not need to change this
  * @global string $restapi_url This applies only to the backoffice. For the frontoffice, the URL will be dynamically generated by function get_restapi_url()
  */
 $restapi_script = 'rest.php?api_version=1&api_request='; // You should not need to change this
-$restapi_url = $htsrv_url.$restapi_script; // You should not need to change this
+$restapi_url = $htsrv_url . $restapi_script; // You should not need to change this
 
 /**
  * Location of the RSC folder.
@@ -481,9 +477,9 @@ $restapi_url = $htsrv_url.$restapi_script; // You should not need to change this
  * @global string $rsc_uri
  */
 $rsc_subdir = 'rsc/';                    // Subdirectory relative to base
-$rsc_path = $basepath.$rsc_subdir;       // You should not need to change this
-$rsc_url = $assets_baseurl.$rsc_subdir;  // You should not need to change this
-$rsc_uri = $basesubpath.$rsc_subdir;     // You should not need to change this
+$rsc_path = $basepath . $rsc_subdir;       // You should not need to change this
+$rsc_url = $assets_baseurl . $rsc_subdir;  // You should not need to change this
+$rsc_uri = $basesubpath . $rsc_subdir;     // You should not need to change this
 
 /**
  * Location of the skins folder.
@@ -495,8 +491,8 @@ $rsc_uri = $basesubpath.$rsc_subdir;     // You should not need to change this
  * @global string $skins_url This applies only to the backoffice. For the frontoffice, the URL will be dynamically generated by function Blog->get_local_skins_url()
  */
 $skins_subdir = 'skins/';                   // Subdirectory relative to base
-$skins_path = $basepath.$skins_subdir;      // You should not need to change this
-$skins_url = $assets_baseurl.$skins_subdir; // You should not need to change this
+$skins_path = $basepath . $skins_subdir;      // You should not need to change this
+$skins_url = $assets_baseurl . $skins_subdir; // You should not need to change this
 
 /**
  * Location of the email skins folder.
@@ -506,19 +502,19 @@ $skins_url = $assets_baseurl.$skins_subdir; // You should not need to change thi
  * @global string $emailskins_subdir
  */
 $emailskins_subdir = 'skins_email/';               // Subdirectory relative to base
-$emailskins_path = $basepath.$emailskins_subdir;   // You should not need to change this
-$emailskins_url = $assets_baseurl.$emailskins_subdir;     // You should not need to change this
+$emailskins_path = $basepath . $emailskins_subdir;   // You should not need to change this
+$emailskins_url = $assets_baseurl . $emailskins_subdir;     // You should not need to change this
 
 /**
  * Location of the customizer mode interface
  */
-$customizer_relative_url = $basesubpath.'customize.php';
+$customizer_relative_url = $basesubpath . 'customize.php';
 
 /**
  * Location of the admin interface dispatcher
  */
 $dispatcher = 'evoadm.php';
-$admin_url = $baseurl.$dispatcher;
+$admin_url = $baseurl . $dispatcher;
 
 /**
  * Location of the admin skins folder.
@@ -528,8 +524,8 @@ $admin_url = $baseurl.$dispatcher;
  * @global string $adminskins_subdir
  */
 $adminskins_subdir = 'skins_adm/';         // Subdirectory relative to ADMIN
-$adminskins_path = $basepath.$adminskins_subdir; // You should not need to change this
-$adminskins_url = $assets_baseurl.$adminskins_subdir;   // You should not need to change this
+$adminskins_path = $basepath . $adminskins_subdir; // You should not need to change this
+$adminskins_url = $assets_baseurl . $adminskins_subdir;   // You should not need to change this
 
 /**
  * Location of the locales folder.
@@ -540,7 +536,7 @@ $adminskins_url = $assets_baseurl.$adminskins_subdir;   // You should not need t
  * @global string $locales_subdir
  */
 $locales_subdir = 'locales/';            // Subdirectory relative to base
-$locales_path = $basepath.$locales_subdir;  // You should not need to change this
+$locales_path = $basepath . $locales_subdir;  // You should not need to change this
 
 /**
  * Location of the plugins.
@@ -553,8 +549,8 @@ $locales_path = $basepath.$locales_subdir;  // You should not need to change thi
  * @global string $plugins_url This applies only to the backoffice. For the frontoffice, the URL will be dynamically generated by function Blog->get_local_plugins_url()
  */
 $plugins_subdir = 'plugins/';            // Subdirectory relative to base
-$plugins_path = $basepath.$plugins_subdir;  // You should not need to change this
-$plugins_url = $baseurl.$plugins_subdir;    // You should not need to change this
+$plugins_path = $basepath . $plugins_subdir;  // You should not need to change this
+$plugins_url = $baseurl . $plugins_subdir;    // You should not need to change this
 
 /**
  * Location of the cron folder.
@@ -564,14 +560,14 @@ $plugins_url = $baseurl.$plugins_subdir;    // You should not need to change thi
  * @global string $cron_subdir
  */
 $cron_subdir = 'cron/';            // Subdirectory relative to base
-$cron_url = $baseurl.$cron_subdir; // You should not need to change this
+$cron_url = $baseurl . $cron_subdir; // You should not need to change this
 
 /**
  * Location of the install folder.
  * @global string $install_subdir
  */
 $install_subdir = 'install/';            	 // Subdirectory relative to base
-$install_path = $basepath.$install_subdir; // You should not need to change this
+$install_path = $basepath . $install_subdir; // You should not need to change this
 
 /**
  * Location of the rendered page cache folder.
@@ -582,7 +578,7 @@ $install_path = $basepath.$install_subdir; // You should not need to change this
  * @global string $cache_subdir
  */
 $cache_subdir = '_cache/';              // Subdirectory relative to base
-$cache_path = $basepath.$cache_subdir; // You should not need to change this
+$cache_path = $basepath . $cache_subdir; // You should not need to change this
 
 
 /**
@@ -596,8 +592,8 @@ $cache_path = $basepath.$cache_subdir; // You should not need to change this
  * @global string $media_url This applies only to the backoffice. For the frontoffice, the URL will be dynamically generated by function Blog->get_local_media_url()
  */
 $media_subdir = 'media/';                   // Subdirectory relative to base
-$media_path = $basepath.$media_subdir;      // You should not need to change this
-$media_url = $assets_baseurl.$media_subdir; // You should not need to change this
+$media_path = $basepath . $media_subdir;      // You should not need to change this
+$media_url = $assets_baseurl . $media_subdir; // You should not need to change this
 
 
 /**
@@ -609,7 +605,7 @@ $media_url = $assets_baseurl.$media_subdir; // You should not need to change thi
  * @global string $backup_subdir
  */
 $backup_subdir = '_backup/';             // Subdirectory relative to base
-$backup_path = $basepath.$backup_subdir; // You should not need to change this
+$backup_path = $basepath . $backup_subdir; // You should not need to change this
 
 
 /**
@@ -621,7 +617,7 @@ $backup_path = $basepath.$backup_subdir; // You should not need to change this
  * @global string $upgrade_subdir
  */
 $upgrade_subdir = '_upgrade/';              // Subdirectory relative to base
-$upgrade_path = $basepath.$upgrade_subdir;  // You should not need to change this
+$upgrade_path = $basepath . $upgrade_subdir;  // You should not need to change this
 
 
 /**
@@ -642,7 +638,7 @@ $auto_upgrade_from_any_url = false;
  * @global string $upgrade_subdir
  */
 $logs_subdir = '_logs/';              // Subdirectory relative to base
-$logs_path = $basepath.$logs_subdir;  // You should not need to change this
+$logs_path = $basepath . $logs_subdir;  // You should not need to change this
 
 
 /**
@@ -654,7 +650,7 @@ $logs_path = $basepath.$logs_subdir;  // You should not need to change this
  * @global string $ext_subdir
  */
 $ext_subdir = 'ext/';               // Subdirectory relative to base
-$ext_path = $basepath.$ext_subdir;  // You should not need to change this
+$ext_path = $basepath . $ext_subdir;  // You should not need to change this
 
 
 /**
@@ -685,7 +681,7 @@ $public_access_to_media = true;
  * File extensions that can never be made "NOT sensitive"
  * Admins will NOT be able to enable these for non-admin users in the FileType Settings.
  */
-$force_upload_forbiddenext = array( 'cgi', 'exe', 'htaccess', 'htpasswd', 'php', 'php3', 'php4', 'php5', 'php6', 'phtml', 'pl', 'vbs' );
+$force_upload_forbiddenext = ['cgi', 'exe', 'htaccess', 'htpasswd', 'php', 'php3', 'php4', 'php5', 'php6', 'phtml', 'pl', 'vbs'];
 
 /**
  * Should Admins be able to upload/rename/edit sensitive files?
@@ -710,7 +706,7 @@ $filename_max_length = 64;
  * On unix systems the file path length is not an issue, so there we can allow a higher value.
  * The OS independent max length is 767, because that is what b2evolution can handle correctly.
  */
-$dirpath_max_length = ( ( ( strtoupper( substr( PHP_OS, 0, 3 ) ) ) === 'WIN' ) ? ( 247 - 35 /* the maximum additional path length because of the _evocache folder */ ) : 767 ) - $filename_max_length;
+$dirpath_max_length = (((strtoupper(substr(PHP_OS, 0, 3))) === 'WIN') ? (247 - 35 /* the maximum additional path length because of the _evocache folder */) : 767) - $filename_max_length;
 
 
 /**
@@ -749,14 +745,14 @@ $pwdchange_request_delay = 300; // 5 minutes
  *     - phpass
  *     - evo_md5 // Use this driver as last choice only.
  */
-$enabled_password_drivers = array(
-		'evo_salted',
-		'bcrypt_2y',
-		'bcrypt',
-		'salted_md5',
-		'phpass',
-		'evo_md5', // Use this driver as last choice only.
-	);
+$enabled_password_drivers = [
+    'evo_salted',
+    'bcrypt_2y',
+    'bcrypt',
+    'salted_md5',
+    'phpass',
+    'evo_md5', // Use this driver as last choice only.
+];
 
 
 /**
@@ -809,7 +805,7 @@ $failed_logins_lockout = 600; // 10 minutes
  * Also deny changing user logins to one of these;
  * Only admins with permission to create new users can use these:
  */
-$reserved_logins = array( 'admin', 'admins', 'administrator', 'administrators', 'moderator', 'moderators', 'webmaster', 'postmaster', 'mailer', 'mail', 'support', 'owner', 'sysop', 'root', 'system', 'web', 'site', 'website', 'server' );
+$reserved_logins = ['admin', 'admins', 'administrator', 'administrators', 'moderator', 'moderators', 'webmaster', 'postmaster', 'mailer', 'mail', 'support', 'owner', 'sysop', 'root', 'system', 'web', 'site', 'website', 'server'];
 
 
 /**
@@ -833,36 +829,36 @@ $allow_redirects_to_different_domain = 'all_collections_and_redirected_posts';
  *
  * NOTE: For Item URL we automatically include enabled switchable params of the Item (see "Switchable content" on https://b2evolution.net/man/post-advanced-properties-panel)
  */
-$accepted_in_canonicals__params = array(
-	'get_redirected_debuginfo_from_sess_ID', // For display debug info of redirected page from different domain
-);
+$accepted_in_canonicals__params = [
+    'get_redirected_debuginfo_from_sess_ID', // For display debug info of redirected page from different domain
+];
 // For pages depending on $disp:
-$accepted_in_canonicals_disp__params = array(
-	'single' => array(
-		'page',          // For showing a different page in a multipage post
-		'quote_post',    // For quoting a post in the forums
-		'quote_comment', // For quoting a comment in the forums
-	),
-	'page' => array(
-		'page',          // For showing a different page in a multipage post
-		'quote_post',    // For quoting a post in the forums
-		'quote_comment', // For quoting a comment in the forums
-	),
-	'posts' => array(
-		'paged',         // For switching between pages of posts
-	),
-	'flagged' => array(
-		'paged',
-	),
-	'mustread' => array(
-		'paged',
-	),
-	'users' => array(
-		'filter_query',
-		'results_u_order',
-		'u_paged',
-	),
-);
+$accepted_in_canonicals_disp__params = [
+    'single' => [
+        'page',          // For showing a different page in a multipage post
+        'quote_post',    // For quoting a post in the forums
+        'quote_comment', // For quoting a comment in the forums
+    ],
+    'page' => [
+        'page',          // For showing a different page in a multipage post
+        'quote_post',    // For quoting a post in the forums
+        'quote_comment', // For quoting a comment in the forums
+    ],
+    'posts' => [
+        'paged',         // For switching between pages of posts
+    ],
+    'flagged' => [
+        'paged',
+    ],
+    'mustread' => [
+        'paged',
+    ],
+    'users' => [
+        'filter_query',
+        'results_u_order',
+        'u_paged',
+    ],
+];
 
 
 /**
@@ -870,11 +866,11 @@ $accepted_in_canonicals_disp__params = array(
  * If these params exist, we include them in ANY redirect we make.
  * We also do NOT overwrite them (e-g: in case of tiny slugs)
  */
-$passthru_in_all_redirs__params = array(
-	'utm_source',
-	'utm_campaign',
-	'utm_medium',
-);
+$passthru_in_all_redirs__params = [
+    'utm_source',
+    'utm_campaign',
+    'utm_medium',
+];
 
 
 /**
@@ -910,42 +906,42 @@ $use_cdns = false;		// Use false by default so b2evo works on intranets, local t
  * The first string is the production (minified URL), the second is the development URL (optional).
  * By default, only the most trusted CDNs are enabled while the other ones are commented out.
  */
-$library_cdn_urls = array(
-		'#jquery#' => array( '//code.jquery.com/jquery-1.11.1.min.js', '//code.jquery.com/jquery-1.11.1.js' ),
-		// jqueryUI is commented out because b2evo uses only a subset... ?
-		//'#jqueryUI#' => array( '//code.jquery.com/ui/1.10.4/jquery-ui.min.js', '//code.jquery.com/ui/1.10.4/jquery-ui.js' ),
-		//'#jqueryUI_css#' => array( '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css', '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css' ),
-		'#bootstrap#' => array( '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.js' ),
-		'#bootstrap_css#' => array( '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css' ),
-		'#bootstrap_theme_css#' => array( '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.css' ),
-		// The following are other possible public shared CDNs we are aware of
-		// but it is not clear whether or not they are:
-		// - Future proof (will they continue to serve old versions of the library in the future?)
-		// - Secure (who guarantees the code is genuine?)
-		//'#bootstrap_typeahead#' => array( '//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.1/typeahead.bundle.min.js', '//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.1/typeahead.bundle.js' ),
-		//'#easypiechart#' => array( '//cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.1/jquery.easypiechart.min.js', '//cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.1/jquery.easypiechart.js' ),
-		//'#scrollto#' => array( '//cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/1.4.2/jquery.scrollTo.min.js' ),
-		//'#touchswipe#' => array( '//cdn.jsdelivr.net/jquery.touchswipe/1.6.5/jquery.touchSwipe.min.js', '//cdn.jsdelivr.net/jquery.touchswipe/1.6.5/jquery.touchSwipe.js' ),
-		/*'#jqplot#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.js' ),
-			'#jqplot_barRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.barRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.barRenderer.js' ),
-			'#jqplot_canvasAxisTickRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasAxisTickRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasAxisTickRenderer.js' ),
-			'#jqplot_canvasTextRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasTextRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasTextRenderer.js' ),
-			'#jqplot_categoryAxisRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.categoryAxisRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.categoryAxisRenderer.js' ),
-			'#jqplot_enhancedLegendRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.enhancedLegendRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.enhancedLegendRenderer.js' ),
-			'#jqplot_highlighter#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.highlighter.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.highlighter.js' ),
-			'#jqplot_canvasOverlay#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasOverlay.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasOverlay.js' ),
-			'#jqplot_donutRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.donutRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.donutRenderer.js' ),
-			'#jqplot_css#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.css', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.css' ),*/
-		//'#tinymce#' => array( '//cdn.tinymce.com/4/tinymce.min.js' ),
-		//'#tinymce_jquery#' => array( '//cdn.tinymce.com/4/jquery.tinymce.min.js' ),
-		//'#flowplayer#' => array( '//releases.flowplayer.org/5.4.4/flowplayer.min.js', '//releases.flowplayer.org/5.4.4/flowplayer.js' ),
-		//'#mediaelement#' => array( '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/js/mediaelement-and-player.min.js', '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/js/mediaelement-and-player.js' ),
-		//'#mediaelement_css#' => array( '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/css/mediaelementplayer.min.css', '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/css/mediaelementplayer.css' ),
-		//'#videojs#' => array( 'http://vjs.zencdn.net/4.2.0/video.js' ),
-		//'#videojs_css#' => array( 'http://vjs.zencdn.net/4.2.0/video-js.css' ),
-		//'#clipboardjs#' => array( '//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js', '//cdn.rawgit.com/zenorocha/clipboard.js/v2.0.4/dist/clipboard.min.js' ),
-		'#fontawesome#' => array( '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' ),
-	);
+$library_cdn_urls = [
+    '#jquery#' => ['//code.jquery.com/jquery-1.11.1.min.js', '//code.jquery.com/jquery-1.11.1.js'],
+    // jqueryUI is commented out because b2evo uses only a subset... ?
+    //'#jqueryUI#' => array( '//code.jquery.com/ui/1.10.4/jquery-ui.min.js', '//code.jquery.com/ui/1.10.4/jquery-ui.js' ),
+    //'#jqueryUI_css#' => array( '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css', '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css' ),
+    '#bootstrap#' => ['//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.js'],
+    '#bootstrap_css#' => ['//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css'],
+    '#bootstrap_theme_css#' => ['//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.css'],
+    // The following are other possible public shared CDNs we are aware of
+    // but it is not clear whether or not they are:
+    // - Future proof (will they continue to serve old versions of the library in the future?)
+    // - Secure (who guarantees the code is genuine?)
+    //'#bootstrap_typeahead#' => array( '//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.1/typeahead.bundle.min.js', '//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.1/typeahead.bundle.js' ),
+    //'#easypiechart#' => array( '//cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.1/jquery.easypiechart.min.js', '//cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.1/jquery.easypiechart.js' ),
+    //'#scrollto#' => array( '//cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/1.4.2/jquery.scrollTo.min.js' ),
+    //'#touchswipe#' => array( '//cdn.jsdelivr.net/jquery.touchswipe/1.6.5/jquery.touchSwipe.min.js', '//cdn.jsdelivr.net/jquery.touchswipe/1.6.5/jquery.touchSwipe.js' ),
+    /*'#jqplot#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.js' ),
+            '#jqplot_barRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.barRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.barRenderer.js' ),
+            '#jqplot_canvasAxisTickRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasAxisTickRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasAxisTickRenderer.js' ),
+            '#jqplot_canvasTextRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasTextRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasTextRenderer.js' ),
+            '#jqplot_categoryAxisRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.categoryAxisRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.categoryAxisRenderer.js' ),
+            '#jqplot_enhancedLegendRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.enhancedLegendRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.enhancedLegendRenderer.js' ),
+            '#jqplot_highlighter#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.highlighter.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.highlighter.js' ),
+            '#jqplot_canvasOverlay#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasOverlay.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.canvasOverlay.js' ),
+            '#jqplot_donutRenderer#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.donutRenderer.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.donutRenderer.js' ),
+            '#jqplot_css#' => array( '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.css', '//cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.css' ),*/
+    //'#tinymce#' => array( '//cdn.tinymce.com/4/tinymce.min.js' ),
+    //'#tinymce_jquery#' => array( '//cdn.tinymce.com/4/jquery.tinymce.min.js' ),
+    //'#flowplayer#' => array( '//releases.flowplayer.org/5.4.4/flowplayer.min.js', '//releases.flowplayer.org/5.4.4/flowplayer.js' ),
+    //'#mediaelement#' => array( '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/js/mediaelement-and-player.min.js', '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/js/mediaelement-and-player.js' ),
+    //'#mediaelement_css#' => array( '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/css/mediaelementplayer.min.css', '//cdnjs.cloudflare.com/ajax/libs/mediaelement/2.13.2/css/mediaelementplayer.css' ),
+    //'#videojs#' => array( 'http://vjs.zencdn.net/4.2.0/video.js' ),
+    //'#videojs_css#' => array( 'http://vjs.zencdn.net/4.2.0/video-js.css' ),
+    //'#clipboardjs#' => array( '//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js', '//cdn.rawgit.com/zenorocha/clipboard.js/v2.0.4/dist/clipboard.min.js' ),
+    '#fontawesome#' => ['//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'],
+];
 
 /**
  * The aliases for all local JS and CSS files that are used when CDN url is not defined in $library_cdn_urls
@@ -953,68 +949,68 @@ $library_cdn_urls = array(
  * Each line starts with the js or css alias.
  * The first string is the production (minified URL), the second is the development URL (optional).
  */
-$library_local_urls = array(
-		'#jquery#' => array( 'ext:jquery/jquery.min.js', 'ext:jquery/jquery.js' ),
-		'#jquery_migrate#' => array( 'ext:jquery/jquery-migrate.min.js', 'ext:jquery/jquery-migrate.js' ),
-		'#jqueryUI#' => array( 'ext:jquery/ui/js/jquery.ui.b2evo.min.js', 'ext:jquery/ui/js/jquery.ui.b2evo.js' ),
-		'#jqueryUI_css#' => array( 'ext:jquery/ui/css/smoothness/jquery-ui.b2evo.min.css', 'ext:jquery/ui/css/smoothness/jquery-ui.b2evo.css' ),
-# Uncomment the following lines if your plugins need more jQueryUI features than the ones loaded by b2evo:
-#		'#jqueryUI#' => array( 'ext:jquery/ui/js/jquery.ui.all.min.js', 'ext:jquery/ui/js/jquery.ui.all.js' ),
-#		'#jqueryUI_css#' => array( 'ext:jquery/ui/css/smoothness/jquery-ui.min.css', 'ext:jquery/ui/css/smoothness/jquery-ui.css' ),
-		'#bootstrap#' => array( 'ext:bootstrap/js/bootstrap.min.js', 'ext:bootstrap/js/bootstrap.js' ),
-		'#bootstrap_css#' => array( 'ext:bootstrap/css/bootstrap.min.css', 'ext:bootstrap/css/bootstrap.css' ),
-		'#bootstrap_theme_css#' => array( 'ext:bootstrap/css/bootstrap-theme.min.css', 'ext:bootstrap/css/bootstrap-theme.css' ),
-		'#bootstrap_typeahead#' => array( 'ext:bootstrap/js/typeahead.bundle.min.js', 'ext:bootstrap/js/typeahead.bundle.js' ),
-		'#easypiechart#' => array( 'ext:jquery/easy-pie-chart/js/jquery.easy-pie-chart.min.js', 'ext:jquery/easy-pie-chart/js/jquery.easy-pie-chart.js' ),
-		'#scrollto#' => array( 'customized:jquery/scrollto/jquery.scrollto.min.js', 'customized:jquery/scrollto/jquery.scrollto.js' ),
-		'#touchswipe#' => array( 'ext:jquery/touchswipe/jquery.touchswipe.min.js', 'ext:jquery/touchswipe/jquery.touchswipe.js' ),
-		'#jqplot#' => array( 'ext:jquery/jqplot/js/jquery.jqplot.min.js' ),
-		'#jqplot_barRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.barRenderer.min.js' ),
-		'#jqplot_canvasAxisTickRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.canvasAxisTickRenderer.min.js' ),
-		'#jqplot_canvasTextRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.canvasTextRenderer.min.js' ),
-		'#jqplot_categoryAxisRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.categoryAxisRenderer.min.js' ),
-		'#jqplot_enhancedLegendRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.enhancedLegendRenderer.min.js' ),
-		'#jqplot_highlighter#' => array( 'ext:jquery/jqplot/js/jqplot.highlighter.min.js' ),
-		'#jqplot_canvasOverlay#' => array( 'ext:jquery/jqplot/js/jqplot.canvasOverlay.min.js' ),
-		'#jqplot_donutRenderer#' => array( 'ext:jquery/jqplot/js/jqplot.donutRenderer.min.js' ),
-		'#jqplot_css#' => array( 'ext:jquery/jqplot/css/jquery.jqplot.min.css', 'ext:jquery/jqplot/css/jquery.jqplot.css' ),
-		'#tinymce#' => array( 'ext:tiny_mce/tinymce.min.js' ),
-		'#tinymce_jquery#' => array( 'ext:tiny_mce/jquery.tinymce.min.js' ),
-		'#flowplayer#' => array( 'ext:flowplayer/flowplayer.min.js', 'ext:flowplayer/flowplayer.js' ),
-		'#mediaelement#' => array( 'ext:mediaelement/js/mediaelement-and-player.min.js', 'ext:mediaelement/js/mediaelement-and-player.js' ),
-		'#mediaelement_css#' => array( 'ext:mediaelement/css/mediaelementplayer.min.css', 'ext:mediaelement/css/mediaelementplayer.css' ),
-		'#videojs#' => array( 'ext:videojs/js/video.min.js', 'ext:videojs/js/video.js' ),
-		'#videojs_css#' => array( 'ext:videojs/css/video-js.min.css', 'ext:videojs/css/video-js.css' ),
-		'#jcrop#' => array( 'ext:jquery/jcrop/js/jquery.jcrop.min.js', 'ext:jquery/jcrop/js/jquery.jcrop.js' ),
-		'#jcrop_css#' => array( 'ext:jquery/jcrop/css/jquery.jcrop.min.css', 'ext:jquery/jcrop/css/jquery.jcrop.css' ),
-		'#fontawesome#' => array( 'ext:font-awesome/css/font-awesome.min.css', 'ext:font-awesome/css/font-awesome.css' ),
-		'#clipboardjs#' => array( 'ext:clipboardjs/clipboard.min.js' ),
-		'#hotkeys#' => array( 'ext:hotkeys/hotkeys.min.js' ),
-	);
+$library_local_urls = [
+    '#jquery#' => ['ext:jquery/jquery.min.js', 'ext:jquery/jquery.js'],
+    '#jquery_migrate#' => ['ext:jquery/jquery-migrate.min.js', 'ext:jquery/jquery-migrate.js'],
+    '#jqueryUI#' => ['ext:jquery/ui/js/jquery.ui.b2evo.min.js', 'ext:jquery/ui/js/jquery.ui.b2evo.js'],
+    '#jqueryUI_css#' => ['ext:jquery/ui/css/smoothness/jquery-ui.b2evo.min.css', 'ext:jquery/ui/css/smoothness/jquery-ui.b2evo.css'],
+    # Uncomment the following lines if your plugins need more jQueryUI features than the ones loaded by b2evo:
+    #		'#jqueryUI#' => array( 'ext:jquery/ui/js/jquery.ui.all.min.js', 'ext:jquery/ui/js/jquery.ui.all.js' ),
+    #		'#jqueryUI_css#' => array( 'ext:jquery/ui/css/smoothness/jquery-ui.min.css', 'ext:jquery/ui/css/smoothness/jquery-ui.css' ),
+    '#bootstrap#' => ['ext:bootstrap/js/bootstrap.min.js', 'ext:bootstrap/js/bootstrap.js'],
+    '#bootstrap_css#' => ['ext:bootstrap/css/bootstrap.min.css', 'ext:bootstrap/css/bootstrap.css'],
+    '#bootstrap_theme_css#' => ['ext:bootstrap/css/bootstrap-theme.min.css', 'ext:bootstrap/css/bootstrap-theme.css'],
+    '#bootstrap_typeahead#' => ['ext:bootstrap/js/typeahead.bundle.min.js', 'ext:bootstrap/js/typeahead.bundle.js'],
+    '#easypiechart#' => ['ext:jquery/easy-pie-chart/js/jquery.easy-pie-chart.min.js', 'ext:jquery/easy-pie-chart/js/jquery.easy-pie-chart.js'],
+    '#scrollto#' => ['customized:jquery/scrollto/jquery.scrollto.min.js', 'customized:jquery/scrollto/jquery.scrollto.js'],
+    '#touchswipe#' => ['ext:jquery/touchswipe/jquery.touchswipe.min.js', 'ext:jquery/touchswipe/jquery.touchswipe.js'],
+    '#jqplot#' => ['ext:jquery/jqplot/js/jquery.jqplot.min.js'],
+    '#jqplot_barRenderer#' => ['ext:jquery/jqplot/js/jqplot.barRenderer.min.js'],
+    '#jqplot_canvasAxisTickRenderer#' => ['ext:jquery/jqplot/js/jqplot.canvasAxisTickRenderer.min.js'],
+    '#jqplot_canvasTextRenderer#' => ['ext:jquery/jqplot/js/jqplot.canvasTextRenderer.min.js'],
+    '#jqplot_categoryAxisRenderer#' => ['ext:jquery/jqplot/js/jqplot.categoryAxisRenderer.min.js'],
+    '#jqplot_enhancedLegendRenderer#' => ['ext:jquery/jqplot/js/jqplot.enhancedLegendRenderer.min.js'],
+    '#jqplot_highlighter#' => ['ext:jquery/jqplot/js/jqplot.highlighter.min.js'],
+    '#jqplot_canvasOverlay#' => ['ext:jquery/jqplot/js/jqplot.canvasOverlay.min.js'],
+    '#jqplot_donutRenderer#' => ['ext:jquery/jqplot/js/jqplot.donutRenderer.min.js'],
+    '#jqplot_css#' => ['ext:jquery/jqplot/css/jquery.jqplot.min.css', 'ext:jquery/jqplot/css/jquery.jqplot.css'],
+    '#tinymce#' => ['ext:tiny_mce/tinymce.min.js'],
+    '#tinymce_jquery#' => ['ext:tiny_mce/jquery.tinymce.min.js'],
+    '#flowplayer#' => ['ext:flowplayer/flowplayer.min.js', 'ext:flowplayer/flowplayer.js'],
+    '#mediaelement#' => ['ext:mediaelement/js/mediaelement-and-player.min.js', 'ext:mediaelement/js/mediaelement-and-player.js'],
+    '#mediaelement_css#' => ['ext:mediaelement/css/mediaelementplayer.min.css', 'ext:mediaelement/css/mediaelementplayer.css'],
+    '#videojs#' => ['ext:videojs/js/video.min.js', 'ext:videojs/js/video.js'],
+    '#videojs_css#' => ['ext:videojs/css/video-js.min.css', 'ext:videojs/css/video-js.css'],
+    '#jcrop#' => ['ext:jquery/jcrop/js/jquery.jcrop.min.js', 'ext:jquery/jcrop/js/jquery.jcrop.js'],
+    '#jcrop_css#' => ['ext:jquery/jcrop/css/jquery.jcrop.min.css', 'ext:jquery/jcrop/css/jquery.jcrop.css'],
+    '#fontawesome#' => ['ext:font-awesome/css/font-awesome.min.css', 'ext:font-awesome/css/font-awesome.css'],
+    '#clipboardjs#' => ['ext:clipboardjs/clipboard.min.js'],
+    '#hotkeys#' => ['ext:hotkeys/hotkeys.min.js'],
+];
 
 /**
  * JS/CSS files which contain other JS/CSS files in order to don't required them twice when main file is required on current page
  *
  * Key - Alias or relative path of main JS/CSS file, Value - array of bundled files inside the main JS/CSS file
  */
-$bundled_files = array(
-	'build/bootstrap-evo_frontoffice-superbundle.bmin.js' => array(
-		'#jquery#',
-		'#jquery_migrate#',
-		'#jqueryUI#',
-		'#bootstrap#',
-	),
-	'bootstrap-b2evo_base-superbundle.bundle.css' => array(
-		'#fontawesome#',
-		'#bootstrap_css#',
-		'bootstrap-b2evo_base.bundle.css',
-	),
-	'bootstrap-b2evo_base-superbundle.bmin.css' => array(
-		'#fontawesome#',
-		'#bootstrap_css#',
-		'bootstrap-b2evo_base.bmin.css',
-	),
-);
+$bundled_files = [
+    'build/bootstrap-evo_frontoffice-superbundle.bmin.js' => [
+        '#jquery#',
+        '#jquery_migrate#',
+        '#jqueryUI#',
+        '#bootstrap#',
+    ],
+    'bootstrap-b2evo_base-superbundle.bundle.css' => [
+        '#fontawesome#',
+        '#bootstrap_css#',
+        'bootstrap-b2evo_base.bundle.css',
+    ],
+    'bootstrap-b2evo_base-superbundle.bmin.css' => [
+        '#fontawesome#',
+        '#bootstrap_css#',
+        'bootstrap-b2evo_base.bmin.css',
+    ],
+];
 
 /**
  * Allow to send outbound pings on localhost
@@ -1057,7 +1053,7 @@ $access_control_allow_origin = false; // set to '*' or to specific URL to enable
 
 /**
  * Allow to use a "defer" way for loading of JavaScript files
- * 
+ *
  * TODO: Implement new value 'front' in order to allow this only on front-office
  */
 $use_defer = true;
@@ -1111,5 +1107,4 @@ $antispamsrv_tos_url = 'http://b2evolution.net/about/terms.html';
 $enable_blacklist_server_API = false;
 
 // This is for plugins to add CS files to the TinyMCE editor window:
-$tinymce_content_css = array();
-?>
+$tinymce_content_css = [];

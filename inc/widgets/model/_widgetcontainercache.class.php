@@ -23,11 +23,13 @@
  *
  * @version $Id: _widgetcontainercache.class.php 10060 2016-03-09 10:40:31Z yura $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache' );
+load_class('_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache');
 
-load_class( 'widgets/model/_widgetcontainer.class.php', 'WidgetContainer' );
+load_class('widgets/model/_widgetcontainer.class.php', 'WidgetContainer');
 
 
 /**
@@ -37,167 +39,148 @@ load_class( 'widgets/model/_widgetcontainer.class.php', 'WidgetContainer' );
  */
 class WidgetContainerCache extends DataObjectCache
 {
-	/**
-	 * Cache by collection ID, container code and skin type
-	 *
-	 * @var cache_by_coll_skintype_code array
-	 */
-	var $cache_by_coll_skintype_code;
+    /**
+     * Cache by collection ID, container code and skin type
+     *
+     * @var cache_by_coll_skintype_code array
+     */
+    public $cache_by_coll_skintype_code;
 
-	/**
-	 * Constructor
-	 */
-	function __construct()
-	{
-		// Call parent constructor:
-		parent::__construct( 'WidgetContainer', true, 'T_widget__container', 'wico_', 'wico_ID', 'wico_order' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        // Call parent constructor:
+        parent::__construct('WidgetContainer', true, 'T_widget__container', 'wico_', 'wico_ID', 'wico_order');
+    }
 
+    /**
+     * Add a WidgetContainer to the cache
+     *
+     * @param object Widget Container
+     * @return boolean true if it was added false otherwise
+     */
+    public function add($WidgetContainer)
+    {
+        $container_code = $WidgetContainer->get('code');
+        if (! empty($container_code)) {	// This container is not shared and it is a main container ( has code )
+            $skin_type = $WidgetContainer->get('skin_type');
+            if (! isset($this->cache_by_coll_skintype_code[$WidgetContainer->coll_ID][$skin_type])) {
+                $this->cache_by_coll_skintype_code[$WidgetContainer->coll_ID][$skin_type] = [];
+            }
+            $this->cache_by_coll_skintype_code[$WidgetContainer->coll_ID][$skin_type][$container_code] = &$WidgetContainer;
+        }
 
-	/**
-	 * Add a WidgetContainer to the cache
-	 *
-	 * @param object Widget Container
-	 * @return boolean true if it was added false otherwise
-	 */
-	function add( $WidgetContainer )
-	{
-		$container_code = $WidgetContainer->get( 'code' );
-		if( ! empty( $container_code ) )
-		{	// This container is not shared and it is a main container ( has code )
-			$skin_type = $WidgetContainer->get( 'skin_type' );
-			if( ! isset( $this->cache_by_coll_skintype_code[ $WidgetContainer->coll_ID ][ $skin_type ] ) )
-			{
-				$this->cache_by_coll_skintype_code[ $WidgetContainer->coll_ID ][ $skin_type ] = array();
-			}
-			$this->cache_by_coll_skintype_code[ $WidgetContainer->coll_ID ][ $skin_type ][ $container_code ] = & $WidgetContainer;
-		}
+        return parent::add($WidgetContainer);
+    }
 
-		return parent::add( $WidgetContainer );
-	}
+    /**
+     * Load all widget containers from the given collection
+     *
+     * @param integer Collection ID
+     */
+    public function load_by_coll_ID($coll_ID)
+    {
+        global $DB;
 
+        if (isset($this->cache_by_coll_skintype_code[$coll_ID])) {	// Don't load widget containers twice:
+            return;
+        }
 
-	/**
-	 * Load all widget containers from the given collection
-	 *
-	 * @param integer Collection ID
-	 */
-	function load_by_coll_ID( $coll_ID )
-	{
-		global $DB;
+        $SQL = new SQL('Load all widget containers for collection #' . $coll_ID . ' and shared into cache');
+        $SQL->SELECT('*');
+        $SQL->FROM('T_widget__container');
+        $SQL->WHERE('( wico_coll_ID = ' . $DB->quote($coll_ID) . ' OR wico_coll_ID IS NULL )');
+        $SQL->WHERE_and('wico_code IS NOT NULL');
+        $SQL->ORDER_BY('wico_order');
 
-		if( isset( $this->cache_by_coll_skintype_code[ $coll_ID ] ) )
-		{	// Don't load widget containers twice:
-			return;
-		}
+        // Instantiate and cache widget containers:
+        $this->instantiate_list($DB->get_results($SQL));
+    }
 
-		$SQL = new SQL( 'Load all widget containers for collection #'.$coll_ID.' and shared into cache' );
-		$SQL->SELECT( '*' );
-		$SQL->FROM( 'T_widget__container' );
-		$SQL->WHERE( '( wico_coll_ID = '.$DB->quote( $coll_ID ).' OR wico_coll_ID IS NULL )' );
-		$SQL->WHERE_and( 'wico_code IS NOT NULL' );
-		$SQL->ORDER_BY( 'wico_order' );
+    /**
+     * Get widget containers from the given collection for the given skin type
+     *
+     * @param integer Collection ID
+     * @param string Skin type: 'normal', 'mobile', 'tablet', 'alt'
+     * @return array of WidgetContainer
+     */
+    public function get_by_coll_skintype($coll_ID, $skin_type)
+    {
+        $this->load_by_coll_ID($coll_ID);
 
-		// Instantiate and cache widget containers:
-		$this->instantiate_list( $DB->get_results( $SQL ) );
-	}
+        if (isset($this->cache_by_coll_skintype_code[$coll_ID][$skin_type])) {
+            return $this->cache_by_coll_skintype_code[$coll_ID][$skin_type];
+        }
 
+        return [];
+    }
 
-	/**
-	 * Get widget containers from the given collection for the given skin type
-	 *
-	 * @param integer Collection ID
-	 * @param string Skin type: 'normal', 'mobile', 'tablet', 'alt'
-	 * @return array of WidgetContainer
-	 */
-	function get_by_coll_skintype( $coll_ID, $skin_type )
-	{
-		$this->load_by_coll_ID( $coll_ID );
+    /**
+     * Get widget container from the given collection with the given container code and for given skin type
+     *
+     * @param integer Collection ID
+     * @param string Skin type
+     * @param string Container code
+     * @param boolean Halt on error
+     * @return object WidgetContainer
+     */
+    public function &get_by_coll_skintype_code($coll_ID, $skin_type, $code, $halt_on_error = false)
+    {
+        $this->load_by_coll_ID($coll_ID);
 
-		if( isset( $this->cache_by_coll_skintype_code[ $coll_ID ][ $skin_type ] ) )
-		{
-			return $this->cache_by_coll_skintype_code[ $coll_ID ][ $skin_type ];
-		}
+        if (empty($this->cache_by_coll_skintype_code[$coll_ID][$skin_type][$code]) && // collection/skin container
+            empty($this->cache_by_coll_skintype_code[''][$skin_type][$code])) { // shared container
+            if ($halt_on_error) {
+                debug_die('Requested widget container does not exist!');
+            }
+            $r = false;
+            return $r;
+        }
 
-		return array();
-	}
+        if (isset($this->cache_by_coll_skintype_code[$coll_ID][$skin_type][$code])) {	// Collection/skin container:
+            return $this->cache_by_coll_skintype_code[$coll_ID][$skin_type][$code];
+        } else {	// Shared container:
+            return $this->cache_by_coll_skintype_code[''][$skin_type][$code];
+        }
+    }
 
+    /**
+     * Get options array with groups for collection and shared sub-containers
+     *
+     * @param string Skin type
+     * @return array
+     */
+    public function get_subcontainers_option_array($skin_type)
+    {
+        global $Blog, $DB;
 
-	/**
-	 * Get widget container from the given collection with the given container code and for given skin type
-	 *
-	 * @param integer Collection ID
-	 * @param string Skin type
-	 * @param string Container code
-	 * @param boolean Halt on error
-	 * @return object WidgetContainer
-	 */
-	function & get_by_coll_skintype_code( $coll_ID, $skin_type, $code, $halt_on_error = false )
-	{
-		$this->load_by_coll_ID( $coll_ID );
+        $this->clear();
+        $SQL = $this->get_SQL_object();
+        $SQL->WHERE_and('wico_main != 1');
+        $SQL->WHERE_and('wico_skin_type = ' . $DB->quote($skin_type));
+        $SQL->WHERE_and('wico_coll_ID IS NULL' . (empty($Blog) ? '' : ' OR wico_coll_ID = ' . $DB->quote($Blog->ID)));
+        $widget_containers = $this->load_by_sql($SQL);
 
-		if( empty( $this->cache_by_coll_skintype_code[ $coll_ID ][ $skin_type ][ $code ] ) && // collection/skin container
-		    empty( $this->cache_by_coll_skintype_code[''][ $skin_type ][ $code ] ) ) // shared container
-		{
-			if( $halt_on_error )
-			{
-				debug_die( 'Requested widget container does not exist!' );
-			}
-			$r = false;
-			return $r;
-		}
+        $container_options = [
+            '' => T_('None'),
+            '!create_new' => T_('Create New'),
+            T_('Existing Sub-Containers') => [],
+            T_('Existing Shared Sub-Containers') => [],
+        ];
 
-		if( isset( $this->cache_by_coll_skintype_code[ $coll_ID ][ $skin_type ][ $code ] ) )
-		{	// Collection/skin container:
-			return $this->cache_by_coll_skintype_code[ $coll_ID ][ $skin_type ][ $code ];
-		}
-		else
-		{	// Shared container:
-			return $this->cache_by_coll_skintype_code[''][ $skin_type ][ $code ];
-		}
-	}
+        foreach ($widget_containers as $WidgetContainer) {
+            if ($WidgetContainer->get('coll_ID')) {	// Collection sub-container:
+                $group = T_('Existing Sub-Containers');
+                $prefix = 'coll:';
+            } else {	// Shared sub-container:
+                $group = T_('Existing Shared Sub-Containers');
+                $prefix = 'shared:';
+            }
+            $container_options[$group][$prefix . $WidgetContainer->get('code')] = $WidgetContainer->get('name');
+        }
 
-
-	/**
-	 * Get options array with groups for collection and shared sub-containers
-	 *
-	 * @param string Skin type
-	 * @return array
-	 */
-	function get_subcontainers_option_array( $skin_type )
-	{
-		global $Blog, $DB;
-
-		$this->clear();
-		$SQL = $this->get_SQL_object();
-		$SQL->WHERE_and( 'wico_main != 1' );
-		$SQL->WHERE_and( 'wico_skin_type = '.$DB->quote( $skin_type ) );
-		$SQL->WHERE_and( 'wico_coll_ID IS NULL'.( empty( $Blog ) ? '' : ' OR wico_coll_ID = '.$DB->quote( $Blog->ID ) ) );
-		$widget_containers = $this->load_by_sql( $SQL );
-
-		$container_options = array(
-				'' => T_('None'),
-				'!create_new' => T_('Create New'),
-				T_('Existing Sub-Containers') => array(),
-				T_('Existing Shared Sub-Containers') => array(),
-			);
-
-		foreach( $widget_containers as $WidgetContainer )
-		{
-			if( $WidgetContainer->get( 'coll_ID' ) )
-			{	// Collection sub-container:
-				$group = T_('Existing Sub-Containers');
-				$prefix = 'coll:';
-			}
-			else
-			{	// Shared sub-container:
-				$group = T_('Existing Shared Sub-Containers');
-				$prefix = 'shared:';
-			}
-			$container_options[ $group ][ $prefix.$WidgetContainer->get( 'code' ) ] = $WidgetContainer->get( 'name' );
-		}
-
-		return $container_options;
-	}
+        return $container_options;
+    }
 }
-?>

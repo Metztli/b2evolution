@@ -21,9 +21,11 @@
  * {@internal Below is a list of authors who have contributed to design/coding of this file: }}
  * @author erhsatingin: Erwin Rommel Satingin.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -34,127 +36,118 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class item_visibility_badge_Widget extends ComponentWidget
 {
-	var $icon = 'info';
+    public $icon = 'info';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'item_visibility_badge' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'item_visibility_badge');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('item-visibility-badge-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'item-visibility-badge-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Visibility Badge');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('Item Visibility Badge'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Visibility Badge');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display the visibility of the item.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        return array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
+    }
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('Item Visibility Badge') );
-	}
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Item, $disp;
 
+        $params = array_merge([
+            'widget_item_visibility_badge_params' => [],
+        ], $params);
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display the visibility of the item.');
-	}
+        $widget_params = array_merge([
+            'template' => '<div class="evo_status evo_status__$status$" data-toggle="tooltip" data-placement="top" title="$tooltip_title$">$status_title$</div>',
+            'format' => 'htmlbody',
+        ], $params['widget_item_visibility_badge_params']);
 
+        $this->init_display($params);
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		return array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display' ),
-					'defaultvalue' => '',
-				),
-			), parent::get_param_definitions( $params ) );
-	}
+        echo $this->disp_params['block_start'];
+        $this->disp_title();
+        echo $this->disp_params['block_body_start'];
 
+        $Item->format_status([
+            'template' => $widget_params['template'],
+            'format' => $widget_params['format'],
+        ]);
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Item, $disp;
+        echo $this->disp_params['block_body_end'];
+        echo $this->disp_params['block_end'];
 
-		$params = array_merge( array(
-				'widget_item_visibility_badge_params'  => array(),
-			), $params );
+        return true;
+    }
 
-		$widget_params = array_merge( array(
-				'template' => '<div class="evo_status evo_status__$status$" data-toggle="tooltip" data-placement="top" title="$tooltip_title$">$status_title$</div>',
-				'format'   => 'htmlbody'
-			), $params['widget_item_visibility_badge_params'] );
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $Item, $current_User;
 
-		$this->init_display( $params );
-
-		echo $this->disp_params['block_start'];
-		$this->disp_title();
-		echo $this->disp_params['block_body_start'];
-
-		$Item->format_status( array(
-				'template' => $widget_params['template'],
-				'format'   => $widget_params['format'],
-			) );
-
-		echo $this->disp_params['block_body_end'];
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $Item, $current_User;
-
-		return array(
-				'wi_ID'       => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'user_ID'     => ( is_logged_in() ? $current_User->ID : 0 ), // Has the current User changed?
-				'item_ID'     => ( empty( $Item->ID ) ? 0 : $Item->ID ), // Has the Item page changed?
-			);
-	}
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'user_ID' => (is_logged_in() ? $current_User->ID : 0), // Has the current User changed?
+            'item_ID' => (empty($Item->ID) ? 0 : $Item->ID), // Has the Item page changed?
+        ];
+    }
 }
-
-?>

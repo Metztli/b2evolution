@@ -12,30 +12,37 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $edited_Poll, $edited_PollOption, $action, $admin_url;
 
 
 // Determine if we are creating or updating:
-$creating = is_create_action( $action );
+$creating = is_create_action($action);
 
-$Form = new Form( NULL, 'poll_option_checkchanges', 'post', 'compact' );
+$Form = new Form(null, 'poll_option_checkchanges', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel editing').'!', 'close', url_add_param( regenerate_url( 'action,popt_ID,blog' ), 'action=edit' ) );
+$Form->global_icon(TB_('Cancel editing') . '!', 'close', url_add_param(regenerate_url('action,popt_ID,blog'), 'action=edit'));
 
-$Form->begin_form( 'fform', sprintf( ( $creating ?  TB_('New poll option for question "%s"') : TB_('Poll option for question "%s"') ), $edited_Poll->get_name() )
-		.get_manual_link( 'poll-option-form' ) );
+$Form->begin_form('fform', sprintf(($creating ? TB_('New poll option for question "%s"') : TB_('Poll option for question "%s"')), $edited_Poll->get_name())
+        . get_manual_link('poll-option-form'));
 
-	$Form->add_crumb( 'poll' );
-	$Form->hidden( 'action', $creating ? 'create_option' : 'update_option' );
-	$Form->hidden( 'pqst_ID', $edited_Poll->ID );
-	$Form->hiddens_by_key( get_memorized( 'action'.( $creating ? ',popt_ID' : '' ) ) );
+$Form->add_crumb('poll');
+$Form->hidden('action', $creating ? 'create_option' : 'update_option');
+$Form->hidden('pqst_ID', $edited_Poll->ID);
+$Form->hiddens_by_key(get_memorized('action' . ($creating ? ',popt_ID' : '')));
 
-	$Form->text_input( 'popt_option_text', $edited_PollOption->get( 'option_text' ), 10, TB_('Option'), '', array( 'maxlength' => 2000, 'required' => true, 'class' => 'large' ) );
+$Form->text_input('popt_option_text', $edited_PollOption->get('option_text'), 10, TB_('Option'), '', [
+    'maxlength' => 2000,
+    'required' => true,
+    'class' => 'large',
+]);
 
-	$Form->text_input( 'popt_order', $edited_PollOption->get( 'order' ), 10, TB_('Order'), '', array( 'required' => ! $creating ) );
+$Form->text_input('popt_order', $edited_PollOption->get('order'), 10, TB_('Order'), '', [
+    'required' => ! $creating,
+]);
 
-$Form->end_form( array( array( 'submit', 'submit', ( $creating ? TB_('Record') : TB_('Save Changes!') ), 'SaveButton' ) ) );
-?>
+$Form->end_form([['submit', 'submit', ($creating ? TB_('Record') : TB_('Save Changes!')), 'SaveButton']]);

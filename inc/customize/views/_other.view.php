@@ -13,49 +13,46 @@
  *
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $AdminUI, $Settings;
 
 // Display customizer tabs to switch between site/collection skins and widgets in special div on customizer mode:
-$AdminUI->display_customizer_tabs( array(
-		'path' => 'other',
-	) );
+$AdminUI->display_customizer_tabs([
+    'path' => 'other',
+]);
 
 echo '<div class="evo_customizer__content">';
 
 // Check if current User can edit site options:
-$can_edit_site_options = ( $Settings->get( 'site_skins_enabled' ) && check_user_perm( 'options', 'edit' ) );
+$can_edit_site_options = ($Settings->get('site_skins_enabled') && check_user_perm('options', 'edit'));
 
-if( $can_edit_site_options )
-{	// Start of list of sites:
-	echo '<ul class="evo_customizer__other_lists">'
-		.'<li><a href="'.get_customizer_url().'?view=site_skin&amp;blog='.get_working_blog().'" target="_parent">'.T_('Site').'</a></li>';
+if ($can_edit_site_options) {	// Start of list of sites:
+    echo '<ul class="evo_customizer__other_lists">'
+        . '<li><a href="' . get_customizer_url() . '?view=site_skin&amp;blog=' . get_working_blog() . '" target="_parent">' . T_('Site') . '</a></li>';
 }
 
 // List of collections:
-$BlogCache = & get_BlogCache();
+$BlogCache = &get_BlogCache();
 $BlogCache->clear();
-$BlogCache->load_user_blogs( 'blog_properties', 'edit' );
-if( count( $BlogCache->cache ) > 1 )
-{
-	echo '<ul'.( $can_edit_site_options ? '' : ' class="evo_customizer__other_lists"' ).'>';
-	foreach( $BlogCache->cache as $other_Blog )
-	{
-		if( get_working_blog() != $other_Blog->ID )
-		{
-			echo '<li><a href="'.$other_Blog->get( 'customizer_url', array( 'customizing_url' => '#baseurl#' ) ).'" target="_parent">'.$other_Blog->get( 'shortname' ).'</a></li>';
-		}
-	}
-	echo '</ul>';
+$BlogCache->load_user_blogs('blog_properties', 'edit');
+if (count($BlogCache->cache) > 1) {
+    echo '<ul' . ($can_edit_site_options ? '' : ' class="evo_customizer__other_lists"') . '>';
+    foreach ($BlogCache->cache as $other_Blog) {
+        if (get_working_blog() != $other_Blog->ID) {
+            echo '<li><a href="' . $other_Blog->get('customizer_url', [
+                'customizing_url' => '#baseurl#',
+            ]) . '" target="_parent">' . $other_Blog->get('shortname') . '</a></li>';
+        }
+    }
+    echo '</ul>';
 }
 
-if( $can_edit_site_options )
-{	// End of list of sites:
-	echo '</ul>';
+if ($can_edit_site_options) {	// End of list of sites:
+    echo '</ul>';
 }
 
 echo '</div>';
-
-?>

@@ -13,9 +13,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-function __autoload( $classname )
+function __autoload($classname)
 {
-	return evocms_autoload_class( $classname );
+    return evocms_autoload_class($classname);
 }

@@ -11,10 +11,12 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_class( 'users/model/passwords/_passworddriver.class.php', 'PasswordDriver' );
+load_class('users/model/passwords/_passworddriver.class.php', 'PasswordDriver');
 
 /**
  * evoMd5PasswordDriver Class
@@ -23,34 +25,31 @@ load_class( 'users/model/passwords/_passworddriver.class.php', 'PasswordDriver' 
  */
 class evoMd5PasswordDriver extends PasswordDriver
 {
-	protected $code = 'evo$md5';
+    protected $code = 'evo$md5';
 
+    /**
+     * Hash password
+     *
+     * @param string Password
+     * @param string Salt (Not used by this password driver)
+     * @return string Hashed password
+     */
+    public function hash($password, $salt = '')
+    {
+        return md5($password);
+    }
 
-	/**
-	 * Hash password
-	 *
-	 * @param string Password
-	 * @param string Salt (Not used by this password driver)
-	 * @return string Hashed password
-	 */
-	public function hash( $password, $salt = '' )
-	{
-		return md5( $password );
-	}
+    /**
+     * Get JavaScript code to hash password on browser/client side
+     *
+     * @param string Name of password variable in JS code
+     * @param string Name of salt variable in JS code
+     * @return string
+     */
+    public function get_javascript_hash_code($var_password_name, $var_salt_name)
+    {
+        $js_code = 'hex_md5( ' . $var_password_name . ' )';
 
-
-	/**
-	 * Get JavaScript code to hash password on browser/client side
-	 *
-	 * @param string Name of password variable in JS code
-	 * @param string Name of salt variable in JS code
-	 * @return string
-	 */
-	public function get_javascript_hash_code( $var_password_name, $var_salt_name )
-	{
-		$js_code = 'hex_md5( '.$var_password_name.' )';
-
-		return $js_code;
-	}
+        return $js_code;
+    }
 }
-?>

@@ -12,47 +12,46 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $admin_url;
 
 $SQL = new SQL();
-$SQL->SELECT( 'tag_ID, tag_name, COUNT( it.itag_itm_ID ) AS tag_count' );
-$SQL->FROM( 'T_items__tag' );
-$SQL->FROM_add( 'LEFT JOIN T_items__itemtag AS it ON it.itag_tag_ID = tag_ID' );
-$SQL->GROUP_BY( 'tag_ID' );
+$SQL->SELECT('tag_ID, tag_name, COUNT( it.itag_itm_ID ) AS tag_count');
+$SQL->FROM('T_items__tag');
+$SQL->FROM_add('LEFT JOIN T_items__itemtag AS it ON it.itag_tag_ID = tag_ID');
+$SQL->GROUP_BY('tag_ID');
 
 $count_SQL = new SQL();
-$count_SQL->SELECT( 'COUNT( tag_ID )' );
-$count_SQL->FROM( 'T_items__tag' );
+$count_SQL->SELECT('COUNT( tag_ID )');
+$count_SQL->FROM('T_items__tag');
 
 // filters
 $list_is_filtered = false;
-if( get_param( 'tag_filter' ) )
-{ // add tag_name filter
-	$sql_name_where = 'LOWER( tag_name ) LIKE '.$DB->quote( '%'.utf8_strtolower( get_param( 'tag_filter' ) ).'%' );
-	$SQL->WHERE_and( $sql_name_where );
-	$count_SQL->WHERE_and( $sql_name_where );
-	$list_is_filtered = true;
+if (get_param('tag_filter')) { // add tag_name filter
+    $sql_name_where = 'LOWER( tag_name ) LIKE ' . $DB->quote('%' . utf8_strtolower(get_param('tag_filter')) . '%');
+    $SQL->WHERE_and($sql_name_where);
+    $count_SQL->WHERE_and($sql_name_where);
+    $list_is_filtered = true;
 }
-if( $filter_item_ID = get_param( 'tag_item_ID' ) )
-{ // add filter for item ID
-	if( is_number( $filter_item_ID ) )
-	{
-		$sql_item_left_join = 'LEFT JOIN T_items__itemtag AS it2 ON it2.itag_tag_ID = tag_ID';
-		$sql_item_where = 'it2.itag_itm_ID = '.$DB->quote( $filter_item_ID );
-		$SQL->FROM_add( $sql_item_left_join );
-		$SQL->WHERE_and( $sql_item_where );
-		$count_SQL->FROM_add( $sql_item_left_join );
-		$count_SQL->WHERE_and( $sql_item_where );
-		$list_is_filtered = true;
-	}
+if ($filter_item_ID = get_param('tag_item_ID')) { // add filter for item ID
+    if (is_number($filter_item_ID)) {
+        $sql_item_left_join = 'LEFT JOIN T_items__itemtag AS it2 ON it2.itag_tag_ID = tag_ID';
+        $sql_item_where = 'it2.itag_itm_ID = ' . $DB->quote($filter_item_ID);
+        $SQL->FROM_add($sql_item_left_join);
+        $SQL->WHERE_and($sql_item_where);
+        $count_SQL->FROM_add($sql_item_left_join);
+        $count_SQL->WHERE_and($sql_item_where);
+        $list_is_filtered = true;
+    }
 }
 
 // Create result set:
-$Results = new Results( $SQL->get(), 'tag_', 'A', NULL, $count_SQL->get() );
+$Results = new Results($SQL->get(), 'tag_', 'A', null, $count_SQL->get());
 
-$Results->title = T_('Tags').' ('.$Results->get_total_rows().')'.get_manual_link( 'item-tags-list' );
+$Results->title = T_('Tags') . ' (' . $Results->get_total_rows() . ')' . get_manual_link('item-tags-list');
 $Results->Cache = get_ItemTagCache();
 
 /**
@@ -60,79 +59,78 @@ $Results->Cache = get_ItemTagCache();
  *
  * @param Form
  */
-function filter_tags( & $Form )
+function filter_tags(&$Form)
 {
-	$Form->text_input( 'tag_filter', get_param( 'tag_filter' ), 24, /* TRANS: noun */ T_('Tag'), '', array( 'maxlength' => 50 ) );
+    $Form->text_input('tag_filter', get_param('tag_filter'), 24, /* TRANS: noun */ T_('Tag'), '', [
+        'maxlength' => 50,
+    ]);
 
-	$item_ID_filter_note = '';
-	if( $filter_item_ID = get_param( 'tag_item_ID' ) )
-	{ // check item_Id filter. It must be a number
-		if( ! is_number( $filter_item_ID ) )
-		{ // It is not a number
-			$item_ID_filter_note = T_('Must be a number');
-		}
-	}
-	$Form->text_input( 'tag_item_ID', $filter_item_ID, 9, T_('Post ID'), $item_ID_filter_note, array( 'maxlength' => 9 ) );
+    $item_ID_filter_note = '';
+    if ($filter_item_ID = get_param('tag_item_ID')) { // check item_Id filter. It must be a number
+        if (! is_number($filter_item_ID)) { // It is not a number
+            $item_ID_filter_note = T_('Must be a number');
+        }
+    }
+    $Form->text_input('tag_item_ID', $filter_item_ID, 9, T_('Post ID'), $item_ID_filter_note, [
+        'maxlength' => 9,
+    ]);
 }
-$Results->filter_area = array(
-	'callback' => 'filter_tags',
-	'url_ignore' => 'tag_filter,results_tag_page',
-	);
+$Results->filter_area = [
+    'callback' => 'filter_tags',
+    'url_ignore' => 'tag_filter,results_tag_page',
+];
 
-$Results->register_filter_preset( 'all', T_('All'), '?ctrl=itemtags' );
+$Results->register_filter_preset('all', T_('All'), '?ctrl=itemtags');
 
 
-function tag_td_name( $tag_ID, $tag_name )
+function tag_td_name($tag_ID, $tag_name)
 {
-	global $admin_url;
+    global $admin_url;
 
-	if( check_user_perm( 'options', 'edit' ) )
-	{	// Display tag name as link to edit form only if current user has a perm:
-		$tag_name = '<a href="'.$admin_url.'?ctrl=itemtags&amp;tag_ID='.$tag_ID
-				.'&amp;action=edit&amp;return_to='.urlencode( regenerate_url( 'action', '', '', '&' ) ).'">'
-			.'<b>'.$tag_name.'</b></a>';
-	}
+    if (check_user_perm('options', 'edit')) {	// Display tag name as link to edit form only if current user has a perm:
+        $tag_name = '<a href="' . $admin_url . '?ctrl=itemtags&amp;tag_ID=' . $tag_ID
+                . '&amp;action=edit&amp;return_to=' . urlencode(regenerate_url('action', '', '', '&')) . '">'
+            . '<b>' . $tag_name . '</b></a>';
+    }
 
-	return $tag_name;
+    return $tag_name;
 }
-$Results->cols[] = array(
-		'th'       => /* TRANS: noun */ T_('Tag'),
-		'order'    => 'tag_name COLLATE utf8mb4_bin',
-		'td'       => '%tag_td_name( #tag_ID#, #tag_name# )%',
-	);
+$Results->cols[] = [
+    'th' => /* TRANS: noun */ T_('Tag'),
+    'order' => 'tag_name COLLATE utf8mb4_bin',
+    'td' => '%tag_td_name( #tag_ID#, #tag_name# )%',
+];
 
-$Results->cols[] = array(
-		'th'          => T_('Used'),
-		'th_class'    => 'shrinkwrap',
-		'td_class'    => 'shrinkwrap',
-		'order'       => 'tag_count',
-		'default_dir' => 'D',
-		'td'          => '$tag_count$',
-	);
+$Results->cols[] = [
+    'th' => T_('Used'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+    'order' => 'tag_count',
+    'default_dir' => 'D',
+    'td' => '$tag_count$',
+];
 
 
-if( check_user_perm( 'options', 'edit' ) )
-{
-	function tag_td_actions( $tag_ID )
-	{
-		global $admin_url;
-		return action_icon( T_('Edit this tag...'), 'edit', $admin_url.'?ctrl=itemtags&amp;tag_ID='.$tag_ID.'&amp;action=edit&amp;return_to='.urlencode( regenerate_url( 'action', '', '', '&' ) ) )
-		      .action_icon( T_('Delete this tag!'), 'delete', regenerate_url( 'tag_ID,action', 'tag_ID='.$tag_ID.'&amp;action=delete&amp;return_to='.urlencode( regenerate_url( 'action', '', '', '&' ) ).'&amp;'.url_crumb( 'tag' ) ) );
-	}
-	$Results->cols[] = array(
-				'th' => T_('Actions'),
-			'th_class' => 'shrinkwrap',
-			'td_class' => 'shrinkwrap',
-			'td' => '%tag_td_actions( #tag_ID# )%',
-		);
+if (check_user_perm('options', 'edit')) {
+    function tag_td_actions($tag_ID)
+    {
+        global $admin_url;
+        return action_icon(T_('Edit this tag...'), 'edit', $admin_url . '?ctrl=itemtags&amp;tag_ID=' . $tag_ID . '&amp;action=edit&amp;return_to=' . urlencode(regenerate_url('action', '', '', '&')))
+              . action_icon(T_('Delete this tag!'), 'delete', regenerate_url('tag_ID,action', 'tag_ID=' . $tag_ID . '&amp;action=delete&amp;return_to=' . urlencode(regenerate_url('action', '', '', '&')) . '&amp;' . url_crumb('tag')));
+    }
+    $Results->cols[] = [
+        'th' => T_('Actions'),
+        'th_class' => 'shrinkwrap',
+        'td_class' => 'shrinkwrap',
+        'td' => '%tag_td_actions( #tag_ID# )%',
+    ];
 
-	if( check_user_perm( 'options', 'edit' ) )
-	{	// Allow to clean up tags only if current user has a permission to edit tags:
-		$Results->global_icon( T_('Cleanup orphans'), 'cleanup', regenerate_url( 'action', 'action=cleanup&amp;return_to='.urlencode( regenerate_url( 'action', '', '', '&' ) ) ).'&amp;'.url_crumb( 'tag' ), T_('Cleanup orphans'), 3, 4 );
-	}
-	$Results->global_icon( T_('Add a new tag...'), 'new', regenerate_url( 'action', 'action=new&amp;return_to='.urlencode( regenerate_url( 'action', '', '', '&' ) ) ), T_('New tag').' &raquo;', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+    if (check_user_perm('options', 'edit')) {	// Allow to clean up tags only if current user has a permission to edit tags:
+        $Results->global_icon(T_('Cleanup orphans'), 'cleanup', regenerate_url('action', 'action=cleanup&amp;return_to=' . urlencode(regenerate_url('action', '', '', '&'))) . '&amp;' . url_crumb('tag'), T_('Cleanup orphans'), 3, 4);
+    }
+    $Results->global_icon(T_('Add a new tag...'), 'new', regenerate_url('action', 'action=new&amp;return_to=' . urlencode(regenerate_url('action', '', '', '&'))), T_('New tag') . ' &raquo;', 3, 4, [
+        'class' => 'action_icon btn-primary',
+    ]);
 }
 
 $Results->display();
-
-?>

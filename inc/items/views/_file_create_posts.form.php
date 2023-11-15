@@ -14,47 +14,48 @@
  * {@internal Below is a list of authors who have contributed to design/coding of this file: }}
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'items/model/_item.class.php', 'Item' );
-load_class( 'files/model/_filelist.class.php', 'FileList' );
+load_class('items/model/_item.class.php', 'Item');
+load_class('files/model/_filelist.class.php', 'FileList');
 
 global $post_extracats, $fm_FileRoot, $edited_Item, $blog;
 
 $edited_Item = new Item();
 
-$Form = new Form( NULL, 'pre_post_publish' );
+$Form = new Form(null, 'pre_post_publish');
 
-$Form->begin_form( 'fform', TB_('Posts preview') );
+$Form->begin_form('fform', TB_('Posts preview'));
 $Form->hidden_ctrl();
 
-$images_list = param( 'fm_selected', 'array:string' );
-foreach( $images_list as $key => $item )
-{
-	$Form->hidden( 'fm_selected['.$key.']', $item );
+$images_list = param('fm_selected', 'array:string');
+foreach ($images_list as $key => $item) {
+    $Form->hidden('fm_selected[' . $key . ']', $item);
 }
 // fp> TODO: cleanup all this crap:
-$Form->hidden( 'confirmed', get_param( 'confirmed' ) );
-$Form->hidden( 'md5_filelist', get_param( 'md5_filelist' ) );
-$Form->hidden( 'md5_cwd', get_param( 'md5_cwd' ) );
-$Form->hidden( 'locale', get_param( 'locale' ) );
-$Form->hidden( 'blog', get_param( 'blog' ) );
-$Form->hidden( 'mode', get_param( 'mode' ) );
-$Form->hidden( 'root', get_param( 'root' ) );
-$Form->hidden( 'path', get_param( 'path' ) );
-$Form->hidden( 'fm_mode', get_param( 'fm_mode' ) );
-$Form->hidden( 'linkctrl', get_param( 'linkctrl' ) );
-$Form->hidden( 'linkdata', get_param( 'linkdata' ) );
-$Form->hidden( 'iframe_name', get_param( 'iframe_name' ) );
-$Form->hidden( 'fm_filter', get_param( 'fm_filter' ) );
-$Form->hidden( 'fm_filter_regex', get_param( 'fm_filter_regex' ) );
-$Form->hidden( 'iframe_name', get_param( 'iframe_name' ) );
-$Form->hidden( 'fm_flatmode', get_param( 'fm_flatmode' ) );
-$Form->hidden( 'fm_order', get_param( 'fm_order' ) );
-$Form->hidden( 'fm_orderasc', get_param( 'fm_orderasc' ) );
-$Form->hidden( 'crumb_file', get_param( 'crumb_file' ) );
+$Form->hidden('confirmed', get_param('confirmed'));
+$Form->hidden('md5_filelist', get_param('md5_filelist'));
+$Form->hidden('md5_cwd', get_param('md5_cwd'));
+$Form->hidden('locale', get_param('locale'));
+$Form->hidden('blog', get_param('blog'));
+$Form->hidden('mode', get_param('mode'));
+$Form->hidden('root', get_param('root'));
+$Form->hidden('path', get_param('path'));
+$Form->hidden('fm_mode', get_param('fm_mode'));
+$Form->hidden('linkctrl', get_param('linkctrl'));
+$Form->hidden('linkdata', get_param('linkdata'));
+$Form->hidden('iframe_name', get_param('iframe_name'));
+$Form->hidden('fm_filter', get_param('fm_filter'));
+$Form->hidden('fm_filter_regex', get_param('fm_filter_regex'));
+$Form->hidden('iframe_name', get_param('iframe_name'));
+$Form->hidden('fm_flatmode', get_param('fm_flatmode'));
+$Form->hidden('fm_order', get_param('fm_order'));
+$Form->hidden('fm_orderasc', get_param('fm_orderasc'));
+$Form->hidden('crumb_file', get_param('crumb_file'));
 
-$post_extracats = array();
+$post_extracats = [];
 $post_counter = 0;
 
 
@@ -65,124 +66,110 @@ $post_counter = 0;
  * @param integer Level
  * @return array Categories
  */
-function fcpf_categories_select( $parent_category_ID = -1, $level = 0 )
+function fcpf_categories_select($parent_category_ID = -1, $level = 0)
 {
-	global $blog, $DB;
-	$result_Array = array();
+    global $blog, $DB;
+    $result_Array = [];
 
-	$SQL = new SQL();
-	$SQL->SELECT( 'cat_ID, cat_name' );
-	$SQL->FROM( 'T_categories' );
-	$SQL->WHERE( 'cat_blog_ID = '.$DB->quote( $blog ) );
-	if( $parent_category_ID == -1 )
-	{
-		$SQL->WHERE_and( 'cat_parent_ID IS NULL' );
-	}
-	else
-	{
-		$SQL->WHERE( 'cat_parent_ID = '.$DB->quote( $parent_category_ID ) );
-	}
-	$SQL->ORDER_BY( 'cat_name' );
-	$categories = $DB->get_results( $SQL->get() );
+    $SQL = new SQL();
+    $SQL->SELECT('cat_ID, cat_name');
+    $SQL->FROM('T_categories');
+    $SQL->WHERE('cat_blog_ID = ' . $DB->quote($blog));
+    if ($parent_category_ID == -1) {
+        $SQL->WHERE_and('cat_parent_ID IS NULL');
+    } else {
+        $SQL->WHERE('cat_parent_ID = ' . $DB->quote($parent_category_ID));
+    }
+    $SQL->ORDER_BY('cat_name');
+    $categories = $DB->get_results($SQL->get());
 
-	if( ! empty( $categories ) )
-	{
-		foreach( $categories as $category )
-		{
-			$result_Array[] = array(
-					'value' => $category->cat_ID,
-					'label' => str_repeat( '&nbsp;&nbsp;&nbsp;', $level ).$category->cat_name
-				);
+    if (! empty($categories)) {
+        foreach ($categories as $category) {
+            $result_Array[] = [
+                'value' => $category->cat_ID,
+                'label' => str_repeat('&nbsp;&nbsp;&nbsp;', $level) . $category->cat_name,
+            ];
 
-			$child_Categories_opts = fcpf_categories_select( $category->cat_ID, $level + 1 );
-			if( $child_Categories_opts != '' )
-			{
-				foreach( $child_Categories_opts as $cat )
-				{
-					$result_Array[] = $cat;
-				}
-			}
-		}
-	}
-	return $result_Array;
+            $child_Categories_opts = fcpf_categories_select($category->cat_ID, $level + 1);
+            if ($child_Categories_opts != '') {
+                foreach ($child_Categories_opts as $cat) {
+                    $result_Array[] = $cat;
+                }
+            }
+        }
+    }
+    return $result_Array;
 }
 
-$FileCache = & get_FileCache();
+$FileCache = &get_FileCache();
 
 // Check if current user can add new categories
-$user_has_cat_perms = check_user_perm( 'blog_cats', '', false, $blog );
+$user_has_cat_perms = check_user_perm('blog_cats', '', false, $blog);
 
 // Get the categories
 $categories = fcpf_categories_select();
 
-foreach( $images_list as $item )
-{
-	$File = & $FileCache->get_by_root_and_path( $fm_FileRoot->type,  $fm_FileRoot->in_type_ID, $item, true );
-	$title = $File->get( 'title' );
-	if( empty( $title ) )
-	{
-		$title = basename( $File->get( 'name' ) );
-	}
-	$Form->begin_fieldset( /* TRANS: noun */ TB_('Post').' #'.( $post_counter + 1 ).get_manual_link( 'creating-posts-from-files' ) );
-	$Form->text_input( 'post_title['.$post_counter.']', $title, 40, TB_('Post title') );
+foreach ($images_list as $item) {
+    $File = &$FileCache->get_by_root_and_path($fm_FileRoot->type, $fm_FileRoot->in_type_ID, $item, true);
+    $title = $File->get('title');
+    if (empty($title)) {
+        $title = basename($File->get('name'));
+    }
+    $Form->begin_fieldset( /* TRANS: noun */ TB_('Post') . ' #' . ($post_counter + 1) . get_manual_link('creating-posts-from-files'));
+    $Form->text_input('post_title[' . $post_counter . ']', $title, 40, TB_('Post title'));
 
-	if( $post_counter != 0 )
-	{ // The posts after first
-		if( $post_counter == 1 )
-		{ // Add new option to select a category from previous post
-			$categories = array_merge(
-				array(
-					array(
-						'value' => 'same',
-						'label' => TB_('Same as above').'<br />',
-					)
-				), $categories );
-		}
-		// Use the same category for all others after first
-		$selected_category_ID = 'same';
-	}
-	else
-	{ // First post, Use a default category as selected on load form
-		global $Collection, $Blog;
-		$selected_category_ID = isset( $Blog ) ? $Blog->get_default_cat_ID() : 1;
-	}
+    if ($post_counter != 0) { // The posts after first
+        if ($post_counter == 1) { // Add new option to select a category from previous post
+            $categories = array_merge(
+                [
+                    [
+                        'value' => 'same',
+                        'label' => TB_('Same as above') . '<br />',
+                    ],
+                ],
+                $categories
+            );
+        }
+        // Use the same category for all others after first
+        $selected_category_ID = 'same';
+    } else { // First post, Use a default category as selected on load form
+        global $Collection, $Blog;
+        $selected_category_ID = isset($Blog) ? $Blog->get_default_cat_ID() : 1;
+    }
 
-	if( $user_has_cat_perms )
-	{ // Field to create a new category if current user has the rights
-		$categories[] = array(
-				'value'  => 'new',
-				'label'  => TB_('New').':',
-				'suffix' => '<input type="text" id="new_categories['.$post_counter.']" name="new_categories['.$post_counter.']" class="form_text_input" maxlength="255" size="25" />'
-			);
-	}
+    if ($user_has_cat_perms) { // Field to create a new category if current user has the rights
+        $categories[] = [
+            'value' => 'new',
+            'label' => TB_('New') . ':',
+            'suffix' => '<input type="text" id="new_categories[' . $post_counter . ']" name="new_categories[' . $post_counter . ']" class="form_text_input" maxlength="255" size="25" />',
+        ];
+    }
 
-	$Form->radio_input( 'category['.$post_counter.']', $selected_category_ID, $categories, TB_('Category'), array( 'suffix' => '<br />' ) );
-	// Clear last option to create a new for next item with other $post_counter
-	array_pop( $categories );
+    $Form->radio_input('category[' . $post_counter . ']', $selected_category_ID, $categories, TB_('Category'), [
+        'suffix' => '<br />',
+    ]);
+    // Clear last option to create a new for next item with other $post_counter
+    array_pop($categories);
 
-	$Form->info( TB_('Post content'), '<img src="'.$fm_FileRoot->ads_url.$item.'" width="200" />' );
+    $Form->info(TB_('Post content'), '<img src="' . $fm_FileRoot->ads_url . $item . '" width="200" />');
 
-	$Form->end_fieldset();
+    $Form->end_fieldset();
 
-	$post_counter++;
+    $post_counter++;
 }
-$edited_Item = NULL;
+$edited_Item = null;
 
-$visibility_statuses = get_visibility_statuses( 'notes-string', array(), true, $blog );
-if( empty( $visibility_statuses ) )
-{
-	$visibility_statuses = get_visibility_statuses( 'notes-string' );
-	if( isset( $visibility_statuses[ $Blog->get_setting( 'default_post_status' ) ] ) )
-	{ // Current user can create a post only with default status
-		$Form->info( TB_('Status of new posts'), $visibility_statuses[ $Blog->get_setting( 'default_post_status' ) ] );
-	}
-}
-else
-{ // Display a list with the post statuses
-	$Form->select_input_array( 'post_status', $Blog->get_setting( 'default_post_status' ), $visibility_statuses, TB_('Status of new posts') );
+$visibility_statuses = get_visibility_statuses('notes-string', [], true, $blog);
+if (empty($visibility_statuses)) {
+    $visibility_statuses = get_visibility_statuses('notes-string');
+    if (isset($visibility_statuses[$Blog->get_setting('default_post_status')])) { // Current user can create a post only with default status
+        $Form->info(TB_('Status of new posts'), $visibility_statuses[$Blog->get_setting('default_post_status')]);
+    }
+} else { // Display a list with the post statuses
+    $Form->select_input_array('post_status', $Blog->get_setting('default_post_status'), $visibility_statuses, TB_('Status of new posts'));
 }
 
-$Form->end_form( array( array( 'submit', 'actionArray[make_posts_from_files]', TB_('Make posts'), 'ActionButton') ) );
+$Form->end_form([['submit', 'actionArray[make_posts_from_files]', TB_('Make posts'), 'ActionButton']]);
 
 ?>
 <script>

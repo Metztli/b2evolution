@@ -11,28 +11,24 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Store/retrieve preferred tab from UserSettings:
-$UserSettings->param_Request( 'tab', 'pref_glob_regional_tab', 'string', 'locales', true /* memorize */, true /* force */ );
+$UserSettings->param_Request('tab', 'pref_glob_regional_tab', 'string', 'locales', true /* memorize */, true /* force */);
 
 // Avoid infernal loop:
-if( $tab == 'regional' )
-{
-	$ctrl = 'locales';
-}
-else
-{
-	$ctrl = $tab;
+if ($tab == 'regional') {
+    $ctrl = 'locales';
+} else {
+    $ctrl = $tab;
 }
 
 // Check matching controller file:
-if( !isset($ctrl_mappings[$ctrl]) )
-{
-	debug_die( 'The requested controller ['.$ctrl.'] does not exist.' );
+if (! isset($ctrl_mappings[$ctrl])) {
+    debug_die('The requested controller [' . $ctrl . '] does not exist.');
 }
 
 // Call the requested controller:
-require $inc_path.$ctrl_mappings[$ctrl];
-
-?>
+require $inc_path . $ctrl_mappings[$ctrl];

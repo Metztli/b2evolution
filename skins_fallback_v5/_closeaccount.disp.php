@@ -12,47 +12,56 @@
  *
  * @copyright (c)2003-2020 by Francois Planque - {@link http://fplanque.com/}.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Collection, $Blog, $account_closing_success, $account_close_reason;
 
-if( ! empty( $account_closing_success ) )
-{ // Display a bye message after user closed an account
-	echo '<p>'.nl2br( $Settings->get( 'account_close_byemsg' ) ).'</p>';
-}
-else
-{ // Display a form to close an account
+if (! empty($account_closing_success)) { // Display a bye message after user closed an account
+    echo '<p>' . nl2br($Settings->get('account_close_byemsg')) . '</p>';
+} else { // Display a form to close an account
+    $Form = new Form(get_htsrv_url('login') . 'login.php');
 
-	$Form = new Form( get_htsrv_url( 'login' ).'login.php' );
+    $Form->begin_form('inskin');
 
-	$Form->begin_form( 'inskin' );
+    $Form->add_crumb('closeaccountform');
+    $Form->hidden('redirect_to', $Blog->get('closeaccounturl', [
+        'glue' => '&',
+    ]));
+    $Form->hidden('action', 'closeaccount');
 
-	$Form->add_crumb( 'closeaccountform' );
-	$Form->hidden( 'redirect_to', $Blog->get( 'closeaccounturl', array( 'glue' => '&' ) ) );
-	$Form->hidden( 'action', 'closeaccount' );
+    // Display intro message
+    $Form->info(null, nl2br($Settings->get('account_close_intro')));
 
-	// Display intro message
-	$Form->info( NULL, nl2br( $Settings->get( 'account_close_intro' ) ) );
+    // Display the reasons
+    $reasons = trim($Settings->get('account_close_reasons'));
+    if (! empty($reasons)) {
+        $reasons = explode("\n", str_replace(["\r\n", "\n\n"], "\n", $reasons));
+        $reasons[] = NT_('Other');
+        $reasons_options = [];
+        foreach ($reasons as $reason) {
+            $reasons_options[] = [
+                'value' => $reason,
+                'label' => $reason,
+            ];
+        }
+        $Form->radio_input('account_close_type', '', $reasons_options, '<b>' . T_('Reason') . '</b>', [
+            'lines' => true,
+        ]);
+    }
 
-	// Display the reasons
-	$reasons = trim( $Settings->get( 'account_close_reasons' ) );
-	if( ! empty( $reasons ) )
-	{
-		$reasons = explode( "\n", str_replace( array( "\r\n", "\n\n" ), "\n", $reasons ) );
-		$reasons[] = NT_('Other');
-		$reasons_options = array();
-		foreach( $reasons as $reason )
-		{
-			$reasons_options[] = array( 'value' => $reason, 'label' => $reason );
-		}
-		$Form->radio_input( 'account_close_type', '', $reasons_options, '<b>'.T_('Reason').'</b>', array( 'lines' => true ) );
-	}
-
-	$Form->textarea_input( 'account_close_reason', $account_close_reason, 3, T_('Details'), array( 'cols' => 40, 'maxlength' => 255 ) );
-	$Form->info_field( NULL, '%s characters left', array( 'class' => 'section_requires_javascript dimmed', 'name' => 'character_counter' ) );
-?>
+    $Form->textarea_input('account_close_reason', $account_close_reason, 3, T_('Details'), [
+        'cols' => 40,
+        'maxlength' => 255,
+    ]);
+    $Form->info_field(null, '%s characters left', [
+        'class' => 'section_requires_javascript dimmed',
+        'name' => 'character_counter',
+    ]);
+    ?>
 	<script>
-		<?php echo 'var counter_text = "'.T_( '%s characters left' ).'";';?>
+		<?php echo 'var counter_text = "' . T_('%s characters left') . '";'; ?>
 		var characterCounter = jQuery("#ffield_character_counter > div");
 		var otherReason = jQuery("#account_close_reason");
 		jQuery("#ffield_account_close_reason").css( { marginBottom: 0 } );
@@ -68,15 +77,14 @@ else
 		} );
 	</script>
 	<noscript>
-		<?php echo T_( '255 characters max' ); ?>
+		<?php echo T_('255 characters max'); ?>
 	</noscript>
 <?php
 
-	$Form->buttons( array( array( 'submit', 'submit', T_('Close my account now'), 'SaveButton' ) ) );
+        $Form->buttons([['submit', 'submit', T_('Close my account now'), 'SaveButton']]);
 
-	$Form->info( '', '<a href="'.$Blog->get( 'userurl' ).'">'.T_( 'I changed my mind, don\'t close my account.' ).'</a>' );
+    $Form->info('', '<a href="' . $Blog->get('userurl') . '">' . T_('I changed my mind, don\'t close my account.') . '</a>');
 
-	$Form->end_form();
-
+    $Form->end_form();
 } // End of form
 ?>

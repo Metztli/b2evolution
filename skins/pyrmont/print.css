@@ -1,0 +1,19 @@
+body { background:none; background-color: #FFFFFF; padding: 0; margin: 0; color: #000; font: 12px Arial, Helvetica, sans-serif }
+
+a { text-decoration:underline; color: #0066CC }
+a:visited { color: #CC3366; }
+a:hover { color: #0066FF; }
+bPost a { text-decoration: none; color: Blue;}
+
+#header { padding-bottom:20px }
+#header .blog_title { margin-top:0 }
+
+/* Hide blocks */
+#evo_toolbar,
+.blog_list,
+#main_navi,
+#search,
+.bSideitem,
+#sidebar { display:none; border:none; background:none }
+
+div#main { float:none; display:inline; width:100%; margin:0; padding:0 }

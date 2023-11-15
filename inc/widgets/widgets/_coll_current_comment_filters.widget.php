@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -25,221 +27,207 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_current_comment_filters_Widget extends ComponentWidget
 {
-	var $icon = 'filter';
+    public $icon = 'filter';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_current_comment_filters' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_current_comment_filters');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('current-comment-filters-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'current-comment-filters-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Current Comment filters');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->disp_params['title']);
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Current Comment filters');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Summary of the current Comment filters.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param array local params
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'type' => 'text',
+                'label' => T_('Block title'),
+                'defaultvalue' => T_('Current Comment filters'),
+                'maxlength' => 100,
+            ],
+            'show_filters' => [
+                'type' => 'checklist',
+                'label' => T_('Show filters'),
+                'options' => [
+                    ['visibility', T_('Visibility'), 0],
+                    ['keyword', T_('Keyword'), 1],
+                    ['rating', T_('Rating'), 1],
+                    ['author', T_('Author'), 1],
+                    ['author_url', T_('Author URL'), 1],
+                    ['author_IP', T_('IP'), 1],
+                    ['active', T_('Show active'), 1],
+                    ['expired', T_('Show expired'), 1],
+                ],
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( $this->disp_params['title'] );
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $CommentList;
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Summary of the current Comment filters.');
-	}
+        $params = array_merge([
+            'CommentList' => $CommentList,
+            'display_button_reset' => true, // Display a button to reset all filters
+            'display_empty_filter' => false, // Display a block with text "No filters"
+        ], $params);
 
+        if (empty($params['CommentList'])) { // Empty CommentList object
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because there is an empty param "CommentList".');
+            return false;
+        }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param array local params
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-			'title' => array(
-					'type' => 'text',
-					'label' => T_('Block title'),
-					'defaultvalue' => T_('Current Comment filters'),
-					'maxlength' => 100,
-				),
-			'show_filters' => array(
-					'type' => 'checklist',
-					'label' => T_('Show filters'),
-					'options' => array(
-						array( 'visibility', T_('Visibility'), 0 ),
-						array( 'keyword', T_('Keyword'), 1 ),
-						array( 'rating', T_('Rating'), 1 ),
-						array( 'author', T_('Author'), 1 ),
-						array( 'author_url', T_('Author URL'), 1 ),
-						array( 'author_IP', T_('IP'), 1 ),
-						array( 'active', T_('Show active'), 1 ),
-						array( 'expired', T_('Show expired'), 1 ),
-					),
-				),
-			), parent::get_param_definitions( $params ) );
+        if (isset($params['show_filters'])) { // Get the predefined filters
+            $show_filters = $params['show_filters'];
+            unset($params['show_filters']);
+        }
 
-		return $r;
-	}
+        $this->init_display($params);
 
+        if (isset($show_filters)) { // Rewrite default filters by predefined
+            $this->disp_params['show_filters'] = array_merge($this->disp_params['show_filters'], $show_filters);
+        }
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $CommentList;
+        $filters = implode(' ' . T_('AND') . ' ', $params['CommentList']->get_filter_titles([], [
+            'group_mask' => '$filter_items$',
+            'filter_mask' => '<div class="filter_item $filter_class$">' . "\n"
+                    . '<div class="group">$group_title$</div>' . "\n"
+                    . '<div class="name">$filter_name$</div>' . "\n"
+                    . '<div class="icon">$clear_icon$</div>' . "\n"
+                . '</div>',
+            'filter_mask_nogroup' => '<div class="filter_item $filter_class$">' . "\n"
+                    . '<div class="name">$filter_name$</div>' . "\n"
+                    . '<div class="icon">$clear_icon$</div>' . "\n"
+                . '</div>',
+            'before_items' => '( ',
+            'after_items' => ' )',
+            'separator_and' => ' ' . T_('AND') . ' ',
+            'separator_or' => ' ' . T_('OR') . ' ',
+            'separator_nor' => ' ' . T_('NOR') . ' ',
+            'separator_comma' => ' ' . T_('OR') . ' ',
+            'display_visibility' => ! empty($this->disp_params['show_filters']['visibility']),
+            'display_keyword' => ! empty($this->disp_params['show_filters']['keyword']),
+            'display_rating' => ! empty($this->disp_params['show_filters']['rating']),
+            'display_author' => ! empty($this->disp_params['show_filters']['author']),
+            'display_author_url' => ! empty($this->disp_params['show_filters']['author_url']),
+            'display_author_IP' => ! empty($this->disp_params['show_filters']['author_IP']),
+            'display_active' => ! empty($this->disp_params['show_filters']['active']),
+            'display_expired' => ! empty($this->disp_params['show_filters']['expired']),
+        ]));
 
-		$params = array_merge( array(
-				'CommentList'          => $CommentList,
-				'display_button_reset' => true, // Display a button to reset all filters
-				'display_empty_filter' => false, // Display a block with text "No filters"
-			), $params );
+        if (empty($filters) && ! $params['display_empty_filter']) {	// No filters
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because there are no filters.');
+            return false;
+        }
 
-		if( empty( $params['CommentList'] ) )
-		{ // Empty CommentList object
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because there is an empty param "CommentList".' );
-			return false;
-		}
+        // START DISPLAY:
+        echo $this->disp_params['block_start'];
 
-		if( isset( $params['show_filters'] ) )
-		{ // Get the predefined filters
-			$show_filters = $params['show_filters'];
-			unset( $params['show_filters'] );
-		}
+        // Display title if requested
+        $this->disp_title();
 
-		$this->init_display( $params );
+        echo $this->disp_params['block_body_start'];
 
-		if( isset( $show_filters ) )
-		{ // Rewrite default filters by predefined
-			$this->disp_params['show_filters'] = array_merge( $this->disp_params['show_filters'], $show_filters );
-		}
+        if (empty($filters)) { // No filters
+            if ($params['display_empty_filter']) {
+                echo sprintf(T_('No filters - Showing all %s'), T_('comments'));
+            }
+        } else { // Display the filters
+            echo $filters;
 
-		$filters =  implode( ' '.T_('AND').' ', $params['CommentList']->get_filter_titles( array(), array(
-				'group_mask'          => '$filter_items$',
-				'filter_mask'         => '<div class="filter_item $filter_class$">'."\n"
-						.'<div class="group">$group_title$</div>'."\n"
-						.'<div class="name">$filter_name$</div>'."\n"
-						.'<div class="icon">$clear_icon$</div>'."\n"
-					.'</div>',
-				'filter_mask_nogroup' => '<div class="filter_item $filter_class$">'."\n"
-						.'<div class="name">$filter_name$</div>'."\n"
-						.'<div class="icon">$clear_icon$</div>'."\n"
-					.'</div>',
-				'before_items'       => '( ',
-				'after_items'        => ' )',
-				'separator_and'      => ' '.T_('AND').' ',
-				'separator_or'       => ' '.T_('OR').' ',
-				'separator_nor'      => ' '.T_('NOR').' ',
-				'separator_comma'    => ' '.T_('OR').' ',
-				'display_visibility' => ! empty( $this->disp_params['show_filters']['visibility'] ),
-				'display_keyword'    => ! empty( $this->disp_params['show_filters']['keyword'] ),
-				'display_rating'     => ! empty( $this->disp_params['show_filters']['rating'] ),
-				'display_author'     => ! empty( $this->disp_params['show_filters']['author'] ),
-				'display_author_url' => ! empty( $this->disp_params['show_filters']['author_url'] ),
-				'display_author_IP'  => ! empty( $this->disp_params['show_filters']['author_IP'] ),
-				'display_active'     => ! empty( $this->disp_params['show_filters']['active'] ),
-				'display_expired'    => ! empty( $this->disp_params['show_filters']['expired'] ),
-			) ) );
+            if ($params['display_button_reset']) {	// Display link/button to reset all filters:
+                global $Blog;
+                if (is_admin_page() || ! isset($Blog)) {	// Regenerate URL by removing all filters from current URL on back-office:
+                    $remove_filters_url = regenerate_url('catsel,cat,'
+                        . $params['CommentList']->param_prefix . 'author_IDs,'
+                        . $params['CommentList']->param_prefix . 'authors_login,'
+                        . $params['CommentList']->param_prefix . 'author,'
+                        . $params['CommentList']->param_prefix . 'author_email,'
+                        . $params['CommentList']->param_prefix . 'author_url,'
+                        . $params['CommentList']->param_prefix . 'author_IP,'
+                        . $params['CommentList']->param_prefix . 'url_match,'
+                        . $params['CommentList']->param_prefix . 'include_emptyurl,'
+                        . $params['CommentList']->param_prefix . 'dstart,'
+                        . $params['CommentList']->param_prefix . 'dstop,'
+                        . $params['CommentList']->param_prefix . 'rating_toshow,'
+                        . $params['CommentList']->param_prefix . 'rating_turn,'
+                        . $params['CommentList']->param_prefix . 'rating_limit,'
+                        . $params['CommentList']->param_prefix . 'status,'
+                        . $params['CommentList']->param_prefix . 'show_statuses,'
+                        . $params['CommentList']->param_prefix . 's,'
+                        . $params['CommentList']->param_prefix . 'sentence,'
+                        . $params['CommentList']->param_prefix . 'exact,'
+                        . $params['CommentList']->param_prefix . 'expiry_statuses,'
+                        . $params['CommentList']->param_prefix . 'type,'
+                        . $params['CommentList']->param_prefix . 'user_perm,');
+                } else {	// Use home page of the current Collection on front-office:
+                    $remove_filters_url = $Blog->get('url');
+                }
 
-		if( empty( $filters ) && ! $params['display_empty_filter'] )
-		{	// No filters
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because there are no filters.' );
-			return false;
-		}
+                echo '<p>' . action_icon(
+                    T_('Remove filters'),
+                    'reset_filters',
+                    $remove_filters_url,
+                    ' ' . T_('Remove filters'),
+                    3,
+                    4
+                ) . '<p>';
+            }
+        }
 
-		// START DISPLAY:
-		echo $this->disp_params['block_start'];
+        echo $this->disp_params['block_body_end'];
 
-		// Display title if requested
-		$this->disp_title();
+        echo $this->disp_params['block_end'];
 
-		echo $this->disp_params['block_body_start'];
-
-		if( empty( $filters ) )
-		{ // No filters
-			if( $params['display_empty_filter'] )
-			{
-				echo sprintf( T_('No filters - Showing all %s'), T_('comments') );
-			}
-		}
-		else
-		{ // Display the filters
-			echo $filters;
-
-			if( $params['display_button_reset'] )
-			{	// Display link/button to reset all filters:
-				global $Blog;
-				if( is_admin_page() || ! isset( $Blog ) )
-				{	// Regenerate URL by removing all filters from current URL on back-office:
-					$remove_filters_url = regenerate_url( 'catsel,cat,'
-						.$params['CommentList']->param_prefix.'author_IDs,'
-						.$params['CommentList']->param_prefix.'authors_login,'
-						.$params['CommentList']->param_prefix.'author,'
-						.$params['CommentList']->param_prefix.'author_email,'
-						.$params['CommentList']->param_prefix.'author_url,'
-						.$params['CommentList']->param_prefix.'author_IP,'
-						.$params['CommentList']->param_prefix.'url_match,'
-						.$params['CommentList']->param_prefix.'include_emptyurl,'
-						.$params['CommentList']->param_prefix.'dstart,'
-						.$params['CommentList']->param_prefix.'dstop,'
-						.$params['CommentList']->param_prefix.'rating_toshow,'
-						.$params['CommentList']->param_prefix.'rating_turn,'
-						.$params['CommentList']->param_prefix.'rating_limit,'
-						.$params['CommentList']->param_prefix.'status,'
-						.$params['CommentList']->param_prefix.'show_statuses,'
-						.$params['CommentList']->param_prefix.'s,'
-						.$params['CommentList']->param_prefix.'sentence,'
-						.$params['CommentList']->param_prefix.'exact,'
-						.$params['CommentList']->param_prefix.'expiry_statuses,'
-						.$params['CommentList']->param_prefix.'type,'
-						.$params['CommentList']->param_prefix.'user_perm,' );
-				}
-				else
-				{	// Use home page of the current Collection on front-office:
-					$remove_filters_url = $Blog->get( 'url' );
-				}
-
-				echo '<p>'.action_icon( T_('Remove filters'), 'reset_filters',
-					$remove_filters_url, ' '.T_('Remove filters'), 3, 4 ).'<p>';
-			}
-		}
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

@@ -1,4 +1,3 @@
-
 <?php
 /**
  * This file displays the links attached to an Object, which can be an Item, Comment, ... (called within the attachment_frame)
@@ -12,34 +11,37 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-$Form = new Form( $admin_url, 'item_new_version_checkchanges', 'post' );
+$Form = new Form($admin_url, 'item_new_version_checkchanges', 'post');
 
 $Form->begin_form();
 
-	$Form->add_crumb( 'item' );
-	$Form->hidden( 'ctrl', 'items' );
-	$Form->hidden( 'blog', $edited_Item->get_blog_ID() );
-	$Form->hidden( 'p', $edited_Item->ID );
+$Form->add_crumb('item');
+$Form->hidden('ctrl', 'items');
+$Form->hidden('blog', $edited_Item->get_blog_ID());
+$Form->hidden('p', $edited_Item->ID);
 
-	$Form->select_input_options( 'post_locale', $edited_Item->get_locale_options( 'all' ), TB_('Language'), '', array( 'style' => 'width:auto' ) );
+$Form->select_input_options('post_locale', $edited_Item->get_locale_options('all'), TB_('Language'), '', [
+    'style' => 'width:auto',
+]);
 
-	$Form->info( TB_('Collection'), '<span id="evo_item_new_version_coll"></span>' );
-	$Form->hidden( 'post_coll_ID', '' );
+$Form->info(TB_('Collection'), '<span id="evo_item_new_version_coll"></span>');
+$Form->hidden('post_coll_ID', '');
 
-	$Form->checkbox( 'post_same_images', 1, TB_('Same images'), TB_('Link all attachments of current Item to new version.') );
+$Form->checkbox('post_same_images', 1, TB_('Same images'), TB_('Link all attachments of current Item to new version.'));
 
-	$ItemTypeCache = & get_ItemTypeCache();
-	$Form->select_input_object( 'item_typ_ID', $edited_Item->get( 'ityp_ID' ), $ItemTypeCache, TB_('Item Type') );
+$ItemTypeCache = &get_ItemTypeCache();
+$Form->select_input_object('item_typ_ID', $edited_Item->get('ityp_ID'), $ItemTypeCache, TB_('Item Type'));
 
-	if( $edited_Item->get_type_setting( 'use_parent' ) != 'never' )
-	{	// If parent is allowed for the Item Type:
-		$Form->checkbox( 'post_create_child', 1, TB_('Create as child'), TB_('Version will be a child and current Item will be parent.') );
-	}
+if ($edited_Item->get_type_setting('use_parent') != 'never') {	// If parent is allowed for the Item Type:
+    $Form->checkbox('post_create_child', 1, TB_('Create as child'), TB_('Version will be a child and current Item will be parent.'));
+}
 
-	$Form->buttons( array( array( 'submit', 'actionArray[new_version]', TB_('Add version'), 'SaveButton' ) ) );
+$Form->buttons([['submit', 'actionArray[new_version]', TB_('Add version'), 'SaveButton']]);
 
 $Form->end_form();
 ?>

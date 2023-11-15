@@ -14,6 +14,7 @@ namespace GeoIp2\Model;
 class ConnectionType extends AbstractModel
 {
     protected $connectionType;
+
     protected $ipAddress;
 
     /**

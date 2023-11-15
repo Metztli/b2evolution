@@ -50,14 +50,17 @@ class City extends Country
      * @ignore
      */
     protected $city;
+
     /**
      * @ignore
      */
     protected $location;
+
     /**
      * @ignore
      */
     protected $postal;
+
     /**
      * @ignore
      */
@@ -82,7 +85,7 @@ class City extends Country
 
     private function createSubdivisions($raw, $locales)
     {
-        if (!isset($raw['subdivisions'])) {
+        if (! isset($raw['subdivisions'])) {
             return;
         }
 

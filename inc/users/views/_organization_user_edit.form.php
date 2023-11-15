@@ -14,7 +14,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -22,50 +24,53 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 global $edited_Organization;
 
-$org_ID = get_param( 'org_ID' );
-$UserCache = & get_UserCache();
-$edited_User = & $UserCache->get_by_ID( param( 'user_ID', 'integer' ) );
+$org_ID = get_param('org_ID');
+$UserCache = &get_UserCache();
+$edited_User = &$UserCache->get_by_ID(param('user_ID', 'integer'));
 $org_data = $edited_User->get_organizations_data();
 
-$Form = new Form( NULL, 'orguser_editmembership' );
+$Form = new Form(null, 'orguser_editmembership');
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-	$Form->add_crumb( 'organization' );
+$Form->add_crumb('organization');
 
-	$Form->hiddens_by_key( get_memorized( 'action' ) ); // (this allows to come back to the right list order & page)
-	$Form->hidden( 'edit_mode', true ); // this allows the controller to determine if it an edit to the membership information
+$Form->hiddens_by_key(get_memorized('action')); // (this allows to come back to the right list order & page)
+$Form->hidden('edit_mode', true); // this allows the controller to determine if it an edit to the membership information
 
-	$Form->info_field( TB_('Username'), $edited_User->get( 'login' ) );
-	$Form->hidden( 'user_login', $edited_User->get('login') );
-	$Form->radio( 'accepted', $org_data[$org_ID]['accepted'],
-				array(
-					array( '1', TB_('Accepted') ),
-					array( '0', TB_('Not Accepted') ),
-			), TB_('Membership'), true );
+$Form->info_field(TB_('Username'), $edited_User->get('login'));
+$Form->hidden('user_login', $edited_User->get('login'));
+$Form->radio(
+    'accepted',
+    $org_data[$org_ID]['accepted'],
+    [
+        ['1', TB_('Accepted')],
+        ['0', TB_('Not Accepted')],
+    ],
+    TB_('Membership'),
+    true
+);
 
-	if( ( $edited_Organization->owner_user_ID == $current_User->ID ) || ( $edited_Organization->perm_role == 'owner and member' && $org_data[$org_ID]['accepted'] ) )
-	{	// Display edit field if current user has a permission to edit role:
-		$Form->text_input( 'role', $org_data[$org_ID]['role'], 32, TB_('Role'), '', array( 'maxlength' => 255 ) );
-	}
-	else
-	{	// Otherwise display info field with role value:
-		$Form->info_field( TB_('Role'), $org_data[$org_ID]['role'] );
-	}
-
-	if( $edited_Organization->owner_user_ID == $current_User->ID || check_user_perm( 'orgs', 'edit', false, $edited_Organization ) )
-	{	// Display edit field if current user has a permission to edit order:
-		$Form->text_input( 'priority', $org_data[$org_ID]['priority'], 10, TB_('Order'), '', array( 'type' => 'number', 'min' => -2147483648, 'max' => 2147483647 ) );
-	}
-	else
-	{	// Otherwise display info field with role value:
-		$Form->info_field( TB_('Order'), $org_data[$org_ID]['priority'] );
-	}
-
-$buttons = array();
-if( check_user_perm( 'orgs', 'edit', false, $edited_Organization ) )
-{	// Display a button to update the poll question only if current user has a permission:
-	$buttons[] = array( 'submit', 'actionArray[link_user]', TB_('Edit'), 'SaveButton' );
+if (($edited_Organization->owner_user_ID == $current_User->ID) || ($edited_Organization->perm_role == 'owner and member' && $org_data[$org_ID]['accepted'])) {	// Display edit field if current user has a permission to edit role:
+    $Form->text_input('role', $org_data[$org_ID]['role'], 32, TB_('Role'), '', [
+        'maxlength' => 255,
+    ]);
+} else {	// Otherwise display info field with role value:
+    $Form->info_field(TB_('Role'), $org_data[$org_ID]['role']);
 }
-$Form->end_form( $buttons );
-?>
+
+if ($edited_Organization->owner_user_ID == $current_User->ID || check_user_perm('orgs', 'edit', false, $edited_Organization)) {	// Display edit field if current user has a permission to edit order:
+    $Form->text_input('priority', $org_data[$org_ID]['priority'], 10, TB_('Order'), '', [
+        'type' => 'number',
+        'min' => -2147483648,
+        'max' => 2147483647,
+    ]);
+} else {	// Otherwise display info field with role value:
+    $Form->info_field(TB_('Order'), $org_data[$org_ID]['priority']);
+}
+
+$buttons = [];
+if (check_user_perm('orgs', 'edit', false, $edited_Organization)) {	// Display a button to update the poll question only if current user has a permission:
+    $buttons[] = ['submit', 'actionArray[link_user]', TB_('Edit'), 'SaveButton'];
+}
+$Form->end_form($buttons);

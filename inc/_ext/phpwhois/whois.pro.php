@@ -27,17 +27,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 require_once('whois.parser.php');
 
-if (!defined('__PRO_HANDLER__'))
-	define('__PRO_HANDLER__', 1);
+if (! defined('__PRO_HANDLER__')) {
+    define('__PRO_HANDLER__', 1);
+}
 
 class pro_handler
-	{
-	function parse($data, $query)
-		{
-		$r['regrinfo'] = generic_parser_b($data['rawdata']);
-		$r['regyinfo']['referrer'] = 'http://www.registrypro.pro';
-		$r['regyinfo']['registrar'] = 'RegistryPRO';
-		return $r;
-		}
-	}
-?>
+{
+    public function parse($data, $query)
+    {
+        $r['regrinfo'] = generic_parser_b($data['rawdata']);
+        $r['regyinfo']['referrer'] = 'http://www.registrypro.pro';
+        $r['regyinfo']['registrar'] = 'RegistryPRO';
+        return $r;
+    }
+}

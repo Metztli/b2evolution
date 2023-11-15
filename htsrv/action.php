@@ -15,9 +15,9 @@
 /**
  * Initialize everything:
  */
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
-require_once $inc_path.'_main.inc.php';
+require_once $inc_path . '_main.inc.php';
 
 global $Session, $modules;
 
@@ -26,31 +26,25 @@ global $Session, $modules;
 $allow_evo_stats = false;
 
 // Module name param must exists
-$module_name = param( 'mname', 'string', true );
+$module_name = param('mname', 'string', true);
 
-$blog = param( 'blog', 'integer', 0 );
-if( ! empty( $blog ) )
-{ 
-	activate_blog_locale( $blog );
-	// Initialize collection object because it may be used in some functions:
-	$BlogCache = & get_BlogCache();
-	$Collection = $Blog = & $BlogCache->get_by_ID( $blog );
+$blog = param('blog', 'integer', 0);
+if (! empty($blog)) {
+    activate_blog_locale($blog);
+    // Initialize collection object because it may be used in some functions:
+    $BlogCache = &get_BlogCache();
+    $Collection = $Blog = &$BlogCache->get_by_ID($blog);
 }
 
-foreach( $modules as $module )
-{
-	if( $module == $module_name )
-	{ // the requested module was found
-		$Module = & $GLOBALS[$module.'_Module'];
-		if( method_exists( $Module, 'handle_htsrv_action' ) )
-		{	// Module has handle_htsrv_action function, we can call it
-			$Module->handle_htsrv_action();
-			break;
-		}
-	}
+foreach ($modules as $module) {
+    if ($module == $module_name) { // the requested module was found
+        $Module = &$GLOBALS[$module . '_Module'];
+        if (method_exists($Module, 'handle_htsrv_action')) {	// Module has handle_htsrv_action function, we can call it
+            $Module->handle_htsrv_action();
+            break;
+        }
+    }
 }
 
 header_redirect();
 // exited
-
-?>

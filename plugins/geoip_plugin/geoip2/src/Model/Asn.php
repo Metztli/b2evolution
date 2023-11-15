@@ -16,7 +16,9 @@ namespace GeoIp2\Model;
 class Asn extends AbstractModel
 {
     protected $autonomousSystemNumber;
+
     protected $autonomousSystemOrganization;
+
     protected $ipAddress;
 
     /**

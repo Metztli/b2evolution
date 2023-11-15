@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Whois.php        PHP classes to conduct whois queries
 
@@ -25,32 +25,33 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-if (!defined('__CL_HANDLER__'))
-	define('__CL_HANDLER__', 1);
+if (! defined('__CL_HANDLER__')) {
+    define('__CL_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class cl_handler
-	{
-	function parse($data_str, $query)
-		{
-		$items = array(
-                  'admin' => '(Administrative Contact)',
-                  'tech' => 'Contacto Técnico (Technical Contact):',
-                  'domain.nserver' => 'Servidores de nombre (Domain servers):',
-                  'domain.changed' => '(Database last updated on):'
-                  );
+{
+    public function parse($data_str, $query)
+    {
+        $items = [
+            'admin' => '(Administrative Contact)',
+            'tech' => 'Contacto Técnico (Technical Contact):',
+            'domain.nserver' => 'Servidores de nombre (Domain servers):',
+            'domain.changed' => '(Database last updated on):',
+        ];
 
-		$trans = array(
-					'organización:' => 'organization',
-					'nombre      :' => 'name');
+        $trans = [
+            'organización:' => 'organization',
+            'nombre      :' => 'name',
+        ];
 
-		$r['regrinfo'] = easy_parser($data_str['rawdata'], $items, 'd-m-y', $trans);
-		$r['regyinfo'] = array(
-                    'referrer' => 'http://www.nic.cl',
-                    'registrar' => 'NIC Chile'
-                    );
-		return $r;
-		}
-	}
-?>
+        $r['regrinfo'] = easy_parser($data_str['rawdata'], $items, 'd-m-y', $trans);
+        $r['regyinfo'] = [
+            'referrer' => 'http://www.nic.cl',
+            'registrar' => 'NIC Chile',
+        ];
+        return $r;
+    }
+}

@@ -7,14 +7,16 @@
  * @package skins
  * @subpackage default_site_skin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 header_http_response('404 Not Found');
 header('Content-Type: text/html; charset=utf-8'); // no translation
 
 $page_title = '404 Not Found';
 // -------------------------- HTML HEADER INCLUDED HERE --------------------------
-siteskin_include( '_html_header.inc.php' );
+siteskin_include('_html_header.inc.php');
 // -------------------------------- END OF HEADER --------------------------------
 
 ?>
@@ -23,6 +25,6 @@ siteskin_include( '_html_header.inc.php' );
 <?php
 
 // -------------------------- HTML FOOTER INCLUDED HERE --------------------------
-siteskin_include( '_html_footer.inc.php' );
+siteskin_include('_html_footer.inc.php');
 // -------------------------------- END OF FOOTER --------------------------------
 ?>

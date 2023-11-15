@@ -16,13 +16,13 @@
  */
 header('Content-type: text/xml; charset=UTF-8', true);
 
-require_once dirname(__FILE__).'/../conf/_config.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
 
-require_once $inc_path.'_main.inc.php';
+require_once $inc_path . '_main.inc.php';
 
-param( 'blog', 'integer', NULL );
+param('blog', 'integer', null);
 
-echo '<?xml version="1.0" encoding="UTF-8"?'.'>';
+echo '<?xml version="1.0" encoding="UTF-8"?' . '>';
 ?>
 <rsd version="1.0" xmlns="http://archipelago.phrasewise.com/rsd">
 	<service>
@@ -31,38 +31,48 @@ echo '<?xml version="1.0" encoding="UTF-8"?'.'>';
 	  <homePageLink><?php echo $baseurl; ?></homePageLink>
 	  <apis>
 	    <api name="WordPress" preferred="true" apiLink="<?php echo $xmlsrv_url; ?>xmlrpc.php"<?php
-	    	if( !empty($blog) ) { echo ' blogID="'.$blog.'"'; }
-	    	?>>
+            if (! empty($blog)) {
+                echo ' blogID="' . $blog . '"';
+            }
+?>>
 				<settings>
 					<docs>https://codex.wordpress.org/XML-RPC_wp</docs>
 				</settings>
 			</api>
 	    <api name="MetaWeblog" preferred="false" apiLink="<?php echo $xmlsrv_url; ?>xmlrpc.php"<?php
-	    	if( !empty($blog) ) { echo ' blogID="'.$blog.'"'; }
-	    	?>>
+if (! empty($blog)) {
+    echo ' blogID="' . $blog . '"';
+}
+?>>
 				<settings>
-					<docs><?php echo get_manual_url( 'metaweblog-api' ); ?></docs>
+					<docs><?php echo get_manual_url('metaweblog-api'); ?></docs>
 				</settings>
 			</api>
 	    <api name="MovableType" preferred="false" apiLink="<?php echo $xmlsrv_url; ?>xmlrpc.php"<?php
-	    	if( !empty($blog) ) { echo ' blogID="'.$blog.'"'; }
-	    	?>>
+if (! empty($blog)) {
+    echo ' blogID="' . $blog . '"';
+}
+?>>
 				<settings>
-					<docs><?php echo get_manual_url( 'movabletype-api' ); ?></docs>
+					<docs><?php echo get_manual_url('movabletype-api'); ?></docs>
 				</settings>
 			</api>
 	    <api name="Blogger" preferred="false" apiLink="<?php echo $xmlsrv_url; ?>xmlrpc.php"<?php
-	    	if( !empty($blog) ) { echo ' blogID="'.$blog.'"'; }
-	    	?>>
+if (! empty($blog)) {
+    echo ' blogID="' . $blog . '"';
+}
+?>>
 				<settings>
-					<docs><?php echo get_manual_url( 'blogger-api' ); ?></docs>
+					<docs><?php echo get_manual_url('blogger-api'); ?></docs>
 				</settings>
 			</api>
 	    <api name="b2" preferred="false" apiLink="<?php echo $xmlsrv_url; ?>xmlrpc.php"<?php
-	    	if( !empty($blog) ) { echo ' blogID="'.$blog.'"'; }
-	    	?>>
+if (! empty($blog)) {
+    echo ' blogID="' . $blog . '"';
+}
+?>>
 				<settings>
-					<docs><?php echo get_manual_url( 'b2-api' ); ?></docs>
+					<docs><?php echo get_manual_url('b2-api'); ?></docs>
 				</settings>
 			</api>
 	  </apis>

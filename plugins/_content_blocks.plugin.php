@@ -8,7 +8,9 @@
  *
  * @package plugins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -18,126 +20,126 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class content_blocks_plugin extends Plugin
 {
-	var $name;
-	var $code = 'content_blocks';
-	var $priority = 102;
-	var $version = '7.2.5';
-	var $group = 'rendering';
-	var $short_desc;
-	var $long_desc;
-	var $help_topic = 'include-content-blocks-plugin';
-	var $number_of_installs = 1;
+    public $name;
 
+    public $code = 'content_blocks';
 
-	/**
-	 * Init
-	 */
-	function PluginInit( & $params )
-	{
-		$this->name = T_('Include Content Blocks');
-		$this->short_desc = T_('Render content blocks.');
-		$this->long_desc = sprintf( T_('This renderer display a content block found in the content by short tag %s or %s'), '<code>[include:item-slug]</code>', '<code>[cblock:item-slug]</code>' );
-	}
+    public $priority = 102;
 
+    public $version = '7.2.5';
 
-	/**
-	 * Define here default collection/blog settings that are to be made available in the backoffice.
-	 *
-	 * @param array Associative array of parameters.
-	 * @return array See {@link Plugin::get_coll_setting_definitions()}.
-	 */
-	function get_coll_setting_definitions( & $params )
-	{
-		$default_params = array(
-				'default_post_rendering'    => 'stealth',
-				'default_comment_rendering' => 'never',
-			);
+    public $group = 'rendering';
 
-		$params = array_merge( $params, $default_params );
+    public $short_desc;
 
-		return parent::get_coll_setting_definitions( $params );
-	}
+    public $long_desc;
 
+    public $help_topic = 'include-content-blocks-plugin';
 
-	/**
-	 * Perform rendering
-	 *
-	 * @param array Associative array of parameters
-	 * @return boolean true if we can render something for the required output format
-	 */
-	function RenderItemAsHtml( & $params )
-	{
-		$content = & $params['data'];
+    public $number_of_installs = 1;
 
-		if( ! ( $Item = & $this->get_Item_from_params( $params ) ) )
-		{	// Skip rendering without provided Item:
-			return false;
-		}
+    /**
+     * Init
+     */
+    public function PluginInit(&$params)
+    {
+        $this->name = T_('Include Content Blocks');
+        $this->short_desc = T_('Render content blocks.');
+        $this->long_desc = sprintf(T_('This renderer display a content block found in the content by short tag %s or %s'), '<code>[include:item-slug]</code>', '<code>[cblock:item-slug]</code>');
+    }
 
-		// Remove block level short tag [include:...] inside <p> blocks and move them before the paragraph:
-		$content = move_short_tags( $content, '#\[(include|cblock):[^\]]+\]#i' );
+    /**
+     * Define here default collection/blog settings that are to be made available in the backoffice.
+     *
+     * @param array Associative array of parameters.
+     * @return array See {@link Plugin::get_coll_setting_definitions()}.
+     */
+    public function get_coll_setting_definitions(&$params)
+    {
+        $default_params = [
+            'default_post_rendering' => 'stealth',
+            'default_comment_rendering' => 'never',
+        ];
 
-		// Don't render several short tags because they may have dynamic
-		// data which should not be cached in Item's pre-rendered content:
-		$params['render_tag_switcher'] = false;
-		$params['render_tag_item_subscribe'] = false;
-		$params['render_tag_item_emailcapture'] = false;
-		$params['render_tag_item_compare'] = false;
-		$params['render_tag_item_fields'] = false;
-		$params['render_tag_item_field'] = false;
-		$params['render_tag_item_titlelink'] = false;
-		$params['render_tag_item_url'] = false;
-		$params['render_tag_item_link'] = false;
-		$params['render_tag_coll_name'] = false;
-		$params['render_tag_coll_shortname'] = false;
+        $params = array_merge($params, $default_params);
 
-		// Replace [include:item-slug] or [cblock:item-slug] short tags with item content:
-		$params['check_code_block'] = true;
-		$content = $Item->render_content_blocks( $content, $params );
+        return parent::get_coll_setting_definitions($params);
+    }
 
-		return true;
-	}
+    /**
+     * Perform rendering
+     *
+     * @param array Associative array of parameters
+     * @return boolean true if we can render something for the required output format
+     */
+    public function RenderItemAsHtml(&$params)
+    {
+        $content = &$params['data'];
 
+        if (! ($Item = &$this->get_Item_from_params($params))) {	// Skip rendering without provided Item:
+            return false;
+        }
 
-	/**
-	 * Perform rendering of Message content
-	 *
-	 * @see Plugin::RenderMessageAsHtml()
-	 */
-	function RenderMessageAsHtml( & $params )
-	{
-		return true;
-	}
+        // Remove block level short tag [include:...] inside <p> blocks and move them before the paragraph:
+        $content = move_short_tags($content, '#\[(include|cblock):[^\]]+\]#i');
 
+        // Don't render several short tags because they may have dynamic
+        // data which should not be cached in Item's pre-rendered content:
+        $params['render_tag_switcher'] = false;
+        $params['render_tag_item_subscribe'] = false;
+        $params['render_tag_item_emailcapture'] = false;
+        $params['render_tag_item_compare'] = false;
+        $params['render_tag_item_fields'] = false;
+        $params['render_tag_item_field'] = false;
+        $params['render_tag_item_titlelink'] = false;
+        $params['render_tag_item_url'] = false;
+        $params['render_tag_item_link'] = false;
+        $params['render_tag_coll_name'] = false;
+        $params['render_tag_coll_shortname'] = false;
 
-	/**
-	 * Perform rendering of Email content
-	 *
-	 * @see Plugin::RenderEmailAsHtml()
-	 */
-	function RenderEmailAsHtml( & $params )
-	{
-		return true;
-	}
+        // Replace [include:item-slug] or [cblock:item-slug] short tags with item content:
+        $params['check_code_block'] = true;
+        $content = $Item->render_content_blocks($content, $params);
 
+        return true;
+    }
 
-	/**
-	 * Event handler: called to filter the comment's content
-	 *
-	 * @param array Associative array of parameters
-	 *   - 'data': the name of the author/blog (by reference)
-	 *   - 'Comment': the {@link Comment} object
-	 */
-	function FilterCommentContent( & $params )
-	{
-		$Comment = & $params['Comment'];
-		if( in_array( $this->code, $Comment->get_renderers_validated() ) )
-		{	// Always allow rendering for comment:
-			$render_params = array_merge( array( 'data' => & $Comment->content ), $params );
-			$this->RenderItemAsHtml( $render_params );
-		}
-		return false;
-	}
+    /**
+     * Perform rendering of Message content
+     *
+     * @see Plugin::RenderMessageAsHtml()
+     */
+    public function RenderMessageAsHtml(&$params)
+    {
+        return true;
+    }
+
+    /**
+     * Perform rendering of Email content
+     *
+     * @see Plugin::RenderEmailAsHtml()
+     */
+    public function RenderEmailAsHtml(&$params)
+    {
+        return true;
+    }
+
+    /**
+     * Event handler: called to filter the comment's content
+     *
+     * @param array Associative array of parameters
+     *   - 'data': the name of the author/blog (by reference)
+     *   - 'Comment': the {@link Comment} object
+     */
+    public function FilterCommentContent(&$params)
+    {
+        $Comment = &$params['Comment'];
+        if (in_array($this->code, $Comment->get_renderers_validated())) {	// Always allow rendering for comment:
+            $render_params = array_merge([
+                'data' => &$Comment->content,
+            ], $params);
+            $this->RenderItemAsHtml($render_params);
+        }
+        return false;
+    }
 }
-
-?>

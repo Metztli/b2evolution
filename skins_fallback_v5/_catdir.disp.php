@@ -13,17 +13,17 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF CATEGORY LIST --------------------------------
-skin_widget( array(
-		// CODE for the widget:
-		'widget' => 'coll_category_list',
-		// Optional display params
-		'block_start' => '',
-		'block_end' => '',
-		'block_display_title' => false,
-	) );
+skin_widget([
+    // CODE for the widget:
+    'widget' => 'coll_category_list',
+    // Optional display params
+    'block_start' => '',
+    'block_end' => '',
+    'block_display_title' => false,
+]);
 // ---------------------------------- END OF CATEGORY LIST ---------------------------------
-
-?>

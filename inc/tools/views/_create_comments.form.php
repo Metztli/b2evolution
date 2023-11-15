@@ -12,23 +12,32 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$Form = new Form( NULL, 'create_comments', 'post', 'compact' );
+$Form = new Form(null, 'create_comments', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel').'!', 'close', regenerate_url( 'action' ) );
+$Form->global_icon(TB_('Cancel') . '!', 'close', regenerate_url('action'));
 
-$Form->begin_form( 'fform',  TB_('Create sample comments for testing moderation') );
+$Form->begin_form('fform', TB_('Create sample comments for testing moderation'));
 
-	$Form->add_crumb( 'tools' );
-	$Form->hidden( 'ctrl', 'tools' );
-	$Form->hidden( 'action',  'create_sample_comments' );
-	$Form->hidden( 'tab3', get_param( 'tab3' ) );
+$Form->add_crumb('tools');
+$Form->hidden('ctrl', 'tools');
+$Form->hidden('action', 'create_sample_comments');
+$Form->hidden('tab3', get_param('tab3'));
 
-	$Form->text_input( 'blog_ID', 1, 6, TB_( 'Blog ID' ), '', array( 'maxlength' => 5, 'required' => true ) );
-	$Form->text_input( 'num_comments', 30, 6, TB_( 'How many comments per post' ), '', array( 'maxlength' => 6, 'required' => true ) );
-	$Form->text_input( 'num_posts', 3, 6, TB_( 'How many posts' ), '', array( 'maxlength' => 5, 'required' => true ) );
+$Form->text_input('blog_ID', 1, 6, TB_('Blog ID'), '', [
+    'maxlength' => 5,
+    'required' => true,
+]);
+$Form->text_input('num_comments', 30, 6, TB_('How many comments per post'), '', [
+    'maxlength' => 6,
+    'required' => true,
+]);
+$Form->text_input('num_posts', 3, 6, TB_('How many posts'), '', [
+    'maxlength' => 5,
+    'required' => true,
+]);
 
-$Form->end_form( array( array( 'submit', 'submit', TB_('Create'), 'SaveButton' ) ) );
-
-?>
+$Form->end_form([['submit', 'submit', TB_('Create'), 'SaveButton']]);

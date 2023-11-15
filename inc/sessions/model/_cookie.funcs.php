@@ -11,7 +11,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -23,17 +25,14 @@ if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page direct
  */
 function get_cookie_domain()
 {
-	global $Collection, $Blog;
+    global $Collection, $Blog;
 
-	if( is_admin_page() || empty( $Blog ) )
-	{	// Use cookie domain of base url from config:
-		global $cookie_domain;
-		return $cookie_domain;
-	}
-	else
-	{	// Use cookie domain of current collection url:
-		return $Blog->get_cookie_domain();
-	}
+    if (is_admin_page() || empty($Blog)) {	// Use cookie domain of base url from config:
+        global $cookie_domain;
+        return $cookie_domain;
+    } else {	// Use cookie domain of current collection url:
+        return $Blog->get_cookie_domain();
+    }
 }
 
 
@@ -46,17 +45,14 @@ function get_cookie_domain()
  */
 function get_cookie_path()
 {
-	global $Collection, $Blog;
+    global $Collection, $Blog;
 
-	if( is_admin_page() || empty( $Blog ) )
-	{	// Use cookie path of base url from config:
-		global $cookie_path;
-		return $cookie_path;
-	}
-	else
-	{	// Use base path of current collection url:
-		return $Blog->get_cookie_path();
-	}
+    if (is_admin_page() || empty($Blog)) {	// Use cookie path of base url from config:
+        global $cookie_path;
+        return $cookie_path;
+    } else {	// Use base path of current collection url:
+        return $Blog->get_cookie_path();
+    }
 }
 
 
@@ -71,22 +67,21 @@ function get_cookie_path()
  * @param boolean Indicates that the cookie should only be transmitted over a secure HTTPS connection from the client
  * @param boolean When TRUE the cookie will be made accessible only through the HTTP protocol
  */
-function evo_setcookie( $name, $value = '', $expire = 0, $dummy = '', $dummy2 = '', $secure = false, $httponly = false )
+function evo_setcookie($name, $value = '', $expire = 0, $dummy = '', $dummy2 = '', $secure = false, $httponly = false)
 {
-	global $evo_cookies;
+    global $evo_cookies;
 
-	if( ! is_array( $evo_cookies ) )
-	{	// Initialize array for cookies only first time:
-		$evo_cookies = array();
-	}
+    if (! is_array($evo_cookies)) {	// Initialize array for cookies only first time:
+        $evo_cookies = [];
+    }
 
-	// Store cookie in global var:
-	$evo_cookies[ $name ] = array(
-			'value'    => $value,
-			'expire'   => $expire,
-			'secure'   => $secure,
-			'httponly' => $httponly,
-		);
+    // Store cookie in global var:
+    $evo_cookies[$name] = [
+        'value' => $value,
+        'expire' => $expire,
+        'secure' => $secure,
+        'httponly' => $httponly,
+    ];
 }
 
 
@@ -95,27 +90,23 @@ function evo_setcookie( $name, $value = '', $expire = 0, $dummy = '', $dummy2 = 
  */
 function evo_sendcookies()
 {
-	global $evo_cookies;
+    global $evo_cookies;
 
-	if( headers_sent() )
-	{	// Exit to avoid errors because headers already were sent:
-		return;
-	}
+    if (headers_sent()) {	// Exit to avoid errors because headers already were sent:
+        return;
+    }
 
-	if( empty( $evo_cookies ) )
-	{	// No cookies:
-		return;
-	}
+    if (empty($evo_cookies)) {	// No cookies:
+        return;
+    }
 
-	$current_cookie_domain = get_cookie_domain();
-	$current_cookie_path = get_cookie_path();
+    $current_cookie_domain = get_cookie_domain();
+    $current_cookie_path = get_cookie_path();
 
-	foreach( $evo_cookies as $evo_cookie_name => $evo_cookie )
-	{
-		setcookie( $evo_cookie_name, $evo_cookie['value'], $evo_cookie['expire'], $current_cookie_path, $current_cookie_domain, $evo_cookie['secure'], $evo_cookie['httponly'] );
+    foreach ($evo_cookies as $evo_cookie_name => $evo_cookie) {
+        setcookie($evo_cookie_name, $evo_cookie['value'], $evo_cookie['expire'], $current_cookie_path, $current_cookie_domain, $evo_cookie['secure'], $evo_cookie['httponly']);
 
-		// Unset to don't send cookie twice:
-		unset( $evo_cookies[ $evo_cookie_name ] );
-	}
+        // Unset to don't send cookie twice:
+        unset($evo_cookies[$evo_cookie_name]);
+    }
 }
-?>

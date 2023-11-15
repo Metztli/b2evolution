@@ -34,15 +34,25 @@ namespace MaxMind\Db\Reader;
 class Metadata
 {
     private $binaryFormatMajorVersion;
+
     private $binaryFormatMinorVersion;
+
     private $buildEpoch;
+
     private $databaseType;
+
     private $description;
+
     private $ipVersion;
+
     private $languages;
+
     private $nodeByteSize;
+
     private $nodeCount;
+
     private $recordSize;
+
     private $searchTreeSize;
 
     public function __construct($metadata)

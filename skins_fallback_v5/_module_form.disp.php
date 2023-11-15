@@ -14,25 +14,22 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Session, $modules;
 
 // get requested module name
-$module_name = param( 'mname', 'string', true );
+$module_name = param('mname', 'string', true);
 
-foreach( $modules as $module )
-{
-	if( $module == $module_name )
-	{ // the requested module was founded
-		$Module = & $GLOBALS[$module.'_Module'];
-		if( method_exists( $Module, 'display_form' ) )
-		{	// Module has display_form function, we can call it
-			$Module->display_form();
-			break;
-		}
-	}
-	// if the requested module doesn't exists don't display anything
+foreach ($modules as $module) {
+    if ($module == $module_name) { // the requested module was founded
+        $Module = &$GLOBALS[$module . '_Module'];
+        if (method_exists($Module, 'display_form')) {	// Module has display_form function, we can call it
+            $Module->display_form();
+            break;
+        }
+    }
+    // if the requested module doesn't exists don't display anything
 }
-
-?>

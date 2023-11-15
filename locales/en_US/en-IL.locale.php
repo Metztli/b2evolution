@@ -9,17 +9,16 @@
  *                tap into the same language file.)
  *  - 'charset':  Character set of the locale's messages files.
  */
-$locale_defs['en-IL'] = array(
-		'name' => NT_('English (IL) utf-8'),
-		'charset' => 'utf-8',
-		'datefmt' => 'Y-m-d',
-		'longdatefmt' => 'Y-m-d',
-		'extdatefmt' => 'Y M d',
-		'input_datefmt' => 'Y-m-d',
-		'timefmt' => 'H:i:s',
-		'shorttimefmt' => 'H:i',
-		'input_timefmt' => 'H:i:s',
-		'startofweek' => 1,
-		'messages' => 'en_US',
-	);
-?>
+$locale_defs['en-IL'] = [
+    'name' => NT_('English (IL) utf-8'),
+    'charset' => 'utf-8',
+    'datefmt' => 'Y-m-d',
+    'longdatefmt' => 'Y-m-d',
+    'extdatefmt' => 'Y M d',
+    'input_datefmt' => 'Y-m-d',
+    'timefmt' => 'H:i:s',
+    'shorttimefmt' => 'H:i',
+    'input_timefmt' => 'H:i:s',
+    'startofweek' => 1,
+    'messages' => 'en_US',
+];

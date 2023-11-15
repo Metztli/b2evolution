@@ -10,11 +10,13 @@
  *
  * @package xmlsrv
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-$b2newpost_doc='Adds a post, blogger-api like, +title +category +postdate';
-$b2newpost_sig = array(array($xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcBoolean, $xmlrpcString, $xmlrpcString, $xmlrpcString));
+$b2newpost_doc = 'Adds a post, blogger-api like, +title +category +postdate';
+$b2newpost_sig = [[$xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcBoolean, $xmlrpcString, $xmlrpcString, $xmlrpcString]];
 /**
  * b2.newPost. Adds a post, blogger-api like, +title +category +postdate.
  *
@@ -34,41 +36,40 @@ $b2newpost_sig = array(array($xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrp
  */
 function b2_newpost($m)
 {
-	// CHECK LOGIN:
-	/**
-	 * @var User
-	 */
-	if( ! $current_User = & xmlrpcs_login( $m, 2, 3 ) )
-	{	// Login failed, return (last) error:
-		return xmlrpcs_resperror();
-	}
+    // CHECK LOGIN:
+    /**
+     * @var User
+     */
+    if (! $current_User = &xmlrpcs_login($m, 2, 3)) {	// Login failed, return (last) error:
+        return xmlrpcs_resperror();
+    }
 
-	$publish  = $m->getParam(5);
-	$publish = $publish->scalarval();
-	$status = $publish ? 'published' : 'draft';
+    $publish = $m->getParam(5);
+    $publish = $publish->scalarval();
+    $status = $publish ? 'published' : 'draft';
 
- 	$content = $m->getParam(4);
- 	$title = $m->getParam(6);
- 	$main_cat = $m->getParam(7);
- 	$date = $m->getParam(8);
+    $content = $m->getParam(4);
+    $title = $m->getParam(6);
+    $main_cat = $m->getParam(7);
+    $date = $m->getParam(8);
 
-	$params = array(
-			'title'			=> $title->scalarval(),
-			'content'		=> $content->scalarval(),
-			'main_cat_ID'	=> $main_cat->scalarval(),
-			'date'			=> $date->scalarval(),
-			'status'		=> $status,
-		);
+    $params = [
+        'title' => $title->scalarval(),
+        'content' => $content->scalarval(),
+        'main_cat_ID' => $main_cat->scalarval(),
+        'date' => $date->scalarval(),
+        'status' => $status,
+    ];
 
-	// COMPLETE VALIDATION & INSERT:
-	return xmlrpcs_new_item( $params );
+    // COMPLETE VALIDATION & INSERT:
+    return xmlrpcs_new_item($params);
 }
 
 
 
 
-$b2getcategories_doc='given a blogID, gives an array of structs that list categories in that blog, using categoryID and categoryName. categoryName is there so the user would choose a category name from the client, rather than just a number. however, when using b2.newPost, only the category ID number should be sent.';
-$b2getcategories_sig = array(array($xmlrpcArray, $xmlrpcString, $xmlrpcString, $xmlrpcString));
+$b2getcategories_doc = 'given a blogID, gives an array of structs that list categories in that blog, using categoryID and categoryName. categoryName is there so the user would choose a category name from the client, rather than just a number. however, when using b2.newPost, only the category ID number should be sent.';
+$b2getcategories_sig = [[$xmlrpcArray, $xmlrpcString, $xmlrpcString, $xmlrpcString]];
 /**
  * b2.getCategories
  *
@@ -80,16 +81,16 @@ $b2getcategories_sig = array(array($xmlrpcArray, $xmlrpcString, $xmlrpcString, $
  *					2 password (string): Password for said username.
  * @return xmlrpcresp XML-RPC Response
  */
-function b2_getcategories( $m )
+function b2_getcategories($m)
 {
-	return _b2_or_mt_get_categories('b2', $m);
+    return _b2_or_mt_get_categories('b2', $m);
 }
 
 
 
 
 $b2_getPostURL_doc = 'Given a blog ID, username, password, and a post ID, returns the URL to that post.';
-$b2_getPostURL_sig = array(array($xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString));
+$b2_getPostURL_sig = [[$xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString]];
 /**
  * b2.getPostURL
  *
@@ -104,48 +105,46 @@ $b2_getPostURL_sig = array(array($xmlrpcString, $xmlrpcString, $xmlrpcString, $x
  */
 function b2_getposturl($m)
 {
-	// CHECK LOGIN:
-	/**
-	 * @var User
-	 */
-	if( ! $current_User = & xmlrpcs_login( $m, 2, 3 ) )
-	{	// Login failed, return (last) error:
-		return xmlrpcs_resperror();
-	}
+    // CHECK LOGIN:
+    /**
+     * @var User
+     */
+    if (! $current_User = &xmlrpcs_login($m, 2, 3)) {	// Login failed, return (last) error:
+        return xmlrpcs_resperror();
+    }
 
-	// GET POST:
-	/**
-	 * @var Item
-	 */
-	if( ! $edited_Item = & xmlrpcs_get_Item( $m, 4 ) )
-	{	// Failed, return (last) error:
-		return xmlrpcs_resperror();
-	}
+    // GET POST:
+    /**
+     * @var Item
+     */
+    if (! $edited_Item = &xmlrpcs_get_Item($m, 4)) {	// Failed, return (last) error:
+        return xmlrpcs_resperror();
+    }
 
-	// CHECK PERMISSION: (user needs to be able to view the item)
-	if( ! xmlrpcs_can_view_item( $edited_Item, $User ) )
-	{	// Permission denied
-		return xmlrpcs_resperror( 3 );	// User error 3
-	}
+    // CHECK PERMISSION: (user needs to be able to view the item)
+    if (! xmlrpcs_can_view_item($edited_Item, $User)) {	// Permission denied
+        return xmlrpcs_resperror(3);	// User error 3
+    }
 
-	logIO( 'OK.' );
-	return new xmlrpcresp( new xmlrpcval( $edited_Item->get_permanent_url() ) );
+    logIO('OK.');
+    return new xmlrpcresp(new xmlrpcval($edited_Item->get_permanent_url()));
 }
 
 
-$xmlrpc_procs['b2.newPost'] = array(
-				'function' => 'b2_newpost',
-				'signature' => $b2newpost_sig,
-				'docstring' => $b2newpost_doc );
+$xmlrpc_procs['b2.newPost'] = [
+    'function' => 'b2_newpost',
+    'signature' => $b2newpost_sig,
+    'docstring' => $b2newpost_doc,
+];
 
-$xmlrpc_procs['b2.getCategories'] = array(
-				'function' => 'b2_getcategories',
-				'signature' => $b2getcategories_sig,
-				'docstring' => $b2getcategories_doc );
+$xmlrpc_procs['b2.getCategories'] = [
+    'function' => 'b2_getcategories',
+    'signature' => $b2getcategories_sig,
+    'docstring' => $b2getcategories_doc,
+];
 
-$xmlrpc_procs['b2.getPostURL'] = array(
-				'function' => 'b2_getposturl',
-				'signature' => $b2_getPostURL_sig,
-				'docstring' => $b2_getPostURL_doc );
-
-?>
+$xmlrpc_procs['b2.getPostURL'] = [
+    'function' => 'b2_getposturl',
+    'signature' => $b2_getPostURL_sig,
+    'docstring' => $b2_getPostURL_doc,
+];

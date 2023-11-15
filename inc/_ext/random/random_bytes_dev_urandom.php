@@ -26,11 +26,11 @@
  * SOFTWARE.
  */
 
-if (!defined('RANDOM_COMPAT_READ_BUFFER')) {
+if (! defined('RANDOM_COMPAT_READ_BUFFER')) {
     define('RANDOM_COMPAT_READ_BUFFER', 8);
 }
 
-if (!is_callable('random_bytes')) {
+if (! is_callable('random_bytes')) {
     /**
      * Unless open_basedir is enabled, use /dev/urandom for
      * random numbers in accordance with best practices
@@ -65,7 +65,7 @@ if (!is_callable('random_bytes')) {
              * to "/" not "\".
              */
             if (DIRECTORY_SEPARATOR === '/') {
-                if (!is_readable('/dev/urandom')) {
+                if (! is_readable('/dev/urandom')) {
                     throw new Exception(
                         'Environment misconfiguration: ' .
                         '/dev/urandom cannot be read.'
@@ -146,7 +146,7 @@ if (!is_callable('random_bytes')) {
                  * @var string|bool
                  */
                 $read = fread($fp, $remaining);
-                if (!is_string($read)) {
+                if (! is_string($read)) {
                     /**
                      * We cannot safely read from the file. Exit the
                      * do-while loop and trigger the exception condition

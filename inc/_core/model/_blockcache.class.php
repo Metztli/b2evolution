@@ -11,9 +11,10 @@
  * Parts of this file are copyright (c)2004-2006 by Daniel HAHLER - {@link http://thequod.de/contact}.
  *
  * @package evocore
- *
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -23,281 +24,252 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class BlockCache
 {
-	var $type;
-	var $keys;
-	var $serialized_keys = '';
+    public $type;
 
-	/**
-	 * After how many bytes should we output sth live while collecting cache content:
-	 */
-	var $output_chunk_size = 2000;
+    public $keys;
 
-	/**
-	 * Progressively caching the content of the current page:
-	 */
-	var $cached_page_content = '';
-	/**
-	 * Are we currently recording cache contents
-	 */
-	var $is_collecting = false;
+    public $serialized_keys = '';
 
+    /**
+     * After how many bytes should we output sth live while collecting cache content:
+     */
+    public $output_chunk_size = 2000;
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $type, $keys )
-	{
-		global $instance_name;
+    /**
+     * Progressively caching the content of the current page:
+     */
+    public $cached_page_content = '';
 
-		$this->type = $type;
+    /**
+     * Are we currently recording cache contents
+     */
+    public $is_collecting = false;
 
-		// Make sure keys are always in the same order:
-		ksort( $keys );
-		$this->keys = $keys;
+    /**
+     * Constructor
+     */
+    public function __construct($type, $keys)
+    {
+        global $instance_name;
 
-		$this->serialized_keys = $instance_name.'+'.$type;
-		foreach( $keys as $key => $val )
-		{
-			$this->serialized_keys .= '+'.$key.'='.$val;
-		}
+        $this->type = $type;
 
-		// echo $this->serialized_keys;
-	}
+        // Make sure keys are always in the same order:
+        ksort($keys);
+        $this->keys = $keys;
 
+        $this->serialized_keys = $instance_name . '+' . $type;
+        foreach ($keys as $key => $val) {
+            $this->serialized_keys .= '+' . $key . '=' . $val;
+        }
 
+        // echo $this->serialized_keys;
+    }
 
-	/**
-	 * Invalidate a special key
-	 *
-	 * All we do is store the timestamp of the invalidation
-	 *
-	 * @see http://b2evolution.net/man/widget-caching
-	 */
-	static function invalidate_key( $key, $val )
-	{
-		global $Debuglog, $servertimenow, $instance_name;
+    /**
+     * Invalidate a special key
+     *
+     * All we do is store the timestamp of the invalidation
+     *
+     * @see http://b2evolution.net/man/widget-caching
+     */
+    public static function invalidate_key($key, $val)
+    {
+        global $Debuglog, $servertimenow, $instance_name;
 
-		$lastchanged_key_name = $instance_name.'+last_changed+'.$key.'='.$val;
+        $lastchanged_key_name = $instance_name . '+last_changed+' . $key . '=' . $val;
 
-		// Invalidate using the real time (seconds may have elapsed since $sertimenow)
-		// Add 1 second because of the granularity that's down to the second
-		// Worst case scenario: content will be collected/cahced several times for a whole second (as well as the first request after the end of that second)
-		BlockCache::cacheproviderstore( $lastchanged_key_name, time()+1 );
+        // Invalidate using the real time (seconds may have elapsed since $sertimenow)
+        // Add 1 second because of the granularity that's down to the second
+        // Worst case scenario: content will be collected/cahced several times for a whole second (as well as the first request after the end of that second)
+        BlockCache::cacheproviderstore($lastchanged_key_name, time() + 1);
 
-		$Debuglog->add( 'Invalidated: '.$lastchanged_key_name.' @ '.(time()+1), 'blockcache' );
-	}
+        $Debuglog->add('Invalidated: ' . $lastchanged_key_name . ' @ ' . (time() + 1), 'blockcache');
+    }
 
+    /**
+     * Check if cache contents are available, otherwise start collecting output to be cached
+     *
+     * Basically we get all the invalidation dates we need, then we get the
+     * data and then we check if some invalidation occured after the data was cached.
+     * If an invalidation date is missing we consider the cache to be
+     * obsolete but we generate a new invalidation date for next time we try to retrieve.
+     *
+     * @return true if we found and have echoed content from the cache
+     */
+    public function check()
+    {
+        global $Debuglog, $servertimenow, $instance_name;
 
-	/**
-	 * Check if cache contents are available, otherwise start collecting output to be cached
-	 *
-	 * Basically we get all the invalidation dates we need, then we get the
-	 * data and then we check if some invalidation occured after the data was cached.
-	 * If an invalidation date is missing we consider the cache to be
-	 * obsolete but we generate a new invalidation date for next time we try to retrieve.
-	 *
-	 * @return true if we found and have echoed content from the cache
-	 */
-	function check()
-	{
-		global $Debuglog, $servertimenow, $instance_name;
+        $missing_date = false;
+        $most_recent_invalidation_ts = 0;
+        $most_recent_invaliating_key = '';
+        foreach ($this->keys as $key => $val) {
+            $lastchanged_key_name = $instance_name . '+last_changed+' . $key . '=' . $val;
+            $last_changed_ts = $this->cacheproviderretrieve($lastchanged_key_name, $success);
+            if (! $success) {	// We have lost the key! Recreate and keep going for other keys:
+                $Debuglog->add('Missing: ' . $lastchanged_key_name, 'blockcache');
+                $missing_date = true;
+                $this->cacheproviderstore($lastchanged_key_name, $servertimenow);
+                continue;
+            }
 
-		$missing_date = false;
-		$most_recent_invalidation_ts = 0;
-		$most_recent_invaliating_key = '';
-		foreach( $this->keys as $key => $val )
-		{
-			$lastchanged_key_name = $instance_name.'+last_changed+'.$key.'='.$val;
-			$last_changed_ts = $this->cacheproviderretrieve( $lastchanged_key_name, $success );
-			if( ! $success )
-			{	// We have lost the key! Recreate and keep going for other keys:
-				$Debuglog->add( 'Missing: '.$lastchanged_key_name, 'blockcache' );
-				$missing_date = true;
-				$this->cacheproviderstore( $lastchanged_key_name, $servertimenow );
-				continue;
-			}
+            if ($last_changed_ts > $most_recent_invalidation_ts) {	// This is the new most recent invalidation date.
+                $most_recent_invalidation_ts = $last_changed_ts;
+                $most_recent_invaliating_key = $lastchanged_key_name;
+            }
+        }
 
-			if( $last_changed_ts > $most_recent_invalidation_ts )
-			{	// This is the new most recent invalidation date.
-				$most_recent_invalidation_ts = $last_changed_ts;
-				$most_recent_invaliating_key = $lastchanged_key_name;
-			}
-		}
+        if (! $missing_date && ($content = $this->retrieve($most_recent_invalidation_ts, $most_recent_invaliating_key)) !== false) { // cache was not invalidated yet and we could retrieve:
+            return $content;
+        }
 
-		if( !$missing_date && ($content = $this->retrieve( $most_recent_invalidation_ts, $most_recent_invaliating_key )) !== false )
-		{ // cache was not invalidated yet and we could retrieve:
-			return $content;
-		}
+        // Caller should call BlockCache->start_collect() right after this
+        return false;
+    }
 
-		// Caller should call BlockCache->start_collect() right after this
-		return false;
-	}
+    /**
+     * Retrieve and output cache
+     *
+     * @param integer oldest acceptable timestamp
+     * @return boolean true if we could retrieve
+     */
+    public function retrieve($oldest_acceptable_ts = null, $most_recent_invaliating_key = '')
+    {
+        global $Debuglog;
+        global $servertimenow;
 
+        // return false;
 
-	/**
-	 * Retrieve and output cache
-	 *
-	 * @param integer oldest acceptable timestamp
-	 * @return boolean true if we could retrieve
-	 */
-	function retrieve( $oldest_acceptable_ts = NULL, $most_recent_invaliating_key = '' )
-	{
-		global $Debuglog;
-		global $servertimenow;
+        $content = $this->cacheproviderretrieve($this->serialized_keys, $success);
 
-		// return false;
+        if (! $success) {
+            return false;
+        }
 
-		$content = $this->cacheproviderretrieve( $this->serialized_keys, $success );
+        if (! is_null($oldest_acceptable_ts)) { // We want to do timestamp checking:
+            //if( ! preg_match( '/^([0-9]+) (.*)$/ms', $content, $matches ) )
+            if (! $pos = strpos($content, ' ')) {	// Could not find timestamp
+                $Debuglog->add('MISSING TIMESTAMP on retrieval of: ' . $this->serialized_keys, 'blockcache');
+                return false;
+            }
 
-		if( ! $success )
-		{
-			return false;
-		}
+            // if( $matches[1] < $oldest_acceptable_ts )
+            if (($cache_ts = substr($content, 0, $pos)) < $oldest_acceptable_ts) {	// Timestamp too old (there has been an invalidation in between)
+                $Debuglog->add('Retrieved INVALIDATED cached content: ' . $this->serialized_keys
+                    . ' (invalidated by ' . $most_recent_invaliating_key . ' - ' . $cache_ts . ' < ' . $oldest_acceptable_ts . ')', 'blockcache');
+                return false;
+            }
 
-		if( !is_null($oldest_acceptable_ts) )
-		{ // We want to do timestamp checking:
+            // OK, we have content that is still valid:
+            // $content = $matches[2];
+            $content = substr($content, $pos + 1);
+        }
 
+        $Debuglog->add('Retrieved: ' . $this->serialized_keys, 'blockcache');
 
-			//if( ! preg_match( '/^([0-9]+) (.*)$/ms', $content, $matches ) )
-			if( ! $pos = strpos( $content, ' ' ) )
-			{	// Could not find timestamp
-				$Debuglog->add( 'MISSING TIMESTAMP on retrieval of: '.$this->serialized_keys, 'blockcache' );
-				return false;
-			}
+        return $content;
+    }
 
-			// if( $matches[1] < $oldest_acceptable_ts )
-			if( ($cache_ts = substr( $content, 0, $pos )) < $oldest_acceptable_ts )
-			{	// Timestamp too old (there has been an invalidation in between)
-				$Debuglog->add( 'Retrieved INVALIDATED cached content: '.$this->serialized_keys
-					.' (invalidated by '.$most_recent_invaliating_key.' - '.$cache_ts.' < '.$oldest_acceptable_ts.')', 'blockcache' );
-				return false;
-			}
+    /**
+     * This is called every x bytes to provide real time output
+     */
+    public function output_handler($buffer)
+    {
+        $this->cached_page_content .= $buffer;
+        return $buffer;
+    }
 
-			// OK, we have content that is still valid:
-			// $content = $matches[2];
-			$content = substr( $content, $pos+1 );
-		}
+    /**
+     * This should be called right after ::check() in order to start collecting a new block for the cache.
+     */
+    public function start_collect()
+    {
+        global $Debuglog;
 
-		$Debuglog->add( 'Retrieved: '.$this->serialized_keys, 'blockcache' );
+        $this->is_collecting = true;
 
-		return $content;
-	}
+        $Debuglog->add('Collecting: ' . $this->serialized_keys, 'blockcache');
 
+        ob_start([&$this, 'output_handler'], $this->output_chunk_size);
+    }
 
-	/**
-	 * This is called every x bytes to provide real time output
-	 */
-	function output_handler( $buffer )
-	{
-		$this->cached_page_content .= $buffer;
-		return $buffer;
-	}
+    /**
+     * We are going to output personal data and we want to abort collecting the data for the cache.
+     */
+    public function abort_collect()
+    {
+        global $Debuglog;
 
+        if (! $this->is_collecting) {	// We are not collecting anyway
+            return;
+        }
 
-	/**
-	 * This should be called right after ::check() in order to start collecting a new block for the cache.
-	 */
-	function start_collect()
-	{
-		global $Debuglog;
+        $Debuglog->add('Aborting cache data collection...', 'blockcache');
 
-		$this->is_collecting = true;
+        ob_end_flush();
 
-		$Debuglog->add( 'Collecting: '.$this->serialized_keys, 'blockcache' );
+        // We are no longer collecting...
+        $this->is_collecting = false;
+    }
 
-		ob_start( array( & $this, 'output_handler'), $this->output_chunk_size );
+    /**
+     * End collecting output to be cached
+     *
+     * We just concatenate all the individual keys to have a single one
+     * Then we store with the current timestamp
+     *
+     * @param boolean TRUE - Flush content on screen, FALSE - Return content as result
+     * @return string Content if $flush = false
+     */
+    public function end_collect($flush = true)
+    {
+        global $Debuglog, $servertimenow;
 
-	}
+        if (! $this->is_collecting) {	// We are not collecting
+            return;
+        }
 
+        if ($flush) {	// Flush content on screen:
+            ob_end_flush();
+        } else {	// Return content without flushing it on screen:
+            $content = ob_get_clean();
+        }
 
-	/**
-	 * We are going to output personal data and we want to abort collecting the data for the cache.
-	 */
-	function abort_collect()
-	{
-		global $Debuglog;
+        // We use servertimenow because we may have used data that was loaded at the very start of this page
+        // NOTE: Call this after ob_end_flush():
+        $this->cacheproviderstore($this->serialized_keys, $servertimenow . ' ' . $this->cached_page_content);
 
-		if( ! $this->is_collecting )
-		{	// We are not collecting anyway
-			return;
-		}
+        if (! $flush) {	// Return content:
+            return $content;
+        }
+    }
 
- 		$Debuglog->add( 'Aborting cache data collection...', 'blockcache' );
+    /**
+     * Store payload/data into the cache provider.
+     *
+     * @todo dh> This method should get removed from here, it's not limited to BlockCache.
+     * @param mixed $key
+     * @param mixed $payload
+     * @param int Time to live in seconds (default: 86400; 0 means "as long as possible")
+     */
+    public static function cacheproviderstore($key, $payload, $ttl = 86400)
+    {
+        return set_to_mem_cache($key, $payload, $ttl);
+    }
 
-		ob_end_flush();
-
-		// We are no longer collecting...
-		$this->is_collecting = false;
-	}
-
-
-	/**
-	 * End collecting output to be cached
-	 *
-	 * We just concatenate all the individual keys to have a single one
-	 * Then we store with the current timestamp
-	 *
-	 * @param boolean TRUE - Flush content on screen, FALSE - Return content as result
-	 * @return string Content if $flush = false
-	 */
-	function end_collect( $flush = true )
-	{
-		global $Debuglog, $servertimenow;
-
-		if( ! $this->is_collecting )
-		{	// We are not collecting
-			return;
-		}
-
-		if( $flush )
-		{	// Flush content on screen:
-			ob_end_flush();
-		}
-		else
-		{	// Return content without flushing it on screen:
-			$content = ob_get_clean();
-		}
-
-		// We use servertimenow because we may have used data that was loaded at the very start of this page
-		// NOTE: Call this after ob_end_flush():
-		$this->cacheproviderstore( $this->serialized_keys, $servertimenow.' '.$this->cached_page_content );
-
-		if( ! $flush )
-		{	// Return content:
-			return $content;
-		}
-	}
-
-
-	/**
-	 * Store payload/data into the cache provider.
-	 *
-	 * @todo dh> This method should get removed from here, it's not limited to BlockCache.
-	 * @param mixed $key
-	 * @param mixed $payload
-	 * @param int Time to live in seconds (default: 86400; 0 means "as long as possible")
-	 */
-	static function cacheproviderstore( $key, $payload, $ttl = 86400 )
-	{
-		return set_to_mem_cache($key, $payload, $ttl);
-	}
-
-
-	/**
-	 * Fetch key from the cache provider.
-	 *
-	 * {@internal JFI: apc_fetch supports fetching an array of keys}}
-	 *
-	 * @todo dh> This method should get removed from here, it's not limited to BlockCache.
-	 * @todo dh> Add $default param, defaulting to NULL. This will be used on lookup failures.
-	 * @param mixed $key
-	 * @param boolean $success (by reference)
-	 */
-	static function cacheproviderretrieve( $key, & $success )
-	{
-		return get_from_mem_cache($key, $success);
-	}
-
+    /**
+     * Fetch key from the cache provider.
+     *
+     * {@internal JFI: apc_fetch supports fetching an array of keys}}
+     *
+     * @todo dh> This method should get removed from here, it's not limited to BlockCache.
+     * @todo dh> Add $default param, defaulting to NULL. This will be used on lookup failures.
+     * @param mixed $key
+     * @param boolean $success (by reference)
+     */
+    public static function cacheproviderretrieve($key, &$success)
+    {
+        return get_from_mem_cache($key, $success);
+    }
 }
-
-?>

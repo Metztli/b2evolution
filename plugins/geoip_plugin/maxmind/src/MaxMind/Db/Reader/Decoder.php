@@ -9,28 +9,47 @@ namespace MaxMind\Db\Reader;
 class Decoder
 {
     private $fileStream;
+
     private $pointerBase;
+
     private $pointerBaseByteSize;
+
     // This is only used for unit testing
     private $pointerTestHack;
+
     private $switchByteOrder;
 
-    const _EXTENDED = 0;
-    const _POINTER = 1;
-    const _UTF8_STRING = 2;
-    const _DOUBLE = 3;
-    const _BYTES = 4;
-    const _UINT16 = 5;
-    const _UINT32 = 6;
-    const _MAP = 7;
-    const _INT32 = 8;
-    const _UINT64 = 9;
-    const _UINT128 = 10;
-    const _ARRAY = 11;
-    const _CONTAINER = 12;
-    const _END_MARKER = 13;
-    const _BOOLEAN = 14;
-    const _FLOAT = 15;
+    public const _EXTENDED = 0;
+
+    public const _POINTER = 1;
+
+    public const _UTF8_STRING = 2;
+
+    public const _DOUBLE = 3;
+
+    public const _BYTES = 4;
+
+    public const _UINT16 = 5;
+
+    public const _UINT32 = 6;
+
+    public const _MAP = 7;
+
+    public const _INT32 = 8;
+
+    public const _UINT64 = 9;
+
+    public const _UINT128 = 10;
+
+    public const _ARRAY = 11;
+
+    public const _CONTAINER = 12;
+
+    public const _END_MARKER = 13;
+
+    public const _BOOLEAN = 14;
+
+    public const _FLOAT = 15;
 
     public function __construct(
         $fileStream,

@@ -44,10 +44,12 @@ use MaxMind\WebService\Client as WsClient;
 class Client implements ProviderInterface
 {
     private $locales;
+
     private $client;
+
     private static $basePath = '/geoip/v2.1';
 
-    const VERSION = 'v2.9.0';
+    public const VERSION = 'v2.9.0';
 
     /**
      * Constructor.
@@ -75,10 +77,12 @@ class Client implements ProviderInterface
         // This is for backwards compatibility. Do not remove except for a
         // major version bump.
         if (\is_string($options)) {
-            $options = ['host' => $options];
+            $options = [
+                'host' => $options,
+            ];
         }
 
-        if (!isset($options['host'])) {
+        if (! isset($options['host'])) {
             $options['host'] = 'geoip.maxmind.com';
         }
 

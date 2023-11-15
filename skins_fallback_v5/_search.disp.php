@@ -11,52 +11,52 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$params = array_merge( array(
-		'pagination'                 => array(),
-		'search_class'               => 'extended_search_form',
-		'search_input_before'        => '',
-		'search_input_after'         => '',
-		'search_submit_before'       => '',
-		'search_submit_after'        => '',
-		'search_input_author_before' => '<div class="col-sm-12 col-md-12 col-lg-5"><label for="$for$">$label$</label>',
-		'search_input_author_after'  => '</div>',
-		'search_input_age_before'    => '<div class="col-sm-12 col-md-12 col-lg-4">',
-		'search_input_age_after'     => '</div>',
-		'search_input_type_before'   => '<div class="col-sm-12 col-md-12 col-lg-3">',
-		'search_input_type_after'    => '</div>',
-		'search_line_before'         => '<div style="text-align: left; margin: .5em 0;" class="row">',
-		'search_line_after'          => '</div>',
-		'search_template'            => '$input_keywords$$button_search$'."\n".'$input_author$ $input_age$ $input_content_type$',
-		'search_use_editor'          => false,
-		'search_author_format'       => 'avatar_name',
-		'search_cell_author_start'   => '<div class="search_info dimmed">',
-		'search_cell_author_end'     => '</div>',
-		'search_date_format'         => locale_datefmt(),
-	), $params );
+$params = array_merge([
+    'pagination' => [],
+    'search_class' => 'extended_search_form',
+    'search_input_before' => '',
+    'search_input_after' => '',
+    'search_submit_before' => '',
+    'search_submit_after' => '',
+    'search_input_author_before' => '<div class="col-sm-12 col-md-12 col-lg-5"><label for="$for$">$label$</label>',
+    'search_input_author_after' => '</div>',
+    'search_input_age_before' => '<div class="col-sm-12 col-md-12 col-lg-4">',
+    'search_input_age_after' => '</div>',
+    'search_input_type_before' => '<div class="col-sm-12 col-md-12 col-lg-3">',
+    'search_input_type_after' => '</div>',
+    'search_line_before' => '<div style="text-align: left; margin: .5em 0;" class="row">',
+    'search_line_after' => '</div>',
+    'search_template' => '$input_keywords$$button_search$' . "\n" . '$input_author$ $input_age$ $input_content_type$',
+    'search_use_editor' => false,
+    'search_author_format' => 'avatar_name',
+    'search_cell_author_start' => '<div class="search_info dimmed">',
+    'search_cell_author_end' => '</div>',
+    'search_date_format' => locale_datefmt(),
+], $params);
 
 // ------------------------- "Search Area" CONTAINER EMBEDDED HERE --------------------------
 // Display container and contents:
-widget_container( 'search_area', array(
-	// The following params will be used as defaults for widgets included in this container:
-	'container_display_if_empty' => false, // If no widget, don't display container at all
-	'container_start'     => '<div class="evo_container $wico_class$">',
-	'container_end'       => '</div>',
-	'block_start'         => '<div class="evo_widget $wi_class$">',
-	'block_end'           => '</div>',
-	'block_display_title' => false,
-) );
+widget_container('search_area', [
+    // The following params will be used as defaults for widgets included in this container:
+    'container_display_if_empty' => false, // If no widget, don't display container at all
+    'container_start' => '<div class="evo_container $wico_class$">',
+    'container_end' => '</div>',
+    'block_start' => '<div class="evo_widget $wi_class$">',
+    'block_end' => '</div>',
+    'block_display_title' => false,
+]);
 // ----------------------------- END OF "Search Area" CONTAINER -----------------------------
 
 // Perform search (after having displayed the first part of the page) & display results:
-search_result_block( array(
-		'pagination'        => $params['pagination'],
-		'use_editor'        => $params['search_use_editor'],
-		'author_format'     => $params['search_author_format'],
-		'cell_author_start' => $params['search_cell_author_start'],
-		'cell_author_end'   => $params['search_cell_author_end'],
-		'date_format'       => $params['search_date_format'],
-	) );
-
-?>
+search_result_block([
+    'pagination' => $params['pagination'],
+    'use_editor' => $params['search_use_editor'],
+    'author_format' => $params['search_author_format'],
+    'cell_author_start' => $params['search_cell_author_start'],
+    'cell_author_end' => $params['search_cell_author_end'],
+    'date_format' => $params['search_date_format'],
+]);

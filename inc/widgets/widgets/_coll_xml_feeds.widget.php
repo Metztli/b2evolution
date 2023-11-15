@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,177 +26,163 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_xml_feeds_Widget extends ComponentWidget
 {
-	var $icon = 'rss';
+    public $icon = 'rss';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_xml_feeds' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_xml_feeds');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('xml-feeds-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'xml-feeds-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('XML Feeds (RSS / Atom)');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->get_title());
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('XML Feeds (RSS / Atom)');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('List of all available XML feeds.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        global $use_strict;
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display, $icon$ will be replaced by the feed icon'),
+                'defaultvalue' => '$icon$ ' . T_('XML Feeds'),
+            ],
+            'disp_info_link' => [
+                'label' => T_('Help link'),
+                'type' => 'checkbox',
+                'note' => T_('Check this to display "What is RSS?" link'),
+                'defaultvalue' => 1,
+            ],
+            'info_link' => [
+                'label' => T_('New Window'),
+                'type' => 'checkbox',
+                'note' => T_('Check this to add target="_blank" to the "What is RSS?" link'),
+                'defaultvalue' => ! $use_strict,
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output($this->get_title());
-	}
+        return $r;
+    }
 
+    public function get_title()
+    {
+        global $rsc_uri;
 
-  /**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('List of all available XML feeds.');
-	}
+        $title = str_replace('$icon$', get_icon('feed'), $this->disp_params['title']);
+        // fp> TODO: support for different icon sizes and backgrounds (at least black and white; mid grey would be cool also)
 
+        return $title;
+    }
 
-  /**
-   * Get definitions for editable params
-   *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		global $use_strict;
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display, $icon$ will be replaced by the feed icon' ),
-					'defaultvalue' => '$icon$ '.T_('XML Feeds'),
-				),
-				'disp_info_link' => array(
-					'label' => T_( 'Help link' ),
-					'type' => 'checkbox',
-					'note' => T_( 'Check this to display "What is RSS?" link' ),
-					'defaultvalue' => 1,
-				),
-				'info_link' => array(
-					'label' => T_( 'New Window' ),
-					'type' => 'checkbox',
-					'note' => T_( 'Check this to add target="_blank" to the "What is RSS?" link' ),
-					'defaultvalue' => !$use_strict,
-				),
-			), parent::get_param_definitions( $params )	);
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Collection, $Blog;
 
-		return $r;
-	}
+        $this->init_display($params);
 
+        // Available XML feeds:
+        echo $this->disp_params['block_start'];
 
-	function get_title()
-	{
-		global $rsc_uri;
+        $this->disp_title($this->get_title());
 
-		$title = str_replace( '$icon$', get_icon('feed'), $this->disp_params['title']);
-		// fp> TODO: support for different icon sizes and backgrounds (at least black and white; mid grey would be cool also)
+        echo $this->disp_params['block_body_start'];
 
-		return $title;
-	}
+        echo $this->disp_params['list_start'];
 
+        $SkinCache = &get_SkinCache();
+        $SkinCache->load_by_type('feed');
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Collection, $Blog;
+        // TODO: this is like touching private parts :>
+        foreach ($SkinCache->cache as $Skin) {
+            if ($Skin->type != 'feed') {	// This skin cannot be used here...
+                continue;
+            }
 
-		$this->init_display( $params );
+            echo $this->disp_params['item_start'];
+            echo $Skin->name . ': ';
+            echo '<a href="' . $Blog->get_item_feed_url($Skin->folder) . '">' . T_('Posts') . '</a>';
+            if ($Blog->get_setting('allow_comments') != 'never' && $Blog->get_setting('comment_feed_content') != 'none' && $Blog->get_setting('comments_latest')) {
+                echo ', <a href="' . $Blog->get_comment_feed_url($Skin->folder) . '">' . T_('Comments') . '</a>';
+            }
 
-		// Available XML feeds:
-		echo $this->disp_params['block_start'];
+            echo $this->disp_params['item_end'];
+        }
 
-		$this->disp_title( $this->get_title() );
+        echo $this->disp_params['list_end'];
 
-		echo $this->disp_params['block_body_start'];
+        // Display "info" link, if activated.
+        if ($this->disp_params['disp_info_link']) {
+            /**
+             * @var AbstractSettings
+             */
+            global $global_Cache;
 
-		echo $this->disp_params['list_start'];
+            $feedhlp = $global_Cache->getx('feedhlp');
+            if (empty($feedhlp)) {	// Use basic default: (fp> needs serious update) -- Note: no localization because destination is in English anyway.
+                $feedhlp = [['http://www.webreference.fr/defintions/rss-atom-xml', 'What is RSS?']];
+            }
 
-		$SkinCache = & get_SkinCache();
-		$SkinCache->load_by_type( 'feed' );
+            if ($this->disp_params['info_link']) {
+                $link_params = [
+                    'target' => '_blank',
+                ];
+            } else {
+                $link_params = [
+                    'target' => '',
+                ];
+            }
+            display_list($feedhlp, $this->disp_params['notes_start'], $this->disp_params['notes_end'], ' ', '', '', null, 1, $link_params);
+        }
 
-		// TODO: this is like touching private parts :>
-		foreach( $SkinCache->cache as $Skin )
-		{
-			if( $Skin->type != 'feed' )
-			{	// This skin cannot be used here...
-				continue;
-			}
+        echo $this->disp_params['block_body_end'];
 
-			echo $this->disp_params['item_start'];
-			echo $Skin->name.': ';
-			echo '<a href="'.$Blog->get_item_feed_url( $Skin->folder ).'">'.T_('Posts').'</a>';
-			if ( $Blog->get_setting( 'allow_comments' ) != 'never' && $Blog->get_setting( 'comment_feed_content' ) != 'none' && $Blog->get_setting( 'comments_latest' ) )
-			{
-				echo ', <a href="'.$Blog->get_comment_feed_url( $Skin->folder ).'">'.T_('Comments').'</a>';
-			}
+        echo $this->disp_params['block_end'];
 
-			echo $this->disp_params['item_end'];
-		}
-
-		echo $this->disp_params['list_end'];
-
-
-		// Display "info" link, if activated.
-		if( $this->disp_params['disp_info_link'] )
-		{
-			/**
-			 * @var AbstractSettings
-			 */
-			global $global_Cache;
-
-			$feedhlp = $global_Cache->getx( 'feedhlp' );
-			if( empty( $feedhlp ) )
-			{	// Use basic default: (fp> needs serious update) -- Note: no localization because destination is in English anyway.
-				$feedhlp = array( array( 'http://www.webreference.fr/defintions/rss-atom-xml', 'What is RSS?' ) );
-			}
-
-			if( $this->disp_params[ 'info_link' ] )
-			{
-				$link_params = array( 'target' => '_blank' );
-			}
-			else
-			{
-				$link_params = array( 'target' => '' );
-			}
-			display_list( $feedhlp, $this->disp_params['notes_start'], $this->disp_params['notes_end'], ' ', '', '', NULL, 1, $link_params );
-		}
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

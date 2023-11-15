@@ -11,193 +11,175 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
-
-load_class( 'templates/model/_template.class.php', 'Template' );
-load_class( 'template/model/_templatecache.class.php', 'TemplateCache' );
-
-// Check minimum permission:
-check_user_perm( 'options', 'view', true );
-
-param_action( 'list' );
-
-if( param( 'tpl_ID', 'integer', '', true ) )
-{	// Load menu:
-	$TemplateCache = & get_TemplateCache();
-	if( ( $edited_Template = & $TemplateCache->get_by_ID( $tpl_ID, false ) ) === false )
-	{	// We could not find the goal to edit:
-		unset( $edited_Template );
-		forget_param( 'tpl_ID' );
-		$Messages->add( sprintf( TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Template') ), 'error' );
-		$action = 'nil';
-	}
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
 }
 
-switch( $action )
-{
-	case 'list':
-		break;
+load_class('templates/model/_template.class.php', 'Template');
+load_class('template/model/_templatecache.class.php', 'TemplateCache');
 
-	case 'new':
-		$edited_Template = new Template();
-		// Set template owner to current user's primary group:
-		$edited_Template->set( 'owner_grp_ID', $current_User->get( 'grp_ID' ) );
-		break;
+// Check minimum permission:
+check_user_perm('options', 'view', true);
 
-	case 'copy':
-		// Do not set a "translation of" value:
-		$edited_Template->set( 'translates_tpl_ID', NULL );
-	case 'edit':
-		// Menu edit form:
-		// Make sure we got a menu_ID:
-		param( 'tpl_ID', 'integer', true );
-		if( is_null( $edited_Template->get( 'owner_grp_ID') ) )
-		{	// This is a system-owned template, do not allow modification. Duplicate the template instead:
-			$action = 'copy';
-			// Set duplicated template owner to current user's primary group:
-			$edited_Template->set( 'owner_grp_ID', $current_User->get( 'grp_ID' ) );
-		}
-		break;
+param_action('list');
 
-	case 'duplicate':
-		// Duplicate menu
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'template' );
+if (param('tpl_ID', 'integer', '', true)) {	// Load menu:
+    $TemplateCache = &get_TemplateCache();
+    if (($edited_Template = &$TemplateCache->get_by_ID($tpl_ID, false)) === false) {	// We could not find the goal to edit:
+        unset($edited_Template);
+        forget_param('tpl_ID');
+        $Messages->add(sprintf(TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Template')), 'error');
+        $action = 'nil';
+    }
+}
 
-		// Check that current user has permission to create menus:
-		check_user_perm( 'options', 'edit', true );
+switch ($action) {
+    case 'list':
+        break;
 
-		if( $edited_Template && $edited_Template->duplicate() )
-		{
-			$Messages->add( sprintf( TB_('The %s has been duplicated.'), TB_('Template') ), 'success' );
-			header_redirect( $admin_url.'?ctrl=templates&action=edit&tpl_ID='.$edited_Template->ID ); // will save $Messages into Session
-			// We have EXITed already at this point!!
-		}
-		break;
+    case 'new':
+        $edited_Template = new Template();
+        // Set template owner to current user's primary group:
+        $edited_Template->set('owner_grp_ID', $current_User->get('grp_ID'));
+        break;
 
-	case 'create':
-	case 'create_edit':
-		// Create new Menu:
-		$edited_Template = new Template();
+    case 'copy':
+        // Do not set a "translation of" value:
+        $edited_Template->set('translates_tpl_ID', null);
+        // no break
+    case 'edit':
+        // Menu edit form:
+        // Make sure we got a menu_ID:
+        param('tpl_ID', 'integer', true);
+        if (is_null($edited_Template->get('owner_grp_ID'))) {	// This is a system-owned template, do not allow modification. Duplicate the template instead:
+            $action = 'copy';
+            // Set duplicated template owner to current user's primary group:
+            $edited_Template->set('owner_grp_ID', $current_User->get('grp_ID'));
+        }
+        break;
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'template' );
+    case 'duplicate':
+        // Duplicate menu
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('template');
 
-		// Check that current user has permission to create menus:
-		check_user_perm( 'options', 'edit', true );
+        // Check that current user has permission to create menus:
+        check_user_perm('options', 'edit', true);
 
-		// Load data from request:
-		if( $edited_Template->load_from_Request() )
-		{	// We could load data from form without errors:
-			// Insert in DB:
-			$edited_Template->dbinsert();
-			$Messages->add( sprintf( TB_('New %s created.'), TB_('Template') ), 'success' );
+        if ($edited_Template && $edited_Template->duplicate()) {
+            $Messages->add(sprintf(TB_('The %s has been duplicated.'), TB_('Template')), 'success');
+            header_redirect($admin_url . '?ctrl=templates&action=edit&tpl_ID=' . $edited_Template->ID); // will save $Messages into Session
+            // We have EXITed already at this point!!
+        }
+        break;
 
-			if( $action == 'create_edit' )
-			{	// Redirect back to edit form:
-				$redirect_to = $admin_url.'?ctrl=templates&action=edit&tpl_ID='.$edited_Template->ID;
-			}
-			else
-			{
-				$redirect_to = $admin_url.'?ctrl=templates';
-			}
+    case 'create':
+    case 'create_edit':
+        // Create new Menu:
+        $edited_Template = new Template();
 
-			header_redirect( $redirect_to, 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		$action = 'new';
-		break;
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('template');
 
-	case 'update':
-	case 'update_edit':
-		// Update menu:
+        // Check that current user has permission to create menus:
+        check_user_perm('options', 'edit', true);
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'template' );
+        // Load data from request:
+        if ($edited_Template->load_from_Request()) {	// We could load data from form without errors:
+            // Insert in DB:
+            $edited_Template->dbinsert();
+            $Messages->add(sprintf(TB_('New %s created.'), TB_('Template')), 'success');
 
-		// Check that current user has permission to edit menus:
-		check_user_perm( 'options', 'edit', true );
+            if ($action == 'create_edit') {	// Redirect back to edit form:
+                $redirect_to = $admin_url . '?ctrl=templates&action=edit&tpl_ID=' . $edited_Template->ID;
+            } else {
+                $redirect_to = $admin_url . '?ctrl=templates';
+            }
 
-		// Make sure we got an menu_ID:
-		param( 'tpl_ID', 'integer', true );
+            header_redirect($redirect_to, 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        $action = 'new';
+        break;
 
-		// load data from request
-		if( $edited_Template->load_from_Request() )
-		{	// We could load data from form without errors:
-			// Update Menu in DB:
-			$edited_Template->dbupdate();
-			$Messages->add( sprintf( TB_('%s updated.'), TB_('Template')  ), 'success' );
+    case 'update':
+    case 'update_edit':
+        // Update menu:
 
-			if( $action == 'update_edit' )
-			{	// Redirect back to edit form:
-				$redirect_to = $admin_url.'?ctrl=templates&action=edit&tpl_ID='.$edited_Template->ID;
-			}
-			else
-			{	// Redirect to template list:
-				$redirect_to = $admin_url.'?ctrl=templates';
-			}
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('template');
 
-			header_redirect( $redirect_to, 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		$action = 'edit';
-		break;
+        // Check that current user has permission to edit menus:
+        check_user_perm('options', 'edit', true);
 
-	case 'delete':
-		// Delete template:
-		
-		if( is_null( $edited_Template->get( 'owner_grp_ID') ) )
-		{	// Do not allow system-owned templates to be deleted:
-			$action = 'list';
-		}
+        // Make sure we got an menu_ID:
+        param('tpl_ID', 'integer', true);
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'template' );
+        // load data from request
+        if ($edited_Template->load_from_Request()) {	// We could load data from form without errors:
+            // Update Menu in DB:
+            $edited_Template->dbupdate();
+            $Messages->add(sprintf(TB_('%s updated.'), TB_('Template')), 'success');
 
-		// Check that current user has permission to delete menus:
-		check_user_perm( 'options', 'edit', true );
+            if ($action == 'update_edit') {	// Redirect back to edit form:
+                $redirect_to = $admin_url . '?ctrl=templates&action=edit&tpl_ID=' . $edited_Template->ID;
+            } else {	// Redirect to template list:
+                $redirect_to = $admin_url . '?ctrl=templates';
+            }
 
-		// Make sure we got an menu_ID:
-		param( 'tpl_ID', 'integer', true );
+            header_redirect($redirect_to, 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        $action = 'edit';
+        break;
 
-		if( param( 'confirm', 'integer', 0 ) )
-		{	// confirmed, Delete from DB:
-			$msg = sprintf( TB_('Template &laquo;%s&raquo; deleted.'), $edited_Template->dget( 'name' ) );
-			$edited_Template->dbdelete();
-			unset( $edited_Template );
-			forget_param( 'tpl_ID' );
-			$Messages->add( $msg, 'success' );
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( regenerate_url( 'action', '', '', '&' ), 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		else
-		{	// not confirmed, Check for restrictions:
-			if( ! $edited_Template->check_delete( sprintf( TB_('Cannot delete %s &laquo;%s&raquo;'), TB_('Template'), $edited_Template->dget( 'name' ) ), array(), true ) )
-			{	// There are restrictions:
-				$action = 'list';
-			}
-		}
-		break;
+    case 'delete':
+        // Delete template:
+
+        if (is_null($edited_Template->get('owner_grp_ID'))) {	// Do not allow system-owned templates to be deleted:
+            $action = 'list';
+        }
+
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('template');
+
+        // Check that current user has permission to delete menus:
+        check_user_perm('options', 'edit', true);
+
+        // Make sure we got an menu_ID:
+        param('tpl_ID', 'integer', true);
+
+        if (param('confirm', 'integer', 0)) {	// confirmed, Delete from DB:
+            $msg = sprintf(TB_('Template &laquo;%s&raquo; deleted.'), $edited_Template->dget('name'));
+            $edited_Template->dbdelete();
+            unset($edited_Template);
+            forget_param('tpl_ID');
+            $Messages->add($msg, 'success');
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect(regenerate_url('action', '', '', '&'), 303); // Will EXIT
+            // We have EXITed already at this point!!
+        } else {	// not confirmed, Check for restrictions:
+            if (! $edited_Template->check_delete(sprintf(TB_('Cannot delete %s &laquo;%s&raquo;'), TB_('Template'), $edited_Template->dget('name')), [], true)) {	// There are restrictions:
+                $action = 'list';
+            }
+        }
+        break;
 }
 
 // We should activate toolbar menu items for this controller
 $activate_collection_toolbar = true;
 
-$AdminUI->set_path( 'site', 'templates' );
+$AdminUI->set_path('site', 'templates');
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( TB_('Site'), $admin_url.'?ctrl=dashboard' );
-$AdminUI->breadcrumbpath_add( TB_('Templates'), $admin_url.'?ctrl=templates' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add(TB_('Site'), $admin_url . '?ctrl=dashboard');
+$AdminUI->breadcrumbpath_add(TB_('Templates'), $admin_url . '?ctrl=templates');
 
 // Set an url for manual page:
-if( $action == 'new' || $action == 'edit' )
-{
-	$AdminUI->set_page_manual_link( 'template-form' );
-}
-else
-{
-	$AdminUI->set_page_manual_link( 'templates-list' );
+if ($action == 'new' || $action == 'edit') {
+    $AdminUI->set_page_manual_link('template-form');
+} else {
+    $AdminUI->set_page_manual_link('templates-list');
 }
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -211,33 +193,34 @@ $AdminUI->disp_payload_begin();
 /**
  * Display payload:
  */
-switch( $action )
-{
-	case 'nil':
-		// Do nothing
-		break;
+switch ($action) {
+    case 'nil':
+        // Do nothing
+        break;
 
-	case 'delete':
-		// We need to ask for confirmation:
-		$edited_Template->confirm_delete(
-				sprintf( TB_('Delete %s &laquo;%s&raquo;?'), TB_('Template'), $edited_Template->dget( 'name' ) ),
-				'template', $action, get_memorized( 'action' ) );
-		// NO BREAK
-	case 'new':
-	case 'edit':
-	case 'copy':
-		// Display menu form:
-		$AdminUI->disp_view( 'templates/views/_template.form.php' );
-		break;
+    case 'delete':
+        // We need to ask for confirmation:
+        $edited_Template->confirm_delete(
+            sprintf(TB_('Delete %s &laquo;%s&raquo;?'), TB_('Template'), $edited_Template->dget('name')),
+            'template',
+            $action,
+            get_memorized('action')
+        );
+        // no break
+    case 'new':
+    case 'edit':
+    case 'copy':
+        // Display menu form:
+        $AdminUI->disp_view('templates/views/_template.form.php');
+        break;
 
-	case 'list':
-		// list templates:
-		$AdminUI->disp_view( 'templates/views/_templates.view.php' );
-		break;
+    case 'list':
+        // list templates:
+        $AdminUI->disp_view('templates/views/_templates.view.php');
+        break;
 }
 
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-?>

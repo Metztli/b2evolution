@@ -11,10 +11,12 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_class( 'users/model/passwords/bcrypt.php', 'bcryptPasswordDriver' );
+load_class('users/model/passwords/bcrypt.php', 'bcryptPasswordDriver');
 
 /**
  * bcryptPasswordDriver Class
@@ -23,6 +25,5 @@ load_class( 'users/model/passwords/bcrypt.php', 'bcryptPasswordDriver' );
  */
 class bcrypt2yPasswordDriver extends bcryptPasswordDriver
 {
-	protected $code = 'bb$2y';
+    protected $code = 'bb$2y';
 }
-?>

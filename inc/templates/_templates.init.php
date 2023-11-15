@@ -12,7 +12,9 @@
  *
  * @package templates
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Minimum PHP version required for template module to function properly
@@ -31,9 +33,9 @@ $required_mysql_version['templates'] = '5.1';
  *  If you want to have multiple b2evo installations in a single database you should
  *  change {@link $tableprefix} in _basic_config.php)
  */
-$db_config['aliases'] = array_merge( $db_config['aliases'], array(
-		'T_templates'  => $tableprefix.'templates',
-	) );
+$db_config['aliases'] = array_merge($db_config['aliases'], [
+    'T_templates' => $tableprefix . 'templates',
+]);
 
 /**
  * Controller mappings.
@@ -57,17 +59,16 @@ $ctrl_mappings['templates'] = 'templates/templates.ctrl.php';
  *
  * @return SiteMenuCache
  */
-function & get_TemplateCache()
+function &get_TemplateCache()
 {
-	global $TemplateCache;
+    global $TemplateCache;
 
-	if( ! isset( $TemplateCache ) )
-	{	// Cache doesn't exist yet:
-		load_class( 'templates/model/_templatecache.class.php', 'TemplateCache' );
-		$TemplateCache = new TemplateCache();
-	}
+    if (! isset($TemplateCache)) {	// Cache doesn't exist yet:
+        load_class('templates/model/_templatecache.class.php', 'TemplateCache');
+        $TemplateCache = new TemplateCache();
+    }
 
-	return $TemplateCache;
+    return $TemplateCache;
 }
 
 
@@ -76,75 +77,68 @@ function & get_TemplateCache()
  */
 class templates_Module extends Module
 {
-	/**
-	 * Do the initializations. Called from in _main.inc.php.
-	 * This is typically where classes matching DB tables for this module are registered/loaded.
-	 *
-	 * Note: this should only load/register things that are going to be needed application wide,
-	 * for example: for constructing menus.
-	 * Anything that is needed only in a specific controller should be loaded only there.
-	 * Anything that is needed only in a specific view should be loaded only there.
-	 */
-	function init()
-	{
-		$this->check_required_php_version( 'templates' );
-		load_funcs( 'templates/model/_template.funcs.php' );
-	}
+    /**
+     * Do the initializations. Called from in _main.inc.php.
+     * This is typically where classes matching DB tables for this module are registered/loaded.
+     *
+     * Note: this should only load/register things that are going to be needed application wide,
+     * for example: for constructing menus.
+     * Anything that is needed only in a specific controller should be loaded only there.
+     * Anything that is needed only in a specific view should be loaded only there.
+     */
+    public function init()
+    {
+        $this->check_required_php_version('templates');
+        load_funcs('templates/model/_template.funcs.php');
+    }
 
+    /**
+     * Build the evobar menu
+     */
+    public function build_evobar_menu()
+    {
+        /**
+         * @var Menu
+         */
+        global $topleft_Menu;
+        global $admin_url;
+        global $Collection, $Blog;
 
-	/**
-	 * Build the evobar menu
-	 */
-	function build_evobar_menu()
-	{
-		/**
-		 * @var Menu
-		 */
-		global $topleft_Menu;
-		global $admin_url;
-		global $Collection, $Blog;
+        //pre_dump( $topleft_Menu->get_menu_entries( 'site') );
 
-		//pre_dump( $topleft_Menu->get_menu_entries( 'site') ); 
+        if (check_user_perm('admin', 'restricted')) {
+            // FM enabled and permission to view files:
+            $entries['templates'] = [
+                'text' => T_('Templates') . '&hellip;',
+                'href' => $admin_url . '?ctrl=templates',
+            ];
 
-		if( check_user_perm( 'admin', 'restricted' ) )
-		{
+            $topleft_Menu->insert_menu_entries_after(['site', 'skin'], $entries);
+        }
+    }
 
-			// FM enabled and permission to view files:
-			$entries['templates'] = array(
-					'text' => T_('Templates').'&hellip;',
-					'href' => $admin_url.'?ctrl=templates',
-				);
+    /**
+     * Builds the 2nd half of the menu. This is the one with the configuration features
+     *
+     * At some point this might be displayed differently than the 1st half.
+     */
+    public function build_menu_2()
+    {
+        global $admin_url, $AdminUI;
 
-			$topleft_Menu->insert_menu_entries_after( array( 'site', 'skin' ), $entries );
-		}
-	}
+        if (! check_user_perm('admin', 'restricted')) {	// User must has an access to back-office:
+            return;
+        }
 
-
-	/**
-	 * Builds the 2nd half of the menu. This is the one with the configuration features
-	 *
-	 * At some point this might be displayed differently than the 1st half.
-	 */
-	function build_menu_2()
-	{
-		global $admin_url, $AdminUI;
-
-		if( ! check_user_perm( 'admin', 'restricted' ) )
-		{	// User must has an access to back-office:
-			return;
-		}
-
-		if( check_user_perm( 'options', 'view' ) )
-		{	// User has an access to view system settings:
-			$AdminUI->add_menu_entries( array( 'site' ), array(
-				'templates' => array(
-					'text' => T_('Templates'),
-					'href' => $admin_url.'?ctrl=templates' ),
-				), 'menus' );
-		}
-	}
+        if (check_user_perm('options', 'view')) {	// User has an access to view system settings:
+            $AdminUI->add_menu_entries(['site'], [
+                'templates' => [
+                    'text' => T_('Templates'),
+                    'href' => $admin_url . '?ctrl=templates',
+                ],
+            ], 'menus');
+        }
+    }
 }
 
 $templates_Module = new templates_Module();
-
-?>

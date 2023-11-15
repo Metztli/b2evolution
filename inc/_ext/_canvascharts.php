@@ -13,7 +13,9 @@
  *
  * @package libs
  */
-if( ! defined( 'EVO_MAIN_INIT' ) ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Draw the canvas bars chart.
@@ -21,89 +23,80 @@ if( ! defined( 'EVO_MAIN_INIT' ) ) die( 'Please, do not access this page directl
  * @param array Chart bars data
  * @param string Javascript callback function to execute after rendering
  */
-function CanvasBarsChart( $chart, $init_js_callback = NULL, $canvas_id = 'canvasbarschart' )
+function CanvasBarsChart($chart, $init_js_callback = null, $canvas_id = 'canvasbarschart')
 {
-	// Init data for jqPlot format:
-	$jqplot_data = array();
-	$jqplot_legend = array();
-	foreach( $chart['chart_data'] as $i => $data )
-	{
-		if( $i > 0 )
-		{
-			// Legend label
-			$jqplot_legend[] = $data[0];
-			// Data
-			array_shift( $data );
-			$jqplot_data[] = $data;
-		}
-	}
+    // Init data for jqPlot format:
+    $jqplot_data = [];
+    $jqplot_legend = [];
+    foreach ($chart['chart_data'] as $i => $data) {
+        if ($i > 0) {
+            // Legend label
+            $jqplot_legend[] = $data[0];
+            // Data
+            array_shift($data);
+            $jqplot_data[] = $data;
+        }
+    }
 
-	// Ticks
-	$jqplot_ticks = $chart['chart_data'][ 0 ];
-	array_shift( $jqplot_ticks );
+    // Ticks
+    $jqplot_ticks = $chart['chart_data'][0];
+    array_shift($jqplot_ticks);
 
-	// Weekend bands
-	$jqplot_canvas_objects = array();
-	foreach( $chart['dates'] as $d => $date )
-	{
-		$week_day = date( 'w', $date );
-		if( $week_day == 0 || $week_day == 6 )
-		{
-			$jqplot_canvas_objects[] = '{rectangle: {
-					xmin: '.( $d + 0.5 ).',
-					xmax: '.( $d + 1.5 ).',
+    // Weekend bands
+    $jqplot_canvas_objects = [];
+    foreach ($chart['dates'] as $d => $date) {
+        $week_day = date('w', $date);
+        if ($week_day == 0 || $week_day == 6) {
+            $jqplot_canvas_objects[] = '{rectangle: {
+					xmin: ' . ($d + 0.5) . ',
+					xmax: ' . ($d + 1.5) . ',
 					xminOffset: "0",
 					xmaxOffset: "0",
 					yminOffset: "0",
 					ymaxOffset: "0",
 					color: "rgba(0,0,0,0.05)"
 				}}';
-		}
-	}
+        }
+    }
 
-	$jqplot_link_dates = array();
-	if( isset( $chart['link_data'] ) )
-	{
-		foreach( $chart['dates'] as $date )
-		{
-			$jqplot_link_dates[] = urlencode( date( locale_datefmt(), $date ) );
-		}
-	}
+    $jqplot_link_dates = [];
+    if (isset($chart['link_data'])) {
+        foreach ($chart['dates'] as $date) {
+            $jqplot_link_dates[] = urlencode(date(locale_datefmt(), $date));
+        }
+    }
 
-	$jqplot_link_params = array();
-	if( isset( $chart['link_data'] ) )
-	{
-		foreach( $chart['link_data']['params'] as $types )
-		{
-			$jqplot_link_params[] = "['".implode( "','", $types )."']";
-		}
-	}
+    $jqplot_link_params = [];
+    if (isset($chart['link_data'])) {
+        foreach ($chart['link_data']['params'] as $types) {
+            $jqplot_link_params[] = "['" . implode("','", $types) . "']";
+        }
+    }
 
-	// Series color:
-	$series_colors = array_map( function( $color )
-		{
-			return '#'.$color;
-		}, $chart['series_color'] );
+    // Series color:
+    $series_colors = array_map(function ($color) {
+        return '#' . $color;
+    }, $chart['series_color']);
 
-	$js_config = array(
-			'canvas_id'             => $canvas_id,
-			'jqplot_data'           => $jqplot_data,
-			'jqplot_labels'         => $jqplot_legend,
-			'jqplot_ticks'          => $jqplot_ticks,
-			'jqplot_canvas_objects' => $jqplot_canvas_objects,
-			'jqplot_link_url'       => isset( $chart['link_data']['url'] ) ? $chart['link_data']['url'] : NULL,
-			'jqplot_link_dates'     => $jqplot_link_dates,
-			'jqplot_link_params'    => $jqplot_link_params,
-			'series_colors'         => $series_colors,
-			'number_rows'           => isset( $chart['legend_numrows'] ) ? (int) $chart['legend_numrows'] : 1,
-			'draw_last_line'        => isset( $chart['draw_last_line'] ) && $chart['draw_last_line'],
-			'init_js_callback'      => $init_js_callback,
-			'link_data'             => isset( $chart['link_data'] ),
-		);
+    $js_config = [
+        'canvas_id' => $canvas_id,
+        'jqplot_data' => $jqplot_data,
+        'jqplot_labels' => $jqplot_legend,
+        'jqplot_ticks' => $jqplot_ticks,
+        'jqplot_canvas_objects' => $jqplot_canvas_objects,
+        'jqplot_link_url' => isset($chart['link_data']['url']) ? $chart['link_data']['url'] : null,
+        'jqplot_link_dates' => $jqplot_link_dates,
+        'jqplot_link_params' => $jqplot_link_params,
+        'series_colors' => $series_colors,
+        'number_rows' => isset($chart['legend_numrows']) ? (int) $chart['legend_numrows'] : 1,
+        'draw_last_line' => isset($chart['draw_last_line']) && $chart['draw_last_line'],
+        'init_js_callback' => $init_js_callback,
+        'link_data' => isset($chart['link_data']),
+    ];
 
-	expose_var_to_js( $canvas_id, $js_config, 'evo_init_canvas_charts_config' );
+    expose_var_to_js($canvas_id, $js_config, 'evo_init_canvas_charts_config');
 
-	echo '<div id="'.$canvas_id.'" style="height: '.$chart['canvas_bg']['height'].'px; width: '.$chart['canvas_bg']['width'].'px; margin: auto 35px;"></div>';
+    echo '<div id="' . $canvas_id . '" style="height: ' . $chart['canvas_bg']['height'] . 'px; width: ' . $chart['canvas_bg']['width'] . 'px; margin: auto 35px;"></div>';
 }
 
 
@@ -112,34 +105,31 @@ function CanvasBarsChart( $chart, $init_js_callback = NULL, $canvas_id = 'canvas
  *
  * @param array Chart donut data
  */
-function CanvasDonutChart( $chart )
+function CanvasDonutChart($chart)
 {
-?>
+    ?>
 <div id="canvasdonutchart" style="height:<?php echo $chart['height']; ?>px;width:<?php echo $chart['width']; ?>px;"></div>
 <script>
 jQuery( window ).on( 'load', function()
 {
 <?php
-	$data_vars = array();
-	foreach( $chart[ 'data' ] as $d => $data_level )
-	{ // Init the chart data
-		$data = array();
-		foreach( $data_level as $label => $value )
-		{
-			$data[] = '[\''.$label.'\','.$value.']';
-		}
-		echo '	var data'.$d.' = ['.implode( ',', $data ).'];'."\n";
-		$data_vars[] = 'data'.$d;
-	}
-	?>
+        $data_vars = [];
+    foreach ($chart['data'] as $d => $data_level) { // Init the chart data
+        $data = [];
+        foreach ($data_level as $label => $value) {
+            $data[] = '[\'' . $label . '\',' . $value . ']';
+        }
+        echo '	var data' . $d . ' = [' . implode(',', $data) . '];' . "\n";
+        $data_vars[] = 'data' . $d;
+    }
+    ?>
 
-	jQuery.jqplot( 'canvasdonutchart', [<?php echo implode( ',', $data_vars ); ?>], {
+	jQuery.jqplot( 'canvasdonutchart', [<?php echo implode(',', $data_vars); ?>], {
 		series: [
 		<?php
-		foreach( $chart[ 'series_color' ] as $colors )
-		{ // Init the colors for each level
-		?>
-			{ seriesColors: [ '#<?php echo implode( '\', \'#', $colors ); ?>' ] },
+        foreach ($chart['series_color'] as $colors) { // Init the colors for each level
+            ?>
+			{ seriesColors: [ '#<?php echo implode('\', \'#', $colors); ?>' ] },
 		<?php } ?>
 		],
 		seriesDefaults: {
@@ -164,9 +154,9 @@ jQuery( window ).on( 'load', function()
 		legend: {
 			renderer: $.jqplot.EnhancedLegendRenderer,
 			rendererOptions: {
-				numberRows: <?php echo ( isset( $chart['legend_numrows'] ) ? $chart['legend_numrows'] : '1' ); ?>
+				numberRows: <?php echo(isset($chart['legend_numrows']) ? $chart['legend_numrows'] : '1'); ?>
 			},
-			labels: ['<?php echo implode( "','", $chart['legends'] ); ?>'],
+			labels: ['<?php echo implode("','", $chart['legends']); ?>'],
 			show: true,
 			predraw: true,
 			location: 'e',

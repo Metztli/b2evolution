@@ -8,17 +8,17 @@
  * Released under GNU GPL License - {@link http://b2evolution.net/about/gnu-gpl-license}
  * @copyright (c)2003-2020 by Francois Planque - {@link http://fplanque.com/}
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Default params:
-$params = array_merge( array(
-		'include_greeting' => true,
-		'recipient_User' => NULL,
-	), $params );
+$params = array_merge([
+    'include_greeting' => true,
+    'recipient_User' => null,
+], $params);
 
-if( $params['include_greeting'] )
-{ // Display the greeting message
-	echo sprintf( T_( 'Hello %s!' ), empty( $params['recipient_User'] ) ? '$name$' : '$username$' )."\n\n";
+if ($params['include_greeting']) { // Display the greeting message
+    echo sprintf(T_('Hello %s!'), empty($params['recipient_User']) ? '$name$' : '$username$') . "\n\n";
 }
-?>

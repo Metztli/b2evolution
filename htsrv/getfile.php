@@ -24,219 +24,184 @@
 /**
  * Load config, init and get the {@link $mode mode param}.
  */
-require_once dirname(__FILE__).'/../conf/_config.php';
-require_once $inc_path.'/_main.inc.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
+require_once $inc_path . '/_main.inc.php';
 
 
 // Don't check new updates from b2evolution.net (@see b2evonet_get_updates()),
 // in order to don't break the response data:
 $allow_evo_stats = false;
 
-if( ! isset($GLOBALS['files_Module']) )
-{
-	debug_die( 'Files module is disabled or missing!' );
+if (! isset($GLOBALS['files_Module'])) {
+    debug_die('Files module is disabled or missing!');
 }
 
-if( param( 'abspath', 'string', NULL ) !== NULL )
-{	// If absolute path is requested then try to decode it to root and relative path:
-	if( $decoded_data = get_root_path_by_abspath( $abspath, true ) )
-	{	// Root and path are decoded, Use them:
-		set_param( 'root', $decoded_data['root'] );
-		set_param( 'path', $decoded_data['path'] );
-	}
+if (param('abspath', 'string', null) !== null) {	// If absolute path is requested then try to decode it to root and relative path:
+    if ($decoded_data = get_root_path_by_abspath($abspath, true)) {	// Root and path are decoded, Use them:
+        set_param('root', $decoded_data['root']);
+        set_param('path', $decoded_data['path']);
+    }
 }
 
 // We need this param early to check blog perms, if possible
-param( 'root', 'string', true ); // the root directory from the dropdown box (user_X or blog_X; X is ID - 'user' for current user (default))
+param('root', 'string', true); // the root directory from the dropdown box (user_X or blog_X; X is ID - 'user' for current user (default))
 
 // Check permission:
-if( ! $public_access_to_media )
-{
-	if( ! isset($current_User) )
-	{
-		debug_die( 'No permission to get file (not logged in)!', array('status'=>'403 Forbidden') );
-	}
+if (! $public_access_to_media) {
+    if (! isset($current_User)) {
+        debug_die('No permission to get file (not logged in)!', [
+            'status' => '403 Forbidden',
+        ]);
+    }
 
 
-	// fp> I don't think we need the following if public_access_to_media
-	if( preg_match( '/^collection_(\d+)$/', $root, $perm_blog ) )
-	{	// OK, we got a blog ID:
-		$perm_blog = $perm_blog[1];
-	}
-	else
-	{	// No blog ID, we will check the global group perm
-		$perm_blog = NULL;
-	}
-	//pre_dump( $perm_blog );
+    // fp> I don't think we need the following if public_access_to_media
+    if (preg_match('/^collection_(\d+)$/', $root, $perm_blog)) {	// OK, we got a blog ID:
+        $perm_blog = $perm_blog[1];
+    } else {	// No blog ID, we will check the global group perm
+        $perm_blog = null;
+    }
+    //pre_dump( $perm_blog );
 
-	// Check permission (#2):
-	check_user_perm( 'files', 'view', true, $perm_blog );
+    // Check permission (#2):
+    check_user_perm('files', 'view', true, $perm_blog);
 }
 
 // Load the other params:
-param( 'path', 'filepath', true );
-param( 'size', 'string', NULL ); // Can be used for images.
-param( 'size_x', 'integer', 1 ); // Ratio size, can be 1, 2 and etc.
-param( 'mtime', 'integer', 0 );  // used for unique URLs (that never expire).
+param('path', 'filepath', true);
+param('size', 'string', null); // Can be used for images.
+param('size_x', 'integer', 1); // Ratio size, can be 1, 2 and etc.
+param('mtime', 'integer', 0);  // used for unique URLs (that never expire).
 
-if( $size_x != 1 && $size_x != 2 )
-{ // Allow only 1x and 2x sizes, in order to avoid hack that creates many x versions
-	$size_x = 1;
+if ($size_x != 1 && $size_x != 2) { // Allow only 1x and 2x sizes, in order to avoid hack that creates many x versions
+    $size_x = 1;
 }
 
 // Load fileroot info:
-$FileRootCache = & get_FileRootCache();
-$FileRoot = & $FileRootCache->get_by_ID( $root );
+$FileRootCache = &get_FileRootCache();
+$FileRoot = &$FileRootCache->get_by_ID($root);
 
 // Load file object (not the file content):
-$File = new File( $FileRoot->type, $FileRoot->in_type_ID, $path );
+$File = new File($FileRoot->type, $FileRoot->in_type_ID, $path);
 
 // Check if the request has an If-Modified-Since date
-if( array_key_exists( 'HTTP_IF_MODIFIED_SINCE', $_SERVER ) )
-{
-	$if_modified_since = strtotime( preg_replace('/;.*$/','',$_SERVER['HTTP_IF_MODIFIED_SINCE']) );
-	$file_lastmode_ts = $File->get_lastmod_ts();
-	if( $file_lastmode_ts <= $if_modified_since )
-	{ // file was not modified since if_modified_since ts
-		header_http_response( '304 Not Modified' );
-		exit(0);
-	}
+if (array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
+    $if_modified_since = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
+    $file_lastmode_ts = $File->get_lastmod_ts();
+    if ($file_lastmode_ts <= $if_modified_since) { // file was not modified since if_modified_since ts
+        header_http_response('304 Not Modified');
+        exit(0);
+    }
 }
 
 $File->load_meta();
-if( $File->is_image() && !$File->exists() )
-{ // Original image file is not found, output a black thumbnail:
+if ($File->is_image() && ! $File->exists()) { // Original image file is not found, output a black thumbnail:
+    global $thumbnail_sizes;
 
-	global $thumbnail_sizes;
+    load_funcs('/files/model/_image.funcs.php');
+    $thumb_width = null;
+    $thumb_height = null;
+    $size_name = $size;
 
-	load_funcs( '/files/model/_image.funcs.php' );
-	$thumb_width = NULL;
-	$thumb_height = NULL;
-	$size_name = $size;
+    if (! empty($size_name)) {
+        $thumb_path = $File->get_af_thumb_path($size_name, null, true);
+        if (substr($thumb_path, 0, 1) != '!' && ($size_arr = imgsize($thumb_path, 'widthheight_assoc'))) {
+            $size_arr = imgsize($thumb_path, 'widthheight_assoc');
+            $thumb_width = $size_arr['width'];
+            $thumb_height = $size_arr['height'];
+        }
+    }
 
-	if( ! empty( $size_name ) )
-	{
-		$thumb_path = $File->get_af_thumb_path( $size_name, NULL, true );
-		if( substr( $thumb_path, 0, 1 ) != '!' && ( $size_arr = imgsize( $thumb_path, 'widthheight_assoc' ) ) )
-		{
-			$size_arr = imgsize( $thumb_path, 'widthheight_assoc' );
-			$thumb_width = $size_arr['width'];
-			$thumb_height = $size_arr['height'];
-		}
-	}
+    output_error_thumb('!Original not found.', $thumb_width, $thumb_height);
+} elseif (! empty($size) && $File->is_image()) {	// We want a thumbnail:
+    // fp> TODO: for more efficient caching, this should probably redirect to the static file right after creating it (when $public_access_to_media=true OF COURSE)
 
-	output_error_thumb( '!Original not found.', $thumb_width, $thumb_height );
+    global $thumbnail_sizes;
+
+    load_funcs('/files/model/_image.funcs.php');
+
+    $size_name = $size;
+    if (! isset($thumbnail_sizes[$size])) { // this file size alias is not defined, use default:
+        // TODO: dh> this causes links for e.g. "fit-50x50" to work also, but with the drawback of images not getting served from the
+        //           .evocache directory directly. I think invalid $size params should bark out here.
+        // fp> ok.
+        $size_name = 'fit-80x80';
+    }
+
+    if (! isset($thumbnail_sizes[$size_name][4])) {	// Set blur percent in 0 by default
+        $thumbnail_sizes[$size_name][4] = 0;
+    }
+    // Set all params for requested size:
+    list($thumb_type, $thumb_width, $thumb_height, $thumb_quality, $thumb_percent_blur) = $thumbnail_sizes[$size_name];
+
+    $Filetype = &$File->get_Filetype();
+    // pre_dump( $Filetype );
+    // TODO: dh> Filetype may be NULL here! see also r1.18 (IIRC)
+    $mimetype = $Filetype->mimetype;
+    // pre_dump( $mimetype );
+
+    // Try to output the cached thumbnail:
+    $err = $File->output_cached_thumb($size_name, $mimetype, $mtime, $size_x);
+    //pre_dump( $err );
+
+    if ($err == '!Thumbnail not found in' . $Settings->get('evocache_foldername')) {	// The thumbnail wasn't already in the cache, try to generate and cache it now:
+        $err = null;		// Short error code
+
+        list($src_width, $src_height) = imgsize($File->get_full_path());
+
+        if (! $resample_all_images && check_thumbnail_sizes($thumb_type, $thumb_width, $thumb_height, $src_width, $src_height)) { // There is no need to resample, use original!
+            $err = $File->get_af_thumb_path($size_name, $mimetype, true, $size_x);
+
+            if ($err[0] != '!' && @copy($File->get_full_path(), $err)) {	// File was saved. Ouput that same file immediately:
+                // note: @copy returns FALSE on failure, if not muted it'll print the error on screen
+                $err = $File->output_cached_thumb($size_name, $mimetype, $mtime, $size_x);
+            }
+        } else { // Resample
+            list($err, $src_imh) = load_image($File->get_full_path(), $mimetype);
+
+            if (empty($err)) {
+                list($err, $dest_imh) = generate_thumb($src_imh, $thumb_type, $thumb_width, $thumb_height, $thumb_percent_blur, $size_x);
+                if (empty($err)) {
+                    $err = $File->save_thumb_to_cache($dest_imh, $size_name, $mimetype, $thumb_quality, $size_x);
+                    if (empty($err)) {	// File was saved. Ouput that same file immediately:
+                        // This is probably better than recompressing the memory image..
+                        $err = $File->output_cached_thumb($size_name, $mimetype, $mtime, $size_x);
+                    } else {	// File could not be saved.
+                        // fp> We might want to output dynamically...
+                        // $err = output_image( $dest_imh, $mimetype );
+                    }
+                }
+            }
+        }
+    }
+
+    // ERROR IMAGE
+    if (! empty($err)) {	// Generate an error image and try to squeeze an error message inside:
+        output_error_thumb($err, $thumb_width, $thumb_height);
+    }
+} else {	// We want the regular file:
+    // Headers to display the file directly in the browser
+    if (! is_readable($File->get_full_path())) {
+        debug_die(sprintf('File "%s" is not readable!', rel_path_to_base($File->get_full_path())));
+    }
+
+    $Filetype = &$File->get_Filetype();
+    if (! empty($Filetype)) {
+        header('Content-type: ' . $Filetype->mimetype);
+        if ($Filetype->viewtype == 'download') {
+            header('Content-disposition: attachment; filename="'
+                . addcslashes($File->get_name(), '\\"') . '"'); // escape quotes and slashes, according to RFC
+        }
+    }
+    $file_path = $File->get_full_path();
+    header('Content-Length: ' . filesize($file_path));
+
+    // The URL refers to this specific file, therefore we can tell the browser that
+    // it does not expire anytime soon.
+    // fp> I don't think mtime changes anything to the cacheability of the data
+    // if( $mtime && $mtime == $File->get_lastmod_ts() ) // TODO: dh> use salt here?! fp>what for?
+    header_noexpire();	// static file
+
+    // Display the content of the file
+    readfile($file_path);
 }
-elseif( ! empty( $size ) && $File->is_image() )
-{	// We want a thumbnail:
-	// fp> TODO: for more efficient caching, this should probably redirect to the static file right after creating it (when $public_access_to_media=true OF COURSE)
-
-	global $thumbnail_sizes;
-
-	load_funcs( '/files/model/_image.funcs.php' );
-
-	$size_name = $size;
-	if( ! isset( $thumbnail_sizes[$size] ) )
-	{ // this file size alias is not defined, use default:
-		// TODO: dh> this causes links for e.g. "fit-50x50" to work also, but with the drawback of images not getting served from the
-		//           .evocache directory directly. I think invalid $size params should bark out here.
-		// fp> ok.
-		$size_name = 'fit-80x80';
-	}
-
-	if( ! isset ( $thumbnail_sizes[$size_name][4] ) )
-	{	// Set blur percent in 0 by default
-		$thumbnail_sizes[$size_name][4] = 0;
-	}
-	// Set all params for requested size:
-	list( $thumb_type, $thumb_width, $thumb_height, $thumb_quality, $thumb_percent_blur ) = $thumbnail_sizes[$size_name];
-
-	$Filetype = & $File->get_Filetype();
-	// pre_dump( $Filetype );
-	// TODO: dh> Filetype may be NULL here! see also r1.18 (IIRC)
-	$mimetype = $Filetype->mimetype;
-	// pre_dump( $mimetype );
-
-	// Try to output the cached thumbnail:
-	$err = $File->output_cached_thumb( $size_name, $mimetype, $mtime, $size_x );
-	//pre_dump( $err );
-
-	if( $err == '!Thumbnail not found in'.$Settings->get( 'evocache_foldername' ) )
-	{	// The thumbnail wasn't already in the cache, try to generate and cache it now:
-		$err = NULL;		// Short error code
-
-		list( $src_width, $src_height ) = imgsize( $File->get_full_path() );
-
-		if( ! $resample_all_images && check_thumbnail_sizes( $thumb_type, $thumb_width, $thumb_height, $src_width, $src_height ) )
-		{ // There is no need to resample, use original!
-			$err = $File->get_af_thumb_path( $size_name, $mimetype, true, $size_x );
-
-			if( $err[0] != '!' && @copy( $File->get_full_path(), $err ) )
-			{	// File was saved. Ouput that same file immediately:
-				// note: @copy returns FALSE on failure, if not muted it'll print the error on screen
-				$err = $File->output_cached_thumb( $size_name, $mimetype, $mtime, $size_x );
-			}
-		}
-		else
-		{ // Resample
-			list( $err, $src_imh ) = load_image( $File->get_full_path(), $mimetype );
-
-			if( empty( $err ) )
-			{
-				list( $err, $dest_imh ) = generate_thumb( $src_imh, $thumb_type, $thumb_width, $thumb_height, $thumb_percent_blur, $size_x );
-				if( empty( $err ) )
-				{
-					$err = $File->save_thumb_to_cache( $dest_imh, $size_name, $mimetype, $thumb_quality, $size_x );
-					if( empty( $err ) )
-					{	// File was saved. Ouput that same file immediately:
-						// This is probably better than recompressing the memory image..
-						$err = $File->output_cached_thumb( $size_name, $mimetype, $mtime, $size_x );
-					}
-					else
-					{	// File could not be saved.
-						// fp> We might want to output dynamically...
-						// $err = output_image( $dest_imh, $mimetype );
-					}
-				}
-			}
-		}
-	}
-
-	// ERROR IMAGE
-	if( !empty( $err ) )
-	{	// Generate an error image and try to squeeze an error message inside:
-		output_error_thumb( $err, $thumb_width, $thumb_height );
-	}
-}
-else
-{	// We want the regular file:
-	// Headers to display the file directly in the browser
-	if( ! is_readable($File->get_full_path()) )
-	{
-		debug_die( sprintf('File "%s" is not readable!', rel_path_to_base($File->get_full_path())) );
-	}
-
-	$Filetype = & $File->get_Filetype();
-	if( ! empty($Filetype) )
-	{
-		header('Content-type: '.$Filetype->mimetype );
-		if( $Filetype->viewtype == 'download' )
-		{
-			header('Content-disposition: attachment; filename="'
-				.addcslashes($File->get_name(), '\\"').'"' ); // escape quotes and slashes, according to RFC
-		}
-	}
-	$file_path = $File->get_full_path();
-	header('Content-Length: '.filesize( $file_path ) );
-
-	// The URL refers to this specific file, therefore we can tell the browser that
-	// it does not expire anytime soon.
-	// fp> I don't think mtime changes anything to the cacheability of the data
-	// if( $mtime && $mtime == $File->get_lastmod_ts() ) // TODO: dh> use salt here?! fp>what for?
-	header_noexpire();	// static file
-
-	// Display the content of the file
-	readfile( $file_path );
-}
-
-?>

@@ -8,7 +8,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $db_storage_charset;
@@ -22,10 +24,10 @@ global $db_storage_charset;
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-$schema_queries = array_merge( $schema_queries, array(
-	'T_templates' => array(
-		'Creating table for Templates',
-		"CREATE TABLE T_templates (
+$schema_queries = array_merge($schema_queries, [
+    'T_templates' => [
+        'Creating table for Templates',
+        "CREATE TABLE T_templates (
 			tpl_ID INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			tpl_name VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
 			tpl_code VARCHAR(128) COLLATE ascii_general_ci NULL DEFAULT NULL,
@@ -36,7 +38,5 @@ $schema_queries = array_merge( $schema_queries, array(
 			tpl_owner_grp_ID INT(4) NULL DEFAULT NULL,
 			PRIMARY KEY (tpl_ID),
 			UNIQUE tpl_code( tpl_code )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
-) );
-
-?>
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
+]);

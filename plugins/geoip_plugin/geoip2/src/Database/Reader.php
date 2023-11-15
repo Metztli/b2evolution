@@ -34,6 +34,7 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
 class Reader implements ProviderInterface
 {
     private $dbReader;
+
     private $locales;
 
     /**
@@ -245,7 +246,7 @@ class Reader implements ProviderInterface
                 "The address $ipAddress is not in the database."
             );
         }
-        if (!\is_array($record)) {
+        if (! \is_array($record)) {
             // This can happen on corrupt databases. Generally,
             // MaxMind\Db\Reader will throw a
             // MaxMind\Db\Reader\InvalidDatabaseException, but occasionally

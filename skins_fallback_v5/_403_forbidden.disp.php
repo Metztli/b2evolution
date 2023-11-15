@@ -11,15 +11,17 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $disp_detail, $baseurl, $app_name;
 
 echo '<div class="error_403">';
 
-echo '<h2>'.T_('403 Forbidden').'</h2>';
+echo '<h2>' . T_('403 Forbidden') . '</h2>';
 
-echo '<p>'.T_('You are not allowed to view the requested URL.').'</p>';
+echo '<p>' . T_('You are not allowed to view the requested URL.') . '</p>';
 
 // You may use this to further customize this page:
 // echo $disp_detail;
@@ -30,16 +32,14 @@ echo '</div>';
 echo '<div class="error_additional_content">';
 // --------------------------------- START OF CLOUD TAG --------------------------------
 // Call the coll_search_form widget:
-skin_widget( array(
-		// CODE for the widget:
-		'widget' => 'coll_tag_cloud',
-		// Optional display params:
-		'block_start' => '<div class="tag_cloud">',
-		'block_end' => '</div>',
-		'block_title_start' => '<h2>',
-		'block_title_end' => '</h2>',
-	) );
+skin_widget([
+    // CODE for the widget:
+    'widget' => 'coll_tag_cloud',
+    // Optional display params:
+    'block_start' => '<div class="tag_cloud">',
+    'block_end' => '</div>',
+    'block_title_start' => '<h2>',
+    'block_title_end' => '</h2>',
+]);
 // ---------------------------------- END OF CLOUD TAG ---------------------------------
 echo '</div>';
-
-?>

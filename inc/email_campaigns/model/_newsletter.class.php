@@ -13,9 +13,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 
 /**
@@ -25,193 +27,190 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class Newsletter extends DataObject
 {
-	var $name;
+    public $name;
 
-	var $label;
+    public $label;
 
-	var $active = 1;
+    public $active = 1;
 
-	var $order;
+    public $order;
 
-	var $owner_user_ID;
+    public $owner_user_ID;
 
-	var $owner_User = NULL;
+    public $owner_User = null;
 
-	var $perm_subscribe = 'anyone';
+    public $perm_subscribe = 'anyone';
 
-	var $perm_groups = '';
+    public $perm_groups = '';
 
-	/**
-	 * @var array IDs of subscribed users
-	 */
-	var $user_IDs = NULL;
+    /**
+     * @var array IDs of subscribed users
+     */
+    public $user_IDs = null;
 
-	/**
-	 * Constructor
-	 *
-	 * @param object table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_email__newsletter', 'enlt_', 'enlt_ID' );
+    /**
+     * Constructor
+     *
+     * @param object table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_email__newsletter', 'enlt_', 'enlt_ID');
 
-		if( $db_row === NULL )
-		{
-			if( is_logged_in() )
-			{	// Use current User for new creating Automation:
-				global $current_User;
-				$this->owner_User = $current_User;
-			}
-		}
-		else
-		{
-			$this->ID = $db_row->enlt_ID;
-			$this->name = $db_row->enlt_name;
-			$this->label = $db_row->enlt_label;
-			$this->active = $db_row->enlt_active;
-			$this->order = $db_row->enlt_order;
-			$this->owner_user_ID = $db_row->enlt_owner_user_ID;
-			$this->perm_subscribe = $db_row->enlt_perm_subscribe;
-			$this->perm_groups = $db_row->enlt_perm_groups;
-		}
-	}
+        if ($db_row === null) {
+            if (is_logged_in()) {	// Use current User for new creating Automation:
+                global $current_User;
+                $this->owner_User = $current_User;
+            }
+        } else {
+            $this->ID = $db_row->enlt_ID;
+            $this->name = $db_row->enlt_name;
+            $this->label = $db_row->enlt_label;
+            $this->active = $db_row->enlt_active;
+            $this->order = $db_row->enlt_order;
+            $this->owner_user_ID = $db_row->enlt_owner_user_ID;
+            $this->perm_subscribe = $db_row->enlt_perm_subscribe;
+            $this->perm_groups = $db_row->enlt_perm_groups;
+        }
+    }
 
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_email__campaign',
+                'fk' => 'ecmp_enlt_ID',
+                'msg' => T_('%d campaigns are linked to this list'),
+            ],
+            [
+                'table' => 'T_automation__newsletter',
+                'fk' => 'aunl_enlt_ID',
+                'msg' => T_('%d automations use this list'),
+            ],
+            [
+                'table' => 'T_automation__step',
+                'fk' => 'step_info',
+                'and_condition' => 'step_type IN ( "subscribe", "unsubscribe" )',
+                'msg' => T_('%d automation steps use this list'),
+            ],
+        ];
+    }
 
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table' => 'T_email__campaign', 'fk' => 'ecmp_enlt_ID', 'msg' => T_('%d campaigns are linked to this list') ),
-				array( 'table' => 'T_automation__newsletter', 'fk' => 'aunl_enlt_ID', 'msg' => T_('%d automations use this list') ),
-				array( 'table' => 'T_automation__step', 'fk' => 'step_info', 'and_condition' => 'step_type IN ( "subscribe", "unsubscribe" )', 'msg' => T_('%d automation steps use this list') ),
-			);
-	}
+    /**
+     * Get delete cascade settings
+     *
+     * @return array
+     */
+    public static function get_delete_cascades()
+    {
+        return [
+            [
+                'table' => 'T_email__newsletter_subscription',
+                'fk' => 'enls_enlt_ID',
+                'msg' => T_('%d user subscriptions'),
+            ],
+        ];
+    }
 
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        // Active:
+        param('enlt_active', 'integer', 0);
+        $this->set_from_Request('active');
 
-	/**
-	 * Get delete cascade settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_cascades()
-	{
-		return array(
-				array( 'table'=>'T_email__newsletter_subscription', 'fk'=>'enls_enlt_ID', 'msg'=>T_('%d user subscriptions') ),
-			);
-	}
+        if (param('enlt_name', 'string', null) !== null) {	// Name:
+            param_string_not_empty('enlt_name', T_('Please enter a list name.'));
+            $this->set_from_Request('name');
+        }
 
+        // Label:
+        param('enlt_label', 'string', null);
+        $this->set_from_Request('label', 'enlt_label', true);
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		// Active:
-		param( 'enlt_active', 'integer', 0 );
-		$this->set_from_Request( 'active' );
+        // Order:
+        param('enlt_order', 'integer', null);
+        $this->set_from_Request('order', 'enlt_order', true);
 
-		if( param( 'enlt_name', 'string', NULL ) !== NULL )
-		{	// Name:
-			param_string_not_empty( 'enlt_name', T_('Please enter a list name.') );
-			$this->set_from_Request( 'name' );
-		}
+        // Owner:
+        $enlt_owner_login = param('enlt_owner_login', 'string', null);
+        $UserCache = &get_UserCache();
+        $owner_User = &$UserCache->get_by_login($enlt_owner_login);
+        if (empty($owner_User)) {
+            param_error('owner_login', sprintf(T_('User &laquo;%s&raquo; does not exist!'), $enlt_owner_login));
+        } else {
+            $this->set('owner_user_ID', $owner_User->ID);
+            $this->owner_User = &$owner_User;
+        }
 
-		// Label:
-		param( 'enlt_label', 'string', NULL );
-		$this->set_from_Request( 'label', 'enlt_label', true );
+        // Self-subscribing:
+        param('enlt_perm_subscribe', 'string', true);
+        $this->set_from_Request('perm_subscribe');
 
-		// Order:
-		param( 'enlt_order', 'integer', NULL );
-		$this->set_from_Request( 'order', 'enlt_order', true );
+        if ($this->get('perm_subscribe') == 'group') {	// Allowed User Groups:
+            $perm_groups = param('enlt_perm_groups', 'array:integer');
+            $this->set('perm_groups', implode(',', $perm_groups));
+        }
 
-		// Owner:
-		$enlt_owner_login = param( 'enlt_owner_login', 'string', NULL );
-		$UserCache = & get_UserCache();
-		$owner_User = & $UserCache->get_by_login( $enlt_owner_login );
-		if( empty( $owner_User ) )
-		{
-			param_error( 'owner_login', sprintf( T_('User &laquo;%s&raquo; does not exist!'), $enlt_owner_login ) );
-		}
-		else
-		{
-			$this->set( 'owner_user_ID', $owner_User->ID );
-			$this->owner_User = & $owner_User;
-		}
+        return ! param_errors_detected();
+    }
 
-		// Self-subscribing:
-		param( 'enlt_perm_subscribe', 'string', true );
-		$this->set_from_Request( 'perm_subscribe' );
+    /**
+     * Get name of newsletter
+     *
+     * @return string Name of newsletter
+     */
+    public function get_name()
+    {
+        return $this->get('name');
+    }
 
-		if( $this->get( 'perm_subscribe' ) == 'group' )
-		{	// Allowed User Groups:
-			$perm_groups = param( 'enlt_perm_groups', 'array:integer' );
-			$this->set( 'perm_groups', implode( ',', $perm_groups ) );
-		}
+    /**
+     * Get owner User
+     *
+     * @return object|null|boolean Reference on cached owner User object, NULL - if request with empty ID, FALSE - if requested owner User does not exist
+     */
+    public function &get_owner_User()
+    {
+        if ($this->owner_User === null) {	// Load owner User into cache var:
+            $UserCache = &get_UserCache();
+            $this->owner_User = &$UserCache->get_by_ID($this->owner_user_ID, false, false);
+        }
 
-		return ! param_errors_detected();
-	}
+        return $this->owner_User;
+    }
 
+    /**
+     * Get IDs of users which are subscribed on this newsletter
+     *
+     * @return array User IDs
+     */
+    public function get_user_IDs()
+    {
+        if (empty($this->ID)) {
+            return [];
+        }
 
-	/**
-	 * Get name of newsletter
-	 *
-	 * @return string Name of newsletter
-	 */
-	function get_name()
-	{
-		return $this->get( 'name' );
-	}
+        if ($this->user_IDs === null) {	// Load user IDs from DB once and store in cache array:
+            global $DB;
+            $SQL = new SQL('Get IDs of users which are subscribed on the newsletter #' . $this->ID);
+            $SQL->SELECT('enls_user_ID');
+            $SQL->FROM('T_email__newsletter_subscription');
+            $SQL->WHERE('enls_enlt_ID = ' . $this->ID);
+            $SQL->WHERE_and('enls_subscribed = 1');
+            $this->user_IDs = $DB->get_col($SQL);
+        }
 
-
-	/**
-	 * Get owner User
-	 *
-	 * @return object|NULL|boolean Reference on cached owner User object, NULL - if request with empty ID, FALSE - if requested owner User does not exist
-	 */
-	function & get_owner_User()
-	{
-		if( $this->owner_User === NULL )
-		{	// Load owner User into cache var:
-			$UserCache = & get_UserCache();
-			$this->owner_User = & $UserCache->get_by_ID( $this->owner_user_ID, false, false );
-		}
-
-		return $this->owner_User;
-	}
-
-
-	/**
-	 * Get IDs of users which are subscribed on this newsletter
-	 *
-	 * @return array User IDs
-	 */
-	function get_user_IDs()
-	{
-		if( empty( $this->ID ) )
-		{
-			return array();
-		}
-
-		if( $this->user_IDs === NULL )
-		{	// Load user IDs from DB once and store in cache array:
-			global $DB;
-			$SQL = new SQL( 'Get IDs of users which are subscribed on the newsletter #'.$this->ID );
-			$SQL->SELECT( 'enls_user_ID' );
-			$SQL->FROM( 'T_email__newsletter_subscription' );
-			$SQL->WHERE( 'enls_enlt_ID = '.$this->ID );
-			$SQL->WHERE_and( 'enls_subscribed = 1' );
-			$this->user_IDs = $DB->get_col( $SQL );
-		}
-
-		return $this->user_IDs;
-	}
+        return $this->user_IDs;
+    }
 }
-
-?>

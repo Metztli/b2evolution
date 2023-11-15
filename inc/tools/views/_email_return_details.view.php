@@ -11,28 +11,28 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $MailReturn;
 
-$Form = new Form( NULL, 'mail_returns', 'post', 'compact' );
+$Form = new Form(null, 'mail_returns', 'post', 'compact');
 
-$Form->global_icon( T_('Cancel viewing!'), 'close', regenerate_url( 'blog' ) );
+$Form->global_icon(T_('Cancel viewing!'), 'close', regenerate_url('blog'));
 
-$Form->begin_form( 'fform', sprintf( T_('Returned mail ID#%s'), $MailReturn->emret_ID ) );
+$Form->begin_form('fform', sprintf(T_('Returned mail ID#%s'), $MailReturn->emret_ID));
 
-$Form->info( T_('Date'), mysql2localedatetime_spans( $MailReturn->emret_timestamp ) );
+$Form->info(T_('Date'), mysql2localedatetime_spans($MailReturn->emret_timestamp));
 
-$Form->info( T_('Error Type'), dre_decode_error_type( $MailReturn->emret_errtype ) );
+$Form->info(T_('Error Type'), dre_decode_error_type($MailReturn->emret_errtype));
 
-$Form->info( T_('Address'), '<pre class="email_log"><span>'.htmlspecialchars($MailReturn->emret_address).'</span></pre>' );
+$Form->info(T_('Address'), '<pre class="email_log"><span>' . htmlspecialchars($MailReturn->emret_address) . '</span></pre>');
 
-$Form->info( T_('Error'), '<pre class="email_log"><span>'.htmlspecialchars($MailReturn->emret_errormsg).'</span></pre>' );
+$Form->info(T_('Error'), '<pre class="email_log"><span>' . htmlspecialchars($MailReturn->emret_errormsg) . '</span></pre>');
 
-$Form->info( T_('Headers'), '<pre class="email_log_scroll"><span>'.htmlspecialchars($MailReturn->emret_headers).'</span></pre>' );
+$Form->info(T_('Headers'), '<pre class="email_log_scroll"><span>' . htmlspecialchars($MailReturn->emret_headers) . '</span></pre>');
 
-$Form->info( T_('Message'), '<pre class="email_log_scroll"><span>'.htmlspecialchars($MailReturn->emret_message).'</span></pre>' );
+$Form->info(T_('Message'), '<pre class="email_log_scroll"><span>' . htmlspecialchars($MailReturn->emret_message) . '</span></pre>');
 
 $Form->end_form();
-
-?>

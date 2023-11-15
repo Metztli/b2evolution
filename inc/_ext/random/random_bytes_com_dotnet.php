@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-if (!is_callable('random_bytes')) {
+if (! is_callable('random_bytes')) {
     /**
      * Windows with PHP < 5.3.0 will not have the function
      * openssl_random_pseudo_bytes() available, so let's use
@@ -57,7 +57,7 @@ if (!is_callable('random_bytes')) {
 
         /** @var string $buf */
         $buf = '';
-        if (!class_exists('COM')) {
+        if (! class_exists('COM')) {
             throw new Error(
                 'COM does not exist'
             );

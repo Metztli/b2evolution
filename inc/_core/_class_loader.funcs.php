@@ -12,7 +12,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Dynamic list of class mapping.
@@ -21,22 +23,21 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  *
  * @var marray
  */
-$map_class_path = array();
+$map_class_path = [];
 
 /**
  * Autoload the required .class.php file when a class is accessed but not defined yet.
  * This gets hooked into spl_autoload_register (preferred) or called through __autoload.
  * Requires PHP5.
  */
-function evocms_autoload_class( $classname )
+function evocms_autoload_class($classname)
 {
-	global $map_class_path;
+    global $map_class_path;
 
-	$classname = strtolower($classname);
-	if( isset($map_class_path[$classname]) )
-	{
-		require_once $map_class_path[$classname];
-	}
+    $classname = strtolower($classname);
+    if (isset($map_class_path[$classname])) {
+        require_once $map_class_path[$classname];
+    }
 }
 
 
@@ -44,15 +45,12 @@ function evocms_autoload_class( $classname )
  * Use spl_autoload_register mechanism, if available (PHP>=5.1.2).
  * This way a stacked set of autoload functions can be used.
  */
-if( function_exists('spl_autoload_register') )
-{
-	// spl_autoload_register( 'var_dump' );
-	spl_autoload_register( 'evocms_autoload_class' );
-}
-else
-{
-	// PHP<5.1.2: Use the fallback method. Function in a separate file as by simply adding it here would generate deprecated warning
-	load_funcs( '_core/fallback/_autoload.funcs.php' );
+if (function_exists('spl_autoload_register')) {
+    // spl_autoload_register( 'var_dump' );
+    spl_autoload_register('evocms_autoload_class');
+} else {
+    // PHP<5.1.2: Use the fallback method. Function in a separate file as by simply adding it here would generate deprecated warning
+    load_funcs('_core/fallback/_autoload.funcs.php');
 }
 
 
@@ -61,14 +59,11 @@ else
  * It only registers the class & file name so that PHP can later load the class
  * IF and ONLY IF the class is actually needed during execution.
  */
-function load_class( $class_path, $classname )
+function load_class($class_path, $classname)
 {
-	global $map_class_path, $inc_path;
-	if( !is_null($classname) )
-	{
-		$map_class_path[strtolower($classname)] = $inc_path.$class_path;
-	}
-	return true;
+    global $map_class_path, $inc_path;
+    if (! is_null($classname)) {
+        $map_class_path[strtolower($classname)] = $inc_path . $class_path;
+    }
+    return true;
 }
-
-?>

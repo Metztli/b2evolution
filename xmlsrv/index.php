@@ -10,6 +10,4 @@
  * @copyright (c)2003-2020 by Francois Planque - {@link http://fplanque.com/}
  */
 
-require dirname(__FILE__).'/xmlrpc.php';
-
-?>
+require dirname(__FILE__) . '/xmlrpc.php';

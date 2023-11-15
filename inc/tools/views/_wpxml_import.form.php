@@ -13,38 +13,43 @@
  * @package admin
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $WordpressImport;
 
-$Form = new Form( NULL, '', 'post', NULL, 'multipart/form-data' );
+$Form = new Form(null, '', 'post', null, 'multipart/form-data');
 
-$Form->begin_form( 'fform', TB_('WordPress XML Importer') );
+$Form->begin_form('fform', TB_('WordPress XML Importer'));
 
-$Form->begin_fieldset( TB_('Report of the import') );
+$Form->begin_fieldset(TB_('Report of the import'));
 
-	// Start to log:
-	$WordpressImport->start_log();
+// Start to log:
+$WordpressImport->start_log();
 
-	// Display info for the wordpress importer:
-	$WordpressImport->display_info( true );
+// Display info for the wordpress importer:
+$WordpressImport->display_info(true);
 
-	$form_buttons = array();
+$form_buttons = [];
 
-	if( $WordpressImport->info_data['errors'] === false )
-	{	// Import the data and display a report on the screen:
-		$WordpressImport->execute();
-		$import_Blog = & $WordpressImport->get_Blog();
-		$form_buttons[] = array( 'button', 'button', TB_('Go to collection').' >>', 'SaveButton', 'onclick' => 'location.href=\''.$import_Blog->get( 'url' ).'\'' );
-	}
+if ($WordpressImport->info_data['errors'] === false) {	// Import the data and display a report on the screen:
+    $WordpressImport->execute();
+    $import_Blog = &$WordpressImport->get_Blog();
+    $form_buttons[] = [
+        'button',
+        'button',
+        TB_('Go to collection') . ' >>',
+        'SaveButton',
+        'onclick' => 'location.href=\'' . $import_Blog->get('url') . '\'',
+    ];
+}
 
-	// End log:
-	$WordpressImport->end_log();
+// End log:
+$WordpressImport->end_log();
 
 $Form->end_fieldset();
 
-$Form->buttons( $form_buttons );
+$Form->buttons($form_buttons);
 
 $Form->end_form();
-
-?>

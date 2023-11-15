@@ -12,7 +12,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $edited_Automation, $admin_url;
@@ -21,38 +23,50 @@ global $edited_Automation, $admin_url;
 $steps = $edited_Automation->get_diagram_steps_data();
 
 // Check if current automation is active:
-$is_automation_active = ( $edited_Automation->get( 'status' ) == 'active' );
+$is_automation_active = ($edited_Automation->get('status') == 'active');
 
 // Display a button to play/pause current Automation:
-if( $is_automation_active )
-{	// To pause:
-	echo action_icon( T_('Pause'), 'pause',
-		$admin_url.'?ctrl=automations&amp;tab='.get_param( 'tab' ).'&amp;action=status_paused&amp;autm_ID='.$edited_Automation->ID.'&amp;'.url_crumb( 'automation' ),
-		' '.T_('Pause'), 3, 4, array( 'class' => 'btn btn-danger' ) )
-	.' <span class="red">('.T_('RUNNING').')</span>';
-}
-else
-{	// To play:
-	echo action_icon( T_('Play'), 'play',
-		$admin_url.'?ctrl=automations&amp;tab='.get_param( 'tab' ).'&amp;action=status_active&amp;autm_ID='.$edited_Automation->ID.'&amp;'.url_crumb( 'automation' ),
-		' '.T_('Play'), 3, 4, array( 'class' => 'btn btn-success' ) )
-	.' <span class="orange">('.T_('PAUSED').')</span>';
+if ($is_automation_active) {	// To pause:
+    echo action_icon(
+        T_('Pause'),
+        'pause',
+        $admin_url . '?ctrl=automations&amp;tab=' . get_param('tab') . '&amp;action=status_paused&amp;autm_ID=' . $edited_Automation->ID . '&amp;' . url_crumb('automation'),
+        ' ' . T_('Pause'),
+        3,
+        4,
+        [
+            'class' => 'btn btn-danger',
+        ]
+    )
+    . ' <span class="red">(' . T_('RUNNING') . ')</span>';
+} else {	// To play:
+    echo action_icon(
+        T_('Play'),
+        'play',
+        $admin_url . '?ctrl=automations&amp;tab=' . get_param('tab') . '&amp;action=status_active&amp;autm_ID=' . $edited_Automation->ID . '&amp;' . url_crumb('automation'),
+        ' ' . T_('Play'),
+        3,
+        4,
+        [
+            'class' => 'btn btn-success',
+        ]
+    )
+    . ' <span class="orange">(' . T_('PAUSED') . ')</span>';
 }
 
-if( count( $steps ) > 0 )
-{	// Display a button to reset a diagram layout to default positions:
-	echo '<a href="'.$admin_url.'?ctrl=automations&amp;action=reset_diagram&amp;autm_ID='.$edited_Automation->ID.'&amp;'.url_crumb( 'automationstep' ).'"'
-				.' class="btn btn-default pull-right" style="margin-left:5px"'
-				.' onclick="return confirm( \''.TS_('Are you sure you want to reset step positions to the default layout?').'\' )">'
-			.T_('Reset layout')
-		.'</a>';
+if (count($steps) > 0) {	// Display a button to reset a diagram layout to default positions:
+    echo '<a href="' . $admin_url . '?ctrl=automations&amp;action=reset_diagram&amp;autm_ID=' . $edited_Automation->ID . '&amp;' . url_crumb('automationstep') . '"'
+                . ' class="btn btn-default pull-right" style="margin-left:5px"'
+                . ' onclick="return confirm( \'' . TS_('Are you sure you want to reset step positions to the default layout?') . '\' )">'
+            . T_('Reset layout')
+        . '</a>';
 }
 
-echo '<a href="'.$admin_url.'?ctrl=automations&amp;action=reset_diagram&amp;autm_ID='.$edited_Automation->ID.'&amp;'.url_crumb( 'automationstep' ).'"'
-			.' class="btn btn-primary pull-right"'
-			.' onclick="return evo_add_new_automation_step()">'
-		.get_icon( 'new' ).' '.T_('New step')
-	.'</a>';
+echo '<a href="' . $admin_url . '?ctrl=automations&amp;action=reset_diagram&amp;autm_ID=' . $edited_Automation->ID . '&amp;' . url_crumb('automationstep') . '"'
+            . ' class="btn btn-primary pull-right"'
+            . ' onclick="return evo_add_new_automation_step()">'
+        . get_icon('new') . ' ' . T_('New step')
+    . '</a>';
 
 // Print out HTML boxes for steps and Initialise steps data to build connectors between steps by JS code below:
 echo '<div>';
@@ -63,14 +77,12 @@ echo '<div class="evo_panzoom__buttons">
 </div>';
 echo '<div id="evo_automation__diagram_panzoom">';
 echo '<div id="evo_automation__diagram_canvas" class="jtk-surface jtk-surface-nopan clear">';
-foreach( $steps as $step )
-{
-	// Print box of step with data:
-	echo '<div'.get_field_attribs_as_string( $step['attrs'] ).'>'
-		.'<b>#'.$step['order'].' '.step_get_type_title( $step['type'] ).':</b><br>'
-			.$step['label']
-		.'</div>'."\n";
-
+foreach ($steps as $step) {
+    // Print box of step with data:
+    echo '<div' . get_field_attribs_as_string($step['attrs']) . '>'
+        . '<b>#' . $step['order'] . ' ' . step_get_type_title($step['type']) . ':</b><br>'
+            . $step['label']
+        . '</div>' . "\n";
 }
 echo '</div>';
 echo '</div>';
@@ -84,7 +96,7 @@ function evo_add_new_automation_step()
 {
 	openModalWindow( '<span class="loader_img loader_file_edit absolute_center" title="<?php echo T_('Loading...'); ?>"></span>',
 		'80%', '', true,
-		'<?php echo TS_('New step').get_manual_link( 'automation-step-form' ); ?>',
+		'<?php echo TS_('New step') . get_manual_link('automation-step-form'); ?>',
 		'<?php echo TS_('Record'); ?>', true, true );
 	jQuery.ajax(
 	{
@@ -101,7 +113,7 @@ function evo_add_new_automation_step()
 		success: function( result )
 		{
 			openModalWindow( result, '80%', '',true,
-				'<?php echo TS_('New step').get_manual_link( 'automation-step-form' ); ?>',
+				'<?php echo TS_('New step') . get_manual_link('automation-step-form'); ?>',
 				'<?php echo TS_('Record'); ?>', false, true );
 		}
 	} );
@@ -133,7 +145,7 @@ jQuery( document ).ready( function()
 
 		openModalWindow( '<span class="loader_img loader_file_edit absolute_center" title="<?php echo T_('Loading...'); ?>"></span>',
 			'80%', '', true,
-			'<?php echo TS_('Step').get_manual_link( 'automation-step-form' ); ?>',
+			'<?php echo TS_('Step') . get_manual_link('automation-step-form'); ?>',
 			'<?php echo TS_('Save Changes!'); ?>', true, true );
 		jQuery.ajax(
 		{
@@ -150,7 +162,7 @@ jQuery( document ).ready( function()
 			success: function( result )
 			{
 				openModalWindow( result, '80%', '',true,
-					'<?php echo TS_('Step').get_manual_link( 'automation-step-form' ); ?>',
+					'<?php echo TS_('Step') . get_manual_link('automation-step-form'); ?>',
 					'<?php echo TS_('Save Changes!'); ?>', false, true );
 			}
 		} );
@@ -256,7 +268,7 @@ jsPlumb.ready( function ()
 						'action': 'update_step_position',
 						'step_ID': e.el.id.replace( 'step_', '' ),
 						'pos': e.pos,
-						'crumb_automationstep': '<?php echo get_crumb( 'automationstep' ); ?>',
+						'crumb_automationstep': '<?php echo get_crumb('automationstep'); ?>',
 					}
 				} );
 			}
@@ -287,16 +299,15 @@ jsPlumb.ready( function ()
 						'step_ID': b2evo_diagram_source_step_ID,
 						'connection_type': b2evo_diagram_connection_type,
 						'target_step_ID': updated_target_step_ID,
-						'crumb_automationstep': '<?php echo get_crumb( 'automationstep' ); ?>',
+						'crumb_automationstep': '<?php echo get_crumb('automationstep'); ?>',
 					}
 				} );
 			}
 		} );
 
 		<?php
-		if( $is_automation_active )
-		{	// Display an alert message if user tries to change a connector for active Automation:
-		?>
+        if ($is_automation_active) {	// Display an alert message if user tries to change a connector for active Automation:
+            ?>
 		instance.bind( 'endpointClick', function()
 		{	// Display an alert message if user tries to change a connector for active Automation:
 			alert( '<?php echo TS_('You should pause this Automation in order to edit it.'); ?>' );
@@ -327,22 +338,19 @@ jsPlumb.ready( function ()
 
 	// Initialise step boxes:
 	<?php
-	foreach( $steps as $step_ID => $step )
-	{
-		echo 'evo_jsplumb_init_step_box( \'step_'.$step_ID.'\' );'."\n\t";
-	}
-	?>
+    foreach ($steps as $step_ID => $step) {
+        echo 'evo_jsplumb_init_step_box( \'step_' . $step_ID . '\' );' . "\n\t";
+    }
+?>
 
 	// Initialise connections between steps:
 	<?php
-	foreach( $steps as $step_ID => $step )
-	{
-		foreach( $step['next_steps'] as $next_step_type => $next_step_ID )
-		{
-			echo 'instance.connect( { uuids: [\'step_'.$step_ID.'_'.$next_step_type.'\', \'step_'.$next_step_ID.'\'] } );'."\n\t";
-		}
-	}
-	?>
+foreach ($steps as $step_ID => $step) {
+    foreach ($step['next_steps'] as $next_step_type => $next_step_ID) {
+        echo 'instance.connect( { uuids: [\'step_' . $step_ID . '_' . $next_step_type . '\', \'step_' . $next_step_ID . '\'] } );' . "\n\t";
+    }
+}
+?>
 
 	// Initialise pan & zoom for diagram:
 	$panzoom = jQuery( '#evo_automation__diagram_panzoom' ).panzoom(

@@ -12,34 +12,35 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $zipname, $exclude_sd, $selected_Filelist;
 
-$Form = new Form( NULL, 'fm_download_checkchanges', 'post', 'compact' );
+$Form = new Form(null, 'fm_download_checkchanges', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel download!'), 'close', regenerate_url() );
+$Form->global_icon(TB_('Cancel download!'), 'close', regenerate_url());
 
-$Form->begin_form( 'fform', TB_('Download files in archive') );
-	$Form->hidden_ctrl();
-	$Form->hidden( 'action', 'download' );
-	$Form->hidden( 'action_invoked', 1 );
-	$Form->hiddens_by_key( get_memorized() );
+$Form->begin_form('fform', TB_('Download files in archive'));
+$Form->hidden_ctrl();
+$Form->hidden('action', 'download');
+$Form->hidden('action_invoked', 1);
+$Form->hiddens_by_key(get_memorized());
 
-	$Form->text_input( 'zipname', $zipname, 30, TB_('Archive filename'), TB_('End with .zip'),  array( 'maxlength' => '' ) );
+$Form->text_input('zipname', $zipname, 30, TB_('Archive filename'), TB_('End with .zip'), [
+    'maxlength' => '',
+]);
 
-	if( $selected_Filelist->count_dirs() )
-	{ // Allow to exclude dirs:
-		$Form->checkbox( 'exclude_sd', $exclude_sd, TB_('Exclude subdirectories'), TB_('This will exclude subdirectories of selected directories.') );
-	}
+if ($selected_Filelist->count_dirs()) { // Allow to exclude dirs:
+    $Form->checkbox('exclude_sd', $exclude_sd, TB_('Exclude subdirectories'), TB_('This will exclude subdirectories of selected directories.'));
+}
 
-	$Form->info( TB_('Files to include'), '<ul>'
-		.'<li>'.implode( "</li>\n<li>", $selected_Filelist->get_array( 'get_prefixed_name' ) )."</li>\n"
-		.'</ul>' );
+$Form->info(TB_('Files to include'), '<ul>'
+    . '<li>' . implode("</li>\n<li>", $selected_Filelist->get_array('get_prefixed_name')) . "</li>\n"
+    . '</ul>');
 
-$Form->end_form( array(
-		array( 'submit', 'submit', TB_('Download'), 'btn-primary' ),
-		array( 'button', 'button', TB_('Cancel'), 'btn-default', 'location.href=\''.regenerate_url( '', '', '', '&' ).'\'' ),
-	) );
-
-?>
+$Form->end_form([
+    ['submit', 'submit', TB_('Download'), 'btn-primary'],
+    ['button', 'button', TB_('Cancel'), 'btn-default', 'location.href=\'' . regenerate_url('', '', '', '&') . '\''],
+]);

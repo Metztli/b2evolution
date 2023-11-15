@@ -18,236 +18,223 @@
 /**
  * Load config, init and get the {@link $mode mode param}.
  */
-require_once dirname(__FILE__).'/../conf/_config.php';
-require_once $inc_path.'/_main.inc.php';
+require_once dirname(__FILE__) . '/../conf/_config.php';
+require_once $inc_path . '/_main.inc.php';
 
 
-if( ! isset($GLOBALS['files_Module']) )
-{
-	debug_die( 'Files module is disabled or missing!', array(
-			'status' => '501 Not Implemented',
-		) );
+if (! isset($GLOBALS['files_Module'])) {
+    debug_die('Files module is disabled or missing!', [
+        'status' => '501 Not Implemented',
+    ]);
 }
 
 // Check permission (#1):
-if( ! is_logged_in() )
-{
-	debug_die( 'No permissions to view file (not logged in)!', array(
-			'status' => '403 Forbidden',
-		) );
+if (! is_logged_in()) {
+    debug_die('No permissions to view file (not logged in)!', [
+        'status' => '403 Forbidden',
+    ]);
 }
 
 // We need this param early to check blog perms, if possible
-param( 'root', 'string', true, true ); // the root directory from the dropdown box (user_X or blog_X; X is ID - 'user' for current user (default))
-if( preg_match( '/^collection_(\d+)$/', $root, $perm_blog ) )
-{	// OK, we got a blog ID:
-	$perm_blog = $perm_blog[1];
-}
-else
-{	// No blog ID, we will check the global group perm
-	$perm_blog = NULL;
+param('root', 'string', true, true); // the root directory from the dropdown box (user_X or blog_X; X is ID - 'user' for current user (default))
+if (preg_match('/^collection_(\d+)$/', $root, $perm_blog)) {	// OK, we got a blog ID:
+    $perm_blog = $perm_blog[1];
+} else {	// No blog ID, we will check the global group perm
+    $perm_blog = null;
 }
 
 // Check permission (#2):
-check_user_perm( 'files', 'view', true, $perm_blog );
+check_user_perm('files', 'view', true, $perm_blog);
 
 // Initialize Font Awesome
 init_fontawesome_icons();
 
 // Load the other params:
-param( 'viewtype', 'string', true, true );
-param( 'path', 'filepath', true, true );
+param('viewtype', 'string', true, true);
+param('path', 'filepath', true, true);
 
 // Load fileroot infos
-$FileRootCache = & get_FileRootCache();
-$FileRoot = & $FileRootCache->get_by_ID( $root );
+$FileRootCache = &get_FileRootCache();
+$FileRoot = &$FileRootCache->get_by_ID($root);
 
 // Create file object
-$selected_File = new File( $FileRoot->type , $FileRoot->in_type_ID, $path, true );
+$selected_File = new File($FileRoot->type, $FileRoot->in_type_ID, $path, true);
 
 $action = param_action();
-switch( $action )
-{
-	case 'rotate_90_left':
-	case 'rotate_180':
-	case 'rotate_90_right':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'image' );
+switch ($action) {
+    case 'rotate_90_left':
+    case 'rotate_180':
+    case 'rotate_90_right':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('image');
 
-		load_funcs( 'files/model/_image.funcs.php' );
+        load_funcs('files/model/_image.funcs.php');
 
-		switch( $action )
-		{
-			case 'rotate_90_left':
-				$degrees = 90;
-				break;
-			case 'rotate_180':
-				$degrees = 180;
-				break;
-			case 'rotate_90_right':
-				$degrees = 270;
-				break;
-		}
+        switch ($action) {
+            case 'rotate_90_left':
+                $degrees = 90;
+                break;
+            case 'rotate_180':
+                $degrees = 180;
+                break;
+            case 'rotate_90_right':
+                $degrees = 270;
+                break;
+        }
 
-		if( rotate_image( $selected_File, $degrees ) )
-		{	// Image was rotated successfully
-			header_redirect( regenerate_url( 'action,crumb_image', 'action=reload_parent', '', '&' ) );
-		}
-		break;
+        if (rotate_image($selected_File, $degrees)) {	// Image was rotated successfully
+            header_redirect(regenerate_url('action,crumb_image', 'action=reload_parent', '', '&'));
+        }
+        break;
 
-	case 'flip_horizontal':
-	case 'flip_vertical':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'image' );
+    case 'flip_horizontal':
+    case 'flip_vertical':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('image');
 
-		load_funcs( 'files/model/_image.funcs.php' );
+        load_funcs('files/model/_image.funcs.php');
 
-		switch( $action )
-		{
-			case 'flip_horizontal':
-				$mode = 'horizontal';
-				break;
-			case 'flip_vertical':
-				$mode = 'vertical';
-				break;
-		}
+        switch ($action) {
+            case 'flip_horizontal':
+                $mode = 'horizontal';
+                break;
+            case 'flip_vertical':
+                $mode = 'vertical';
+                break;
+        }
 
-		if( flip_image( $selected_File, $mode ) )
-		{	// Image was rotated successfully
-			header_redirect( regenerate_url( 'action,crumb_image', 'action=reload_parent', '', '&' ) );
-		}
-		break;
+        if (flip_image($selected_File, $mode)) {	// Image was rotated successfully
+            header_redirect(regenerate_url('action,crumb_image', 'action=reload_parent', '', '&'));
+        }
+        break;
 
-	case 'reload_parent':
-		// Reload parent window to update rotated image
-		$JS_additional = 'window.opener.location.reload(true);';
-		break;
+    case 'reload_parent':
+        // Reload parent window to update rotated image
+        $JS_additional = 'window.opener.location.reload(true);';
+        break;
 }
 
 // Add CSS:
-require_css( 'basic_styles.css', 'rsc_url' ); // the REAL basic styles
-require_css( 'basic.css', 'rsc_url' ); // Basic styles
-require_css( 'viewfile.css', 'rsc_url' );
-require_css( '#bootstrap_css#', 'rsc_url' );
+require_css('basic_styles.css', 'rsc_url'); // the REAL basic styles
+require_css('basic.css', 'rsc_url'); // Basic styles
+require_css('viewfile.css', 'rsc_url');
+require_css('#bootstrap_css#', 'rsc_url');
 
 // Send the predefined cookies:
 evo_sendcookies();
 
-headers_content_mightcache( 'text/html' );		// In most situations, you do NOT want to cache dynamic content!
+headers_content_mightcache('text/html');		// In most situations, you do NOT want to cache dynamic content!
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xml:lang="<?php locale_lang() ?>" lang="<?php locale_lang() ?>">
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<title><?php echo $selected_File->dget('name').' ('./* TRANS: Noun */ T_('Preview').')'; ?></title>
+	<title><?php echo $selected_File->dget('name') . ' (' . /* TRANS: Noun */ T_('Preview') . ')'; ?></title>
 	<?php include_headlines() /* Add javascript and css files included by plugins and skin */ ?>
-<?php if( isset( $JS_additional ) ) { ?>
+<?php if (isset($JS_additional)) { ?>
 	<script><?php echo $JS_additional; ?></script>
 <?php } ?>
 </head>
 
 <body>
 	<?php
-	switch( $viewtype )
-	{
-		case 'image':
-			/*
-			* Image file view:
-			*/
-			echo '<div class="img_preview content-type-image">';
+    switch ($viewtype) {
+        case 'image':
+            /*
+            * Image file view:
+            */
+            echo '<div class="img_preview content-type-image">';
 
-			if( $imgSize = $selected_File->get_image_size( 'widthheight' ) )
-			{
-				echo '<img ';
-				if( $alt = $selected_File->dget( 'alt', 'htmlattr' ) )
-				{
-					echo 'alt="'.$alt.'" ';
-				}
-				if( $title = $selected_File->dget( 'title', 'htmlattr' ) )
-				{
-					echo 'title="'.$title.'" ';
-				}
-				echo 'src="'.$selected_File->get_url().'"'
-							.' width="'.$imgSize[0].'" height="'.$imgSize[1].'" />';
+            if ($imgSize = $selected_File->get_image_size('widthheight')) {
+                echo '<img ';
+                if ($alt = $selected_File->dget('alt', 'htmlattr')) {
+                    echo 'alt="' . $alt . '" ';
+                }
+                if ($title = $selected_File->dget('title', 'htmlattr')) {
+                    echo 'title="' . $title . '" ';
+                }
+                echo 'src="' . $selected_File->get_url() . '"'
+                            . ' width="' . $imgSize[0] . '" height="' . $imgSize[1] . '" />';
 
-				$url_rotate_90_left = regenerate_url( '', 'action=rotate_90_left'.'&'.url_crumb('image') );
-				$url_rotate_180 = regenerate_url( '', 'action=rotate_180'.'&'.url_crumb('image') );
-				$url_rotate_90_right = regenerate_url( '', 'action=rotate_90_right'.'&'.url_crumb('image') );
-				$url_flip_horizontal = regenerate_url( '', 'action=flip_horizontal'.'&'.url_crumb('image') );
-				$url_flip_vertical = regenerate_url( '', 'action=flip_vertical'.'&'.url_crumb('image') );
+                $url_rotate_90_left = regenerate_url('', 'action=rotate_90_left' . '&' . url_crumb('image'));
+                $url_rotate_180 = regenerate_url('', 'action=rotate_180' . '&' . url_crumb('image'));
+                $url_rotate_90_right = regenerate_url('', 'action=rotate_90_right' . '&' . url_crumb('image'));
+                $url_flip_horizontal = regenerate_url('', 'action=flip_horizontal' . '&' . url_crumb('image'));
+                $url_flip_vertical = regenerate_url('', 'action=flip_vertical' . '&' . url_crumb('image'));
 
-				echo '<div class="center">';
-				echo action_icon( T_('Rotate this picture 90&deg; to the left'), 'rotate_left', $url_rotate_90_left, '', 0, 0, array( 'style' => 'margin-right:4px' ) );
-				echo action_icon( T_('Rotate this picture 180&deg;'), 'rotate_180', $url_rotate_180, '', 0, 0, array( 'style' => 'margin-right:4px' ) );
-				echo action_icon( T_('Rotate this picture 90&deg; to the right'), 'rotate_right', $url_rotate_90_right, '', 0, 0, array( 'style' => 'margin-right:4px' ) );
-				echo action_icon( T_('Flip this picture horizontally'), 'flip_horizontal', $url_flip_horizontal, '', 0, 0, array( 'style' => 'margin-right:4px' ) );
-				echo action_icon( T_('Flip this picture vertically'), 'flip_vertical', $url_flip_vertical, '', 0, 0 );
-				echo '</div>';
+                echo '<div class="center">';
+                echo action_icon(T_('Rotate this picture 90&deg; to the left'), 'rotate_left', $url_rotate_90_left, '', 0, 0, [
+                    'style' => 'margin-right:4px',
+                ]);
+                echo action_icon(T_('Rotate this picture 180&deg;'), 'rotate_180', $url_rotate_180, '', 0, 0, [
+                    'style' => 'margin-right:4px',
+                ]);
+                echo action_icon(T_('Rotate this picture 90&deg; to the right'), 'rotate_right', $url_rotate_90_right, '', 0, 0, [
+                    'style' => 'margin-right:4px',
+                ]);
+                echo action_icon(T_('Flip this picture horizontally'), 'flip_horizontal', $url_flip_horizontal, '', 0, 0, [
+                    'style' => 'margin-right:4px',
+                ]);
+                echo action_icon(T_('Flip this picture vertically'), 'flip_vertical', $url_flip_vertical, '', 0, 0);
+                echo '</div>';
 
-				echo '<div class="subline">';
-				echo '<p><strong>'.$selected_File->dget( 'title' ).'</strong></p>';
-				echo '<p>'.$selected_File->dget( 'desc' ).'</p>';
-				echo '<p>'.$selected_File->dget('name').' &middot; ';
-				echo $selected_File->get_image_size().' &middot; ';
-				echo $selected_File->get_size_formatted().'</p>';
-				echo '</div>';
+                echo '<div class="subline">';
+                echo '<p><strong>' . $selected_File->dget('title') . '</strong></p>';
+                echo '<p>' . $selected_File->dget('desc') . '</p>';
+                echo '<p>' . $selected_File->dget('name') . ' &middot; ';
+                echo $selected_File->get_image_size() . ' &middot; ';
+                echo $selected_File->get_size_formatted() . '</p>';
+                echo '</div>';
+            } else {
+                echo 'error';
+            }
+            echo '&nbsp;</div>';
+            break;
 
-			}
-			else
-			{
-				echo 'error';
-			}
-			echo '&nbsp;</div>';
-			break;
+        case 'text':
+            echo '<div class="content-type-text">';
+            /*
+            * Text file view:
+            */
+            if (($buffer = @file($selected_File->get_full_path())) !== false) {	// Display raw file
+                param('showlinenrs', 'integer', 0);
 
-		case 'text':
-			echo '<div class="content-type-text">';
-			/*
-			* Text file view:
-			*/
-			if( ($buffer = @file( $selected_File->get_full_path() )) !== false )
-			{	// Display raw file
-				param( 'showlinenrs', 'integer', 0 );
+                $buffer_lines = count($buffer);
 
-				$buffer_lines = count( $buffer );
+                echo '<div class="fileheader">';
 
-				echo '<div class="fileheader">';
+                echo '<p>';
+                echo T_('File') . ': <strong>' . $selected_File->dget('name') . '</strong>';
+                echo ' &middot; ';
+                echo T_('Title') . ': <strong>' . $selected_File->dget('title') . '</strong>';
+                echo '</p>';
 
-				echo '<p>';
-				echo T_('File').': <strong>'.$selected_File->dget('name').'</strong>';
-				echo ' &middot; ';
-				echo T_('Title').': <strong>'.$selected_File->dget( 'title' ).'</strong>';
-				echo '</p>';
-
-				echo '<p>';
-				echo T_('Description').': '.$selected_File->dget( 'desc' );
-				echo '</p>';
+                echo '<p>';
+                echo T_('Description') . ': ' . $selected_File->dget('desc');
+                echo '</p>';
 
 
-				if( !$buffer_lines )
-				{
-					echo '<p>** '.T_('Empty file').'! ** </p></div>';
-				}
-				else
-				{
-					echo '<p>';
-					printf( T_('%d lines'), $buffer_lines );
+                if (! $buffer_lines) {
+                    echo '<p>** ' . T_('Empty file') . '! ** </p></div>';
+                } else {
+                    echo '<p>';
+                    printf(T_('%d lines'), $buffer_lines);
 
-					$linenr_width = strlen( $buffer_lines+1 );
+                    $linenr_width = strlen($buffer_lines + 1);
 
-					echo ' [';
-					?>
+                    echo ' [';
+                    ?>
 					<noscript>
-						<a href="<?php echo $selected_File->get_url().'&amp;showlinenrs='.(1-$showlinenrs); ?>">
+						<a href="<?php echo $selected_File->get_url() . '&amp;showlinenrs=' . (1 - $showlinenrs); ?>">
 
 						<?php echo $showlinenrs ? T_('Hide line numbers') : T_('Show line numbers');
-						?></a>
+                    ?></a>
 					</noscript>
 					<script>
 						<!--
 						document.write('<a id="togglelinenrs" href="javascript:toggle_linenrs()">toggle</a>');
 
-						showlinenrs = <?php var_export( !$showlinenrs ); ?>;
+						showlinenrs = <?php var_export(! $showlinenrs); ?>;
 
 						toggle_linenrs();
 
@@ -290,40 +277,36 @@ headers_content_mightcache( 'text/html' );		// In most situations, you do NOT wa
 					</script>
 					<?php
 
-					echo ']</p>';
-					echo '</div>';
+                    echo ']</p>';
+                    echo '</div>';
 
-					echo '<pre class="rawcontent">';
+                    echo '<pre class="rawcontent">';
 
-					for( $i = 0; $i < $buffer_lines; $i++ )
-					{
-						echo '<span name="linenr" class="linenr">';
-						if( $showlinenrs )
-						{
-							echo ' '.str_pad($i+1, $linenr_width, ' ', STR_PAD_LEFT).' ';
-						}
-						echo '</span>'.htmlspecialchars( str_replace( "\t", '  ', $buffer[$i] ) );  // TODO: customize tab-width
-					}
+                    for ($i = 0; $i < $buffer_lines; $i++) {
+                        echo '<span name="linenr" class="linenr">';
+                        if ($showlinenrs) {
+                            echo ' ' . str_pad($i + 1, $linenr_width, ' ', STR_PAD_LEFT) . ' ';
+                        }
+                        echo '</span>' . htmlspecialchars(str_replace("\t", '  ', $buffer[$i]));  // TODO: customize tab-width
+                    }
 
-				echo '</pre>';
+                    echo '</pre>';
 
-					echo '<div class="eof">** '.T_('End Of File').' **</div>';
-				}
-			}
-			else
-			{
-				echo '<p class="error">'.sprintf( T_('The file &laquo;%s&raquo; could not be accessed!'), $selected_File->get_rdfs_rel_path( $selected_File ) ).'</p>';
-			}
-			echo '</div>';
-			break;
+                    echo '<div class="eof">** ' . T_('End Of File') . ' **</div>';
+                }
+            } else {
+                echo '<p class="error">' . sprintf(T_('The file &laquo;%s&raquo; could not be accessed!'), $selected_File->get_rdfs_rel_path($selected_File)) . '</p>';
+            }
+            echo '</div>';
+            break;
 
-		default:
-			echo '<p class="error">'.sprintf( T_('The file &laquo;%s&raquo; could not be accessed!'), $selected_File->dget('name') ).'</p>';
-			break;
-	}
+        default:
+            echo '<p class="error">' . sprintf(T_('The file &laquo;%s&raquo; could not be accessed!'), $selected_File->dget('name')) . '</p>';
+            break;
+    }
 
-	// Add JavaScript and CSS files included by plugins and skin
-	include_footerlines();
+    // Add JavaScript and CSS files included by plugins and skin
+    include_footerlines();
 ?>
 </body>
 </html>

@@ -13,9 +13,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 
 /**
@@ -25,115 +27,112 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class Domain extends DataObject
 {
-	var $name;
+    public $name;
 
-	var $status;
+    public $status;
 
-	var $type;
+    public $type;
 
-	var $comment;
+    public $comment;
 
-	var $source_tag;
+    public $source_tag;
 
-	/**
-	 * Constructor
-	 *
-	 * @param object table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_basedomains', 'dom_', 'dom_ID' );
+    /**
+     * Constructor
+     *
+     * @param object table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_basedomains', 'dom_', 'dom_ID');
 
-		if( $db_row != NULL )
-		{
-			$this->ID = $db_row->dom_ID;
-			$this->name = $db_row->dom_name;
-			$this->status = $db_row->dom_status;
-			$this->type = $db_row->dom_type;
-			$this->comment = $db_row->dom_comment;
-			$this->source_tag = $db_row->dom_source_tag;
-		}
-	}
+        if ($db_row != null) {
+            $this->ID = $db_row->dom_ID;
+            $this->name = $db_row->dom_name;
+            $this->status = $db_row->dom_status;
+            $this->type = $db_row->dom_type;
+            $this->comment = $db_row->dom_comment;
+            $this->source_tag = $db_row->dom_source_tag;
+        }
+    }
 
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_hitlog',
+                'fk' => 'hit_referer_dom_ID',
+                'msg' => T_('%d hits from this domain in the hitlog'),
+            ],
+            [
+                'table' => 'T_users',
+                'fk' => 'user_email_dom_ID',
+                'msg' => T_('%d users have this as their email domain'),
+            ],
+        ];
+    }
 
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table'=>'T_hitlog', 'fk'=>'hit_referer_dom_ID', 'msg'=>T_('%d hits from this domain in the hitlog') ),
-				array( 'table'=>'T_users', 'fk'=>'user_email_dom_ID', 'msg'=>T_('%d users have this as their email domain') ),
-			);
-	}
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        param_string_not_empty('dom_name', T_('Please enter domain name.'));
+        $dom_name = ltrim(get_param('dom_name'), '.');
+        $this->set('name', $dom_name);
 
+        $dom_status = param('dom_status', 'string', true);
+        $this->set('status', $dom_status, true);
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		param_string_not_empty( 'dom_name', T_('Please enter domain name.') );
-		$dom_name = ltrim( get_param( 'dom_name' ), '.' );
-		$this->set( 'name', $dom_name );
+        $dom_type = param('dom_type', 'string', true);
+        $this->set('type', $dom_type, true);
 
-		$dom_status = param( 'dom_status', 'string', true );
-		$this->set( 'status', $dom_status, true );
+        $dom_comment = param('dom_comment', 'string', true);
+        $this->set('comment', $dom_comment, true);
 
-		$dom_type = param( 'dom_type', 'string', true );
-		$this->set( 'type', $dom_type, true );
+        $this->set('source_tag', param('dom_source_tag', 'string', null), true);
 
-		$dom_comment = param( 'dom_comment', 'string', true );
-		$this->set( 'comment', $dom_comment, true );
+        if (! param_errors_detected()) { // Check domains with the same name
+            global $Messages, $DB;
+            $SQL = new SQL('Check domain with same name');
+            $SQL->SELECT('dom_ID');
+            $SQL->FROM('T_basedomains');
+            $SQL->WHERE('dom_ID != ' . $this->ID);
+            $SQL->WHERE_and('dom_name = ' . $DB->quote($dom_name));
+            //$SQL->WHERE_and( 'dom_type = '.$DB->quote( $dom_type ) );
+            if ($DB->get_var($SQL)) {
+                param_error('dom_name', T_('Domain already exists with the same name.'));
+            }
+        }
 
-		$this->set( 'source_tag', param( 'dom_source_tag', 'string', NULL ), true );
+        return ! param_errors_detected();
+    }
 
-		if( ! param_errors_detected() )
-		{ // Check domains with the same name
-			global $Messages, $DB;
-			$SQL = new SQL( 'Check domain with same name' );
-			$SQL->SELECT( 'dom_ID' );
-			$SQL->FROM( 'T_basedomains' );
-			$SQL->WHERE( 'dom_ID != '.$this->ID );
-			$SQL->WHERE_and( 'dom_name = '.$DB->quote( $dom_name ) );
-			//$SQL->WHERE_and( 'dom_type = '.$DB->quote( $dom_type ) );
-			if( $DB->get_var( $SQL ) )
-			{
-				param_error( 'dom_name', T_('Domain already exists with the same name.') );
-			}
-		}
+    /**
+     * Delete object from DB.
+     *
+     * @return boolean true on success, false on failure to update
+     */
+    public function dbdelete()
+    {
+        global $DB;
 
-		return ! param_errors_detected();
-	}
+        $DB->begin();
 
+        if (($r = parent::dbdelete()) !== false) {
+            $DB->commit();
+        } else {
+            $DB->rollback();
+        }
 
-	/**
-	 * Delete object from DB.
-	 *
-	 * @return boolean true on success, false on failure to update
-	 */
-	function dbdelete()
-	{
-		global $DB;
-
-		$DB->begin();
-
-		if( ( $r = parent::dbdelete() ) !== false )
-		{
-			$DB->commit();
-		}
-		else
-		{
-			$DB->rollback();
-		}
-
-		return $r;
-	}
+        return $r;
+    }
 }
-
-?>

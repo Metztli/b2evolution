@@ -12,29 +12,33 @@
  *
  * @package messaging
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $Settings;
 
-$Form = new Form( NULL, 'msg_settings_general' );
+$Form = new Form(null, 'msg_settings_general');
 
-$Form->begin_form( 'fform', '' );
+$Form->begin_form('fform', '');
 
-	$Form->add_crumb( 'msgsettings' );
-	$Form->hidden( 'ctrl', 'msgsettings' );
-	$Form->hidden( 'action', 'update' );
-	$Form->hidden( 'tab', get_param( 'tab' ) );
+$Form->add_crumb('msgsettings');
+$Form->hidden('ctrl', 'msgsettings');
+$Form->hidden('action', 'update');
+$Form->hidden('tab', get_param('tab'));
 
-$Form->begin_fieldset( TB_( 'General settings' ).get_manual_link( 'messages-general-settings' ) );
+$Form->begin_fieldset(TB_('General settings') . get_manual_link('messages-general-settings'));
 
-	$Form->checkbox( 'allow_html_message', $Settings->get( 'allow_html_message' ),
-						TB_( 'Allow HTML' ), TB_( 'Check to allow HTML in messages.' ).' ('.TB_('HTML code will pass several sanitization filters.').')' );
+$Form->checkbox(
+    'allow_html_message',
+    $Settings->get('allow_html_message'),
+    TB_('Allow HTML'),
+    TB_('Check to allow HTML in messages.') . ' (' . TB_('HTML code will pass several sanitization filters.') . ')'
+);
 
 $Form->end_fieldset();
 
-$Form->buttons( array( array( 'submit', 'submit', TB_('Save Changes!'), 'SaveButton' ) ) );
+$Form->buttons([['submit', 'submit', TB_('Save Changes!'), 'SaveButton']]);
 
 $Form->end_form();
-
-?>

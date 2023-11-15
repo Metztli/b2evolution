@@ -11,87 +11,78 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $blog, $admin_url, $UserSettings;
 
 
 global $datestartinput, $datestart, $datestopinput, $datestop, $email;
 
-if( param_date( 'datestartinput', T_('Invalid date'), false,  NULL ) !== NULL )
-{ // We have a user provided localized date:
-	memorize_param( 'datestart', 'string', NULL, trim( form_date( $datestartinput ) ) );
-	memorize_param( 'datestartinput', 'string', NULL, empty( $datestartinput ) ? NULL : date( locale_datefmt(), strtotime( $datestartinput ) ) );
+if (param_date('datestartinput', T_('Invalid date'), false, null) !== null) { // We have a user provided localized date:
+    memorize_param('datestart', 'string', null, trim(form_date($datestartinput)));
+    memorize_param('datestartinput', 'string', null, empty($datestartinput) ? null : date(locale_datefmt(), strtotime($datestartinput)));
+} else { // We may have an automated param transmission date:
+    param('datestart', 'string', '', true);
 }
-else
-{ // We may have an automated param transmission date:
-	param( 'datestart', 'string', '', true );
+if (param_date('datestopinput', T_('Invalid date'), false, null) !== null) { // We have a user provided localized date:
+    memorize_param('datestop', 'string', null, trim(form_date($datestopinput)));
+    memorize_param('datestopinput', 'string', null, empty($datestopinput) ? null : date(locale_datefmt(), strtotime($datestopinput)));
+} else { // We may have an automated param transmission date:
+    param('datestop', 'string', '', true);
 }
-if( param_date( 'datestopinput', T_('Invalid date'), false, NULL ) !== NULL )
-{ // We have a user provided localized date:
-	memorize_param( 'datestop', 'string', NULL, trim( form_date( $datestopinput ) ) );
-	memorize_param( 'datestopinput', 'string', NULL, empty( $datestopinput ) ? NULL : date( locale_datefmt(), strtotime( $datestopinput ) ) );
-}
-else
-{ // We may have an automated param transmission date:
-	param( 'datestop', 'string', '', true );
-}
-param( 'email', 'string', '', true );
+param('email', 'string', '', true);
 
 // Create result set:
 
 $SQL = new SQL();
-$SQL->SELECT( 'SQL_NO_CACHE emret_ID, emret_timestamp, emret_address, emret_errormsg, emret_errtype' );
-$SQL->FROM( 'T_email__returns' );
+$SQL->SELECT('SQL_NO_CACHE emret_ID, emret_timestamp, emret_address, emret_errormsg, emret_errtype');
+$SQL->FROM('T_email__returns');
 
 $count_SQL = new SQL();
-$count_SQL->SELECT( 'SQL_NO_CACHE COUNT(emret_ID)' );
-$count_SQL->FROM( 'T_email__returns' );
+$count_SQL->SELECT('SQL_NO_CACHE COUNT(emret_ID)');
+$count_SQL->FROM('T_email__returns');
 
-if( !empty( $datestart ) )
-{	// Filter by start date
-	$SQL->WHERE_and( 'emret_timestamp >= '.$DB->quote( $datestart.' 00:00:00' ) );
-	$count_SQL->WHERE_and( 'emret_timestamp >= '.$DB->quote( $datestart.' 00:00:00' ) );
+if (! empty($datestart)) {	// Filter by start date
+    $SQL->WHERE_and('emret_timestamp >= ' . $DB->quote($datestart . ' 00:00:00'));
+    $count_SQL->WHERE_and('emret_timestamp >= ' . $DB->quote($datestart . ' 00:00:00'));
 }
-if( !empty( $datestop ) )
-{	// Filter by end date
-	$SQL->WHERE_and( 'emret_timestamp <= '.$DB->quote( $datestop.' 23:59:59' ) );
-	$count_SQL->WHERE_and( 'emret_timestamp <= '.$DB->quote( $datestop.' 23:59:59' ) );
+if (! empty($datestop)) {	// Filter by end date
+    $SQL->WHERE_and('emret_timestamp <= ' . $DB->quote($datestop . ' 23:59:59'));
+    $count_SQL->WHERE_and('emret_timestamp <= ' . $DB->quote($datestop . ' 23:59:59'));
 }
-if( !empty( $email ) )
-{	// Filter by email
-	$email = utf8_strtolower( $email );
-	$SQL->WHERE_and( 'emret_address LIKE '.$DB->quote( '%'.$email.'%' ) );
-	$count_SQL->WHERE_and( 'emret_address LIKE '.$DB->quote( '%'.$email.'%' ) );
+if (! empty($email)) {	// Filter by email
+    $email = utf8_strtolower($email);
+    $SQL->WHERE_and('emret_address LIKE ' . $DB->quote('%' . $email . '%'));
+    $count_SQL->WHERE_and('emret_address LIKE ' . $DB->quote('%' . $email . '%'));
 }
 
 
-$Results = new Results( $SQL->get(), 'emret_', 'D', $UserSettings->get( 'results_per_page' ), $count_SQL->get() );
+$Results = new Results($SQL->get(), 'emret_', 'D', $UserSettings->get('results_per_page'), $count_SQL->get());
 
-$Results->title = T_('Returned emails').get_manual_link( 'email-returned' );
+$Results->title = T_('Returned emails') . get_manual_link('email-returned');
 
 /**
  * Callback to add filters on top of the result set
  *
  * @param Form
  */
-function filter_email_return( & $Form )
+function filter_email_return(&$Form)
 {
-	global $datestart, $datestop, $email;
+    global $datestart, $datestop, $email;
 
-	$Form->date_input( 'datestartinput', $datestart, T_('From date') );
-	$Form->date_input( 'datestopinput', $datestop, T_('To date') );
-	$Form->text_input( 'email', $email, 40, T_('Email') );
+    $Form->date_input('datestartinput', $datestart, T_('From date'));
+    $Form->date_input('datestopinput', $datestop, T_('To date'));
+    $Form->text_input('email', $email, 40, T_('Email'));
 }
-$Results->filter_area = array(
-	'callback' => 'filter_email_return',
-	);
-$Results->register_filter_preset( 'all', T_('All'), $admin_url.'?ctrl=email&amp;tab=return' );
+$Results->filter_area = [
+    'callback' => 'filter_email_return',
+];
+$Results->register_filter_preset('all', T_('All'), $admin_url . '?ctrl=email&amp;tab=return');
 
 // Initialize Results object:
-email_returns_results( $Results );
+email_returns_results($Results);
 
 // Display results:
 $Results->display();
-
-?>

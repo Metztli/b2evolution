@@ -21,9 +21,11 @@
  * {@internal Below is a list of authors who have contributed to design/coding of this file: }}
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -34,116 +36,106 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class page_404_not_found_Widget extends ComponentWidget
 {
-	var $icon = 'question-circle-o';
+    public $icon = 'question-circle-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'page_404_not_found' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'page_404_not_found');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('page-404-not-found-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'page-404-not-found-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('404 Not Found');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('404 Not Found'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('404 Not Found');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display page "404 Not Found".');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+            'text' => [
+                'label' => T_('Text'),
+                'note' => '',
+                'type' => 'html_textarea',
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('404 Not Found') );
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $baseurl, $app_name;
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display page "404 Not Found".');
-	}
+        $this->init_display($params);
 
+        if (empty($this->disp_params['title'])) {	// Default title:
+            $this->disp_params['title'] = T_('404 Not Found');
+        }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_('Title'),
-					'size' => 40,
-					'note' => T_('This is the title to display'),
-					'defaultvalue' => '',
-				),
-				'text' => array(
-					'label' => T_('Text'),
-					'note' => '',
-					'type' => 'html_textarea',
-					'defaultvalue' => '',
-				),
-			), parent::get_param_definitions( $params ) );
+        if (empty($this->disp_params['text'])) {	// Default title:
+            $this->disp_params['text'] = sprintf(T_('%s cannot resolve the requested URL.'), '<a href="' . $baseurl . '">' . $app_name . '</a>');
+        }
 
-		return $r;
-	}
+        echo $this->disp_params['block_start'];
 
+        $this->disp_title();
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $baseurl, $app_name;
+        echo $this->disp_params['block_body_start'];
+        echo $this->disp_params['text'];
+        echo $this->disp_params['block_body_end'];
 
-		$this->init_display( $params );
+        echo $this->disp_params['block_end'];
 
-		if( empty( $this->disp_params['title'] ) )
-		{	// Default title:
-			$this->disp_params['title'] = T_('404 Not Found');
-		}
-
-		if( empty( $this->disp_params['text'] ) )
-		{	// Default title:
-			$this->disp_params['text'] = sprintf( T_('%s cannot resolve the requested URL.'), '<a href="'.$baseurl.'">'.$app_name.'</a>' );
-		}
-
-		echo $this->disp_params['block_start'];
-
-		$this->disp_title();
-
-		echo $this->disp_params['block_body_start'];
-		echo $this->disp_params['text'];
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

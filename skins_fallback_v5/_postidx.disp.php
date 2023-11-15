@@ -13,21 +13,21 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF POST LIST --------------------------------
-skin_widget( array(
-		// CODE for the widget:
-		'widget' => 'coll_post_list',
-		// Optional display params
-		'block_start' => '',
-		'block_end' => '',
-		'block_display_title' => false,
-		'order_by' => 'title',
-		'order_dir' => 'ASC',
-		'limit' => 1000,
-		'page' => param( 'coll_post_list_paged', 'integer', 1 ),
-	) );
+skin_widget([
+    // CODE for the widget:
+    'widget' => 'coll_post_list',
+    // Optional display params
+    'block_start' => '',
+    'block_end' => '',
+    'block_display_title' => false,
+    'order_by' => 'title',
+    'order_dir' => 'ASC',
+    'limit' => 1000,
+    'page' => param('coll_post_list_paged', 'integer', 1),
+]);
 // ---------------------------------- END OF POST LIST ---------------------------------
-
-?>

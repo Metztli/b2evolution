@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class('_core/ui/results/_results.class.php', 'Results' );
+load_class('_core/ui/results/_results.class.php', 'Results');
 
 /**
  * Data Object List Base Class
@@ -27,74 +29,73 @@ load_class('_core/ui/results/_results.class.php', 'Results' );
  */
 class DataObjectList extends Results
 {
+    /**
+     * The following should probably be obsoleted by Results::Cache
+     */
+    public $dbtablename;
 
-	/**
-	 * The following should probably be obsoleted by Results::Cache
-	 */
-	var	$dbtablename;
-	var $dbprefix;
-	var $dbIDname;
+    public $dbprefix;
 
-	/**
-	 * Class name of objects handled in this list
-	 */
-	var $objType;
+    public $dbIDname;
 
-	/**
-	 * Object array
-	 */
-	var $Obj = array();
+    /**
+     * Class name of objects handled in this list
+     */
+    public $objType;
 
+    /**
+     * Object array
+     */
+    public $Obj = [];
 
-	/**
-	 * Constructor
-	 *
-	 * If provided, executes SQL query via parent Results object
-	 *
-	 * @param string Name of table in database
-	 * @param string Prefix of fields in the table
-	 * @param string Name of the ID field (including prefix)
-	 * @param string Name of Class for objects within this list
-	 * @param string SQL query
-	 * @param integer number of lines displayed on one screen
-	 * @param string prefix to differentiate page/order params when multiple Results appear one same page
-	 * @param string default ordering of columns (special syntax)
-	 */
-	function __construct( $tablename, $prefix = '', $dbIDname = 'ID', $objType = 'Item', $sql = NULL,
-														$limit = 20, $param_prefix = '', $default_order = NULL )
-	{
-		$this->dbtablename = $tablename;
-		$this->dbprefix = $prefix;
-		$this->dbIDname = $dbIDname;
-		$this->objType = $objType;
+    /**
+     * Constructor
+     *
+     * If provided, executes SQL query via parent Results object
+     *
+     * @param string Name of table in database
+     * @param string Prefix of fields in the table
+     * @param string Name of the ID field (including prefix)
+     * @param string Name of Class for objects within this list
+     * @param string SQL query
+     * @param integer number of lines displayed on one screen
+     * @param string prefix to differentiate page/order params when multiple Results appear one same page
+     * @param string default ordering of columns (special syntax)
+     */
+    public function __construct(
+        $tablename,
+        $prefix = '',
+        $dbIDname = 'ID',
+        $objType = 'Item',
+        $sql = null,
+        $limit = 20,
+        $param_prefix = '',
+        $default_order = null
+    ) {
+        $this->dbtablename = $tablename;
+        $this->dbprefix = $prefix;
+        $this->dbIDname = $dbIDname;
+        $this->objType = $objType;
 
-		if( !is_null( $sql ) )
-		{	// We have an SQL query to execute:
-			parent::__construct( $sql, $param_prefix, $default_order, $limit );
-		}
-		else
-		{	// TODO: do we want to autogenerate a query here???
-			// Temporary...
-			parent::__construct( $sql, $param_prefix, $default_order, $limit );
-		}
-	}
+        if (! is_null($sql)) {	// We have an SQL query to execute:
+            parent::__construct($sql, $param_prefix, $default_order, $limit);
+        } else {	// TODO: do we want to autogenerate a query here???
+            // Temporary...
+            parent::__construct($sql, $param_prefix, $default_order, $limit);
+        }
+    }
 
-
-	/**
-	 * Get next object in list
-	 *
-	 * @return DataObject
-	 */
-	function & get_next()
-	{
-		if( $this->current_idx >= $this->result_num_rows )
-		{	// No more comment in list
-			$r = false;
-			return $r;
-		}
-		return $this->Obj[$this->current_idx++];
-	}
-
+    /**
+     * Get next object in list
+     *
+     * @return DataObject
+     */
+    public function &get_next()
+    {
+        if ($this->current_idx >= $this->result_num_rows) {	// No more comment in list
+            $r = false;
+            return $r;
+        }
+        return $this->Obj[$this->current_idx++];
+    }
 }
-
-?>

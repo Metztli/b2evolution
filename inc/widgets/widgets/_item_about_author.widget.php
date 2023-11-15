@@ -23,9 +23,11 @@
  *
  * @version $Id: _item_about_author.widget.php 10056 2015-10-16 12:47:15Z yura $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -36,291 +38,283 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class item_about_author_Widget extends ComponentWidget
 {
-	var $icon = 'user-o';
+    public $icon = 'user-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'item_about_author' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'item_about_author');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('about-author-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'about-author-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('About Author');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('About Author'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('About Author');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display information about item author.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        global $admin_url;
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('About Author') );
-	}
+        // Get available templates:
+        $context = 'item_details';
+        $TemplateCache = &get_TemplateCache();
+        $TemplateCache->load_by_context($context);
 
+        $template_options = [
+            null => T_('No template / use settings below') . ':',
+        ] + $TemplateCache->get_code_option_array();
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display information about item author.');
-	}
+        // Load Userfield class and all fields:
+        load_class('users/model/_userfield.class.php', 'Userfield');
+        $UserFieldCache = &get_UserFieldCache();
+        $UserFieldCache->load_all();
+        $user_fields = $UserFieldCache->get_option_array();
 
+        // Set default user field as "Micro bio"
+        $default_user_field_ID = 0;
+        foreach ($user_fields as $user_field_ID => $user_field_name) {
+            if ($user_field_name == 'Micro bio') {
+                $default_user_field_ID = $user_field_ID;
+                break;
+            }
+        }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		global $admin_url;
+        load_funcs('files/model/_image.funcs.php');
 
-		// Get available templates:
-		$context = 'item_details';
-		$TemplateCache = & get_TemplateCache();
-		$TemplateCache->load_by_context( $context );
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+            'template' => [
+                'label' => T_('Template'),
+                'type' => 'select',
+                'options' => $template_options,
+                'defaultvalue' => null,
+                'input_suffix' => (check_user_perm('options', 'edit') ? '&nbsp;'
+                        . action_icon(
+                            '',
+                            'edit',
+                            $admin_url . '?ctrl=templates&amp;context=' . $context,
+                            null,
+                            null,
+                            null,
+                            [
+                                'onclick' => 'return b2template_list_highlight( this )',
+                                'target' => '_blank',
+                            ],
+                            [
+                                'title' => T_('Manage templates') . '...',
+                            ]
+                        ) : ''),
+                'class' => 'evo_template_select',
+            ],
+            'thumb_size' => [
+                'label' => T_('Display user image'),
+                'note' => T_('Cropping and sizing of thumbnails'),
+                'type' => 'select',
+                'options' => [
+                    '' => T_('None'),
+                ] + get_available_thumb_sizes(),
+                'defaultvalue' => 'crop-top-48x48',
+            ],
+            'link_profile' => [
+                'label' => T_('Link to profile'),
+                'note' => T_('link profile picture to user profile'),
+                'type' => 'checkbox',
+                'defaultvalue' => 1,
+            ],
+            'user_field' => [
+                'label' => T_('Display user field'),
+                'note' => T_('Select what user field should be displayed'),
+                'type' => 'select',
+                'options' => [
+                    '' => T_('None'),
+                ] + $user_fields,
+                'defaultvalue' => $default_user_field_ID,
+            ],
+        ], parent::get_param_definitions($params));
 
-		$template_options = array( NULL => T_('No template / use settings below').':' ) + $TemplateCache->get_code_option_array();
+        return $r;
+    }
 
-		// Load Userfield class and all fields:
-		load_class( 'users/model/_userfield.class.php', 'Userfield' );
-		$UserFieldCache = & get_UserFieldCache();
-		$UserFieldCache->load_all();
-		$user_fields = $UserFieldCache->get_option_array();
+    /**
+     * Prepare display params
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function init_display($params)
+    {
+        global $preview;
 
-		// Set default user field as "Micro bio"
-		$default_user_field_ID = 0;
-		foreach( $user_fields as $user_field_ID => $user_field_name )
-		{
-			if( $user_field_name == 'Micro bio' )
-			{
-				$default_user_field_ID = $user_field_ID;
-				break;
-			}
-		}
+        parent::init_display($params);
 
-		load_funcs( 'files/model/_image.funcs.php' );
+        if ($preview) {	// Disable block caching for this widget when item is previewed currently:
+            $this->disp_params['allow_blockcache'] = 0;
+        }
+    }
 
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display' ),
-					'defaultvalue' => '',
-				),
-				'template' => array(
-					'label' => T_('Template'),
-					'type' => 'select',
-					'options' => $template_options,
-					'defaultvalue' => NULL,
-					'input_suffix' => ( check_user_perm( 'options', 'edit' ) ? '&nbsp;'
-							.action_icon( '', 'edit', $admin_url.'?ctrl=templates&amp;context='.$context, NULL, NULL, NULL,
-							array( 'onclick' => 'return b2template_list_highlight( this )', 'target' => '_blank' ),
-							array( 'title' => T_('Manage templates').'...' ) ) : '' ),
-					'class' => 'evo_template_select',
-				),
-				'thumb_size' => array(
-					'label' => T_('Display user image'),
-					'note' => T_('Cropping and sizing of thumbnails'),
-					'type' => 'select',
-					'options' => array( '' => T_('None') ) + get_available_thumb_sizes(),
-					'defaultvalue' => 'crop-top-48x48',
-				),
-				'link_profile' => array(
-					'label' => T_('Link to profile'),
-					'note' => T_('link profile picture to user profile'),
-					'type' => 'checkbox',
-					'defaultvalue' => 1,
-				),
-				'user_field' => array(
-					'label' => T_('Display user field'),
-					'note' => T_('Select what user field should be displayed'),
-					'type' => 'select',
-					'options' => array( '' => T_('None') ) + $user_fields,
-					'defaultvalue' => $default_user_field_ID,
-				),
-			), parent::get_param_definitions( $params ) );
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Item;
 
-		return $r;
-	}
+        if (empty($Item)) {	// Don't display this widget when no Item object:
+            $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because there is no Item object.');
+            return false;
+        }
 
+        $this->init_display($params);
 
-	/**
-	 * Prepare display params
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function init_display( $params )
-	{
-		global $preview;
+        if (empty($this->disp_params['template'])) {
+            if (empty($this->disp_params['user_field'])) {	// Not defined user field in the widget settings:
+                $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because there is no defined widget param "user_field".');
+                return false;
+            }
 
-		parent::init_display( $params );
+            // Load user fields
+            $creator_User = &$Item->get_creator_User();
+            $creator_User->userfields_load();
+            if (empty($creator_User->userfields_by_type[$this->disp_params['user_field']])) {	// No user field by ID for current author:
+                $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because there is no defined widget param "user_field".');
+                return false;
+            }
 
-		if( $preview )
-		{	// Disable block caching for this widget when item is previewed currently:
-			$this->disp_params['allow_blockcache'] = 0;
-		}
-	}
+            $user_info = '';
 
+            $user_info .= '<div class="evo_author_display_field">';
+            $user_info .= $creator_User->userfield_value_by_ID($this->disp_params['user_field']);
+            $user_info .= '</div>';
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Item;
+            if (empty($user_info)) {	// No user info:
+                $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because there is no user info.');
+                return false;
+            }
 
-		if( empty( $Item ) )
-		{	// Don't display this widget when no Item object:
-			$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because there is no Item object.' );
-			return false;
-		}
+            // Display user info only when it is defined for current author
+            echo add_tag_class($this->disp_params['block_start'], 'clearfix');
+            $this->disp_title();
+            echo $this->disp_params['block_body_start'];
 
-		$this->init_display( $params );
+            if (! empty($this->disp_params['thumb_size'])) {
+                echo '<div class="evo_avatar">';
 
-		if( empty( $this->disp_params['template'] ) )
-		{
-			if( empty( $this->disp_params['user_field'] ) )
-			{	// Not defined user field in the widget settings:
-				$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because there is no defined widget param "user_field".' );
-				return false;
-			}
+                $user_url = $this->disp_params['link_profile'] ? $creator_User->get_userpage_url() : '';
 
-			// Load user fields
-			$creator_User = & $Item->get_creator_User();
-			$creator_User->userfields_load();
-			if( empty( $creator_User->userfields_by_type[ $this->disp_params['user_field'] ] ) )
-			{	// No user field by ID for current author:
-				$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because there is no defined widget param "user_field".' );
-				return false;
-			}
+                if (! empty($user_url)) {
+                    echo '<a href="' . $user_url . '" class="user_link" rel="bubbletip_user_' . $creator_User->ID . '">';
+                }
 
-			$user_info = '';
+                echo $creator_User->get_avatar_imgtag($this->disp_params['thumb_size']);
+                if (! empty($user_url)) {
+                    echo '</a>';
+                }
 
-			$user_info .= '<div class="evo_author_display_field">';
-			$user_info .= $creator_User->userfield_value_by_ID( $this->disp_params['user_field'] );
-			$user_info .= '</div>';
+                echo '</div>';
+            }
+            echo $user_info;
 
-			if( empty( $user_info ) )
-			{	// No user info:
-				$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because there is no user info.' );
-				return false;
-			}
+            echo $this->disp_params['block_body_end'];
+            echo $this->disp_params['block_end'];
 
-			// Display user info only when it is defined for current author
-			echo add_tag_class( $this->disp_params['block_start'], 'clearfix' );
-			$this->disp_title();
-			echo $this->disp_params['block_body_start'];
+            return true;
+        } else {
+            $TemplateCache = &get_TemplateCache();
+            if (! $TemplateCache->get_by_code($this->disp_params['template'], false, false)) {
+                $this->display_error_message(sprintf('Template not found: %s', '<code>' . $this->disp_params['template'] . '</code>'));
+                return false;
+            }
 
-			if( ! empty( $this->disp_params['thumb_size'] ) )
-			{
-				echo '<div class="evo_avatar">';
+            $template = $this->disp_params['template'];
+            $item_author_User = &$Item->get_creator_User();
+            $rendered_template = render_template_code($template, $this->disp_params, [
+                'User' => $item_author_User,
+            ]);
 
-				$user_url = $this->disp_params['link_profile'] ? $creator_User->get_userpage_url() : '';
+            if (! empty($rendered_template)) {
+                // Display user info only when it is defined for current author
+                echo $this->disp_params['block_start'];
+                $this->disp_title();
+                echo $this->disp_params['block_body_start'];
 
-				if( ! empty( $user_url ) )
-				{
-					echo '<a href="'.$user_url.'" class="user_link" rel="bubbletip_user_'.$creator_User->ID.'">';
-				}
+                echo $rendered_template;
 
-				echo $creator_User->get_avatar_imgtag( $this->disp_params['thumb_size'] );
-				if( ! empty( $user_url ) )
-				{
-					echo '</a>';
-				}
+                echo $this->disp_params['block_body_end'];
+                echo $this->disp_params['block_end'];
 
-				echo '</div>';
-			}
-			echo $user_info;
+                return true;
+            }
 
-			echo $this->disp_params['block_body_end'];
-			echo $this->disp_params['block_end'];
+            $this->display_debug_message();
+            return false;
+        }
+    }
 
-			return true;
-		}
-		else
-		{
-			$TemplateCache = & get_TemplateCache();
-			if( ! $TemplateCache->get_by_code( $this->disp_params['template'], false, false ) )
-			{
-				$this->display_error_message( sprintf( 'Template not found: %s', '<code>'.$this->disp_params['template'].'</code>' ) );
-				return false;
-			}
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $Item;
 
-			$template = $this->disp_params['template'];
-			$item_author_User = & $Item->get_creator_User();
-			$rendered_template = render_template_code( $template, $this->disp_params, array( 'User' => $item_author_User ) );
+        if (! empty($Item) && ($creator_User = &$Item->get_creator_User()) !== false) { // Get ID of creator User
+            $creator_user_ID = $creator_User->ID;
+        } else { // Cannot get creator User by some reason
+            $creator_user_ID = 0;
+        }
 
-			if( ! empty( $rendered_template ) )
-			{
-				// Display user info only when it is defined for current author
-				echo $this->disp_params['block_start'];
-				$this->disp_title();
-				echo $this->disp_params['block_body_start'];
-
-				echo $rendered_template;
-
-				echo $this->disp_params['block_body_end'];
-				echo $this->disp_params['block_end'];
-
-				return true;
-			}
-			
-			$this->display_debug_message();
-			return false;
-		}
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $Item;
-
-		if( ! empty( $Item ) && ( $creator_User = & $Item->get_creator_User() ) !== false )
-		{ // Get ID of creator User
-			$creator_user_ID = $creator_User->ID;
-		}
-		else
-		{ // Cannot get creator User by some reason
-			$creator_user_ID = 0;
-		}
-
-		return array(
-				'wi_ID'       => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'user_ID'     => $creator_user_ID, // Has the creator User changed?
-				'item_ID'     => ( empty( $Item->ID ) ? 0 : $Item->ID ), // Has the Item page changed?
-				'template_code' => $this->get_param( 'template' ), // Has the Template changed?
-			);
-	}
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'user_ID' => $creator_user_ID, // Has the creator User changed?
+            'item_ID' => (empty($Item->ID) ? 0 : $Item->ID), // Has the Item page changed?
+            'template_code' => $this->get_param('template'), // Has the Template changed?
+        ];
+    }
 }
-
-?>

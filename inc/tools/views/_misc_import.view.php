@@ -13,49 +13,51 @@
  * @package admin
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$block_item_Widget = new Widget( 'block_item' );
+$block_item_Widget = new Widget('block_item');
 
 $block_item_Widget->title = T_('Markdown Import');
-$block_item_Widget->disp_template_replaced( 'block_start' );
+$block_item_Widget->disp_template_replaced('block_start');
 echo '<ul>';
-printf( '<li>'.T_('Use the <a %s>Markdown Importer</a> to import contents from <code>*.md</code> file.').'</li>', ' href="?ctrl=mdimport"' );
+printf('<li>' . T_('Use the <a %s>Markdown Importer</a> to import contents from <code>*.md</code> file.') . '</li>', ' href="?ctrl=mdimport"');
 echo '</ul>';
-$block_item_Widget->disp_template_raw( 'block_end' );
+$block_item_Widget->disp_template_raw('block_end');
 
 
 // fp> TODO: pluginize MT! :P
-$block_item_Widget->title = T_('Movable Type Import').get_manual_link( 'import-tab' );
-$block_item_Widget->disp_template_replaced( 'block_start' );
+$block_item_Widget->title = T_('Movable Type Import') . get_manual_link('import-tab');
+$block_item_Widget->disp_template_replaced('block_start');
 ?>
 	<ol>
 		<li><?php echo T_('Use MT\'s export functionnality to create a .TXT file containing your posts;') ?></li>
-		<li><?php printf( T_('Follow the instructions in <a %s>Daniel\'s Movable Type Importer</a>.'), ' href="?ctrl=mtimport"' ) ?></li>
+		<li><?php printf(T_('Follow the instructions in <a %s>Daniel\'s Movable Type Importer</a>.'), ' href="?ctrl=mtimport"') ?></li>
 	</ol>
 <?php
-$block_item_Widget->disp_template_raw( 'block_end' );
+$block_item_Widget->disp_template_raw('block_end');
 
 
 $block_item_Widget->title = T_('WordPress Import');
-$block_item_Widget->disp_template_replaced( 'block_start' );
+$block_item_Widget->disp_template_replaced('block_start');
 echo '<ul>';
-printf( '<li>'.T_('Use the <a %s>WordPress XML Importer</a> to import contents previously exported as a wordpress XML file.').'</li>', ' href="?ctrl=wpimportxml"' );
+printf('<li>' . T_('Use the <a %s>WordPress XML Importer</a> to import contents previously exported as a wordpress XML file.') . '</li>', ' href="?ctrl=wpimportxml"');
 echo '</ul>';
-$block_item_Widget->disp_template_raw( 'block_end' );
+$block_item_Widget->disp_template_raw('block_end');
 
 
 $block_item_Widget->title = TB_('Item Type Import');
-$block_item_Widget->disp_template_replaced( 'block_start' );
+$block_item_Widget->disp_template_replaced('block_start');
 echo '<ul>';
-printf( '<li>'.TB_('Use the <a %s>Item Type Importer</a> to import Item Type Definitions previously exported as XML file.').'</li>', ' href="?ctrl=itimport"' );
+printf('<li>' . TB_('Use the <a %s>Item Type Importer</a> to import Item Type Definitions previously exported as XML file.') . '</li>', ' href="?ctrl=itimport"');
 echo '</ul>';
-$block_item_Widget->disp_template_raw( 'block_end' );
+$block_item_Widget->disp_template_raw('block_end');
 
 
 $block_item_Widget->title = T_('phpBB Import');
-$block_item_Widget->disp_template_replaced( 'block_start' );
-printf( '<p>'.T_('You can import contents from your phpBB 2.x or 3.x database into your b2evolution database by using <a %s>phpBB Importer</a> or <a %s>phpBB 3 Importer</a> .').'</p>', ' href="?ctrl=phpbbimport"', ' href="?ctrl=phpbbimport&ver=3"' );
-$block_item_Widget->disp_template_raw( 'block_end' );
+$block_item_Widget->disp_template_replaced('block_start');
+printf('<p>' . T_('You can import contents from your phpBB 2.x or 3.x database into your b2evolution database by using <a %s>phpBB Importer</a> or <a %s>phpBB 3 Importer</a> .') . '</p>', ' href="?ctrl=phpbbimport"', ' href="?ctrl=phpbbimport&ver=3"');
+$block_item_Widget->disp_template_raw('block_end');
 
 ?>

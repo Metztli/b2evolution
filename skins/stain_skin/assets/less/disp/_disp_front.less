@@ -1,0 +1,205 @@
+// ======================================================================== /
+// Disp Front
+// ======================================================================== /
+.disp_front {
+
+    .evo_front_page {
+
+        .title_widget_front {
+            font-family: @font_heading;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .evo_widget {
+            background-color: @w;
+            box-shadow: @box-shadow;
+            padding: 40px;
+            margin-bottom: 30px;
+
+            @media screen and ( max-width: @S ) {
+                padding: 25px;
+            }
+
+            ul {
+                list-style-type: circle;
+                margin-left: 20px;
+                margin-bottom: 0;
+                padding: 0;
+
+                ul {
+                    margin: 0;
+                }
+
+                li {
+                    list-style-type: circle;
+                    padding: 0 5px 1.5rem 0;
+                    margin-bottom: 1.5rem;
+                    border-bottom: 1px solid @ce;
+
+                    &:last-child {
+                        padding-bottom: 0;
+                        margin-bottom: 0;
+                        border-bottom: none;
+                    }
+                }
+
+            }
+
+            & > ul:last-child > li:last-child {
+                margin-bottom: 0;
+            }
+
+            .form-group {
+
+                .control-label {
+                    padding-bottom: 5px;
+                }
+
+                .form_text_input {
+                    padding: 10px 15px;
+                    height: auto;
+                    border-radius: 2px;
+                    box-shadow: none;
+
+                    &:hover, &:active, &:focus {
+                        border-color: @primary;
+                    }
+                }
+            }
+
+            .panel {
+
+                .panel-body {
+                    .submit {
+                        padding: 10px 15px;
+                        border-radius: 2px;
+                        font-size: 1.1rem;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+
+                        &:hover, &:active, &:focus {
+                            background-color: @primary;
+                            color: @w;
+                            border-color: @primary;
+                        }
+                    }
+                }
+            }
+
+            // Widget
+            // ======================================================================== /
+            &.widget_core_coll_search_form {
+                .compact_search_form {
+                    .search_field {
+                        border-color: @primary;
+                    }
+
+                    .search_submit {
+                        padding-left: 30px;
+                        padding-right: 30px;
+                    }
+                }
+            }
+
+            &.widget_core_user_register,
+            &.widget_core_user_login {
+                .fieldset_wrapper {
+                    margin-top: 0 !important;
+                }
+
+                .panel-body {
+                    padding: 5px 0;
+                }
+            }
+
+        }
+
+    }
+
+    // CONTENT
+    // ======================================================================== /
+    #content {
+
+        .evo_front_page {
+            .widget_core_coll_featured_intro {
+
+                .featurepost {
+
+                    .evo_post_title {
+                        h2 {
+                            font-family: @font_heading;
+                            font-weight: 700;
+                            padding-top: 0;
+                        }
+
+                        .btn-group {
+                            padding-top: 0;
+                        }
+                    }
+
+                    .evo_post_header {
+                        padding: 0 !important;
+                        margin-bottom: 10px;
+                        border-bottom: 0;
+                        box-shadow: none;
+                    }
+
+                    .evo_image_block {
+                        margin: -20px -20px 20px;
+                    }
+
+                    .panel {
+                        padding: 20px;
+                        margin-bottom: 0;
+                        border-color: @e;
+                        box-shadow: none;
+                        border-radius: 2px;
+                        overflow: hidden;
+
+                        .evo_post__full_text {
+                            padding: 0;
+                        }
+
+                        .evo_post_attachments {
+                            h3 {
+                                font-family: @font_heading;
+                                font-weight: 700;
+                            }
+
+                            .evo_files {
+                                li {
+                                    padding-bottom: 1rem;
+                                    margin-bottom: 1rem;
+
+                                    &:last-child {
+                                        border-bottom: none;
+                                        padding-bottom: 0;
+                                        margin-bottom: 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .item_comments {
+                        padding: 0;
+                    }
+                }
+
+            }
+        }
+
+    }
+	
+	.evo_intro_post,
+	.featurepost {
+		.evo_post__full ul li {
+			border: none;
+			padding-bottom: 0;
+		}
+	}
+
+}

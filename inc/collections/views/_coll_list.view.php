@@ -11,10 +11,10 @@
  * @author blueyed: Daniel HAHLER
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Display all blogs results table
 blogs_all_results_block();
-load_funcs( 'collections/model/_blog_js.funcs.php' );
-
-?>
+load_funcs('collections/model/_blog_js.funcs.php');

@@ -11,7 +11,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var Goal
@@ -20,60 +22,70 @@ global $edited_Goal;
 
 // Determine if we are creating or updating...
 global $action;
-$creating = is_create_action( $action );
+$creating = is_create_action($action);
 
 // These params need to be memorized and passed through regenerated urls: (this allows to come back to the right list order & page)
-param( 'results_goals_page', 'integer', '', true );
-param( 'results_goals_order', 'string', '', true );
+param('results_goals_page', 'integer', '', true);
+param('results_goals_order', 'string', '', true);
 
-$Form = new Form( NULL, 'goal_checkchanges', 'post', 'compact' );
+$Form = new Form(null, 'goal_checkchanges', 'post', 'compact');
 
-if( ! $creating )
-{
-	$Form->global_icon( TB_('Delete this goal!'), 'delete', regenerate_url( 'action', 'action=delete&amp;'.url_crumb( 'goal' ) ) );
+if (! $creating) {
+    $Form->global_icon(TB_('Delete this goal!'), 'delete', regenerate_url('action', 'action=delete&amp;' . url_crumb('goal')));
 }
-$Form->global_icon( TB_('Cancel editing').'!', 'close', regenerate_url( 'action' ) );
+$Form->global_icon(TB_('Cancel editing') . '!', 'close', regenerate_url('action'));
 
-$Form->begin_form( 'fform', $creating ?  TB_('New goal') : TB_('Goal') );
+$Form->begin_form('fform', $creating ? TB_('New goal') : TB_('Goal'));
 
-	$Form->add_crumb( 'goal' );
-	$Form->hiddens_by_key( get_memorized( 'action'.( $creating ? ',goal_ID' : '' ) ) ); // (this allows to come back to the right list order & page)
+$Form->add_crumb('goal');
+$Form->hiddens_by_key(get_memorized('action' . ($creating ? ',goal_ID' : ''))); // (this allows to come back to the right list order & page)
 
-	$GoalCategoryCache = & get_GoalCategoryCache();
-	$GoalCategoryCache->load_all();
-	$Form->select_input_object( 'goal_gcat_ID', $edited_Goal->gcat_ID, $GoalCategoryCache, TB_('Category'), array( 'required' => true ) );
+$GoalCategoryCache = &get_GoalCategoryCache();
+$GoalCategoryCache->load_all();
+$Form->select_input_object('goal_gcat_ID', $edited_Goal->gcat_ID, $GoalCategoryCache, TB_('Category'), [
+    'required' => true,
+]);
 
-	$Form->text_input( 'goal_name', $edited_Goal->name, 40, TB_('Name'), '', array( 'maxlength'=> 50, 'required' => true ) );
+$Form->text_input('goal_name', $edited_Goal->name, 40, TB_('Name'), '', [
+    'maxlength' => 50,
+    'required' => true,
+]);
 
-	$Form->text_input( 'goal_key', $edited_Goal->key, 32, TB_('Key'), TB_('Should be URL friendly'), array( 'required' => true ) );
+$Form->text_input('goal_key', $edited_Goal->key, 32, TB_('Key'), TB_('Should be URL friendly'), [
+    'required' => true,
+]);
 
-	$Form->text_input( 'goal_redir_url', $edited_Goal->redir_url, 60, TB_('Normal Redirection URL'), '', array( 'maxlength' => 255, 'class' => 'large', 'required' => true ) );
+$Form->text_input('goal_redir_url', $edited_Goal->redir_url, 60, TB_('Normal Redirection URL'), '', [
+    'maxlength' => 255,
+    'class' => 'large',
+    'required' => true,
+]);
 
-	$Form->text_input( 'goal_temp_redir_url', $edited_Goal->temp_redir_url, 60, TB_('Temporary Redirection URL'), '', array( 'maxlength' => 255, 'class' => 'large' ) );
+$Form->text_input('goal_temp_redir_url', $edited_Goal->temp_redir_url, 60, TB_('Temporary Redirection URL'), '', [
+    'maxlength' => 255,
+    'class' => 'large',
+]);
 
-	$Form->begin_line( TB_('Temporary Start Date'), 'goal_temp_start_date' );
-		$Form->date_input( 'goal_temp_start_date', is_int( $edited_Goal->temp_start_ts ) ? date2mysql( $edited_Goal->temp_start_ts ) : $edited_Goal->temp_start_ts, '' );
-		$Form->time_input( 'goal_temp_start_time', is_int( $edited_Goal->temp_start_ts ) ? date2mysql( $edited_Goal->temp_start_ts ) : $edited_Goal->temp_start_ts, TB_('at') );
-	$Form->end_line();
+$Form->begin_line(TB_('Temporary Start Date'), 'goal_temp_start_date');
+$Form->date_input('goal_temp_start_date', is_int($edited_Goal->temp_start_ts) ? date2mysql($edited_Goal->temp_start_ts) : $edited_Goal->temp_start_ts, '');
+$Form->time_input('goal_temp_start_time', is_int($edited_Goal->temp_start_ts) ? date2mysql($edited_Goal->temp_start_ts) : $edited_Goal->temp_start_ts, TB_('at'));
+$Form->end_line();
 
-	$Form->begin_line( TB_('Temporary End Date'), 'goal_temp_end_date' );
-		$Form->date_input( 'goal_temp_end_date', is_int( $edited_Goal->temp_end_ts ) ? date2mysql( $edited_Goal->temp_end_ts ) : $edited_Goal->temp_end_ts, '' );
-		$Form->time_input( 'goal_temp_end_time', is_int( $edited_Goal->temp_end_ts ) ? date2mysql( $edited_Goal->temp_end_ts ) : $edited_Goal->temp_end_ts, TB_('at') );
-	$Form->end_line();
+$Form->begin_line(TB_('Temporary End Date'), 'goal_temp_end_date');
+$Form->date_input('goal_temp_end_date', is_int($edited_Goal->temp_end_ts) ? date2mysql($edited_Goal->temp_end_ts) : $edited_Goal->temp_end_ts, '');
+$Form->time_input('goal_temp_end_time', is_int($edited_Goal->temp_end_ts) ? date2mysql($edited_Goal->temp_end_ts) : $edited_Goal->temp_end_ts, TB_('at'));
+$Form->end_line();
 
-	$Form->text_input( 'goal_default_value', $edited_Goal->default_value, 15, TB_('Default value'), '' );
+$Form->text_input('goal_default_value', $edited_Goal->default_value, 15, TB_('Default value'), '');
 
-	$Form->textarea( 'goal_notes', $edited_Goal->get( 'notes' ), 15, TB_('Notes'), '', 50 );
+$Form->textarea('goal_notes', $edited_Goal->get('notes'), 15, TB_('Notes'), '', 50);
 
-if( $creating )
-{
-	$Form->end_form( array( array( 'submit', 'actionArray[create]', TB_('Record'), 'SaveButton' ),
-													array( 'submit', 'actionArray[create_new]', TB_('Record, then Create New'), 'SaveButton' ),
-													array( 'submit', 'actionArray[create_copy]', TB_('Record, then Create Similar'), 'SaveButton' ) ) );
-}
-else
-{
-	$Form->end_form( array( array( 'submit', 'actionArray[update]', TB_('Save Changes!'), 'SaveButton' ) ) );
+if ($creating) {
+    $Form->end_form([['submit', 'actionArray[create]', TB_('Record'), 'SaveButton'],
+        ['submit', 'actionArray[create_new]', TB_('Record, then Create New'), 'SaveButton'],
+        ['submit', 'actionArray[create_copy]', TB_('Record, then Create Similar'), 'SaveButton']]);
+} else {
+    $Form->end_form([['submit', 'actionArray[update]', TB_('Save Changes!'), 'SaveButton']]);
 }
 
 ?>

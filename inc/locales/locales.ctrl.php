@@ -12,173 +12,149 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Check minimum permission:
-check_user_perm( 'admin', 'normal', true );
-check_user_perm( 'options', 'view', true );
+check_user_perm('admin', 'normal', true);
+check_user_perm('options', 'view', true);
 
 load_funcs('locales/model/_translation.funcs.php');
 
 // Memorize this as the last "tab" used in the Global Settings:
-$UserSettings->set( 'pref_glob_settings_tab', $ctrl );
-$UserSettings->set( 'pref_glob_regional_tab', $ctrl );
+$UserSettings->set('pref_glob_settings_tab', $ctrl);
+$UserSettings->set('pref_glob_regional_tab', $ctrl);
 $UserSettings->dbupdate();
 
-$AdminUI->set_path( 'options', 'regional', 'locales' );
+$AdminUI->set_path('options', 'regional', 'locales');
 
 $action = param_action();
-param( 'edit_locale', 'string' );
-if( param( 'loc_transinfo', 'integer', NULL ) !== NULL )
-{ // Save visibility status of translation info in Session
-	$Session->set( 'loc_transinfo', $loc_transinfo );
-	$Session->dbsave();
+param('edit_locale', 'string');
+if (param('loc_transinfo', 'integer', null) !== null) { // Save visibility status of translation info in Session
+    $Session->set('loc_transinfo', $loc_transinfo);
+    $Session->dbsave();
 }
-$loc_transinfo = $Session->get( 'loc_transinfo' );
+$loc_transinfo = $Session->get('loc_transinfo');
 
 // Load all available locale defintions:
 locales_load_available_defs();
 
-switch( $action )
-{
-	case 'abort_update':
-		// Update was aborted
-		break;
+switch ($action) {
+    case 'abort_update':
+        // Update was aborted
+        break;
 
-	case 'update':
-	case 'confirm_update':
-		// UPDATE regional settings
+    case 'update':
+    case 'confirm_update':
+        // UPDATE regional settings
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
+        // Check permission:
+        check_user_perm('options', 'edit', true);
 
-		// If default locale has not been selected on form use default locale from config var $default_locale:
-		param( 'newdefault_locale', 'string', $default_locale );
-		$Settings->set( 'default_locale', $newdefault_locale );
+        // If default locale has not been selected on form use default locale from config var $default_locale:
+        param('newdefault_locale', 'string', $default_locale);
+        $Settings->set('default_locale', $newdefault_locale);
 
-		if( ( ! $Messages->has_errors() ) && ( locale_updateDB() ) )
-		{
-			$Settings->dbupdate();
-			$Messages->add( TB_('Regional settings updated.'), 'success' );
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		break;
+        if ((! $Messages->has_errors()) && (locale_updateDB())) {
+            $Settings->dbupdate();
+            $Messages->add(TB_('Regional settings updated.'), 'success');
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        break;
 
 
-	case 'updatelocale':
-	case 'createlocale':
-		// CREATE/EDIT locale
+    case 'updatelocale':
+    case 'createlocale':
+        // CREATE/EDIT locale
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
+        // Check permission:
+        check_user_perm('options', 'edit', true);
 
-		param( 'newloc_locale', 'string', true );
-		param_check_regexp( 'newloc_locale', '/^[a-z]{2,3}-[A-Z]{2}.*$/', TB_('Please use valid locale format.') );
-		param( 'newloc_enabled', 'integer', 0 );
-		param( 'newloc_name', 'string', true );
-		param( 'newloc_datefmt', 'string', true );
-		param_check_not_empty( 'newloc_datefmt', TB_('Date format cannot be empty.') );
-		param( 'newloc_longdatefmt', 'string', '' );
-		param( 'newloc_extdatefmt', 'string', '' );
-		param( 'newloc_input_datefmt', 'string', '' );
-		param( 'newloc_timefmt', 'string', true );
-		param_check_not_empty( 'newloc_timefmt', TB_('Time format cannot be empty.') );
-		param( 'newloc_shorttimefmt', 'string', true );
-		param( 'newloc_input_timefmt', 'string', '' );
-		param_check_not_empty( 'newloc_shorttimefmt', TB_('Short time format cannot be empty.') );
-		param( 'newloc_startofweek', 'integer', 0 );
-		param( 'newloc_priority', 'integer', 1 );
-		param_check_range( 'newloc_priority', 1, 255, TB_('Priority must be numeric (1-255).') );
-		param( 'newloc_messages', 'string', true );
-		param( 'newloc_transliteration_map', 'string', true );
+        param('newloc_locale', 'string', true);
+        param_check_regexp('newloc_locale', '/^[a-z]{2,3}-[A-Z]{2}.*$/', TB_('Please use valid locale format.'));
+        param('newloc_enabled', 'integer', 0);
+        param('newloc_name', 'string', true);
+        param('newloc_datefmt', 'string', true);
+        param_check_not_empty('newloc_datefmt', TB_('Date format cannot be empty.'));
+        param('newloc_longdatefmt', 'string', '');
+        param('newloc_extdatefmt', 'string', '');
+        param('newloc_input_datefmt', 'string', '');
+        param('newloc_timefmt', 'string', true);
+        param_check_not_empty('newloc_timefmt', TB_('Time format cannot be empty.'));
+        param('newloc_shorttimefmt', 'string', true);
+        param('newloc_input_timefmt', 'string', '');
+        param_check_not_empty('newloc_shorttimefmt', TB_('Short time format cannot be empty.'));
+        param('newloc_startofweek', 'integer', 0);
+        param('newloc_priority', 'integer', 1);
+        param_check_range('newloc_priority', 1, 255, TB_('Priority must be numeric (1-255).'));
+        param('newloc_messages', 'string', true);
+        param('newloc_transliteration_map', 'string', true);
 
-		if( empty( $newloc_longdatefmt ) )
-		{
-			$newloc_longdatefmt = str_replace( 'y', 'Y', $newloc_datefmt );
-		}
+        if (empty($newloc_longdatefmt)) {
+            $newloc_longdatefmt = str_replace('y', 'Y', $newloc_datefmt);
+        }
 
-		if( empty( $newloc_extdatefmt ) )
-		{
-			$newloc_extdatefmt = str_replace( 'm', 'M', $newloc_longdatefmt );
-			$newloc_extdatefmt = str_replace( array( '.', '-', '\\', '/' ), ' ', $newloc_extdatefmt );
-		}
+        if (empty($newloc_extdatefmt)) {
+            $newloc_extdatefmt = str_replace('m', 'M', $newloc_longdatefmt);
+            $newloc_extdatefmt = str_replace(['.', '-', '\\', '/'], ' ', $newloc_extdatefmt);
+        }
 
-		$date_format_regex = '/[^dDjmnYy:\.,\-_\/\\\\ ]/';
-		$time_format_regex = '/[^gGhHisu:\-_\., \/\\\\ ]/';
+        $date_format_regex = '/[^dDjmnYy:\.,\-_\/\\\\ ]/';
+        $time_format_regex = '/[^gGhHisu:\-_\., \/\\\\ ]/';
 
-		if( empty( $newloc_input_datefmt ) )
-		{
-			if( preg_match( $date_format_regex, $newloc_datefmt ) )
-			{
-				$newloc_input_datefmt = 'Y-m-d';
-			}
-			else
-			{
-				$newloc_input_datefmt = $newloc_datefmt;
-			}
-		}
-		elseif( preg_match( $date_format_regex, $newloc_input_datefmt ) )
-		{
-			param_error( 'newloc_input_datefmt', TB_('Invalid input date format.') );
-		}
+        if (empty($newloc_input_datefmt)) {
+            if (preg_match($date_format_regex, $newloc_datefmt)) {
+                $newloc_input_datefmt = 'Y-m-d';
+            } else {
+                $newloc_input_datefmt = $newloc_datefmt;
+            }
+        } elseif (preg_match($date_format_regex, $newloc_input_datefmt)) {
+            param_error('newloc_input_datefmt', TB_('Invalid input date format.'));
+        }
 
-		if( empty( $newloc_input_timefmt ) )
-		{
-			if( preg_match( $time_format_regex, $newloc_timefmt ) )
-			{
-				$newloc_input_timefmt = 'H:i:s';
-			}
-			else
-			{
-				$newloc_input_timefmt = $newloc_timefmt;
-			}
-		}
-		elseif( preg_match( $time_format_regex, $newloc_input_timefmt ) )
-		{
-			param_error( 'newloc_input_timefmt', TB_('Invalid input time format.') );
-		}
+        if (empty($newloc_input_timefmt)) {
+            if (preg_match($time_format_regex, $newloc_timefmt)) {
+                $newloc_input_timefmt = 'H:i:s';
+            } else {
+                $newloc_input_timefmt = $newloc_timefmt;
+            }
+        } elseif (preg_match($time_format_regex, $newloc_input_timefmt)) {
+            param_error('newloc_input_timefmt', TB_('Invalid input time format.'));
+        }
 
 
-		if( param_errors_detected() )
-		{ // Don't save locale if errors exist
-			$action = 'edit';
-			break;
-		}
+        if (param_errors_detected()) { // Don't save locale if errors exist
+            $action = 'edit';
+            break;
+        }
 
-		if( $action == 'updatelocale' )
-		{
-			param( 'oldloc_locale', 'string', true );
+        if ($action == 'updatelocale') {
+            param('oldloc_locale', 'string', true);
 
-			if( $DB->get_var( 'SELECT loc_locale FROM T_locales WHERE loc_locale = '.$DB->quote( $oldloc_locale ) ) )
-			{ // old locale exists in DB
-				if( $oldloc_locale != $newloc_locale )
-				{ // locale key was renamed, we delete the old locale in DB and remember to create the new one
-					$q = $DB->query( 'DELETE FROM T_locales
-															WHERE loc_locale = '.$DB->quote( $oldloc_locale ) );
-					if( $DB->rows_affected )
-					{
-						$Messages->add( sprintf( TB_('Deleted settings for locale &laquo;%s&raquo; in database.'), $oldloc_locale ), 'success' );
-					}
-				}
-			}
-			elseif( isset( $locales[ $oldloc_locale ] ) )
-			{ // old locale is not in DB yet. Insert it.
+            if ($DB->get_var('SELECT loc_locale FROM T_locales WHERE loc_locale = ' . $DB->quote($oldloc_locale))) { // old locale exists in DB
+                if ($oldloc_locale != $newloc_locale) { // locale key was renamed, we delete the old locale in DB and remember to create the new one
+                    $q = $DB->query('DELETE FROM T_locales
+															WHERE loc_locale = ' . $DB->quote($oldloc_locale));
+                    if ($DB->rows_affected) {
+                        $Messages->add(sprintf(TB_('Deleted settings for locale &laquo;%s&raquo; in database.'), $oldloc_locale), 'success');
+                    }
+                }
+            } elseif (isset($locales[$oldloc_locale])) { // old locale is not in DB yet. Insert it.
+                $transliteration_map = '';
+                if (isset($locales[$oldloc_locale]['transliteration_map']) && is_array($locales[$oldloc_locale]['transliteration_map'])) {
+                    $transliteration_map = base64_encode(serialize($locales[$oldloc_locale]['transliteration_map']));
+                }
 
-				$transliteration_map = '';
-				if( isset( $locales[$oldloc_locale]['transliteration_map']) && is_array( $locales[$oldloc_locale]['transliteration_map'] ) )
-				{
-					$transliteration_map = base64_encode( serialize( $locales[$oldloc_locale]['transliteration_map'] ) );
-				}
-
-				$query = "INSERT INTO T_locales
+                $query = "INSERT INTO T_locales
 									( loc_locale, loc_datefmt, loc_longdatefmt, loc_extdatefmt, loc_input_datefmt, loc_timefmt, loc_shorttimefmt, loc_input_timefmt, loc_startofweek, loc_name, loc_messages, loc_priority, loc_transliteration_map, loc_enabled )
 									VALUES ( '$oldloc_locale',
 									'{$locales[$oldloc_locale]['datefmt']}',
@@ -193,394 +169,361 @@ switch( $action )
 									'{$locales[$oldloc_locale]['messages']}',
 									'{$locales[$oldloc_locale]['priority']}',
 									'$transliteration_map'";
-				if( $oldloc_locale != $newloc_locale )
-				{ // disable old locale
-					$query .= ', 0 )';
-					$Messages->add( sprintf( TB_('Inserted (and disabled) locale &laquo;%s&raquo; into database.'), $oldloc_locale ), 'success' );
-				}
-				else
-				{ // keep old state
-					$query .= ', '.( $locales[$oldloc_locale]['enabled'] ).' )';
-					$Messages->add( sprintf( TB_('Inserted locale &laquo;%s&raquo; into database.'), $oldloc_locale ), 'success' );
-				}
-				$q = $DB->query( $query );
-			}
-		}
+                if ($oldloc_locale != $newloc_locale) { // disable old locale
+                    $query .= ', 0 )';
+                    $Messages->add(sprintf(TB_('Inserted (and disabled) locale &laquo;%s&raquo; into database.'), $oldloc_locale), 'success');
+                } else { // keep old state
+                    $query .= ', ' . ($locales[$oldloc_locale]['enabled']) . ' )';
+                    $Messages->add(sprintf(TB_('Inserted locale &laquo;%s&raquo; into database.'), $oldloc_locale), 'success');
+                }
+                $q = $DB->query($query);
+            }
+        }
 
-		$query = 'REPLACE INTO T_locales
+        $query = 'REPLACE INTO T_locales
 							( loc_locale, loc_datefmt, loc_longdatefmt, loc_extdatefmt, loc_input_datefmt, loc_timefmt, loc_shorttimefmt, loc_input_timefmt,
 									loc_startofweek, loc_name, loc_messages, loc_priority, loc_transliteration_map, loc_enabled )
-							VALUES ( '.$DB->quote( $newloc_locale ).', '.$DB->quote( $newloc_datefmt ).', '.$DB->quote( $newloc_longdatefmt ).', '.$DB->quote( $newloc_extdatefmt ).', '.$DB->quote( $newloc_input_datefmt ).', '
-								.$DB->quote( $newloc_timefmt ).', '.$DB->quote( $newloc_shorttimefmt ).', '.$DB->quote( $newloc_input_timefmt ).', '.$DB->quote( $newloc_startofweek ).', '.$DB->quote( $newloc_name ).', '
-								.$DB->quote( $newloc_messages ).', '.$DB->quote( $newloc_priority ).', '.$DB->quote( $newloc_transliteration_map ).', '.$DB->quote( $newloc_enabled ).' )';
-		$q = $DB->query( $query );
-		$Messages->add( sprintf(TB_('Saved locale &laquo;%s&raquo;.'), $newloc_locale), 'success' );
+							VALUES ( ' . $DB->quote($newloc_locale) . ', ' . $DB->quote($newloc_datefmt) . ', ' . $DB->quote($newloc_longdatefmt) . ', ' . $DB->quote($newloc_extdatefmt) . ', ' . $DB->quote($newloc_input_datefmt) . ', '
+                                . $DB->quote($newloc_timefmt) . ', ' . $DB->quote($newloc_shorttimefmt) . ', ' . $DB->quote($newloc_input_timefmt) . ', ' . $DB->quote($newloc_startofweek) . ', ' . $DB->quote($newloc_name) . ', '
+                                . $DB->quote($newloc_messages) . ', ' . $DB->quote($newloc_priority) . ', ' . $DB->quote($newloc_transliteration_map) . ', ' . $DB->quote($newloc_enabled) . ' )';
+        $q = $DB->query($query);
+        $Messages->add(sprintf(TB_('Saved locale &laquo;%s&raquo;.'), $newloc_locale), 'success');
 
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-		// We have EXITed already at this point!!
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+        // We have EXITed already at this point!!
 
-		/*
-		// reload locales: an existing one could have been renamed (but we keep $evo_charset, which may have changed)
-		$old_evo_charset = $evo_charset;
-		unset( $locales );
-		include $conf_path.'_locales.php';
-		if( file_exists($conf_path.'_overrides_TEST.php') )
-		{ // also overwrite settings again:
-			include $conf_path.'_overrides_TEST.php';
-		}
-		$evo_charset = $old_evo_charset;
+        /*
+        // reload locales: an existing one could have been renamed (but we keep $evo_charset, which may have changed)
+        $old_evo_charset = $evo_charset;
+        unset( $locales );
+        include $conf_path.'_locales.php';
+        if( file_exists($conf_path.'_overrides_TEST.php') )
+        { // also overwrite settings again:
+            include $conf_path.'_overrides_TEST.php';
+        }
+        $evo_charset = $old_evo_charset;
 
-		// Load all available locale defintions:
-		locales_load_available_defs();
+        // Load all available locale defintions:
+        locales_load_available_defs();
 
-		// load locales from DB into $locales array:
-		locale_overwritefromDB();
-		*/
-		break;
+        // load locales from DB into $locales array:
+        locale_overwritefromDB();
+        */
+        break;
 
 
-	case 'reset':
-		// RESET locales in DB
+    case 'reset':
+        // RESET locales in DB
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
+        // Check permission:
+        check_user_perm('options', 'edit', true);
 
-		$nofile_locales = array();
-		if( is_array( $locales ) )
-		{
-			foreach( $locales as $del_locale_key => $del_locale )
-			{
-				$del_locale_messages = ( empty( $del_locale['messages'] ) ) ? $del_locale_key : str_replace( '-', '_', $del_locale['messages'] );
-				$del_locale_path = $locales_path.$del_locale_messages.'/'.$del_locale_key.'.locale.php';
-				if( ! file_exists( $del_locale_path ) )
-				{ // Don't reset/delete the locale without file on disk
-					$nofile_locales[] = $del_locale_key;
-					$Messages->add( sprintf( TB_('We cannot reload the locale %s because the file %s was not found.'), '<b>'.$del_locale_key.'</b>',  '<b>'.$del_locale_path.'</b>' ), 'error' );
-				}
-			}
-		}
+        $nofile_locales = [];
+        if (is_array($locales)) {
+            foreach ($locales as $del_locale_key => $del_locale) {
+                $del_locale_messages = (empty($del_locale['messages'])) ? $del_locale_key : str_replace('-', '_', $del_locale['messages']);
+                $del_locale_path = $locales_path . $del_locale_messages . '/' . $del_locale_key . '.locale.php';
+                if (! file_exists($del_locale_path)) { // Don't reset/delete the locale without file on disk
+                    $nofile_locales[] = $del_locale_key;
+                    $Messages->add(sprintf(TB_('We cannot reload the locale %s because the file %s was not found.'), '<b>' . $del_locale_key . '</b>', '<b>' . $del_locale_path . '</b>'), 'error');
+                }
+            }
+        }
 
-		// forget DB locales:
-		unset( $locales );
+        // forget DB locales:
+        unset($locales);
 
-		// Get all enabled locales before restoring:
-		$locale_SQL = new SQL( 'Get all enabled locales before restoring' );
-		$locale_SQL->SELECT( 'loc_locale' );
-		$locale_SQL->FROM( 'T_locales' );
-		$locale_SQL->WHERE( 'loc_enabled = 1' );
-		$enabled_locales = $DB->get_col( $locale_SQL );
+        // Get all enabled locales before restoring:
+        $locale_SQL = new SQL('Get all enabled locales before restoring');
+        $locale_SQL->SELECT('loc_locale');
+        $locale_SQL->FROM('T_locales');
+        $locale_SQL->WHERE('loc_enabled = 1');
+        $enabled_locales = $DB->get_col($locale_SQL);
 
-		// Delete locales that are not enabled and have no file currently:
-		$q = $DB->query( 'DELETE FROM T_locales
+        // Delete locales that are not enabled and have no file currently:
+        $q = $DB->query(
+            'DELETE FROM T_locales
 			WHERE loc_enabled != 1'
-			.( empty( $nofile_locales ) ? '' : ' AND loc_locale NOT IN ( '.$DB->quote( $nofile_locales ).' )' ),
-			'Delete locales that are not enabled and have no file currently' );
+            . (empty($nofile_locales) ? '' : ' AND loc_locale NOT IN ( ' . $DB->quote($nofile_locales) . ' )'),
+            'Delete locales that are not enabled and have no file currently'
+        );
 
-		if( ! isset( $locales[ $current_locale ] ) )
-		{ // activate default locale
-			locale_activate( $default_locale );
-		}
+        if (! isset($locales[$current_locale])) { // activate default locale
+            locale_activate($default_locale);
+        }
 
-		// reset default_locale
-		$Settings->set( 'default_locale', $default_locale );
-		$Settings->dbupdate();
+        // reset default_locale
+        $Settings->set('default_locale', $default_locale);
+        $Settings->dbupdate();
 
-		// Reload locales from files:
-		unset( $locales );
-		include $conf_path.'_locales.php';
-		if( file_exists( $conf_path.'_overrides_TEST.php' ) )
-		{ // also overwrite settings again (just in case we override some local erelated things):
-			include $conf_path.'_overrides_TEST.php';
-		}
+        // Reload locales from files:
+        unset($locales);
+        include $conf_path . '_locales.php';
+        if (file_exists($conf_path . '_overrides_TEST.php')) { // also overwrite settings again (just in case we override some local erelated things):
+            include $conf_path . '_overrides_TEST.php';
+        }
 
-		// Load all available locale defintions from locale folders:
-		$locales_loaded_form_disk = false; // Reset to FALSE in order to load all locales again, to use them in func below:
-		locales_load_available_defs();
+        // Load all available locale defintions from locale folders:
+        $locales_loaded_form_disk = false; // Reset to FALSE in order to load all locales again, to use them in func below:
+        locales_load_available_defs();
 
-		// Restore default values of the enabled locales:
-		locale_restore_defaults( $enabled_locales );
+        // Restore default values of the enabled locales:
+        locale_restore_defaults($enabled_locales);
 
-		$Messages->add( TB_('Locale definitions reset to defaults. (<code>/conf/_locales.php</code>)'), 'success' );
+        $Messages->add(TB_('Locale definitions reset to defaults. (<code>/conf/_locales.php</code>)'), 'success');
 
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-		// We have EXITed already at this point!!
-		break;
-
-
-	case 'extract':
-		// EXTRACT locale
-
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
-
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
-
-		// Get PO file for that edit_locale:
-		$AdminUI->append_to_titlearea( sprintf( TB_('Extracting language file for %s...'), '<b>'.$edit_locale.'</b>' ) );
-
-		$error = false;
-		$po_files['global']       = $locales_path.$locales[$edit_locale]['messages'].'/LC_MESSAGES/messages.po';
-		$po_files['backoffice']    = $locales_path.$locales[$edit_locale]['messages'].'/LC_MESSAGES/messages-backoffice.po';
-		$po_files['demo_contents'] = $locales_path.$locales[$edit_locale]['messages'].'/LC_MESSAGES/messages-demo-contents.po';
-		foreach( $po_files as $po_file )
-		{
-			if( ! is_file( $po_file ) )
-			{
-				$Messages->add( sprintf(TB_('File <code>%s</code> not found.'), '/'.$locales_subdir.$locales[$edit_locale]['messages'].'/LC_MESSAGES/messages.po'), 'error' );
-				$error = true;
-			}
-		}
-		if( $error )
-		{
-			break;
-		}
-
-		$outfiles['global'] = array(
-				'file'   => $locales_path.$locales[$edit_locale]['messages'].'/_global.php',
-				'title'  => 'Global lang file',
-				'source' => $po_files['global'],
-				'type'   => 'global',
-			);
-
-		$outfiles['backoffice'] = array(
-				'file'   => $locales_path.$locales[$edit_locale]['messages'].'/_back-office.php',
-				'title'  => 'Back-Office lang file',
-				'source' => $po_files['backoffice'],
-				'type'   => 'backoffice',
-			);
-
-		$outfiles['demo_contents'] = array(
-				'file'   => $locales_path.$locales[$edit_locale]['messages'].'/_demo-contents.php',
-				'title'  => 'Demo Contents lang file',
-				'source' => $po_files['demo_contents'],
-				'type'   => 'demo_content',
-			);
-
-		foreach( $outfiles as $key => $outfile )
-		if( file_exists( $outfile['file'] ) && ( !is_writable( $outfile['file'] ) ) )
-		{ // The '_global.php' file exists but it is not writable
-			$Messages->add( sprintf( TB_('The file %s is not writable.'), '<b>'.$outfile['file'].'</b>' ) );
-			$error = true;
-		}
-		if( $error )
-		{
-			break;
-		}
-
-		load_class( 'locales/_pofile.class.php', 'POFile' );
-
-		foreach( $outfiles as $key => $outfile )
-		{
-			$POFile = new POFile( $outfile['source'] );
-			$POFile->read( true ); // adds info about sources to $Messages
-			$POFile->write_evo_trans( $outfile['file'], $locales[$edit_locale]['messages'], array(
-					'title'  => $outfile['title'],
-					'source' => basename( $outfile['source'] ),
-					'type'   => $outfile['type'],
-				) );
-		}
-
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-		// We have EXITed already at this point!!
-		break;
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+        // We have EXITed already at this point!!
+        break;
 
 
-	case 'resetlocale':
-		// Reset a specific Locale:
+    case 'extract':
+        // EXTRACT locale
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
+        // Check permission:
+        check_user_perm('options', 'edit', true);
 
-		$edit_locale_messages = ( empty( $locales[ $edit_locale ]['messages'] ) ) ? $edit_locale : str_replace( '-', '_', $locales[ $edit_locale ]['messages'] );
-		$edit_locale_path = $locales_path.$edit_locale_messages.'/'.$edit_locale.'.locale.php';
-		if( ! file_exists( $edit_locale_path ) )
-		{ // Don't reset/delete the locale without file on disk
-			$Messages->add( sprintf( TB_('We cannot reload the locale %s because the file %s was not found.'), '<b>'.$edit_locale.'</b>',  '<b>'.$edit_locale_path.'</b>' ), 'error' );
-		}
-		else
-		{ // --- DELETE locale from DB
-			if( $DB->query( 'DELETE FROM T_locales
-												WHERE loc_locale = '.$DB->quote( $edit_locale ) ) )
-			{
-				$Messages->add( sprintf( TB_('The locale %s has been reloaded.'), '<b>'.$edit_locale.'</b>' ), 'success' );
-			}
-		}
+        // Get PO file for that edit_locale:
+        $AdminUI->append_to_titlearea(sprintf(TB_('Extracting language file for %s...'), '<b>' . $edit_locale . '</b>'));
 
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-		// We have EXITed already at this point!!
+        $error = false;
+        $po_files['global'] = $locales_path . $locales[$edit_locale]['messages'] . '/LC_MESSAGES/messages.po';
+        $po_files['backoffice'] = $locales_path . $locales[$edit_locale]['messages'] . '/LC_MESSAGES/messages-backoffice.po';
+        $po_files['demo_contents'] = $locales_path . $locales[$edit_locale]['messages'] . '/LC_MESSAGES/messages-demo-contents.po';
+        foreach ($po_files as $po_file) {
+            if (! is_file($po_file)) {
+                $Messages->add(sprintf(TB_('File <code>%s</code> not found.'), '/' . $locales_subdir . $locales[$edit_locale]['messages'] . '/LC_MESSAGES/messages.po'), 'error');
+                $error = true;
+            }
+        }
+        if ($error) {
+            break;
+        }
 
-		/*
-		// reload locales
-		unset( $locales );
-		require $conf_path.'_locales.php';
-		if( file_exists($conf_path.'_overrides_TEST.php') )
-		{ // also overwrite settings again:
-			include $conf_path.'_overrides_TEST.php';
-		}
+        $outfiles['global'] = [
+            'file' => $locales_path . $locales[$edit_locale]['messages'] . '/_global.php',
+            'title' => 'Global lang file',
+            'source' => $po_files['global'],
+            'type' => 'global',
+        ];
 
-		// Load all available locale defintions:
-		locales_load_available_defs();
+        $outfiles['backoffice'] = [
+            'file' => $locales_path . $locales[$edit_locale]['messages'] . '/_back-office.php',
+            'title' => 'Back-Office lang file',
+            'source' => $po_files['backoffice'],
+            'type' => 'backoffice',
+        ];
 
-		// load locales from DB into $locales array:
-		locale_overwritefromDB();
-		*/
-		break;
+        $outfiles['demo_contents'] = [
+            'file' => $locales_path . $locales[$edit_locale]['messages'] . '/_demo-contents.php',
+            'title' => 'Demo Contents lang file',
+            'source' => $po_files['demo_contents'],
+            'type' => 'demo_content',
+        ];
 
+        foreach ($outfiles as $key => $outfile) {
+            if (file_exists($outfile['file']) && (! is_writable($outfile['file']))) { // The '_global.php' file exists but it is not writable
+                $Messages->add(sprintf(TB_('The file %s is not writable.'), '<b>' . $outfile['file'] . '</b>'));
+                $error = true;
+            }
+        }
+        if ($error) {
+            break;
+        }
 
-	case 'delete':
-		// Delete a specific Locale from DB:
+        load_class('locales/_pofile.class.php', 'POFile');
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        foreach ($outfiles as $key => $outfile) {
+            $POFile = new POFile($outfile['source']);
+            $POFile->read(true); // adds info about sources to $Messages
+            $POFile->write_evo_trans($outfile['file'], $locales[$edit_locale]['messages'], [
+                'title' => $outfile['title'],
+                'source' => basename($outfile['source']),
+                'type' => $outfile['type'],
+            ]);
+        }
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
-
-		if( isset( $locales ) && isset( $locales[ $edit_locale ] ) &&
-		    ! empty( $locales[ $edit_locale ]['enabled'] ) )
-		{ // Don't delete the enabled locales
-			$Messages->add( sprintf( TB_('The locale %s is currently enabled.'), '<b>'.$edit_locale.'</b>' ), 'error' );
-		}
-		elseif( $edit_locale == 'en-US' )
-		{ // The default locale cannot be deleted, because it is defined in the file "/conf/_locales.php"
-			$Messages->add( sprintf( TB_('The locale %s cannot be deleted.'), '<b>'.$edit_locale.'</b>' ), 'error' );
-		}
-		else
-		{ // --- DELETE locale from DB
-			if( $DB->query( 'DELETE FROM T_locales
-												WHERE loc_locale = '.$DB->quote( $edit_locale ) ) )
-			{
-				$del_message = sprintf( TB_('The locale %s has been deleted from database.'), '<b>'.$edit_locale.'</b>' );
-				$del_message_status = 'success';
-				if( isset( $locales[ $edit_locale ] ) )
-				{
-					$edit_locale_path = $locales_path.str_replace( '-', '_', $locales[ $edit_locale ]['messages'] ).'/'.$edit_locale.'.locale.php';
-					if( file_exists( $edit_locale_path ) )
-					{ // Inform user about existing locale file
-						$del_message .= ' '.sprintf( TB_('To completely delete it, you should also delete the file %s from the server hard disk.'), '<b>'.$edit_locale_path.'</b>' );
-						$del_message_status = 'warning';
-					}
-				}
-				$Messages->add( $del_message, $del_message_status );
-			}
-		}
-
-		// Redirect so that a reload doesn't write to the DB twice:
-		header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-		// We have EXITed already at this point!!
-		break;
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+        // We have EXITed already at this point!!
+        break;
 
 
-	case 'prioup':
-	case 'priodown':
-		// --- SWITCH PRIORITIES -----------------
+    case 'resetlocale':
+        // Reset a specific Locale:
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
 
-		// Check permission:
-		check_user_perm( 'options', 'edit', true );
+        // Check permission:
+        check_user_perm('options', 'edit', true);
 
-		$switchcond = '';
-		if( $action == 'prioup' )
-		{
-			$switchcond = 'return ($lval[\'priority\'] > $i && $lval[\'priority\'] < $locales[ $edit_locale ][\'priority\']);';
-			$i = -1;
-		}
-		elseif( $action == 'priodown' )
-		{
-			$switchcond = 'return ($lval[\'priority\'] < $i && $lval[\'priority\'] > $locales[ $edit_locale ][\'priority\']);';
-			$i = 256;
-		}
+        $edit_locale_messages = (empty($locales[$edit_locale]['messages'])) ? $edit_locale : str_replace('-', '_', $locales[$edit_locale]['messages']);
+        $edit_locale_path = $locales_path . $edit_locale_messages . '/' . $edit_locale . '.locale.php';
+        if (! file_exists($edit_locale_path)) { // Don't reset/delete the locale without file on disk
+            $Messages->add(sprintf(TB_('We cannot reload the locale %s because the file %s was not found.'), '<b>' . $edit_locale . '</b>', '<b>' . $edit_locale_path . '</b>'), 'error');
+        } else { // --- DELETE locale from DB
+            if ($DB->query('DELETE FROM T_locales
+												WHERE loc_locale = ' . $DB->quote($edit_locale))) {
+                $Messages->add(sprintf(TB_('The locale %s has been reloaded.'), '<b>' . $edit_locale . '</b>'), 'success');
+            }
+        }
 
-		if( !empty($switchcond) )
-		{ // we want to switch priorities
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+        // We have EXITed already at this point!!
 
-			foreach( $locales as $lkey => $lval )
-			{ // find nearest priority
-				if( eval($switchcond) )
-				{
-					// remember it
-					$i = $lval['priority'];
-					$lswitchwith = $lkey;
-				}
-			}
-			if( $i > -1 && $i < 256 )
-			{ // switch
-				#echo 'Switching prio '.$locales[ $lswitchwith ]['priority'].' with '.$locales[ $lswitch ]['priority'].'<br />';
-				$locales[ $lswitchwith ]['priority'] = $locales[ $edit_locale ]['priority'];
-				$locales[ $edit_locale ]['priority'] = $i;
+        /*
+        // reload locales
+        unset( $locales );
+        require $conf_path.'_locales.php';
+        if( file_exists($conf_path.'_overrides_TEST.php') )
+        { // also overwrite settings again:
+            include $conf_path.'_overrides_TEST.php';
+        }
 
-				$lswitchwith_transliteration_map = is_array($locales[ $lswitchwith ]['transliteration_map']) ? base64_encode(serialize($locales[ $lswitchwith ]['transliteration_map'])) : '';
-				$edit_transliteration_map = is_array($locales[ $edit_locale ]['transliteration_map']) ? base64_encode(serialize($locales[ $edit_locale ]['transliteration_map'])) : '';
+        // Load all available locale defintions:
+        locales_load_available_defs();
 
-				$query = "REPLACE INTO T_locales ( loc_locale, loc_datefmt, loc_longdatefmt, loc_extdatefmt, loc_input_datefmt, loc_timefmt, loc_shorttimefmt, loc_input_timefmt, loc_name, loc_messages, loc_priority, loc_transliteration_map, loc_enabled ) VALUES
-					( '$edit_locale', '{$locales[ $edit_locale ]['datefmt']}', '{$locales[ $edit_locale ]['longdatefmt']}', '{$locales[ $edit_locale ]['extdatefmt']}', '{$locales[ $edit_locale ]['input_datefmt']}', '{$locales[ $edit_locale ]['timefmt']}', '{$locales[ $edit_locale ]['shorttimefmt']}', '{$locales[ $edit_locale ]['input_timefmt']}', '{$locales[ $edit_locale ]['name']}', '{$locales[ $edit_locale ]['messages']}', '{$locales[ $edit_locale ]['priority']}', '$edit_transliteration_map', '{$locales[ $edit_locale ]['enabled']}'),
-					( '$lswitchwith', '{$locales[ $lswitchwith ]['datefmt']}', '{$locales[ $lswitchwith ]['longdatefmt']}', '{$locales[ $lswitchwith ]['extdatefmt']}', '{$locales[ $lswitchwith ]['input_datefmt']}', '{$locales[ $lswitchwith ]['timefmt']}', '{$locales[ $lswitchwith ]['shorttimefmt']}', '{$locales[ $lswitchwith ]['input_timefmt']}', '{$locales[ $lswitchwith ]['name']}', '{$locales[ $lswitchwith ]['messages']}', '{$locales[ $lswitchwith ]['priority']}', '$lswitchwith_transliteration_map', '{$locales[ $lswitchwith ]['enabled']}')";
-				$q = $DB->query( $query );
-
-				$Messages->add( TB_('Switched priorities.'), 'success' );
-
-				// Redirect so that a reload doesn't write to the DB twice:
-				header_redirect( '?ctrl=locales'.( $loc_transinfo ? '&loc_transinfo=1' : '' ), 303 ); // Will EXIT
-				// We have EXITed already at this point!!
-			}
-
-			// load locales from DB into $locales array:
-			locale_overwritefromDB();
-		}
-		break;
+        // load locales from DB into $locales array:
+        locale_overwritefromDB();
+        */
+        break;
 
 
-	case 'generate_pot':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+    case 'delete':
+        // Delete a specific Locale from DB:
 
-		if( translation_generate_pot_file() )
-		{
-			$Messages->add( TB_('The file .POT was generated successfully'), 'success' );
-		}
-		header_redirect( '?ctrl=locales', 303 );
-		break;
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
+
+        // Check permission:
+        check_user_perm('options', 'edit', true);
+
+        if (isset($locales) && isset($locales[$edit_locale]) &&
+            ! empty($locales[$edit_locale]['enabled'])) { // Don't delete the enabled locales
+            $Messages->add(sprintf(TB_('The locale %s is currently enabled.'), '<b>' . $edit_locale . '</b>'), 'error');
+        } elseif ($edit_locale == 'en-US') { // The default locale cannot be deleted, because it is defined in the file "/conf/_locales.php"
+            $Messages->add(sprintf(TB_('The locale %s cannot be deleted.'), '<b>' . $edit_locale . '</b>'), 'error');
+        } else { // --- DELETE locale from DB
+            if ($DB->query('DELETE FROM T_locales
+												WHERE loc_locale = ' . $DB->quote($edit_locale))) {
+                $del_message = sprintf(TB_('The locale %s has been deleted from database.'), '<b>' . $edit_locale . '</b>');
+                $del_message_status = 'success';
+                if (isset($locales[$edit_locale])) {
+                    $edit_locale_path = $locales_path . str_replace('-', '_', $locales[$edit_locale]['messages']) . '/' . $edit_locale . '.locale.php';
+                    if (file_exists($edit_locale_path)) { // Inform user about existing locale file
+                        $del_message .= ' ' . sprintf(TB_('To completely delete it, you should also delete the file %s from the server hard disk.'), '<b>' . $edit_locale_path . '</b>');
+                        $del_message_status = 'warning';
+                    }
+                }
+                $Messages->add($del_message, $del_message_status);
+            }
+        }
+
+        // Redirect so that a reload doesn't write to the DB twice:
+        header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+        // We have EXITed already at this point!!
+        break;
 
 
-	case 'import_pot':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'locales' );
+    case 'prioup':
+    case 'priodown':
+        // --- SWITCH PRIORITIES -----------------
 
-		if( translation_update_table_pot() )
-		{
-			$Messages->add( TB_('The file .POT was imported into database successfully'), 'success' );
-		}
-		header_redirect( '?ctrl=locales', 303 );
-		break;
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
+
+        // Check permission:
+        check_user_perm('options', 'edit', true);
+
+        $switchcond = '';
+        if ($action == 'prioup') {
+            $switchcond = 'return ($lval[\'priority\'] > $i && $lval[\'priority\'] < $locales[ $edit_locale ][\'priority\']);';
+            $i = -1;
+        } elseif ($action == 'priodown') {
+            $switchcond = 'return ($lval[\'priority\'] < $i && $lval[\'priority\'] > $locales[ $edit_locale ][\'priority\']);';
+            $i = 256;
+        }
+
+        if (! empty($switchcond)) { // we want to switch priorities
+            foreach ($locales as $lkey => $lval) { // find nearest priority
+                if (eval($switchcond)) {
+                    // remember it
+                    $i = $lval['priority'];
+                    $lswitchwith = $lkey;
+                }
+            }
+            if ($i > -1 && $i < 256) { // switch
+                #echo 'Switching prio '.$locales[ $lswitchwith ]['priority'].' with '.$locales[ $lswitch ]['priority'].'<br />';
+                $locales[$lswitchwith]['priority'] = $locales[$edit_locale]['priority'];
+                $locales[$edit_locale]['priority'] = $i;
+
+                $lswitchwith_transliteration_map = is_array($locales[$lswitchwith]['transliteration_map']) ? base64_encode(serialize($locales[$lswitchwith]['transliteration_map'])) : '';
+                $edit_transliteration_map = is_array($locales[$edit_locale]['transliteration_map']) ? base64_encode(serialize($locales[$edit_locale]['transliteration_map'])) : '';
+
+                $query = "REPLACE INTO T_locales ( loc_locale, loc_datefmt, loc_longdatefmt, loc_extdatefmt, loc_input_datefmt, loc_timefmt, loc_shorttimefmt, loc_input_timefmt, loc_name, loc_messages, loc_priority, loc_transliteration_map, loc_enabled ) VALUES
+					( '$edit_locale', '{$locales[$edit_locale]['datefmt']}', '{$locales[$edit_locale]['longdatefmt']}', '{$locales[$edit_locale]['extdatefmt']}', '{$locales[$edit_locale]['input_datefmt']}', '{$locales[$edit_locale]['timefmt']}', '{$locales[$edit_locale]['shorttimefmt']}', '{$locales[$edit_locale]['input_timefmt']}', '{$locales[$edit_locale]['name']}', '{$locales[$edit_locale]['messages']}', '{$locales[$edit_locale]['priority']}', '$edit_transliteration_map', '{$locales[$edit_locale]['enabled']}'),
+					( '$lswitchwith', '{$locales[$lswitchwith]['datefmt']}', '{$locales[$lswitchwith]['longdatefmt']}', '{$locales[$lswitchwith]['extdatefmt']}', '{$locales[$lswitchwith]['input_datefmt']}', '{$locales[$lswitchwith]['timefmt']}', '{$locales[$lswitchwith]['shorttimefmt']}', '{$locales[$lswitchwith]['input_timefmt']}', '{$locales[$lswitchwith]['name']}', '{$locales[$lswitchwith]['messages']}', '{$locales[$lswitchwith]['priority']}', '$lswitchwith_transliteration_map', '{$locales[$lswitchwith]['enabled']}')";
+                $q = $DB->query($query);
+
+                $Messages->add(TB_('Switched priorities.'), 'success');
+
+                // Redirect so that a reload doesn't write to the DB twice:
+                header_redirect('?ctrl=locales' . ($loc_transinfo ? '&loc_transinfo=1' : ''), 303); // Will EXIT
+                // We have EXITed already at this point!!
+            }
+
+            // load locales from DB into $locales array:
+            locale_overwritefromDB();
+        }
+        break;
+
+
+    case 'generate_pot':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
+
+        if (translation_generate_pot_file()) {
+            $Messages->add(TB_('The file .POT was generated successfully'), 'success');
+        }
+        header_redirect('?ctrl=locales', 303);
+        break;
+
+
+    case 'import_pot':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('locales');
+
+        if (translation_update_table_pot()) {
+            $Messages->add(TB_('The file .POT was imported into database successfully'), 'success');
+        }
+        header_redirect('?ctrl=locales', 303);
+        break;
 }
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( TB_('System'), $admin_url.'?ctrl=system',
-		TB_('Global settings are shared between all blogs; see Blog settings for more granular settings.') );
-$AdminUI->breadcrumbpath_add( TB_('Regional'), $admin_url.'?ctrl=locales' );
-$AdminUI->breadcrumbpath_add( TB_('Locales'), $admin_url.'?ctrl=locales' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add(
+    TB_('System'),
+    $admin_url . '?ctrl=system',
+    TB_('Global settings are shared between all blogs; see Blog settings for more granular settings.')
+);
+$AdminUI->breadcrumbpath_add(TB_('Regional'), $admin_url . '?ctrl=locales');
+$AdminUI->breadcrumbpath_add(TB_('Locales'), $admin_url . '?ctrl=locales');
 
 // Set an url for manual page:
-if( $action == 'edit' )
-{
-	$AdminUI->set_page_manual_link( 'locale-form' );
-}
-else
-{
-	$AdminUI->set_page_manual_link( 'locales-tab' );
+if ($action == 'edit') {
+    $AdminUI->set_page_manual_link('locale-form');
+} else {
+    $AdminUI->set_page_manual_link('locales-tab');
 }
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -593,12 +536,10 @@ $AdminUI->disp_body_top();
 $AdminUI->disp_payload_begin();
 
 // Display VIEW:
-$AdminUI->disp_view( 'locales/_locale_settings.form.php' );
+$AdminUI->disp_view('locales/_locale_settings.form.php');
 
 // End payload block:
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

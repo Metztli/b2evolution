@@ -19,7 +19,9 @@
  *
  * @package conf
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // TODO: dh> this file was meant to be used for things where you only need the basic config..
@@ -52,12 +54,12 @@ die( 'The site is temporarily down for maintenance. Please reload this page in a
  * MySQL DB settings.
  * Fill in your database details (check carefully or nothing will work!)
  */
-$db_config = array(
-	'user'          => 'demouser',     // your MySQL username
-	'password'      => 'demopass',     // ...and password
-	'name'          => 'b2evolution',  // the name of the database
-	'host'          => 'localhost',    // MySQL Server (typically 'localhost')
-);
+$db_config = [
+    'user' => 'demouser',     // your MySQL username
+    'password' => 'demopass',     // ...and password
+    'name' => 'b2evolution',  // the name of the database
+    'host' => 'localhost',    // MySQL Server (typically 'localhost')
+];
 
 
 /**
@@ -124,8 +126,8 @@ $baseurl = 'http://localhost/b2evolution/blogs/';
 /*
 if( isset($_SERVER['HTTP_HOST']) )
 {	// This only works if HOST is provided by webserver (i-e DOES NOT WORK IN PHP CLI MODE)
-	$baseurl = ( (isset($_SERVER['HTTPS']) && ( $_SERVER['HTTPS'] != 'off' ) ) ?'https://':'http://')
-							.$_SERVER['HTTP_HOST'].'/';
+    $baseurl = ( (isset($_SERVER['HTTPS']) && ( $_SERVER['HTTPS'] != 'off' ) ) ?'https://':'http://')
+                            .$_SERVER['HTTP_HOST'].'/';
 }
 */
 
@@ -157,4 +159,3 @@ $config_is_done = 0;
  * IT IS RECOMMENDED YOU DO NOT TOUCH THOSE SETTINGS
  * UNTIL YOU ARE FAMILIAR WITH THE DEFAULT INSTALLATION.
  */
-?>

@@ -1,10 +1,12 @@
 <?php
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Require this file because function evoAlert() is used here
-require_js_defer( 'functions.js', 'blog', true );
+require_js_defer('functions.js', 'blog', true);
 
 ?>
 <script>
@@ -28,13 +30,17 @@ jQuery( document ).on( 'click', 'a.evo_post_fav_btn', function()
 							case 1:
 								//icon_container.removeClass( 'fa-star-o' );
 								//icon_container.addClass( 'fa-star' );
-								me.html( '<?php echo format_to_js( get_icon( 'star_on', 'imgtag', array( 'class' => 'coll-fav' ) ) );?>' );
+								me.html( '<?php echo format_to_js(get_icon('star_on', 'imgtag', [
+								    'class' => 'coll-fav',
+								])); ?>' );
 								break;
 
 							default:
 								//icon_container.removeClass( 'fa-star' );
 								//icon_container.addClass( 'fa-star-o' );
-								me.html( '<?php echo format_to_js( get_icon( 'star_off', 'imgtag', array( 'class' => 'coll-fav' ) ) );?>' );
+								me.html( '<?php echo format_to_js(get_icon('star_off', 'imgtag', [
+								    'class' => 'coll-fav',
+								])); ?>' );
 						}
 						favorite_link.data( 'favorite', data.setting == 1 ? 0 : 1 );
 					}

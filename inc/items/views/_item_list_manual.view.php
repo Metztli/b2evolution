@@ -11,7 +11,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 items_manual_results_block();
@@ -22,34 +24,38 @@ echo '<p class="note">'.T_('<strong>Note:</strong> Deleting a category does not 
 
 global $Settings, $admin_url, $ReqURI, $Collection, $Blog, $blog;
 
-if( empty( $Blog ) )
-{ // Set Blog
-	$BlogCache = & get_BlogCache();
-	$Collection = $Blog = $BlogCache->get_by_ID( $blog );
+if (empty($Blog)) {
+    $BlogCache = &get_BlogCache();
+    $Collection = $Blog = $BlogCache->get_by_ID($blog);
 }
 
 // Use a wrapper div to have margin around the form
 echo '<div id="form_wrapper" style="margin: 2ex auto 1ex">';
 
-$Form = new Form( NULL, 'cat_order_checkchanges', 'post', 'compact' );
-$Form->begin_form( 'fform', T_('Category order').get_manual_link('categories-order') );
-$Form->add_crumb( 'collection' );
-$Form->hidden( 'ctrl', 'coll_settings' );
-$Form->hidden( 'action', 'update' );
-$Form->hidden( 'blog', $Blog->ID );
-$Form->hidden( 'tab', 'chapters' );
-$Form->hidden( 'redirect_to', regenerate_url( '', '', '', '&' ) );
-$Form->radio_input( 'category_ordering', $Blog->get_setting('category_ordering'), array(
-					array( 'value'=>'alpha', 'label'=>T_('Alphabetically') ),
-					array( 'value'=>'manual', 'label'=>T_('Manually') ),
-			 ), T_('Sort categories'), array( 'note'=>'('.T_('Note: can be overridden for sub-categories').')' ) );
-$Form->end_form( array( array( 'submit', 'submit', T_('Save Changes!'), 'SaveButton' ) )  );
+$Form = new Form(null, 'cat_order_checkchanges', 'post', 'compact');
+$Form->begin_form('fform', T_('Category order') . get_manual_link('categories-order'));
+$Form->add_crumb('collection');
+$Form->hidden('ctrl', 'coll_settings');
+$Form->hidden('action', 'update');
+$Form->hidden('blog', $Blog->ID);
+$Form->hidden('tab', 'chapters');
+$Form->hidden('redirect_to', regenerate_url('', '', '', '&'));
+$Form->radio_input('category_ordering', $Blog->get_setting('category_ordering'), [
+    [
+        'value' => 'alpha',
+        'label' => T_('Alphabetically'),
+    ],
+    [
+        'value' => 'manual',
+        'label' => T_('Manually'),
+    ],
+], T_('Sort categories'), [
+    'note' => '(' . T_('Note: can be overridden for sub-categories') . ')',
+]);
+$Form->end_form([['submit', 'submit', T_('Save Changes!'), 'SaveButton']]);
 
 echo '</div>'; // form wrapper end
 
-if( ! $Settings->get('allow_moving_chapters') )
-{ // TODO: check perm
-	echo '<p class="alert alert-info">'.sprintf( T_('<strong>Note:</strong> Moving categories across blogs is currently disabled in the %sblogs settings%s.'), '<a href="'.$admin_url.'?ctrl=collections&tab=blog_settings#categories">', '</a>' ).'</p> ';
+if (! $Settings->get('allow_moving_chapters')) { // TODO: check perm
+    echo '<p class="alert alert-info">' . sprintf(T_('<strong>Note:</strong> Moving categories across blogs is currently disabled in the %sblogs settings%s.'), '<a href="' . $admin_url . '?ctrl=collections&tab=blog_settings#categories">', '</a>') . '</p> ';
 }
-
-?>

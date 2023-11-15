@@ -1,0 +1,346 @@
+// ======================================================================== /
+// Footer Style
+// ======================================================================== /
+#footer {
+    padding: 40px 0;
+    background-color: @bg_footer;
+
+    // Footer Widget
+    // ======================================================================== /
+    .footer__widgets {
+        color: @w;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba( 255, 255, 255, 0.15 );
+
+        .widget_title {
+            font-family: @font_heading;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            color: @w;
+        }
+
+        .evo_widget {
+            padding-bottom: 30px;
+
+            ul {
+                list-style-type: disc;
+                margin: 0;
+                padding: 0;
+
+                li {
+                    list-style-type: disc;
+                    padding: 5px 0;
+                    margin: 5px 0;
+
+                    .item-content {
+                        a {
+                            color: @w;
+                        }
+                    }
+                }
+
+                a {
+                    color: @w;
+                    transition: all 0.2s ease-out;
+                    word-wrap: break-word;
+                    word-break: break-word;
+
+                    &:hover, &:active, &:focus {
+                        color: @primary;
+                    }
+                }
+
+            }
+
+            & > ul {
+                margin: 0 0 0 20px;
+            }
+
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .panel {
+                background-color: transparent;
+
+                .panel-body {
+                    padding: 5px 0;
+                }
+
+                .submit {
+                    font-size: 1.2rem;
+                    border-radius: 2px;
+                    padding: 10px 15px;
+                    text-transform: uppercase;
+                    border-color: @w;
+
+                    &:hover, &:active, &:focus {
+                        background-color: @primary;
+                        color: @w;
+                        border-color: @primary;
+                    }
+                }
+            }
+
+            .form-group {
+                margin-bottom: 5px;
+
+                .control-label {
+                    margin-bottom: 5px;
+                }
+
+                .form_text_input {
+                    padding: 10px 15px;
+                    border-radius: 0;
+                    border-color: @w;
+                    height: auto;
+                }
+
+            }
+
+
+            // Widget
+            // ======================================================================== /
+            &.widget_core_coll_tag_cloud {
+                .tag_cloud a {
+                    color: @w;
+                    border-color: @w;
+
+                    &:hover, &:active, &:focus {
+                        color: @w;
+                        border-color: @primary;
+                    }
+                }
+            }
+
+            &.widget_core_image {
+                text-align: center;
+            }
+
+            &.widget_core_org_members {
+                color: @w;
+
+                a.user_link {
+                    color: @w;
+                }
+            }
+
+        }
+
+    }
+
+    // Footer Bottom
+    // ======================================================================== /
+    .footer__bottom {
+
+        @media screen and ( max-width: @M ) {
+            text-align: center;
+
+            .footer__social,
+            .copyright {
+                text-align: center;
+                float: none;
+            }
+        }
+    }
+
+    // Copyright
+    // ======================================================================== /
+    .copyright {
+        font-size: 1.2rem;
+        letter-spacing: 0.2px;
+        color: @w;
+        padding: 0;
+        margin: 0;
+        height: 38px;
+        line-height: 1.6;
+        opacity: 0.95;
+
+        @media screen and ( min-width: @MM ) {
+            line-height: 38px;
+        }
+
+        a {
+            color: @primary;
+        }
+    }
+
+    // Footer Social
+    // ======================================================================== /
+    .footer__social {
+
+        a {
+            position: relative;
+            width: 35px;
+            height: 35px;
+            background-color: transparent;
+            margin: 2px 4px;
+            opacity: 0.7;
+            transition: top 0.1s linear, opacity 0.32s ease;
+
+            .fa {
+                font-size: 1.6rem;
+                line-height: 35px;
+                color: @w;
+
+                &::after {
+                    position: absolute;
+                    top: -20px;
+                    // right: 0;
+                    margin: 0 auto;
+                    text-align: center;
+                    display: block;
+                    font-family: @font_body;
+                    font-weight: 700;
+                    font-size: 1.1rem;
+                    line-height: 1.2;
+                    background: @c5;
+                    padding: 5px 8px;
+                    border-radius: 2px;
+                    visibility: hidden;
+                    transition: 0s;
+                }
+
+                &:hover {
+                    &::after {
+                        visibility: visible;
+                        top: -28px;
+                        transition: all 0.32s ease;
+                    }
+                }
+            }
+
+            &:hover{
+                opacity: 1;
+            }
+
+            &.ufld_twitter .fa::after {
+                content: 'Twitter';
+                left: -32%;
+            }
+
+            &.ufld_facebook .fa::after {
+                content: 'Facebook';
+                left: -50%;
+            }
+
+            &.ufld_googleplus .fa::after {
+                content: 'Google+';
+                left: -36%;
+            }
+
+            &.ufld_linkedin .fa::after {
+                content: 'LinkedIn';
+                left: -36%;
+            }
+
+            &.ufld_github .fa::after {
+                content: 'Github';
+                left: -32%;
+            }
+
+            &.ufld_flickr .fa::after {
+                content: 'Flickr';
+                left: -16%;
+            }
+
+            &.ufld_youtube .fa::after {
+                content: 'Youtube';
+                left: -38%;
+            }
+
+            &.ufld_digg .fa::after {
+                content: 'Digg';
+                left: -10%;
+            }
+
+            &.ufld_stumbleupon .fa::after {
+                content: 'Stumbleupon';
+                left: -76%;
+            }
+
+            &.ufld_pinterest .fa::after {
+                content: 'Pinterest';
+                left: -46%;
+            }
+
+        }
+
+    }
+
+    // Bottom b2evo image background issue fix
+    .powered_by {
+        a {
+            img {
+                background-color: rgba(255,255,255,1);
+                border-radius: 4px;
+            }
+        }
+    }
+
+}
+
+
+// Back To Stop
+// ======================================================================== /
+.cd_top {
+    position: fixed;
+    bottom: 40px;
+    right: 25px;
+    background-color: @primary;
+    color: @w;
+    border-radius: 30px;
+    width: 42px;
+    height: 42px;
+    text-align: center;
+    line-height: 42px;
+
+    z-index: 800;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.32s ease-in-out;
+
+    .fa {
+        font-size: 1.6rem;
+    }
+
+    &:hover, &:active, &:focus {
+        background-color: @primary;
+        color: @w;
+    }
+
+    &.cd-is-visible {
+        opacity: 1;
+        visibility: visible;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+
+    &.cd-fade-out {
+        // if the user keeps scrolling down, the button is out of focus and becomes less visible
+        opacity: 0.7;
+        @media screen and ( max-width: @ML ){
+            opacity: 0.9;
+        }
+    }
+
+    @media screen and ( max-width: @M ) {
+        right: 20px;
+        bottom: 40px;
+    }
+
+    @media screen and ( max-width: @S ) {
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        right: 15px;
+        bottom: 40px;
+    }
+}

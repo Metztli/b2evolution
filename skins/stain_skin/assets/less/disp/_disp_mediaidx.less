@@ -1,0 +1,384 @@
+// ======================================================================== /
+// Mediaidx Style
+// ======================================================================== /
+.disp_mediaidx {
+
+    #content {
+        overflow: hidden;
+
+        .title__content {
+            font-size: 3rem;
+        }
+    }
+
+    .main_content {
+        // overflow: hidden;
+
+        .widget_core_coll_media_index {
+
+            .evo_image_index {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .image_content {
+                opacity: 0;
+                padding: 0;
+                transition: left 0.3s ease;
+                // overflow: hidden;
+
+                a {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+
+                    &:before, &:after {
+                        position: absolute;
+                    }
+
+                    &:before {
+                        content: '';
+                        right: 0;
+                        bottom: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: @w;
+                        z-index: 1;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: all 0.42s ease-in-out;
+                    }
+
+                    &:after {
+                        content: 'View';
+                        top: 45%;
+                        left: 0;
+                        right: 0;
+                        text-align: center;
+                        margin: 0 auto;
+                        width: 80px;
+                        font-size: 1.2rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: @w;
+                        background-color: @primary;
+                        padding: 10px 12px;
+                        border-radius: 30px;
+                        box-shadow: 1px 4px 8px -3px rgba(0, 0, 0, 0.35);
+
+                        // transform: scale(0);
+                        z-index: 2;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: all 0.3s ease-in-out;
+                    }
+
+                }
+
+                img {
+                    max-width: 100%;
+                    height: auto;
+                    transition: all 0.32s ease;
+                }
+
+                .note {
+                    display: block;
+                    background-color: @w;
+                    font-family: @font_heading;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    padding: 15px;
+                    color: @c5;
+                    letter-spacing: -0.1px;
+                    box-shadow: @box-shadow;
+                    word-wrap: break-word;
+
+                    transition: all 0.32s ease;
+                }
+
+                &:hover, &:active, &:focus {
+                    // transform: translateY( -3px );
+                    // margin-top: -4px;
+
+                    a {
+                        &:before {
+                            visibility: visible;
+                        }
+                        &:after {
+                            // transform: scale(1);
+                            opacity: 1;
+                            visibility: visible;
+                        }
+                    }
+
+                    img {
+                        box-shadow: 0px 6px 20px -3px rgba(0, 0, 0, 0.3);
+                    }
+
+                    .note {
+                        box-shadow: 0px 6px 30px -10px rgba(0, 0, 0, 0.6);
+                        transform: translateY(-6px);
+                    }
+                }
+
+                &.shown {
+                    opacity: 1;
+                }
+
+                // Column
+                // ======================================================================== /
+                &.one_column {
+                    .note {
+                        font-size: 1.8rem;
+                    }
+                }
+
+                &.two_column {
+                    .note {
+                        font-size: 1.6rem;
+                    }
+                }
+
+                &.four_column {
+                    .note {
+                        font-size: 1.3rem;
+                        padding: 12px;
+                    }
+                }
+
+                @media screen and ( max-width: @M ) {
+                    // max-width: @two_column;
+                }
+
+                @media screen and ( max-width: @S ) {
+                    // max-width: @one_column;
+                }
+            }
+
+        }
+    }
+
+
+    // IMAGE HOVER ANIMATION
+    // ======================================================================== /
+    .evo_image_index {
+
+        .image_content {
+            a {
+                perspective: 1300px;
+            }
+
+            &.none {
+                a {
+                    &:before {
+                        display: none;
+                    }
+                }
+            }
+
+            &.opacity {
+                a {
+                    &:before, &:after {
+                        opacity: 0;
+                    }
+                }
+            }
+
+            &.flip {
+                a {
+                    &:before {
+                        transform-style: preserve-3d;
+                    }
+                    &:after {
+                        transform-style: preserve-3d;
+                        transform: rotateY(180deg);
+                    }
+                }
+            }
+
+            &.zoom {
+                a {
+                    overflow: hidden;
+
+                    &:before, &:after {
+                        transform: scale(0);
+                    }
+
+                    img {
+                        transition: all 0.2s ease;
+                    }
+                }
+
+                .note {
+                    margin-right: -1px;
+                }
+            }
+
+            &.tb {
+                a {
+                    &:before{
+                        top: 0;
+                        height: 0;
+                    }
+
+                    &:after {
+                        top: 0;
+                    }
+                }
+            }
+
+            &.bt {
+                a {
+                    &:before {
+                        bottom: 0;
+                        height: 0;
+                    }
+                    &:after {
+                        top: auto;
+                        bottom: 0;
+                    }
+                }
+            }
+
+            &.rl {
+                a {
+                    &::before {
+                        right: 0;
+                        width: 0;
+                    }
+                    &::after {
+                        right: -50%;
+                    }
+                }
+            }
+
+            &.lr {
+                a {
+                    &:before {
+                        left: 0;
+                        width: 0;
+                    }
+                    &:after {
+                        left: -50%;
+                    }
+                }
+            }
+
+            // WHEN HOVER
+            // ======================================================================== /
+            &:hover, &:active, &:focus {
+                &.none {
+                    a {
+                        &:before {
+                            display: none;
+                        }
+                        &:after {
+                            display: none;
+                        }
+                        img {
+                            box-shadow: none;
+                        }
+                    }
+                    .note {
+                        box-shadow: none;
+                        transform: none;
+                    }
+                }
+
+                &.opacity {
+                    a {
+                        &:before {
+                            // opacity: 0.5;
+                        }
+                        &:after {
+                            opacity: 1;
+                        }
+                    }
+                }
+
+                &.flip {
+                    a {
+                        &:before {
+                            transform: rotateY(180deg);
+                            opacity: 0.5;
+                        }
+                        &:after {
+                            transform: rotateY(0deg);
+                        }
+                    }
+                }
+
+                &.zoom {
+                    a {
+                        &:before, &:after {
+                            transform: scale(1);
+                        }
+
+                        img {
+                            transform: scale(1.2);
+                            box-shadow: none;
+                            transition: all 1.25s linear;
+                        }
+                    }
+                }
+
+                &.tb {
+                    a {
+                        &:before {
+                            height: 100%;
+                        }
+
+                        &:after {
+                            top: 45%;
+                        }
+                    }
+                }
+
+                &.bt {
+                    a {
+                        &:before {
+                            height: 100%;
+                        }
+                        &:after {
+                            bottom: 45%;
+                        }
+                    }
+                }
+
+                &.rl {
+                    a {
+                        &:before {
+                            width: 100%;
+                        }
+                        &:after {
+                            right: 0;
+                        }
+                    }
+                }
+
+                &.lr {
+                    a {
+                        &:before {
+                            width: 100%;
+                        }
+                        &:after {
+                            left: 0;
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+    }
+
+}
+
+
+.no-js .evo_image_index li,
+.no-cssanimations .evo_image_index li {
+	opacity: 1;
+}

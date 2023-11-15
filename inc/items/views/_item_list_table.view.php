@@ -12,7 +12,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @var Blog
@@ -27,73 +29,70 @@ global $edit_item_url, $delete_item_url;
 global $tab, $tab_type;
 global $Session;
 
-if( $highlight = param( 'highlight', 'integer', NULL ) )
-{	// There are lines we want to highlight:
-	$result_fadeout = array( 'post_ID' => array($highlight) );
-
-}
-elseif ( $highlight = $Session->get( 'highlight_id' ) )
-{
-	$result_fadeout = array( 'post_ID' => array($highlight) );
-	$Session->delete( 'highlight_id' );
-}
-else
-{	// Nothing to highlight
-	$result_fadeout = NULL;
+if ($highlight = param('highlight', 'integer', null)) {	// There are lines we want to highlight:
+    $result_fadeout = [
+        'post_ID' => [$highlight],
+    ];
+} elseif ($highlight = $Session->get('highlight_id')) {
+    $result_fadeout = [
+        'post_ID' => [$highlight],
+    ];
+    $Session->delete('highlight_id');
+} else {	// Nothing to highlight
+    $result_fadeout = null;
 }
 
 
-$ItemList->filter_area = array(
-		'callback' => 'callback_filter_item_list_table',
-		'apply_filters_button' => 'none',
-	);
+$ItemList->filter_area = [
+    'callback' => 'callback_filter_item_list_table',
+    'apply_filters_button' => 'none',
+];
 
 
 /*
-	**
-	 * Callback to add filters on top of the result set
-	 *
-	function filter_on_post_title( & $Form )
-	{
-		global $pagenow, $post_filter;
+    **
+     * Callback to add filters on top of the result set
+     *
+    function filter_on_post_title( & $Form )
+    {
+        global $pagenow, $post_filter;
 
-		$Form->hidden( 'filter_on_post_title', 1 );
-		$Form->text( 'post_filter', $post_filter, 20, T_('Task title'), '', 60 );
-	}
-	$ItemList->filters_callback = 'filter_on_post_title';
+        $Form->hidden( 'filter_on_post_title', 1 );
+        $Form->text( 'post_filter', $post_filter, 20, T_('Task title'), '', 60 );
+    }
+    $ItemList->filters_callback = 'filter_on_post_title';
 */
 
-switch( $tab_type )
-{
-	case 'page':
-		$ItemList->title = T_('Page list');
-		break;
-	case 'special':
-		$ItemList->title = T_('Special Items list');
-		break;
-	case 'intro':
-		$ItemList->title = T_('Intro list');
-		break;
-	case 'content-block':
-		$ItemList->title = T_('Content Block list');
-		break;
-	default: // post
-		$ItemList->title = T_('Post list');
+switch ($tab_type) {
+    case 'page':
+        $ItemList->title = T_('Page list');
+        break;
+    case 'special':
+        $ItemList->title = T_('Special Items list');
+        break;
+    case 'intro':
+        $ItemList->title = T_('Intro list');
+        break;
+    case 'content-block':
+        $ItemList->title = T_('Content Block list');
+        break;
+    default: // post
+        $ItemList->title = T_('Post list');
 }
 
-$ItemList->title .= get_manual_link( $tab_type.'-list' );
+$ItemList->title .= get_manual_link($tab_type . '-list');
 
 // Display a panel to confirm mass action with selected items:
 display_mass_items_confirmation_panel();
 
 // Initialize Results object
-items_results( $ItemList, array(
-		'tab' => $tab,
-		'display_selector' => true,
-	) );
+items_results($ItemList, [
+    'tab' => $tab,
+    'display_selector' => true,
+]);
 
 // Generate global icons depending on seleted tab with item type
-item_type_global_icons( $ItemList );
+item_type_global_icons($ItemList);
 
 // EXECUTE the query now:
 $ItemList->restart();
@@ -104,7 +103,7 @@ $postIDlist = $ItemList->get_page_ID_list();
 $postIDarray = $ItemList->get_page_ID_array();
 
 // DISPLAY table now:
-$ItemList->display( NULL, $result_fadeout );
+$ItemList->display(null, $result_fadeout);
 
 ?>
 <script>
@@ -119,26 +118,23 @@ jQuery(document).ready( function()
 	} );
 <?php
 
-if( isset( $ItemList->filters['cat_array'] ) &&
-    count ( $ItemList->filters['cat_array'] ) == 1 )
-{	// Set param to update item order per filtered category:
-	$order_cat_param = '&cat_ID='.$ItemList->filters['cat_array'][0];
-}
-else
-{	// Update item order per main category by default:
-	$order_cat_param = '';
+if (isset($ItemList->filters['cat_array']) &&
+    count($ItemList->filters['cat_array']) == 1) {	// Set param to update item order per filtered category:
+    $order_cat_param = '&cat_ID=' . $ItemList->filters['cat_array'][0];
+} else {	// Update item order per main category by default:
+    $order_cat_param = '';
 }
 
 // Print JS to edit an item order:
-echo_editable_column_js( array(
-	'column_selector' => '.item_order_edit',
-	'ajax_url'        => get_htsrv_url().'async.php?action=item_order_edit&blog='.$Blog->ID.$order_cat_param.'&'.url_crumb( 'itemorder' ),
-	'field_type'      => 'text',
-	'new_field_name'  => 'new_item_order',
-	'ID_value'        => 'jQuery( this ).attr( "rel" )',
-	'ID_name'         => 'post_ID',
-	'print_init_tags' => false
-) );
+echo_editable_column_js([
+    'column_selector' => '.item_order_edit',
+    'ajax_url' => get_htsrv_url() . 'async.php?action=item_order_edit&blog=' . $Blog->ID . $order_cat_param . '&' . url_crumb('itemorder'),
+    'field_type' => 'text',
+    'new_field_name' => 'new_item_order',
+    'ID_value' => 'jQuery( this ).attr( "rel" )',
+    'ID_name' => 'post_ID',
+    'print_init_tags' => false,
+]);
 ?>
 });
 </script>

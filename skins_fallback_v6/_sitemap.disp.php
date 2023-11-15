@@ -13,19 +13,20 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Note: this is a very imperfect sitemap, but it's a start :)
 
 // ------------------------- "Sitemap" CONTAINER EMBEDDED HERE --------------------------
 // Display container and contents:
-widget_container( 'sitemap', array(
-	// The following params will be used as defaults for widgets included in this container:
-	'container_display_if_empty' => false, // If no widget, don't display container at all
-	'container_start' => '<div class="evo_container $wico_class$">',
-	'container_end'   => '</div>',
-	'block_start'     => '<div class="evo_widget $wi_class$">',
-	'block_end'       => '</div>',
-) );
+widget_container('sitemap', [
+    // The following params will be used as defaults for widgets included in this container:
+    'container_display_if_empty' => false, // If no widget, don't display container at all
+    'container_start' => '<div class="evo_container $wico_class$">',
+    'container_end' => '</div>',
+    'block_start' => '<div class="evo_widget $wi_class$">',
+    'block_end' => '</div>',
+]);
 // ----------------------------- END OF "Sitemap" CONTAINER -----------------------------
-?>

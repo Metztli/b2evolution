@@ -16,7 +16,9 @@
  *
  * @author Yabba
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 ?>
 <h3>Hello world!</h3>
 <p>This is a custom disp mode provided by the test plugin.</p>

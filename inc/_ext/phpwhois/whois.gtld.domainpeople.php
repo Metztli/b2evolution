@@ -25,35 +25,34 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-if (!defined('__DOMAINPEOPLE_HANDLER__'))
-	define('__DOMAINPEOPLE_HANDLER__', 1);
+if (! defined('__DOMAINPEOPLE_HANDLER__')) {
+    define('__DOMAINPEOPLE_HANDLER__', 1);
+}
 
 require_once('whois.parser.php');
 
 class domainpeople_handler
-	{
+{
+    public function parse($data_str, $query)
+    {
+        $items = [
+            'owner' => 'Registrant Contact:',
+            'admin' => 'Administrative Contact:',
+            'tech' => 'Technical Contact:',
+            'domain.name' => 'Domain name:',
+            'domain.sponsor' => 'Registration Service Provided By:',
+            'domain.referrer' => 'Contact:',
+            'domain.nserver.' => 'Name Servers:',
+            'domain.created' => 'Creation date:',
+            'domain.expires' => 'Expiration date:',
+            //                  'domain.changed' => 'Record last updated on',
+            'domain.status' => 'Status:',
+        ];
 
-	function parse($data_str, $query)
-		{
-
-		$items = array(
-                  'owner' => 'Registrant Contact:',
-                  'admin' => 'Administrative Contact:',
-                  'tech' => 'Technical Contact:',
-                  'domain.name' => 'Domain name:',
-                  'domain.sponsor' => 'Registration Service Provided By:',
-                  'domain.referrer' => 'Contact:',
-                  'domain.nserver.' => 'Name Servers:',
-                  'domain.created' => 'Creation date:',
-                  'domain.expires' => 'Expiration date:',
-//                  'domain.changed' => 'Record last updated on',
-                  'domain.status' => 'Status:'
-		              );
-
-		$r = easy_parser($data_str, $items, 'dmy', false, false, true);
-		if (isset($r['domain']['sponsor']) && is_array($r['domain']['sponsor']))
-		$r['domain']['sponsor'] = $r['domain']['sponsor'][0];
-		return $r;
-		}
-	}
-?>
+        $r = easy_parser($data_str, $items, 'dmy', false, false, true);
+        if (isset($r['domain']['sponsor']) && is_array($r['domain']['sponsor'])) {
+            $r['domain']['sponsor'] = $r['domain']['sponsor'][0];
+        }
+        return $r;
+    }
+}

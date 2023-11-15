@@ -1,6 +1,6 @@
 <?php
 
-if (!is_callable('random_int')) {
+if (! is_callable('random_int')) {
     /**
      * Random_* Compatibility Library
      * for using the new PHP 7 random_* API in PHP 5 projects
@@ -110,8 +110,7 @@ if (!is_callable('random_int')) {
         /**
          * Test for integer overflow:
          */
-        if (!is_int($range)) {
-
+        if (! is_int($range)) {
             /**
              * Still safely calculate wider ranges.
              * Provided by @CodesInChaos, @oittaa
@@ -126,9 +125,7 @@ if (!is_callable('random_int')) {
             $bytes = PHP_INT_SIZE;
             /** @var int $mask */
             $mask = ~0;
-
         } else {
-
             /**
              * $bits is effectively ceil(log($range, 2)) without dealing with
              * type juggling
@@ -197,7 +194,7 @@ if (!is_callable('random_int')) {
              * ... or smaller than $min,
              * then try again.
              */
-        } while (!is_int($val) || $val > $max || $val < $min);
+        } while (! is_int($val) || $val > $max || $val < $min);
 
         return (int) $val;
     }

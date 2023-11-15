@@ -9,7 +9,9 @@
  * @package admin
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -19,14 +21,14 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 function ca_get_keyword_statuses()
 {
-	global $central_antispam_Module;
+    global $central_antispam_Module;
 
-	return array(
-			'new'       => T_('New'),
-			'published' => T_('Published'),
-			'revoked'   => T_('Revoked'),
-			'ignored'   => T_('Ignored'),
-		);
+    return [
+        'new' => T_('New'),
+        'published' => T_('Published'),
+        'revoked' => T_('Revoked'),
+        'ignored' => T_('Ignored'),
+    ];
 }
 
 
@@ -35,11 +37,11 @@ function ca_get_keyword_statuses()
  *
  * @return string
  */
-function ca_get_keyword_status_title( $value )
+function ca_get_keyword_status_title($value)
 {
-	$statuses = ca_get_keyword_statuses();
+    $statuses = ca_get_keyword_statuses();
 
-	return isset( $statuses[ $value ] ) ? $statuses[ $value ] : $value;
+    return isset($statuses[$value]) ? $statuses[$value] : $value;
 }
 
 
@@ -50,15 +52,15 @@ function ca_get_keyword_status_title( $value )
  */
 function ca_get_source_statuses()
 {
-	global $central_antispam_Module;
+    global $central_antispam_Module;
 
-	return array(
-			'trusted'   => T_('Trusted'),
-			'promising' => T_('Promising'),
-			'unknown'   => T_('Unknown'),
-			'suspect'   => T_('Suspect'),
-			'blocked'   => T_('Blocked'),
-		);
+    return [
+        'trusted' => T_('Trusted'),
+        'promising' => T_('Promising'),
+        'unknown' => T_('Unknown'),
+        'suspect' => T_('Suspect'),
+        'blocked' => T_('Blocked'),
+    ];
 }
 
 
@@ -67,11 +69,11 @@ function ca_get_source_statuses()
  *
  * @return string
  */
-function ca_get_source_status_title( $value )
+function ca_get_source_status_title($value)
 {
-	$statuses = ca_get_source_statuses();
+    $statuses = ca_get_source_statuses();
 
-	return isset( $statuses[ $value ] ) ? $statuses[ $value ] : $value;
+    return isset($statuses[$value]) ? $statuses[$value] : $value;
 }
 
 
@@ -82,12 +84,12 @@ function ca_get_source_status_title( $value )
  */
 function ca_get_keyword_status_colors()
 {
-	return array(
-			'new'       => '5bc0de',
-			'published' => 'f0ad4e',
-			'revoked'   => '333333',
-			'ignored'   => '00cc00',
-		);
+    return [
+        'new' => '5bc0de',
+        'published' => 'f0ad4e',
+        'revoked' => '333333',
+        'ignored' => '00cc00',
+    ];
 }
 
 
@@ -97,16 +99,15 @@ function ca_get_keyword_status_colors()
  * @param string Status value
  * @return string Color value
  */
-function ca_get_keyword_status_color( $status )
+function ca_get_keyword_status_color($status)
 {
-	if( $status == 'NULL' )
-	{
-		$status = '';
-	}
+    if ($status == 'NULL') {
+        $status = '';
+    }
 
-	$ca_keyword_status_colors = ca_get_keyword_status_colors();
+    $ca_keyword_status_colors = ca_get_keyword_status_colors();
 
-	return isset( $ca_keyword_status_colors[ $status ] ) ? '#'.$ca_keyword_status_colors[ $status ] : 'none';
+    return isset($ca_keyword_status_colors[$status]) ? '#' . $ca_keyword_status_colors[$status] : 'none';
 }
 
 
@@ -117,13 +118,13 @@ function ca_get_keyword_status_color( $status )
  */
 function ca_get_source_status_colors()
 {
-	return array(
-			'trusted'   => '00cc00',
-			'promising' => 'f0ad4e',
-			'unknown'   => '999999',
-			'suspect'   => 'ff6600',
-			'blocked'   => 'ff0000',
-		);
+    return [
+        'trusted' => '00cc00',
+        'promising' => 'f0ad4e',
+        'unknown' => '999999',
+        'suspect' => 'ff6600',
+        'blocked' => 'ff0000',
+    ];
 }
 
 
@@ -133,15 +134,13 @@ function ca_get_source_status_colors()
  * @param string Status value
  * @return string Color value
  */
-function ca_get_source_status_color( $status )
+function ca_get_source_status_color($status)
 {
-	if( $status == 'NULL' )
-	{
-		$status = '';
-	}
+    if ($status == 'NULL') {
+        $status = '';
+    }
 
-	$ca_source_status_colors = ca_get_source_status_colors();
+    $ca_source_status_colors = ca_get_source_status_colors();
 
-	return isset( $ca_source_status_colors[ $status ] ) ? '#'.$ca_source_status_colors[ $status ] : 'none';
+    return isset($ca_source_status_colors[$status]) ? '#' . $ca_source_status_colors[$status] : 'none';
 }
-?>

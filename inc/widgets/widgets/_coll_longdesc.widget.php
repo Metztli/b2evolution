@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,113 +26,108 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_longdesc_Widget extends ComponentWidget
 {
-	var $icon = 'file-text-o';
+    public $icon = 'file-text-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_longdesc' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_longdesc');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('long-description-of-collection-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'long-description-of-collection-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Long description');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->disp_params['title']);
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Long description');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        global $Collection, $Blog;
+        return sprintf(
+            T_('Long description from the blog\'s <a %s>general settings</a>.'),
+            'href="?ctrl=coll_settings&tab=general&blog=' . $Blog->ID . '"'
+        );
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'note' => T_('Title to display in your skin. Use $title$ to display the collection title.'),
+                'size' => 40,
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output($this->disp_params['title']);
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Collection, $Blog;
 
-  /**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		global $Collection, $Blog;
-		return sprintf( T_('Long description from the blog\'s <a %s>general settings</a>.'),
-						'href="?ctrl=coll_settings&tab=general&blog='.$Blog->ID.'"' );
-	}
+        $this->init_display($params);
 
+        // Collection long description:
+        echo $this->disp_params['block_start'];
 
-  /**
-   * Get definitions for editable params
-   *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_('Block title'),
-					'note' => T_( 'Title to display in your skin. Use $title$ to display the collection title.' ),
-					'size' => 40,
-					'defaultvalue' => '',
-				),
+        if (strpos($this->disp_params['title'], '$title$') !== false) { // Replace mask $title$ with real blog name with link to blog home page as it does widget coll_title
+            $this->disp_params['title'] = str_replace(
+                '$title$',
+                '<a href="' . $Blog->get('url') . '">' . $Blog->dget('name', 'htmlbody') . '</a>',
+                $this->disp_params['title']
+            );
+        }
 
-			), parent::get_param_definitions( $params )	);
+        // Display title if requested
+        $this->disp_title();
 
-		return $r;
-	}
+        echo $this->disp_params['block_body_start'];
 
+        $Blog->disp('longdesc', 'htmlbody');
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Collection, $Blog;
+        echo $this->disp_params['block_body_end'];
 
-		$this->init_display( $params );
+        echo $this->disp_params['block_end'];
 
-		// Collection long description:
-		echo $this->disp_params['block_start'];
-
-		if( strpos( $this->disp_params['title'], '$title$' ) !== false )
-		{ // Replace mask $title$ with real blog name with link to blog home page as it does widget coll_title
-			$this->disp_params['title'] = str_replace( '$title$',
-				'<a href="'.$Blog->get( 'url' ).'">'.$Blog->dget( 'name', 'htmlbody' ).'</a>', $this->disp_params['title'] );
-		}
-
-		// Display title if requested
-		$this->disp_title();
-
-		echo $this->disp_params['block_body_start'];
-
-		$Blog->disp( 'longdesc', 'htmlbody' );
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

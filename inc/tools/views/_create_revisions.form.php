@@ -12,23 +12,32 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-$Form = new Form( NULL, 'create_revisions', 'post', 'compact' );
+$Form = new Form(null, 'create_revisions', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel').'!', 'close', regenerate_url( 'action' ) );
+$Form->global_icon(TB_('Cancel') . '!', 'close', regenerate_url('action'));
 
-$Form->begin_form( 'fform',  TB_('Create sample revisions for testing moderation') );
+$Form->begin_form('fform', TB_('Create sample revisions for testing moderation'));
 
-	$Form->add_crumb( 'tools' );
-	$Form->hidden( 'ctrl', 'tools' );
-	$Form->hidden( 'action',  'create_sample_revisions' );
-	$Form->hidden( 'tab3', get_param( 'tab3' ) );
+$Form->add_crumb('tools');
+$Form->hidden('ctrl', 'tools');
+$Form->hidden('action', 'create_sample_revisions');
+$Form->hidden('tab3', get_param('tab3'));
 
-	$Form->text_input( 'blog_ID', 1, 50, TB_( 'Blog ID' ), '', array( 'maxlength' => 11, 'required' => true ) );
-	$Form->text_input( 'min_revisions', 1, 50, TB_( 'Minimum number of revisions' ), '', array( 'maxlength' => 11, 'required' => true ) );
-	$Form->text_input( 'max_revisions', 3, 50, TB_( 'Maximum number of revisions' ), '', array( 'maxlength' => 11, 'required' => true ) );
+$Form->text_input('blog_ID', 1, 50, TB_('Blog ID'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
+$Form->text_input('min_revisions', 1, 50, TB_('Minimum number of revisions'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
+$Form->text_input('max_revisions', 3, 50, TB_('Maximum number of revisions'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
 
-$Form->end_form( array( array( 'submit', 'submit', TB_('Create'), 'SaveButton' ) ) );
-
-?>
+$Form->end_form([['submit', 'submit', TB_('Create'), 'SaveButton']]);

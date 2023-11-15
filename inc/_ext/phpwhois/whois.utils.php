@@ -25,127 +25,121 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-class utils extends Whois {
+class utils extends Whois
+{
+    // showObject() and debugObject()
+    // - debug code to show an object or array
 
-	// showObject() and debugObject()
-	// - debug code to show an object or array
+    public function showObject(&$obj)
+    {
+        $r = $this->debugObject($obj);
+        return "<pre>$r</pre>\n";
+    }
 
-	function showObject(&$obj)
-		{
-		$r = $this->debugObject($obj);
-		return "<pre>$r</pre>\n";
-		}
+    public function debugObject($obj, $indent = 0)
+    {
+        if (is_Array($obj)) {
+            $return = '';
+            foreach ($obj as $k => $v) {
+                $return .= str_repeat('&nbsp;', $indent);
+                $return .= $k . "->$v\n";
+                $return .= $this->debugObject($v, $indent + 1);
+            }
+            return $return;
+        }
+    }
 
-	function debugObject($obj,$indent=0)
-		{
-		if (is_Array($obj))
-			{
-			$return = '';
-			foreach($obj as $k => $v)
-				{
-				$return .= str_repeat('&nbsp;',$indent);
-				$return .= $k."->$v\n";
-				$return .= $this->debugObject($v,$indent+1);
-			}
-			return $return;
-		}
-	}
+    public function ns_rr_defined($query)
+    {
+        return checkdnsrr($query, 'NS');
+    }
 
-	function ns_rr_defined($query) {
-		return checkdnsrr($query,'NS');
-	}
+    // get nice HTML output
 
-	// get nice HTML output
+    public function showHTML($result, $link_myself = true, $params = 'query=$0&amp;output=nice')
+    {
+        // adds links fort HTML output
 
-	function showHTML($result, $link_myself=true, $params='query=$0&amp;output=nice') {
+        $email_regex = "/([-_\w\.]+)(@)([-_\w\.]+)\b/i";
+        $html_regex = "/(?:^|\b)((((http|https|ftp):\/\/)|(www\.))([\w\.]+)([,:%#&\/?~=\w+\.-]+))(?:\b|$)/is";
+        $ip_regex = "/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/i";
 
-		// adds links fort HTML output
+        $out = '';
+        $lempty = true;
 
-		$email_regex = "/([-_\w\.]+)(@)([-_\w\.]+)\b/i";
-		$html_regex = "/(?:^|\b)((((http|https|ftp):\/\/)|(www\.))([\w\.]+)([,:%#&\/?~=\w+\.-]+))(?:\b|$)/is";
-		$ip_regex = "/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/i";
+        foreach ($result['rawdata'] as $line) {
+            $line = trim($line);
 
-		$out = '';
-		$lempty = true;
+            if ($line == '') {
+                if ($lempty) {
+                    continue;
+                } else {
+                    $lempty = true;
+                }
+            } else {
+                $lempty = false;
+            }
 
-		foreach($result['rawdata'] as $line)
-			{
-			$line = trim($line);
+            $out .= $line . "\n";
+        }
 
-			if ($line == '')
-				{
-				if ($lempty) continue;
-				else $lempty = true;
-				}
-			else
-				$lempty = false;
+        if ($lempty) {
+            $out = trim($out);
+        }
 
-			$out .= $line."\n";
-			}
+        $out = strip_tags($out);
+        $out = preg_replace($email_regex, '<a href="mailto:$0">$0</a>', $out);
+        $out = preg_replace_callback($html_regex, 'href_replace', $out);
 
-		if ($lempty) $out = trim($out);
+        if ($link_myself) {
+            if ($params[0] == '/') {
+                $link = $params;
+            } else {
+                $link = $_SERVER['PHP_SELF'] . '?' . $params;
+            }
 
-		$out = strip_tags($out);
-		$out = preg_replace ($email_regex, '<a href="mailto:$0">$0</a>', $out);
-		$out = preg_replace_callback ($html_regex, 'href_replace', $out);
+            $out = preg_replace($ip_regex, '<a href="' . $link . '">$0</a>', $out);
 
-		if ($link_myself)
-			{
-			if ($params[0] == '/')
-				$link = $params;
-			else
-				$link = $_SERVER['PHP_SELF'].'?'.$params;
+            if (isset($result['regrinfo']['domain']['nserver'])) {
+                $nserver = $result['regrinfo']['domain']['nserver'];
+            } else {
+                $nserver = false;
+            }
 
-			$out = preg_replace ($ip_regex, '<a href="'.$link.'">$0</a>', $out);
+            if (isset($result['regrinfo']['network']['nserver'])) {
+                $nserver = $result['regrinfo']['network']['nserver'];
+            }
 
-			if (isset($result['regrinfo']['domain']['nserver']))
-				{
-				$nserver = $result['regrinfo']['domain']['nserver'];
-				}
-			else
-				$nserver = false;
+            if (is_array($nserver)) {
+                foreach ($nserver as $host => $ip) {
+                    $url = '<a href="' . str_replace('$0', $ip, $link) . "\">$host</a>";
+                    $out = str_replace($host, $url, $out);
+                    $out = str_replace(strtoupper($host), $url, $out);
+                }
+            }
+        }
 
-			if (isset($result['regrinfo']['network']['nserver']))
-				{
-				$nserver = $result['regrinfo']['network']['nserver'];
-				}
+        // Add bold field names
 
-			if (is_array($nserver))
-				{
-				foreach( $nserver as $host => $ip )
-					{
-					$url = '<a href="'. str_replace('$0',$ip,$link)."\">$host</a>";
-					$out = str_replace($host, $url, $out);
-					$out = str_replace(strtoupper($host), $url, $out);
-					}
-				}
-			}
+        $out = preg_replace("/(?m)^([-\s\.&;'\w\t\(\)\/]+:\s*)/", '<b>$1</b>', $out);
 
-		// Add bold field names
+        // Add italics for disclaimer
 
-		$out = preg_replace ("/(?m)^([-\s\.&;'\w\t\(\)\/]+:\s*)/", '<b>$1</b>', $out);
+        $out = preg_replace("/(?m)^(%.*)/", '<i>$0</i>', $out);
 
-		// Add italics for disclaimer
-
-		$out = preg_replace ("/(?m)^(%.*)/", '<i>$0</i>', $out);
-
-		return str_replace("\n","<br/>\n",$out);
-	}
+        return str_replace("\n", "<br/>\n", $out);
+    }
 }
 
 function href_replace($matches)
 {
-if (substr($matches[0],0,4)=='www.')
-	{
-	$web=$matches[0];
-	$url='http://'.$web;
-	}
-else
-	{
-	$web=$matches[0];
-	$url=$web;
-	}
+    if (substr($matches[0], 0, 4) == 'www.') {
+        $web = $matches[0];
+        $url = 'http://' . $web;
+    } else {
+        $web = $matches[0];
+        $url = $web;
+    }
 
-return '<a href="'.$url.'" target="_blank">'.$web.'</a>';
+    return '<a href="' . $url . '" target="_blank">' . $web . '</a>';
 }
-?>

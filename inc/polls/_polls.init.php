@@ -12,17 +12,19 @@
  *
  * @package polls
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * Minimum PHP version required for messaging module to function properly
  */
-$required_php_version[ 'polls' ] = '5.6';
+$required_php_version['polls'] = '5.6';
 
 /**
  * Minimum MYSQL version required for messaging module to function properly
  */
-$required_mysql_version[ 'polls' ] = '5.1';
+$required_mysql_version['polls'] = '5.1';
 
 /**
  * Aliases for table names:
@@ -31,11 +33,11 @@ $required_mysql_version[ 'polls' ] = '5.1';
  *  If you want to have multiple b2evo installations in a single database you should
  *  change {@link $tableprefix} in _basic_config.php)
  */
-$db_config['aliases'] = array_merge( $db_config['aliases'], array(
-		'T_polls__question' => $tableprefix.'polls__question',
-		'T_polls__option'   => $tableprefix.'polls__option',
-		'T_polls__answer'   => $tableprefix.'polls__answer',
-	) );
+$db_config['aliases'] = array_merge($db_config['aliases'], [
+    'T_polls__question' => $tableprefix . 'polls__question',
+    'T_polls__option' => $tableprefix . 'polls__option',
+    'T_polls__answer' => $tableprefix . 'polls__answer',
+]);
 
 /**
  * Controller mappings.
@@ -59,17 +61,16 @@ $ctrl_mappings['polls'] = 'polls/polls.ctrl.php';
  *
  * @return PollCache
  */
-function & get_PollCache()
+function &get_PollCache()
 {
-	global $PollCache;
+    global $PollCache;
 
-	if( ! isset( $PollCache ) )
-	{	// Cache doesn't exist yet:
-		load_class( 'polls/model/_poll.class.php', 'Poll' );
-		$PollCache = new DataObjectCache( 'Poll', false, 'T_polls__question', 'pqst_', 'pqst_ID', 'pqst_question_text' );
-	}
+    if (! isset($PollCache)) {	// Cache doesn't exist yet:
+        load_class('polls/model/_poll.class.php', 'Poll');
+        $PollCache = new DataObjectCache('Poll', false, 'T_polls__question', 'pqst_', 'pqst_ID', 'pqst_question_text');
+    }
 
-	return $PollCache;
+    return $PollCache;
 }
 
 
@@ -78,17 +79,16 @@ function & get_PollCache()
  *
  * @return PollOptionCache
  */
-function & get_PollOptionCache()
+function &get_PollOptionCache()
 {
-	global $PollOptionCache;
+    global $PollOptionCache;
 
-	if( ! isset( $PollOptionCache ) )
-	{	// Cache doesn't exist yet:
-		load_class( 'polls/model/_poll_option.class.php', 'PollOption' );
-		$PollOptionCache = new DataObjectCache( 'PollOption', false, 'T_polls__option', 'popt_', 'popt_ID', 'popt_option_text', 'popt_order' );
-	}
+    if (! isset($PollOptionCache)) {	// Cache doesn't exist yet:
+        load_class('polls/model/_poll_option.class.php', 'PollOption');
+        $PollOptionCache = new DataObjectCache('PollOption', false, 'T_polls__option', 'popt_', 'popt_ID', 'popt_option_text', 'popt_order');
+    }
 
-	return $PollOptionCache;
+    return $PollOptionCache;
 }
 
 
@@ -97,305 +97,280 @@ function & get_PollOptionCache()
  */
 class polls_Module extends Module
 {
-	/**
-	 * Do the initializations. Called from in _main.inc.php.
-	 * This is typically where classes matching DB tables for this module are registered/loaded.
-	 *
-	 * Note: this should only load/register things that are going to be needed application wide,
-	 * for example: for constructing menus.
-	 * Anything that is needed only in a specific controller should be loaded only there.
-	 * Anything that is needed only in a specific view should be loaded only there.
-	 */
-	function init()
-	{
-		$this->check_required_php_version( 'polls' );
-	}
+    /**
+     * Do the initializations. Called from in _main.inc.php.
+     * This is typically where classes matching DB tables for this module are registered/loaded.
+     *
+     * Note: this should only load/register things that are going to be needed application wide,
+     * for example: for constructing menus.
+     * Anything that is needed only in a specific controller should be loaded only there.
+     * Anything that is needed only in a specific view should be loaded only there.
+     */
+    public function init()
+    {
+        $this->check_required_php_version('polls');
+    }
 
+    /**
+     * Get default module permissions
+     *
+     * #param integer Group ID
+     * @return array
+     */
+    public function get_default_group_permissions($grp_ID)
+    {
+        switch ($grp_ID) {
+            case 1:
+                // Administrators (group ID 1) have full permission by default:
+                $permpolls = 'edit';
+                break;
 
-	/**
-	 * Get default module permissions
-	 *
-	 * #param integer Group ID
-	 * @return array
-	 */
-	function get_default_group_permissions( $grp_ID )
-	{
-		switch( $grp_ID )
-		{
-			case 1:
-				// Administrators (group ID 1) have full permission by default:
-				$permpolls = 'edit';
-				break;
+            case 2:
+            case 3:
+                // Moderators (group ID 2) & Editors (group ID 3) have permission by default:
+                $permpolls = 'create';
+                break;
 
-			case 2:
-			case 3:
-				// Moderators (group ID 2) & Editors (group ID 3) have permission by default:
-				$permpolls = 'create';
-				break;
+            case 4:
+                // Normal Users (group ID 4) have permission by default:
+                $permpolls = 'none';
+                break;
 
-			case 4:
-				// Normal Users (group ID 4) have permission by default:
-				$permpolls = 'none';
-				break;
+                // case 5: // Misbehaving/Suspect users (group ID 5) have permission by default:
+                // case 6: // Spammers/restricted Users
+            default:
+                // Other groups have no permission by default
+                $permpolls = 'none';
+                break;
+        }
 
-			// case 5: // Misbehaving/Suspect users (group ID 5) have permission by default:
-			// case 6: // Spammers/restricted Users
-			default:
-				// Other groups have no permission by default
-				$permpolls = 'none';
-				break;
-		}
+        // We can return as many default permissions as we want:
+        // e.g. array ( permission_name => permission_value, ... , ... )
+        return $permissions = [
+            'perm_polls' => $permpolls,
+        ];
+    }
 
-		// We can return as many default permissions as we want:
-		// e.g. array ( permission_name => permission_value, ... , ... )
-		return $permissions = array(
-			'perm_polls' => $permpolls,
-		 );
-	}
+    /**
+     * Get available group permissions
+     *
+     * @return array
+     */
+    public function get_available_group_permissions()
+    {
+        // 'label' is used in the group form as label for radio buttons group
+        // 'user_func' is used to check user permission. This function should be defined in module initializer.
+        // 'group_func' is used to check group permission. This function should be defined in module initializer.
+        // 'perm_block' group form block where this permissions will be displayed. Now available, the following blocks: additional, system
+        // 'options' is permission options
+        $permissions = [
+            'perm_polls' => [
+                'label' => T_('Polls'),
+                'user_func' => 'check_poll_user_perm',
+                'group_func' => 'check_poll_group_perm',
+                'perm_block' => 'additional',
+                'options' => [
+                    // format: array( radio_button_value, radio_button_label, radio_button_note )
+                    ['none', T_('No Access')],
+                    ['create', T_('Create & Edit owned polls only')],
+                    ['view', T_('Create & Edit owned polls + View all')],
+                    ['edit', T_('Full Access')],
+                ],
+                'perm_type' => 'radiobox',
+                'field_lines' => true,
+            ],
+        ];
 
+        // We can return as many permissions as we want.
+        // In other words, one module can return many pluggable permissions.
+        return $permissions;
+    }
 
-	/**
-	 * Get available group permissions
-	 *
-	 * @return array
-	 */
-	function get_available_group_permissions()
-	{
-		// 'label' is used in the group form as label for radio buttons group
-		// 'user_func' is used to check user permission. This function should be defined in module initializer.
-		// 'group_func' is used to check group permission. This function should be defined in module initializer.
-		// 'perm_block' group form block where this permissions will be displayed. Now available, the following blocks: additional, system
-		// 'options' is permission options
-		$permissions = array(
-			'perm_polls' => array(
-				'label'      => T_('Polls'),
-				'user_func'  => 'check_poll_user_perm',
-				'group_func' => 'check_poll_group_perm',
-				'perm_block' => 'additional',
-				'options'    => array(
-						// format: array( radio_button_value, radio_button_label, radio_button_note )
-						array( 'none', T_('No Access') ),
-						array( 'create', T_('Create & Edit owned polls only') ),
-						array( 'view', T_('Create & Edit owned polls + View all') ),
-						array( 'edit', T_('Full Access') )
-					),
-				'perm_type' => 'radiobox',
-				'field_lines' => true,
-				),
-		);
+    /**
+     * Check an user permission for the poll. ( see 'user_func' in get_available_group_permissions() function  )
+     *
+     * @param string Requested permission level
+     * @param string Permission value, this is the value on the database
+     * @param mixed Permission target (blog ID, array of cat IDs...)
+     * @return boolean True on success (permission is granted), false if permission is not granted
+     */
+    public function check_poll_user_perm($permlevel, $permvalue, $permtarget)
+    {
+        return true;
+    }
 
-		// We can return as many permissions as we want.
-		// In other words, one module can return many pluggable permissions.
-		return $permissions;
-	}
+    /**
+     * Check a group permission for the poll. ( see 'group_func' in get_available_group_permissions() function )
+     *
+     * @param string Requested permission level
+     * @param string Permission value
+     * @param mixed Permission target (blog ID, array of cat IDs...)
+     * @return boolean True on success (permission is granted), false if permission is not granted
+     */
+    public function check_poll_group_perm($permlevel, $permvalue, $permtarget)
+    {
+        $perm = false;
 
-	/**
-	 * Check an user permission for the poll. ( see 'user_func' in get_available_group_permissions() function  )
-	 *
-	 * @param string Requested permission level
-	 * @param string Permission value, this is the value on the database
-	 * @param mixed Permission target (blog ID, array of cat IDs...)
-	 * @return boolean True on success (permission is granted), false if permission is not granted
-	 */
-	function check_poll_user_perm( $permlevel, $permvalue, $permtarget )
-	{
-		return true;
-	}
+        switch ($permvalue) {
+            case 'edit':
+                // Users has edit perms
+                if ($permlevel == 'edit') {
+                    $perm = true;
+                    break;
+                }
 
-	/**
-	 * Check a group permission for the poll. ( see 'group_func' in get_available_group_permissions() function )
-	 *
-	 * @param string Requested permission level
-	 * @param string Permission value
-	 * @param mixed Permission target (blog ID, array of cat IDs...)
-	 * @return boolean True on success (permission is granted), false if permission is not granted
-	 */
-	function check_poll_group_perm( $permlevel, $permvalue, $permtarget )
-	{
-		$perm = false;
+                // no break
+            case 'view':
+                // Users has view perms
+                if ($permlevel == 'view') {
+                    $perm = true;
+                    break;
+                }
 
-		switch ( $permvalue )
-		{
-			case 'edit':
-				// Users has edit perms
-				if( $permlevel == 'edit' )
-				{
-					$perm = true;
-					break;
-				}
+                // no break
+            case 'create':
+                // Users has a create permisson:
+                if ($permlevel == 'create') {
+                    $perm = true;
+                    break;
+                }
+        }
 
-			case 'view':
-				// Users has view perms
-				if( $permlevel == 'view' )
-				{
-					$perm = true;
-					break;
-				}
+        if (! $perm && is_logged_in() && ! empty($permtarget)
+            && ($permlevel == 'edit' || $permlevel == 'view')) {	// If this perm level is still not allowed, check if current user is owner of the requested Poll:
+            global $current_User;
+            if ($current_User->ID == $permtarget->owner_user_ID) {	// Current user is owner
+                $perm = true;
+            }
+        }
 
-			case 'create':
-				// Users has a create permisson:
-				if( $permlevel == 'create' )
-				{
-					$perm = true;
-					break;
-				}
-		}
+        return $perm;
+    }
 
-		if( ! $perm && is_logged_in() && ! empty( $permtarget )
-		    && ( $permlevel == 'edit' || $permlevel == 'view' ) )
-		{	// If this perm level is still not allowed, check if current user is owner of the requested Poll:
-			global $current_User;
-			if( $current_User->ID == $permtarget->owner_user_ID )
-			{	// Current user is owner
-				$perm = true;
-			}
-		}
+    /**
+     * Handle messaging module htsrv actions
+     */
+    public function handle_htsrv_action()
+    {
+        global $Session, $Messages;
 
-		return $perm;
-	}
+        $action = param_action();
 
+        if ($action != 'email_vote') {	// Check that this action request is not a CSRF hacked request:
+            $Session->assert_received_crumb('polls');
 
-	/**
-	 * Handle messaging module htsrv actions
-	 */
-	function handle_htsrv_action()
-	{
-		global $Session, $Messages;
+            if (! is_logged_in()) {	// User must be logged in
+                debug_die('User must be logged in to vote!');
+            }
+        }
 
-		$action = param_action();
+        // Load classes:
+        load_class('polls/model/_poll.class.php', 'Poll');
+        load_class('polls/model/_poll_option.class.php', 'PollOption');
 
-		if( $action != 'email_vote' )
-		{	// Check that this action request is not a CSRF hacked request:
-			$Session->assert_received_crumb( 'polls' );
+        switch ($action) {
+            case 'vote':
+                // Vote on poll:
+                $poll_ID = param('poll_ID', 'integer', true);
 
-			if( ! is_logged_in() )
-			{	// User must be logged in
-				debug_die( 'User must be logged in to vote!' );
-			}
-		}
+                // Check if the requested poll is correct:
+                $PollCache = &get_PollCache();
+                $Poll = &$PollCache->get_by_ID($poll_ID, false, false);
+                if (! $Poll) {	// The requested poll doesn't exist in DB:
+                    $Messages->add('Wrong poll request!', 'error');
+                    break;
+                }
 
-		// Load classes:
-		load_class( 'polls/model/_poll.class.php', 'Poll' );
-		load_class( 'polls/model/_poll_option.class.php', 'PollOption' );
+                $poll_option_IDs = param('poll_answer', 'array:integer', []);
 
-		switch( $action )
-		{
-			case 'vote':
-				// Vote on poll:
-				$poll_ID = param( 'poll_ID', 'integer', true );
+                if (empty($poll_option_IDs)) {	// The poll option must be selected:
+                    $Messages->add(T_('Please select an answer for the poll.'), 'error');
+                    break;
+                } elseif (count($poll_option_IDs) > $Poll->max_answers) {
+                    $Messages->add(sprintf(T_('You are only allowed to choose a maximum of %d answers for the poll.'), $Poll->max_answers), 'error');
+                    break;
+                }
 
-				// Check if the requested poll is correct:
-				$PollCache = & get_PollCache();
-				$Poll = & $PollCache->get_by_ID( $poll_ID, false, false );
-				if( ! $Poll )
-				{	// The requested poll doesn't exist in DB:
-					$Messages->add( 'Wrong poll request!', 'error' );
-					break;
-				}
+                // Check if the requested poll option is correct:
+                $PollOptionCache = &get_PollOptionCache();
+                if (! is_array($poll_option_IDs)) {
+                    $poll_option_IDs = [$poll_option_IDs];
+                }
 
-				$poll_option_IDs = param( 'poll_answer', 'array:integer', array() );
+                $Poll->clear_user_votes();
+                foreach ($poll_option_IDs as $poll_option_ID) {
+                    $PollOption = &$PollOptionCache->get_by_ID($poll_option_ID, false, false);
+                    if (! $PollOption || $PollOption->pqst_ID != $Poll->ID) {	// The requested poll option doesn't exist in DB:
+                        $Messages->add('Wrong poll request!', 'error');
+                        break;
+                    }
 
-				if( empty( $poll_option_IDs ) )
-				{	// The poll option must be selected:
-					$Messages->add( T_('Please select an answer for the poll.'), 'error' );
-					break;
-				}
-				elseif( count( $poll_option_IDs ) > $Poll->max_answers )
-				{
-					$Messages->add( sprintf( T_('You are only allowed to choose a maximum of %d answers for the poll.'), $Poll->max_answers ), 'error' );
-					break;
-				}
+                    // Vote on the poll by current User:
+                    $PollOption->vote();
+                }
+                $Messages->add(T_('Your vote has been cast.'), 'success');
+                break;
 
-				// Check if the requested poll option is correct:
-				$PollOptionCache = & get_PollOptionCache();
-				if( ! is_array( $poll_option_IDs ) )
-				{
-					$poll_option_IDs = array( $poll_option_IDs );
-				}
+            case 'email_vote':
+                global $DB, $Messages;
 
-				$Poll->clear_user_votes();
-				foreach( $poll_option_IDs as $poll_option_ID )
-				{
-					$PollOption = & $PollOptionCache->get_by_ID( $poll_option_ID, false, false );
-					if( ! $PollOption || $PollOption->pqst_ID != $Poll->ID )
-					{	// The requested poll option doesn't exist in DB:
-						$Messages->add( 'Wrong poll request!', 'error' );
-						break;
-					}
+                $email_ID = param('email_ID', 'integer', true);
+                $email_key = param('email_key', 'string', true);
+                $poll_ID = param('poll_ID', 'integer', true);
+                $poll_answer = param('poll_answer', 'integer', true);
+                $redirect_to = param('redirect_to', 'url', '');
 
-					// Vote on the poll by current User:
-					$PollOption->vote();
-				}
-				$Messages->add( T_('Your vote has been cast.'), 'success' );
-				break;
+                $email_log = $DB->get_row('SELECT * FROM T_email__log WHERE emlog_ID = ' . $DB->quote($email_ID) . ' AND emlog_key = ' . $DB->quote($email_key), ARRAY_A);
 
-			case 'email_vote':
-				global $DB, $Messages;
+                if ($email_log) {
+                    $user_ID = $email_log['emlog_user_ID'];
+                    $UserCache = &get_UserCache();
+                    $User = &$UserCache->get_by_ID($user_ID);
+                    $PollCache = &get_PollCache();
+                    $PollOptionCache = &get_PollOptionCache();
+                    $Poll = &$PollCache->get_by_ID($poll_ID);
+                    $PollOption = &$PollOptionCache->get_by_ID($poll_answer);
 
-				$email_ID = param( 'email_ID', 'integer', true );
-				$email_key = param( 'email_key', 'string', true );
-				$poll_ID = param( 'poll_ID', 'integer', true );
-				$poll_answer = param( 'poll_answer', 'integer', true );
-				$redirect_to = param( 'redirect_to', 'url', '' );
+                    if ($Poll && $PollOption && $User) {
+                        $Poll->clear_user_votes($User->ID);
+                        $PollOption->vote($User->ID);
 
-				$email_log = $DB->get_row( 'SELECT * FROM T_email__log WHERE emlog_ID = '.$DB->quote( $email_ID ).' AND emlog_key = '.$DB->quote( $email_key ), ARRAY_A );
+                        $Messages->add(T_('Your vote has been cast.'), 'success');
+                    }
+                }
 
-				if( $email_log )
-				{
-					$user_ID = $email_log['emlog_user_ID'];
-					$UserCache = & get_UserCache();
-					$User = & $UserCache->get_by_ID( $user_ID );
-					$PollCache = & get_PollCache();
-					$PollOptionCache = & get_PollOptionCache();
-					$Poll = & $PollCache->get_by_ID( $poll_ID );
-					$PollOption = & $PollOptionCache->get_by_ID( $poll_answer );
+                if (! empty($redirect_to)) {	// Redirect to provided URL after voting:
+                    // Use message of already loaded email log above, otherwise set empty string in order to don't execute SQL query twice:
+                    $email_log_message = (isset($email_log['emlog_message']) ? $email_log['emlog_message'] : '');
+                    header_redirect_from_email($redirect_to, 303, $email_log_message);
+                    // We have EXITed already at this point!!
+                }
+                break;
+        }
+    }
 
-					if( $Poll && $PollOption && $User )
-					{
-						$Poll->clear_user_votes( $User->ID );
-						$PollOption->vote( $User->ID );
+    /**
+     * Builds the 2nd half of the menu. This is the one with the configuration features
+     *
+     * At some point this might be displayed differently than the 1st half.
+     */
+    public function build_menu_2()
+    {
+        global $admin_url, $AdminUI;
 
-						$Messages->add( T_('Your vote has been cast.'), 'success' );
-					}
-				}
+        if (! check_user_perm('admin', 'restricted')) {	// User must has an access to back-office:
+            return;
+        }
 
-				if( ! empty( $redirect_to ) )
-				{	// Redirect to provided URL after voting:
-					// Use message of already loaded email log above, otherwise set empty string in order to don't execute SQL query twice:
-					$email_log_message = ( isset( $email_log['emlog_message'] ) ? $email_log['emlog_message'] : '' );
-					header_redirect_from_email( $redirect_to, 303, $email_log_message );
-					// We have EXITed already at this point!!
-				}
-				break;
-		}
-	}
-
-
-	/**
-	 * Builds the 2nd half of the menu. This is the one with the configuration features
-	 *
-	 * At some point this might be displayed differently than the 1st half.
-	 */
-	function build_menu_2()
-	{
-		global $admin_url, $AdminUI;
-
-		if( ! check_user_perm( 'admin', 'restricted' ) )
-		{	// User must has an access to back-office:
-			return;
-		}
-
-		if( check_user_perm( 'polls', 'create' ) )
-		{	// User has an access at least to view and edit own polls:
-			$AdminUI->add_menu_entries( array( 'site' ), array(
-				'polls' => array(
-					'text' => T_('Polls'),
-					'href' => $admin_url.'?ctrl=polls' ),
-				) );
-		}
-	}
+        if (check_user_perm('polls', 'create')) {	// User has an access at least to view and edit own polls:
+            $AdminUI->add_menu_entries(['site'], [
+                'polls' => [
+                    'text' => T_('Polls'),
+                    'href' => $admin_url . '?ctrl=polls',
+                ],
+            ]);
+        }
+    }
 }
 
 $polls_Module = new polls_Module();
-
-?>

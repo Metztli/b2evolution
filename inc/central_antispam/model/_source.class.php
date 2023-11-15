@@ -27,67 +27,65 @@
  * @author fplanque: Francois Planque.
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * CaSource Class
  */
 class CaSource extends DataObject
 {
-	var $baseurl = '';
-	var $status = '';
+    public $baseurl = '';
 
-	/**
-	 * Constructor
-	 *
-	 * @param object database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		global $central_antispam_Module;
+    public $status = '';
 
-		// Call parent constructor:
-		parent::__construct( 'T_centralantispam__source', 'casrc_', 'casrc_ID' );
+    /**
+     * Constructor
+     *
+     * @param object database row
+     */
+    public function __construct($db_row = null)
+    {
+        global $central_antispam_Module;
 
-		$this->delete_restrictions = array();
+        // Call parent constructor:
+        parent::__construct('T_centralantispam__source', 'casrc_', 'casrc_ID');
 
-		$this->delete_cascades = array();
+        $this->delete_restrictions = [];
 
-		if( $db_row )
-		{	// Edit existing keyword:
-			$this->ID      = $db_row->casrc_ID;
-			$this->baseurl = $db_row->casrc_baseurl;
-			$this->status  = $db_row->casrc_status;
-		}
-	}
+        $this->delete_cascades = [];
 
+        if ($db_row) {	// Edit existing keyword:
+            $this->ID = $db_row->casrc_ID;
+            $this->baseurl = $db_row->casrc_baseurl;
+            $this->status = $db_row->casrc_status;
+        }
+    }
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		// Status
-		param( 'casrc_status', 'string' );
-		$this->set_from_Request( 'status' );
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        // Status
+        param('casrc_status', 'string');
+        $this->set_from_Request('status');
 
-		return ! param_errors_detected();
-	}
+        return ! param_errors_detected();
+    }
 
-
-	/**
-	 * Get name as baseurl.
-	 *
-	 * @return string Baseurl
-	 */
-	function get_name()
-	{
-		return $this->baseurl;
-	}
+    /**
+     * Get name as baseurl.
+     *
+     * @return string Baseurl
+     */
+    public function get_name()
+    {
+        return $this->baseurl;
+    }
 }
-
-?>

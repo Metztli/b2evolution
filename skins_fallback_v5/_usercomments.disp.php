@@ -11,38 +11,40 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $user_ID, $viewed_User, $display_params, $user_CommentList;
 
 // Default params:
-$params = array_merge( array(
-		'user_commentlist_title'      => T_('Comments posted by %s'),
-		'user_commentlist_no_results' => T_('User has not posted any comment yet'),
-		'user_commentlist_col_post'   => T_('Comment on').':',
-	), $params );
+$params = array_merge([
+    'user_commentlist_title' => T_('Comments posted by %s'),
+    'user_commentlist_no_results' => T_('User has not posted any comment yet'),
+    'user_commentlist_col_post' => T_('Comment on') . ':',
+], $params);
 
 
-$user_CommentList->title = sprintf( $params['user_commentlist_title'], $viewed_User->get_identity_link( array( 'link_text' => 'auto' ) ) );
+$user_CommentList->title = sprintf($params['user_commentlist_title'], $viewed_User->get_identity_link([
+    'link_text' => 'auto',
+]));
 $user_CommentList->no_results_text = $params['user_commentlist_no_results'];
 
 // Initialize Results object
-comments_results( $user_CommentList, array(
-		'field_prefix'       => $user_CommentList->param_prefix,
-		'display_permalink'  => false,
-		'display_item'       => true,
-		'display_status'     => true,
-		'display_kind'       => false,
-		'display_spam'       => false,
-		'display_author'     => false,
-		'display_url'        => false,
-		'display_email'      => false,
-		'display_ip'         => false,
-		'display_visibility' => false,
-		'display_actions'    => false,
-		'col_post'           => $params['user_commentlist_col_post'],
-	) );
+comments_results($user_CommentList, [
+    'field_prefix' => $user_CommentList->param_prefix,
+    'display_permalink' => false,
+    'display_item' => true,
+    'display_status' => true,
+    'display_kind' => false,
+    'display_spam' => false,
+    'display_author' => false,
+    'display_url' => false,
+    'display_email' => false,
+    'display_ip' => false,
+    'display_visibility' => false,
+    'display_actions' => false,
+    'col_post' => $params['user_commentlist_col_post'],
+]);
 
-$user_CommentList->display( $display_params );
-
-?>
+$user_CommentList->display($display_params);

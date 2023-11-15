@@ -12,26 +12,39 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $threads_count;
 
-$Form = new Form( NULL, 'create_messages', 'post', 'compact' );
+$Form = new Form(null, 'create_messages', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel').'!', 'close', regenerate_url( 'action' ) );
+$Form->global_icon(TB_('Cancel') . '!', 'close', regenerate_url('action'));
 
-$Form->begin_form( 'fform',  TB_('Create sample messages for testing moderation') );
+$Form->begin_form('fform', TB_('Create sample messages for testing moderation'));
 
-	$Form->add_crumb( 'tools' );
-	$Form->hidden( 'ctrl', 'tools' );
-	$Form->hidden( 'action', 'create_sample_messages' );
-	$Form->hidden( 'tab3', get_param( 'tab3' ) );
+$Form->add_crumb('tools');
+$Form->hidden('ctrl', 'tools');
+$Form->hidden('action', 'create_sample_messages');
+$Form->hidden('tab3', get_param('tab3'));
 
-	$Form->text_input( 'num_loops', 3, 50, TB_( 'How many loops' ), '', array( 'maxlength' => 11, 'required' => true, 'note' => sprintf( TB_('1 loop will create %d conversations'), $threads_count ) ) );
-	$Form->text_input( 'num_messages', 5, 50, TB_( 'How many messages in each conversation' ), '', array( 'maxlength' => 11, 'required' => true ) );
-	$Form->text_input( 'num_words', 3, 50, TB_( 'How many words in each message' ), '', array( 'maxlength' => 11, 'required' => true ) );
-	$Form->text_input( 'max_users', 3, 50, TB_( 'Max # of participants in a conversation' ), '', array( 'maxlength' => 11, 'required' => true ) );
+$Form->text_input('num_loops', 3, 50, TB_('How many loops'), '', [
+    'maxlength' => 11,
+    'required' => true,
+    'note' => sprintf(TB_('1 loop will create %d conversations'), $threads_count),
+]);
+$Form->text_input('num_messages', 5, 50, TB_('How many messages in each conversation'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
+$Form->text_input('num_words', 3, 50, TB_('How many words in each message'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
+$Form->text_input('max_users', 3, 50, TB_('Max # of participants in a conversation'), '', [
+    'maxlength' => 11,
+    'required' => true,
+]);
 
-$Form->end_form( array( array( 'submit', 'submit', TB_('Create'), 'SaveButton' ) ) );
-
-?>
+$Form->end_form([['submit', 'submit', TB_('Create'), 'SaveButton']]);

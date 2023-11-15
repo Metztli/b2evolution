@@ -10,171 +10,155 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Load Userfield class:
-load_class( 'users/model/_userfieldgroup.class.php', 'UserfieldGroup' );
+load_class('users/model/_userfieldgroup.class.php', 'UserfieldGroup');
 
 // Check minimum permission:
-check_user_perm( 'users', 'view', true );
+check_user_perm('users', 'view', true);
 
 // Set options path:
-$AdminUI->set_path( 'users', 'usersettings', 'userfields' );
+$AdminUI->set_path('users', 'usersettings', 'userfields');
 
 // Get action parameter from request:
 param_action();
 
-if( param( 'ufgp_ID', 'integer', '', true) )
-{// Load userfield group from cache:
-	$UserfieldGroupCache = & get_UserFieldGroupCache();
-	if( ($edited_UserfieldGroup = & $UserfieldGroupCache->get_by_ID( $ufgp_ID, false )) === false )
-	{	// We could not find the user field to edit:
-		unset( $edited_UserfieldGroup );
-		forget_param( 'ufgp_ID' );
-		$Messages->add( sprintf( TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('User field group') ), 'error' );
-		$action = 'nil';
-	}
+if (param('ufgp_ID', 'integer', '', true)) {// Load userfield group from cache:
+    $UserfieldGroupCache = &get_UserFieldGroupCache();
+    if (($edited_UserfieldGroup = &$UserfieldGroupCache->get_by_ID($ufgp_ID, false)) === false) {	// We could not find the user field to edit:
+        unset($edited_UserfieldGroup);
+        forget_param('ufgp_ID');
+        $Messages->add(sprintf(TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('User field group')), 'error');
+        $action = 'nil';
+    }
 }
 
 
-switch( $action )
-{
+switch ($action) {
+    case 'new':
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-	case 'new':
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        if (! isset($edited_UserfieldGroup)) {	// We don't have a model to use, start with blank object:
+            $edited_UserfieldGroup = new UserfieldGroup();
+        } else {	// Duplicate object in order no to mess with the cache:
+            $edited_UserfieldGroup = clone $edited_UserfieldGroup;
+            $edited_UserfieldGroup->ID = 0;
+        }
+        break;
 
-		if( ! isset($edited_UserfieldGroup) )
-		{	// We don't have a model to use, start with blank object:
-			$edited_UserfieldGroup = new UserfieldGroup();
-		}
-		else
-		{	// Duplicate object in order no to mess with the cache:
-			$edited_UserfieldGroup = clone $edited_UserfieldGroup;
-			$edited_UserfieldGroup->ID = 0;
-		}
-		break;
+    case 'edit':
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-	case 'edit':
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        // Make sure we got an ufgp_ID:
+        param('ufgp_ID', 'integer', true);
+        break;
 
-		// Make sure we got an ufgp_ID:
-		param( 'ufgp_ID', 'integer', true );
-		break;
+    case 'create': // Record new UserfieldGroup
+    case 'create_new': // Record UserfieldGroup and create new
+    case 'create_copy': // Record UserfieldGroup and create similar
+        // Insert new user field group...:
+        $edited_UserfieldGroup = new UserfieldGroup();
 
-	case 'create': // Record new UserfieldGroup
-	case 'create_new': // Record UserfieldGroup and create new
-	case 'create_copy': // Record UserfieldGroup and create similar
-		// Insert new user field group...:
-		$edited_UserfieldGroup = new UserfieldGroup();
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('userfieldgroup');
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'userfieldgroup' );
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        // load data from request
+        if ($edited_UserfieldGroup->load_from_Request()) {	// We could load data from form without errors:
+            // Insert in DB:
+            $edited_UserfieldGroup->dbinsert();
+            $Messages->add(TB_('New User field group created.'), 'success');
 
-		// load data from request
-		if( $edited_UserfieldGroup->load_from_Request() )
-		{	// We could load data from form without errors:
+            switch ($action) {
+                case 'create_copy':
+                    // Redirect so that a reload doesn't write to the DB twice:
+                    header_redirect('?ctrl=userfieldsgroups&action=new&ufgp_ID=' . $edited_UserfieldGroup->ID, 303); // Will EXIT
+                    // We have EXITed already at this point!!
+                    break;
+                case 'create_new':
+                    // Redirect so that a reload doesn't write to the DB twice:
+                    header_redirect('?ctrl=userfieldsgroups&action=new', 303); // Will EXIT
+                    // We have EXITed already at this point!!
+                    break;
+                case 'create':
+                    // Redirect so that a reload doesn't write to the DB twice:
+                    header_redirect('?ctrl=userfields', 303); // Will EXIT
+                    // We have EXITed already at this point!!
+                    break;
+            }
+        }
+        break;
 
-			// Insert in DB:
-			$edited_UserfieldGroup->dbinsert();
-			$Messages->add( TB_('New User field group created.'), 'success' );
+    case 'update':
+        // Edit user field form...:
 
-			switch( $action )
-			{
-				case 'create_copy':
-					// Redirect so that a reload doesn't write to the DB twice:
-					header_redirect( '?ctrl=userfieldsgroups&action=new&ufgp_ID='.$edited_UserfieldGroup->ID, 303 ); // Will EXIT
-					// We have EXITed already at this point!!
-					break;
-				case 'create_new':
-					// Redirect so that a reload doesn't write to the DB twice:
-					header_redirect( '?ctrl=userfieldsgroups&action=new', 303 ); // Will EXIT
-					// We have EXITed already at this point!!
-					break;
-				case 'create':
-					// Redirect so that a reload doesn't write to the DB twice:
-					header_redirect( '?ctrl=userfields', 303 ); // Will EXIT
-					// We have EXITed already at this point!!
-					break;
-			}
-		}
-		break;
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('userfieldgroup');
 
-	case 'update':
-		// Edit user field form...:
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'userfieldgroup' );
+        // Make sure we got an ufgp_ID:
+        param('ufgp_ID', 'integer', true);
 
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        // load data from request
+        if ($edited_UserfieldGroup->load_from_Request()) {	// We could load data from form without errors:
+            // Update in DB:
+            $DB->begin();
 
-		// Make sure we got an ufgp_ID:
-		param( 'ufgp_ID', 'integer', true );
+            $edited_UserfieldGroup->dbupdate();
+            $Messages->add(TB_('User field group updated.'), 'success');
 
-		// load data from request
-		if( $edited_UserfieldGroup->load_from_Request() )
-		{	// We could load data from form without errors:
+            $DB->commit();
 
-			// Update in DB:
-			$DB->begin();
+            header_redirect('?ctrl=userfields', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        break;
 
-			$edited_UserfieldGroup->dbupdate();
-			$Messages->add( TB_('User field group updated.'), 'success' );
+    case 'delete':
+        // Delete user field:
 
-			$DB->commit();
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('userfieldgroup');
 
-			header_redirect( '?ctrl=userfields', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		break;
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-	case 'delete':
-		// Delete user field:
+        // Make sure we got an ufgp_ID:
+        param('ufgp_ID', 'integer', true);
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'userfieldgroup' );
-
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
-
-		// Make sure we got an ufgp_ID:
-		param( 'ufgp_ID', 'integer', true );
-
-		if( param( 'confirm', 'integer', 0 ) )
-		{ // confirmed, Delete from DB:
-			$msg = sprintf( TB_('User field group &laquo;%s&raquo; deleted.'), $edited_UserfieldGroup->dget('name') );
-			$edited_UserfieldGroup->dbdelete();
-			unset( $edited_UserfieldGroup );
-			forget_param( 'ufgp_ID' );
-			$Messages->add( $msg, 'success' );
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=userfields', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-
-		}
-		else
-		{	// not confirmed, Check for restrictions:
-			if( ! $edited_UserfieldGroup->check_delete( sprintf( TB_('Cannot delete user field group &laquo;%s&raquo;'), $edited_UserfieldGroup->dget('name') ) ) )
-			{	// There are restrictions:
-				$action = 'view';
-			}
-		}
-		break;
-
+        if (param('confirm', 'integer', 0)) { // confirmed, Delete from DB:
+            $msg = sprintf(TB_('User field group &laquo;%s&raquo; deleted.'), $edited_UserfieldGroup->dget('name'));
+            $edited_UserfieldGroup->dbdelete();
+            unset($edited_UserfieldGroup);
+            forget_param('ufgp_ID');
+            $Messages->add($msg, 'success');
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=userfields', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        } else {	// not confirmed, Check for restrictions:
+            if (! $edited_UserfieldGroup->check_delete(sprintf(TB_('Cannot delete user field group &laquo;%s&raquo;'), $edited_UserfieldGroup->dget('name')))) {	// There are restrictions:
+                $action = 'view';
+            }
+        }
+        break;
 }
 
-$AdminUI->breadcrumbpath_init( false );  // fp> I'm playing with the idea of keeping the current blog in the path here...
-$AdminUI->breadcrumbpath_add( TB_('Users'), '?ctrl=users' );
-$AdminUI->breadcrumbpath_add( TB_('Settings'), '?ctrl=usersettings' );
-$AdminUI->breadcrumbpath_add( TB_('User fields configuration'), '?ctrl=userfields' );
+$AdminUI->breadcrumbpath_init(false);  // fp> I'm playing with the idea of keeping the current blog in the path here...
+$AdminUI->breadcrumbpath_add(TB_('Users'), '?ctrl=users');
+$AdminUI->breadcrumbpath_add(TB_('Settings'), '?ctrl=usersettings');
+$AdminUI->breadcrumbpath_add(TB_('User fields configuration'), '?ctrl=userfields');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'user-field-group-form' );
+$AdminUI->set_page_manual_link('user-field-group-form');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -187,42 +171,41 @@ $AdminUI->disp_payload_begin();
 /**
  * Display payload:
  */
-switch( $action )
-{
-	case 'nil':
-		// Do nothing
-		break;
+switch ($action) {
+    case 'nil':
+        // Do nothing
+        break;
 
 
-	case 'delete':
-		// We need to ask for confirmation:
-		$edited_UserfieldGroup->confirm_delete(
-				sprintf( TB_('Delete user field &laquo;%s&raquo;?'), $edited_UserfieldGroup->dget('name') ),
-				'userfieldgroup', $action, get_memorized( 'action' ) );
-		/* no break */
-	case 'new':
-	case 'create':
-	case 'create_new':
-	case 'create_copy':
-	case 'edit':
-	case 'update':	// we return in this state after a validation error
-		$AdminUI->disp_view( 'users/views/_userfieldsgroup.form.php' );
-		break;
+    case 'delete':
+        // We need to ask for confirmation:
+        $edited_UserfieldGroup->confirm_delete(
+            sprintf(TB_('Delete user field &laquo;%s&raquo;?'), $edited_UserfieldGroup->dget('name')),
+            'userfieldgroup',
+            $action,
+            get_memorized('action')
+        );
+        /* no break */
+    case 'new':
+    case 'create':
+    case 'create_new':
+    case 'create_copy':
+    case 'edit':
+    case 'update':	// we return in this state after a validation error
+        $AdminUI->disp_view('users/views/_userfieldsgroup.form.php');
+        break;
 
 
-	default:
-		// No specific request, list all user fields:
-		// Cleanup context:
-		forget_param( 'ufgp_ID' );
-		// Display user fields list:
-		$AdminUI->disp_view( 'users/views/_userfields.view.php' );
-		break;
-
+    default:
+        // No specific request, list all user fields:
+        // Cleanup context:
+        forget_param('ufgp_ID');
+        // Display user fields list:
+        $AdminUI->disp_view('users/views/_userfields.view.php');
+        break;
 }
 
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

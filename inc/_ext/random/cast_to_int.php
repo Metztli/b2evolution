@@ -26,14 +26,13 @@
  * SOFTWARE.
  */
 
-if (!is_callable('RandomCompat_intval')) {
-
+if (! is_callable('RandomCompat_intval')) {
     /**
      * Cast to an integer if we can, safely.
      *
      * If you pass it a float in the range (~PHP_INT_MAX, PHP_INT_MAX)
      * (non-inclusive), it will sanely cast it to an int. If you it's equal to
-     * ~PHP_INT_MAX or PHP_INT_MAX, we let it fail as not an integer. Floats 
+     * ~PHP_INT_MAX or PHP_INT_MAX, we let it fail as not an integer. Floats
      * lose precision, so the <= and => operators might accidentally let a float
      * through.
      *
@@ -67,7 +66,7 @@ if (!is_callable('RandomCompat_intval')) {
 
         if (is_int($number)) {
             return (int) $number;
-        } elseif (!$fail_open) {
+        } elseif (! $fail_open) {
             throw new TypeError(
                 'Expected an integer.'
             );

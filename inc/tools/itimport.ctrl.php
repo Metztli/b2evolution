@@ -9,15 +9,17 @@
  * @package admin
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Check permission:
-check_user_perm( 'admin', 'normal', true );
-check_user_perm( 'options', 'edit', true );
+check_user_perm('admin', 'normal', true);
+check_user_perm('options', 'edit', true);
 
-load_funcs( 'tools/model/_wp.funcs.php' );
-load_funcs( 'tools/model/_itemtypeimport.funcs.php' );
+load_funcs('tools/model/_wp.funcs.php');
+load_funcs('tools/model/_itemtypeimport.funcs.php');
 
 /**
  * @var action
@@ -26,64 +28,56 @@ load_funcs( 'tools/model/_itemtypeimport.funcs.php' );
  * 1) 'file'
  * 2) 'import'
  */
-param( 'action', 'string' );
+param('action', 'string');
 
-if( !empty( $action ) )
-{	// Try to obtain some serious time to do some serious processing (15 minutes)
-	set_max_execution_time( 900 );
-	// Turn off the output buffering to do the correct work of the function flush()
-	@ini_set( 'output_buffering', 'off' );
+if (! empty($action)) {	// Try to obtain some serious time to do some serious processing (15 minutes)
+    set_max_execution_time(900);
+    // Turn off the output buffering to do the correct work of the function flush()
+    @ini_set('output_buffering', 'off');
 }
 
-if( param( 'it_blog_IDs', 'array:integer', NULL ) !== NULL )
-{	// Save last import collections in Session:
-	$Session->set( 'last_import_coll_IDs', get_param( 'it_blog_IDs' ) );
+if (param('it_blog_IDs', 'array:integer', null) !== null) {	// Save last import collections in Session:
+    $Session->set('last_import_coll_IDs', get_param('it_blog_IDs'));
 }
 
-switch( $action )
-{
-	case 'import':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'itimport' );
+switch ($action) {
+    case 'import':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('itimport');
 
-		// XML File
-		$xml_file = param( 'import_file', 'string', '' );
-		if( empty( $xml_file ) )
-		{ // File is not selected
-			param_error( 'import_file', 'Please select file to import.' );
-		}
-		else if( ! preg_match( '/\.xml$/i', $xml_file ) )
-		{ // Extension is incorrect
-			param_error( 'import_file', sprintf( '&laquo;%s&raquo; has an unrecognized extension.', $xml_file ) );
-		}
+        // XML File
+        $xml_file = param('import_file', 'string', '');
+        if (empty($xml_file)) { // File is not selected
+            param_error('import_file', 'Please select file to import.');
+        } elseif (! preg_match('/\.xml$/i', $xml_file)) { // Extension is incorrect
+            param_error('import_file', sprintf('&laquo;%s&raquo; has an unrecognized extension.', $xml_file));
+        }
 
-		if( param( 'import_type', 'string', 'skip' ) == 'update' &&
-		    param( 'import_type_update_confirm', 'string' ) !== 'DELETE' )
-		{	// If deleting/replacing is not confirmed:
-			param_error( 'import_type_update_confirm', sprintf( TB_('Type %s to confirm'), '<code>DELETE</code>' ).'!' );
-		}
+        if (param('import_type', 'string', 'skip') == 'update' &&
+            param('import_type_update_confirm', 'string') !== 'DELETE') {	// If deleting/replacing is not confirmed:
+            param_error('import_type_update_confirm', sprintf(TB_('Type %s to confirm'), '<code>DELETE</code>') . '!');
+        }
 
-		if( param_errors_detected() )
-		{ // Stop import if errors exist
-			$action = 'file';
-			break;
-		}
+        if (param_errors_detected()) { // Stop import if errors exist
+            $action = 'file';
+            break;
+        }
 
-		break;
+        break;
 }
 
 
 // Highlight the requested tab (if valid):
-$AdminUI->set_path( 'options', 'misc', 'import' );
+$AdminUI->set_path('options', 'misc', 'import');
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( 'System', $admin_url.'?ctrl=system' );
-$AdminUI->breadcrumbpath_add( 'Maintenance', $admin_url.'?ctrl=tools' );
-$AdminUI->breadcrumbpath_add( 'Import', $admin_url.'?ctrl=tools&amp;tab3=import' );
-$AdminUI->breadcrumbpath_add( 'Item Type Importer', $admin_url.'?ctrl=wpimportxml' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add('System', $admin_url . '?ctrl=system');
+$AdminUI->breadcrumbpath_add('Maintenance', $admin_url . '?ctrl=tools');
+$AdminUI->breadcrumbpath_add('Import', $admin_url . '?ctrl=tools&amp;tab3=import');
+$AdminUI->breadcrumbpath_add('Item Type Importer', $admin_url . '?ctrl=wpimportxml');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'item-type-importer' );
+$AdminUI->set_page_manual_link('item-type-importer');
 
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -95,16 +89,15 @@ $AdminUI->disp_body_top();
 // Begin payload block:
 $AdminUI->disp_payload_begin();
 
-switch( $action )
-{
-	case 'import':	// Step 2
-		$AdminUI->disp_view( 'tools/views/_it_import.form.php' );
-		break;
+switch ($action) {
+    case 'import':	// Step 2
+        $AdminUI->disp_view('tools/views/_it_import.form.php');
+        break;
 
-	case 'file':	// Step 1
-	default:
-		$AdminUI->disp_view( 'tools/views/_it_file.form.php' );
-		break;
+    case 'file':	// Step 1
+    default:
+        $AdminUI->disp_view('tools/views/_it_file.form.php');
+        break;
 }
 
 
@@ -113,5 +106,3 @@ $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

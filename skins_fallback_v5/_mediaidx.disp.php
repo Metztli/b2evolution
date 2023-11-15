@@ -13,22 +13,22 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // ------------------------- "Photo Index" CONTAINER EMBEDDED HERE --------------------------
-skin_container( NT_('Photo Index'), array(
-	// The following params will be used as defaults for widgets included in this container:
-	// This will enclose each widget in a block:
-	'block_start'    => '<div class="evo_widget $wi_class$">',
-	'block_end'      => '</div>',
-	'grid_start'     => '<div class="image_index">',
-	'grid_end'       => '</div>',
-	'grid_colstart'  => '',
-	'grid_colend'    => '',
-	'grid_cellstart' => '<div><span>',
-	'grid_cellend'   => '</span></div>',
-) );
+skin_container(NT_('Photo Index'), [
+    // The following params will be used as defaults for widgets included in this container:
+    // This will enclose each widget in a block:
+    'block_start' => '<div class="evo_widget $wi_class$">',
+    'block_end' => '</div>',
+    'grid_start' => '<div class="image_index">',
+    'grid_end' => '</div>',
+    'grid_colstart' => '',
+    'grid_colend' => '',
+    'grid_cellstart' => '<div><span>',
+    'grid_cellend' => '</span></div>',
+]);
 // ----------------------------- END OF "Photo Index" CONTAINER -----------------------------
-
-?>

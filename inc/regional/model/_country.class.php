@@ -11,150 +11,163 @@
  * @package evocore
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * Country Class
  */
 class Country extends DataObject
 {
-	var $code = '';
-	var $name = '';
-	var $curr_ID = '';
-	var $enabled = 1;
-	var $preferred = 0;
-	var $status = '';
-	var $block_count = 0;
+    public $code = '';
 
-	var $Currency = NULL;
+    public $name = '';
 
-	/**
-	 * Constructor
-	 *
-	 * @param object database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_regional__country', 'ctry_', 'ctry_ID' );
+    public $curr_ID = '';
 
-		if( $db_row )
-		{
-			$this->ID          = $db_row->ctry_ID;
-			$this->code        = $db_row->ctry_code;
-			$this->name        = $db_row->ctry_name;
-			$this->curr_ID     = $db_row->ctry_curr_ID;
-			$this->enabled     = $db_row->ctry_enabled;
-			$this->preferred   = $db_row->ctry_preferred;
-			$this->status      = $db_row->ctry_status;
-			$this->block_count = $db_row->ctry_block_count;
-		}
-	}
+    public $enabled = 1;
 
+    public $preferred = 0;
 
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table'=>'T_users', 'fk'=>'user_ctry_ID', 'msg'=>T_('%d related users') ),
-				array( 'table'=>'T_regional__region', 'fk'=>'rgn_ctry_ID', 'msg'=>T_('%d related regions') ),
-				array( 'table'=>'T_regional__city', 'fk'=>'city_ctry_ID', 'msg'=>T_('%d related cities') ),
-			);
-	}
+    public $status = '';
 
+    public $block_count = 0;
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		// Name
-		$this->set_string_from_param( 'name', true );
+    public $Currency = null;
 
-		// Code
-		param( 'ctry_code', 'string' );
-		param_check_regexp( 'ctry_code', '#^[A-Za-z]{2}$#', T_('Country code must be 2 letters.') );
-		$this->set_from_Request( 'code', 'ctry_code' );
+    /**
+     * Constructor
+     *
+     * @param object database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_regional__country', 'ctry_', 'ctry_ID');
 
-		// Currency Id
-		param( 'ctry_curr_ID', 'integer' );
-		param_check_number( 'ctry_curr_ID', T_('Please select a currency') );
-		$this->set_from_Request( 'curr_ID', 'ctry_curr_ID', true );
+        if ($db_row) {
+            $this->ID = $db_row->ctry_ID;
+            $this->code = $db_row->ctry_code;
+            $this->name = $db_row->ctry_name;
+            $this->curr_ID = $db_row->ctry_curr_ID;
+            $this->enabled = $db_row->ctry_enabled;
+            $this->preferred = $db_row->ctry_preferred;
+            $this->status = $db_row->ctry_status;
+            $this->block_count = $db_row->ctry_block_count;
+        }
+    }
 
-		if( ! param_errors_detected() )
-		{	// Check country code for duplicating:
-			$existing_ctry_ID = $this->dbexists( 'ctry_code', $this->get( 'code' ) );
-			if( $existing_ctry_ID )
-			{	// We have a duplicate country:
-				param_error( 'ctry_code',
-					sprintf( T_('This country already exists. Do you want to <a %s>edit the existing country</a>?'),
-						'href="?ctrl=countries&amp;action=edit&amp;ctry_ID='.$existing_ctry_ID.'"' ) );
-			}
-		}
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_users',
+                'fk' => 'user_ctry_ID',
+                'msg' => T_('%d related users'),
+            ],
+            [
+                'table' => 'T_regional__region',
+                'fk' => 'rgn_ctry_ID',
+                'msg' => T_('%d related regions'),
+            ],
+            [
+                'table' => 'T_regional__city',
+                'fk' => 'city_ctry_ID',
+                'msg' => T_('%d related cities'),
+            ],
+        ];
+    }
 
-		return ! param_errors_detected();
-	}
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        // Name
+        $this->set_string_from_param('name', true);
 
+        // Code
+        param('ctry_code', 'string');
+        param_check_regexp('ctry_code', '#^[A-Za-z]{2}$#', T_('Country code must be 2 letters.'));
+        $this->set_from_Request('code', 'ctry_code');
 
-	/**
-	 * Set param value
-	 *
-	 * By default, all values will be considered strings
-	 *
-	 * @param string parameter name
-	 * @param mixed parameter value
-	 * @param boolean true to set to NULL if empty value
-	 * @return boolean true, if a value has been set; false if it has not changed
-	 */
-	function set( $parname, $parvalue, $make_null = false )
-	{
-		switch( $parname )
-		{
-			case 'code':
-				$parvalue = strtolower($parvalue);
-			case 'name':
-			case 'curr_ID':
-			case 'enabled':
-			default:
-				return $this->set_param( $parname, 'string', $parvalue, $make_null );
-		}
-	}
+        // Currency Id
+        param('ctry_curr_ID', 'integer');
+        param_check_number('ctry_curr_ID', T_('Please select a currency'));
+        $this->set_from_Request('curr_ID', 'ctry_curr_ID', true);
 
+        if (! param_errors_detected()) {	// Check country code for duplicating:
+            $existing_ctry_ID = $this->dbexists('ctry_code', $this->get('code'));
+            if ($existing_ctry_ID) {	// We have a duplicate country:
+                param_error(
+                    'ctry_code',
+                    sprintf(
+                        T_('This country already exists. Do you want to <a %s>edit the existing country</a>?'),
+                        'href="?ctrl=countries&amp;action=edit&amp;ctry_ID=' . $existing_ctry_ID . '"'
+                    )
+                );
+            }
+        }
 
-	/**
-	 * Get country name.
-	 *
-	 * @return string currency code
-	 */
-	function get_name()
-	{
-		return $this->name;
-	}
+        return ! param_errors_detected();
+    }
 
+    /**
+     * Set param value
+     *
+     * By default, all values will be considered strings
+     *
+     * @param string parameter name
+     * @param mixed parameter value
+     * @param boolean true to set to NULL if empty value
+     * @return boolean true, if a value has been set; false if it has not changed
+     */
+    public function set($parname, $parvalue, $make_null = false)
+    {
+        switch ($parname) {
+            case 'code':
+                $parvalue = strtolower($parvalue);
+                // no break
+            case 'name':
+            case 'curr_ID':
+            case 'enabled':
+            default:
+                return $this->set_param($parname, 'string', $parvalue, $make_null);
+        }
+    }
 
-	/**
-	 * Get Currency object of this Country
-	 *
-	 * @return object Currency
-	 */
-	function & get_Currency()
-	{
-		if( $this->Currency === NULL )
-		{	// Initialize Currency for this Country:
-			$CurrencyCache = & get_CurrencyCache();
-			$this->Currency = & $CurrencyCache->get_by_ID( $this->get( 'curr_ID' ), false, false );
-		}
+    /**
+     * Get country name.
+     *
+     * @return string currency code
+     */
+    public function get_name()
+    {
+        return $this->name;
+    }
 
-		return $this->Currency;
-	}
+    /**
+     * Get Currency object of this Country
+     *
+     * @return object Currency
+     */
+    public function &get_Currency()
+    {
+        if ($this->Currency === null) {	// Initialize Currency for this Country:
+            $CurrencyCache = &get_CurrencyCache();
+            $this->Currency = &$CurrencyCache->get_by_ID($this->get('curr_ID'), false, false);
+        }
+
+        return $this->Currency;
+    }
 }
-
-?>

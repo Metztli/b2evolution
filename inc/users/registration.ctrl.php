@@ -10,193 +10,185 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // Check minimum permission:
-check_user_perm( 'users', 'view', true );
+check_user_perm('users', 'view', true);
 
-$AdminUI->set_path( 'users', 'usersettings', 'registration' );
+$AdminUI->set_path('users', 'usersettings', 'registration');
 
 param_action();
 
-switch ( $action )
-{
-	case 'update':
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'registration' );
+switch ($action) {
+    case 'update':
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('registration');
 
-		// Check permission:
-		check_user_perm( 'users', 'edit', true );
+        // Check permission:
+        check_user_perm('users', 'edit', true);
 
-		// keep old newusers_canregister setting value to check if we need to invalidate pagecaches
-		$old_newusers_canregister = $Settings->get( 'newusers_canregister' );
+        // keep old newusers_canregister setting value to check if we need to invalidate pagecaches
+        $old_newusers_canregister = $Settings->get('newusers_canregister');
 
-		// UPDATE general settings:
-		param( 'newusers_canregister', 'string', 'no' );
-		param( 'registration_is_public', 'integer', 0 );
-		param( 'quick_registration', 'integer', 0 );
-		param( 'newusers_grp_ID', 'integer', true );
+        // UPDATE general settings:
+        param('newusers_canregister', 'string', 'no');
+        param('registration_is_public', 'integer', 0);
+        param('quick_registration', 'integer', 0);
+        param('newusers_grp_ID', 'integer', true);
 
-		param_integer_range( 'newusers_level', 0, 9, TB_('User level must be between %d and %d.') );
+        param_integer_range('newusers_level', 0, 9, TB_('User level must be between %d and %d.'));
 
-		// UPDATE default user settings
-		param( 'enable_PM', 'integer', 0 );
-		param( 'enable_email', 'integer', 0 );
-		param( 'notify_messages', 'integer', 0 );
-		param( 'notify_unread_messages', 'integer', 0 );
-		param( 'notify_comment_mentioned', 'integer', 0 );
-		param( 'notify_published_comments', 'integer', 0 );
-		param( 'notify_comment_moderation', 'integer', 0 );
-		param( 'notify_edit_cmt_moderation', 'integer', 0 );
-		param( 'notify_spam_cmt_moderation', 'integer', 0 );
-		param( 'notify_meta_comment_mentioned', 'integer', 0 );
-		param( 'notify_meta_comments', 'integer', 0 );
-		param( 'notify_post_mentioned', 'integer', 0 );
-		param( 'notify_post_moderation', 'integer', 0 );
-		param( 'notify_edit_pst_moderation', 'integer', 0 );
-		param( 'notify_post_proposed', 'integer', 0 );
-		param( 'notify_post_assignment', 'integer', 0 );
-		param( 'def_newsletters', 'array:integer', array() );
-		param_integer_range( 'notification_email_limit', 0, 999, TB_('Notificaiton email limit must be between %d and %d.') );
-		param_integer_range( 'newsletter_limit', 0, 999, TB_('List limit must be between %d and %d.') );
+        // UPDATE default user settings
+        param('enable_PM', 'integer', 0);
+        param('enable_email', 'integer', 0);
+        param('notify_messages', 'integer', 0);
+        param('notify_unread_messages', 'integer', 0);
+        param('notify_comment_mentioned', 'integer', 0);
+        param('notify_published_comments', 'integer', 0);
+        param('notify_comment_moderation', 'integer', 0);
+        param('notify_edit_cmt_moderation', 'integer', 0);
+        param('notify_spam_cmt_moderation', 'integer', 0);
+        param('notify_meta_comment_mentioned', 'integer', 0);
+        param('notify_meta_comments', 'integer', 0);
+        param('notify_post_mentioned', 'integer', 0);
+        param('notify_post_moderation', 'integer', 0);
+        param('notify_edit_pst_moderation', 'integer', 0);
+        param('notify_post_proposed', 'integer', 0);
+        param('notify_post_assignment', 'integer', 0);
+        param('def_newsletters', 'array:integer', []);
+        param_integer_range('notification_email_limit', 0, 999, TB_('Notificaiton email limit must be between %d and %d.'));
+        param_integer_range('newsletter_limit', 0, 999, TB_('List limit must be between %d and %d.'));
 
-		// UPDATE account activation by email
-		param( 'newusers_mustvalidate', 'integer', 0 );
-		param( 'newusers_revalidate_emailchg', 'integer', 0 );
-		param( 'validation_process', 'string', true );
-		$activate_requests_limit = param_duration( 'activate_requests_limit' );
-		param( 'newusers_findcomments', 'integer', 0 );
-		param( 'pass_after_quick_reg', 'integer', 0 );
+        // UPDATE account activation by email
+        param('newusers_mustvalidate', 'integer', 0);
+        param('newusers_revalidate_emailchg', 'integer', 0);
+        param('validation_process', 'string', true);
+        $activate_requests_limit = param_duration('activate_requests_limit');
+        param('newusers_findcomments', 'integer', 0);
+        param('pass_after_quick_reg', 'integer', 0);
 
-		$after_email_validation = param( 'after_email_validation', 'string', 'return_to_original' );
-		if( $after_email_validation != 'return_to_original' )
-		{
-			$after_email_validation = param( 'specific_after_validation_url', 'url', NULL );
-			param_check_url( 'specific_after_validation_url', 'http-https' );
-		}
+        $after_email_validation = param('after_email_validation', 'string', 'return_to_original');
+        if ($after_email_validation != 'return_to_original') {
+            $after_email_validation = param('specific_after_validation_url', 'url', null);
+            param_check_url('specific_after_validation_url', 'http-https');
+        }
 
-		$after_registration = param( 'after_registration', 'string', 'return_to_original' );
-		$after_registration_slug = param( 'specific_after_registration_slug', 'string', '' );
-		switch( $after_registration )
-		{
-			case 'specific_url':
-				$after_registration = param( 'specific_after_registration_url', 'url', NULL );
-				param_check_url( 'specific_after_registration_url', 'http-https' );
-				break;
+        $after_registration = param('after_registration', 'string', 'return_to_original');
+        $after_registration_slug = param('specific_after_registration_slug', 'string', '');
+        switch ($after_registration) {
+            case 'specific_url':
+                $after_registration = param('specific_after_registration_url', 'url', null);
+                param_check_url('specific_after_registration_url', 'http-https');
+                break;
 
-			case 'specific_slug':
-				param_check_not_empty( 'specific_after_registration_slug', sprintf( TB_('The field &laquo;%s&raquo; cannot be empty.'), TB_('Go to specific slug') ) );
-				break;
-		}
+            case 'specific_slug':
+                param_check_not_empty('specific_after_registration_slug', sprintf(TB_('The field &laquo;%s&raquo; cannot be empty.'), TB_('Go to specific slug')));
+                break;
+        }
 
-		param_integer_range( 'user_minpwdlen', 1, 32, TB_('Minimum password length must be between %d and %d.') );
+        param_integer_range('user_minpwdlen', 1, 32, TB_('Minimum password length must be between %d and %d.'));
 
-		param( 'http_auth_require', 'integer', 0 );
-		param( 'http_auth_accept', 'integer', 0 );
-		if( $http_auth_require )
-		{	// Force to accept HTTP authentication headers when it is required:
-			$http_auth_accept = 1;
-		}
-		param( 'require_ssl', 'integer', 0 );
-		param( 'js_passwd_hashing', 'integer', 0 );
-		param( 'passwd_special', 'integer', 0 );
-		param( 'strict_logins', 'integer', 0 );
-		param( 'registration_after_quick', 'string', '' );
-		param( 'registration_no_username', 'string', '' );
-		param( 'registration_master_template', 'string', '' );
+        param('http_auth_require', 'integer', 0);
+        param('http_auth_accept', 'integer', 0);
+        if ($http_auth_require) {	// Force to accept HTTP authentication headers when it is required:
+            $http_auth_accept = 1;
+        }
+        param('require_ssl', 'integer', 0);
+        param('js_passwd_hashing', 'integer', 0);
+        param('passwd_special', 'integer', 0);
+        param('strict_logins', 'integer', 0);
+        param('registration_after_quick', 'string', '');
+        param('registration_no_username', 'string', '');
+        param('registration_master_template', 'string', '');
 
-		// We are about to allow non-ASCII logins
-		// Let's check if there are users with logins starting with reserved prefix usr_
-		if( ! $strict_logins && $invalid_users = find_logins_with_reserved_prefix() )
-		{
-			// Enforce strict logins until all invalid logins are changed
-			$strict_logins = true;
+        // We are about to allow non-ASCII logins
+        // Let's check if there are users with logins starting with reserved prefix usr_
+        if (! $strict_logins && $invalid_users = find_logins_with_reserved_prefix()) {
+            // Enforce strict logins until all invalid logins are changed
+            $strict_logins = true;
 
-			$user_edit_url = regenerate_url( 'ctrl,action', 'ctrl=user&amp;user_tab=profile&amp;user_ID=' );
-			foreach( $invalid_users as $inv_user )
-			{
-				$msg[] = '<li>'.action_icon( TB_('Edit this user...'), 'edit', $user_edit_url.$inv_user->user_ID, 5, 0 ).' [ '.$inv_user->user_login.' ]</li>';
-			}
+            $user_edit_url = regenerate_url('ctrl,action', 'ctrl=user&amp;user_tab=profile&amp;user_ID=');
+            foreach ($invalid_users as $inv_user) {
+                $msg[] = '<li>' . action_icon(TB_('Edit this user...'), 'edit', $user_edit_url . $inv_user->user_ID, 5, 0) . ' [ ' . $inv_user->user_login . ' ]</li>';
+            }
 
-			if( !empty($msg) )
-			{
-				$Messages->add( TB_('The following user logins must be changed in order for you to disable "Require strict logins" setting:')
-							.'<ol style="list-style-type:decimal; list-style-position: inside">'.implode( "\n", $msg ).'</ol>', 'note' );
-			}
-		}
+            if (! empty($msg)) {
+                $Messages->add(TB_('The following user logins must be changed in order for you to disable "Require strict logins" setting:')
+                            . '<ol style="list-style-type:decimal; list-style-position: inside">' . implode("\n", $msg) . '</ol>', 'note');
+            }
+        }
 
-		$Settings->set_array( array(
-					 array( 'newusers_canregister', $newusers_canregister ),
-					 array( 'registration_is_public', $registration_is_public ),
-					 array( 'quick_registration', $quick_registration ),
-					 array( 'newusers_grp_ID', $newusers_grp_ID ),
-					 array( 'newusers_level', $newusers_level ),
-					 array( 'def_enable_PM', $enable_PM ),
-					 array( 'def_enable_email', $enable_email ),
-					 array( 'def_notify_messages', $notify_messages ),
-					 array( 'def_notify_unread_messages', $notify_unread_messages ),
-					 array( 'def_notify_comment_mentioned', $notify_comment_mentioned ),
-					 array( 'def_notify_published_comments', $notify_published_comments ),
-					 array( 'def_notify_comment_moderation', $notify_comment_moderation ),
-					 array( 'def_notify_edit_cmt_moderation', $notify_edit_cmt_moderation ),
-					 array( 'def_notify_spam_cmt_moderation', $notify_spam_cmt_moderation ),
-					 array( 'def_notify_meta_comment_mentioned', $notify_meta_comment_mentioned ),
-					 array( 'def_notify_meta_comments', $notify_meta_comments ),
-					 array( 'def_notify_post_mentioned', $notify_post_mentioned ),
-					 array( 'def_notify_post_moderation', $notify_post_moderation ),
-					 array( 'def_notify_edit_pst_moderation', $notify_edit_pst_moderation ),
-					 array( 'def_notify_post_proposed', $notify_post_proposed ),
-					 array( 'def_notify_post_assignment', $notify_post_assignment ),
-					 array( 'def_newsletters', implode( ',', $def_newsletters ) ),
-					 array( 'def_notification_email_limit', $notification_email_limit ),
-					 array( 'def_newsletter_limit', $newsletter_limit ),
-					 array( 'newusers_mustvalidate', $newusers_mustvalidate ),
-					 array( 'newusers_revalidate_emailchg', $newusers_revalidate_emailchg ),
-					 array( 'activate_requests_limit', $activate_requests_limit ),
-					 array( 'validation_process', $validation_process ),
-					 array( 'newusers_findcomments', $newusers_findcomments ),
-					 array( 'after_email_validation', $after_email_validation ),
-					 array( 'pass_after_quick_reg', $pass_after_quick_reg ),
-					 array( 'after_registration', $after_registration ),
-					 array( 'after_registration_slug', $after_registration_slug ),
-					 array( 'user_minpwdlen', $user_minpwdlen ),
-					 array( 'require_ssl', $require_ssl ),
-					 array( 'js_passwd_hashing', $js_passwd_hashing ),
-					 array( 'http_auth_require', $http_auth_require ),
-					 array( 'http_auth_accept', $http_auth_accept ),
-					 array( 'passwd_special', $passwd_special ),
-					 array( 'strict_logins', $strict_logins ),
-					 array( 'registration_after_quick', $registration_after_quick ),
-					 array( 'registration_no_username', $registration_no_username ),
-					 array( 'registration_master_template', $registration_master_template ),
-				) );
+        $Settings->set_array([
+            ['newusers_canregister', $newusers_canregister],
+            ['registration_is_public', $registration_is_public],
+            ['quick_registration', $quick_registration],
+            ['newusers_grp_ID', $newusers_grp_ID],
+            ['newusers_level', $newusers_level],
+            ['def_enable_PM', $enable_PM],
+            ['def_enable_email', $enable_email],
+            ['def_notify_messages', $notify_messages],
+            ['def_notify_unread_messages', $notify_unread_messages],
+            ['def_notify_comment_mentioned', $notify_comment_mentioned],
+            ['def_notify_published_comments', $notify_published_comments],
+            ['def_notify_comment_moderation', $notify_comment_moderation],
+            ['def_notify_edit_cmt_moderation', $notify_edit_cmt_moderation],
+            ['def_notify_spam_cmt_moderation', $notify_spam_cmt_moderation],
+            ['def_notify_meta_comment_mentioned', $notify_meta_comment_mentioned],
+            ['def_notify_meta_comments', $notify_meta_comments],
+            ['def_notify_post_mentioned', $notify_post_mentioned],
+            ['def_notify_post_moderation', $notify_post_moderation],
+            ['def_notify_edit_pst_moderation', $notify_edit_pst_moderation],
+            ['def_notify_post_proposed', $notify_post_proposed],
+            ['def_notify_post_assignment', $notify_post_assignment],
+            ['def_newsletters', implode(',', $def_newsletters)],
+            ['def_notification_email_limit', $notification_email_limit],
+            ['def_newsletter_limit', $newsletter_limit],
+            ['newusers_mustvalidate', $newusers_mustvalidate],
+            ['newusers_revalidate_emailchg', $newusers_revalidate_emailchg],
+            ['activate_requests_limit', $activate_requests_limit],
+            ['validation_process', $validation_process],
+            ['newusers_findcomments', $newusers_findcomments],
+            ['after_email_validation', $after_email_validation],
+            ['pass_after_quick_reg', $pass_after_quick_reg],
+            ['after_registration', $after_registration],
+            ['after_registration_slug', $after_registration_slug],
+            ['user_minpwdlen', $user_minpwdlen],
+            ['require_ssl', $require_ssl],
+            ['js_passwd_hashing', $js_passwd_hashing],
+            ['http_auth_require', $http_auth_require],
+            ['http_auth_accept', $http_auth_accept],
+            ['passwd_special', $passwd_special],
+            ['strict_logins', $strict_logins],
+            ['registration_after_quick', $registration_after_quick],
+            ['registration_no_username', $registration_no_username],
+            ['registration_master_template', $registration_master_template],
+        ]);
 
-		if( ! $Messages->has_errors() )
-		{
-			if( $Settings->dbupdate() )
-			{ // update was successful
-				if( $old_newusers_canregister != $newusers_canregister )
-				{ // invalidate all PageCaches
-					invalidate_pagecaches();
-				}
-				$Messages->add( TB_('General settings updated.'), 'success' );
-				// Redirect so that a reload doesn't write to the DB twice:
-				header_redirect( '?ctrl=registration', 303 ); // Will EXIT
-				// We have EXITed already at this point!!
-			}
-		}
+        if (! $Messages->has_errors()) {
+            if ($Settings->dbupdate()) { // update was successful
+                if ($old_newusers_canregister != $newusers_canregister) { // invalidate all PageCaches
+                    invalidate_pagecaches();
+                }
+                $Messages->add(TB_('General settings updated.'), 'success');
+                // Redirect so that a reload doesn't write to the DB twice:
+                header_redirect('?ctrl=registration', 303); // Will EXIT
+                // We have EXITed already at this point!!
+            }
+        }
 
-		break;
+        break;
 }
 
 
-$AdminUI->breadcrumbpath_init( false );  // fp> I'm playing with the idea of keeping the current blog in the path here...
-$AdminUI->breadcrumbpath_add( TB_('Users'), '?ctrl=users' );
-$AdminUI->breadcrumbpath_add( TB_('Settings'), '?ctrl=usersettings' );
-$AdminUI->breadcrumbpath_add( TB_('Registration & Login'), '?ctrl=registration' );
+$AdminUI->breadcrumbpath_init(false);  // fp> I'm playing with the idea of keeping the current blog in the path here...
+$AdminUI->breadcrumbpath_add(TB_('Users'), '?ctrl=users');
+$AdminUI->breadcrumbpath_add(TB_('Settings'), '?ctrl=usersettings');
+$AdminUI->breadcrumbpath_add(TB_('Registration & Login'), '?ctrl=registration');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'user-settings-registration-tab' );
+$AdminUI->set_page_manual_link('user-settings-registration-tab');
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
 $AdminUI->disp_html_head();
@@ -208,12 +200,10 @@ $AdminUI->disp_body_top();
 $AdminUI->disp_payload_begin();
 
 // Display VIEW:
-$AdminUI->disp_view( 'users/views/_registration.form.php' );
+$AdminUI->disp_view('users/views/_registration.form.php');
 
 // End payload block:
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

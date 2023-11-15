@@ -11,7 +11,9 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -22,25 +24,26 @@ global $Settings;
 global $baseurl;
 
 
-$Form = new Form( NULL, 'remotepublish_checkchanges' );
+$Form = new Form(null, 'remotepublish_checkchanges');
 
 $Form->begin_form('fform');
 
-$Form->add_crumb( 'globalsettings' );
-$Form->hidden( 'ctrl', 'remotepublish' );
-$Form->hidden( 'tab', 'xmlrpc' );
-$Form->hidden( 'action', 'update' );
+$Form->add_crumb('globalsettings');
+$Form->hidden('ctrl', 'remotepublish');
+$Form->hidden('tab', 'xmlrpc');
+$Form->hidden('action', 'update');
 
 // fp> TODO: it would be awesome to be able to enable the different APIs individually
 // that way you minimalize security/spam risks by enable just what you need.
-$Form->begin_fieldset( TB_('Remote publishing').get_manual_link('xml-rpc') );
-	$Form->checkbox_input( 'general_xmlrpc', $Settings->get('general_xmlrpc'), TB_('Enable XML-RPC'), array( 'note' => TB_('Enable the Movable Type, MetaWeblog, WordPress, Blogger and B2 XML-RPC publishing protocols.') ) );
-	$Form->text_input( 'xmlrpc_default_title', $Settings->get('xmlrpc_default_title'), 50, TB_('Default title'), '<br />'.TB_('Default title for items created with a XML-RPC API that doesn\'t send a post title (e. g. the Blogger API).'), array( 'maxlength' => 255 ) );
+$Form->begin_fieldset(TB_('Remote publishing') . get_manual_link('xml-rpc'));
+$Form->checkbox_input('general_xmlrpc', $Settings->get('general_xmlrpc'), TB_('Enable XML-RPC'), [
+    'note' => TB_('Enable the Movable Type, MetaWeblog, WordPress, Blogger and B2 XML-RPC publishing protocols.'),
+]);
+$Form->text_input('xmlrpc_default_title', $Settings->get('xmlrpc_default_title'), 50, TB_('Default title'), '<br />' . TB_('Default title for items created with a XML-RPC API that doesn\'t send a post title (e. g. the Blogger API).'), [
+    'maxlength' => 255,
+]);
 $Form->end_fieldset();
 
-if( check_user_perm( 'options', 'edit' ) )
-{
-	$Form->end_form( array( array( 'submit', '', TB_('Save Changes!'), 'SaveButton' ) ) );
+if (check_user_perm('options', 'edit')) {
+    $Form->end_form([['submit', '', TB_('Save Changes!'), 'SaveButton']]);
 }
-
-?>

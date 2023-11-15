@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?php echo ( empty( $locale_lang ) ? 'en' : $locale_lang ); ?>">
+<html lang="<?php echo(empty($locale_lang) ? 'en' : $locale_lang); ?>">
 
 	<head>
 		<base href="<?php echo get_script_baseurl(); ?>">

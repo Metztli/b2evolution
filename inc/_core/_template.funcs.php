@@ -12,7 +12,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -20,24 +22,22 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  *
  * @param string content-type; override for RSS feeds
  */
-function header_content_type( $type = 'text/html', $charset = '#' )
+function header_content_type($type = 'text/html', $charset = '#')
 {
-	global $io_charset;
-	global $content_type_header;
+    global $io_charset;
+    global $content_type_header;
 
-	$content_type_header = 'Content-type: '.$type;
+    $content_type_header = 'Content-type: ' . $type;
 
-	if( !empty($charset) )
-	{
-		if( $charset == '#' )
-		{
-			$charset = $io_charset;
-		}
+    if (! empty($charset)) {
+        if ($charset == '#') {
+            $charset = $io_charset;
+        }
 
-		$content_type_header .= '; charset='.$charset;
-	}
+        $content_type_header .= '; charset=' . $charset;
+    }
 
-	header( $content_type_header );
+    header($content_type_header);
 }
 
 
@@ -49,42 +49,40 @@ function header_content_type( $type = 'text/html', $charset = '#' )
  * @param string charset
  * @param boolean flush already collected content from the PageCache
  */
-function headers_content_mightcache( $type = 'text/html', $max_age = '#', $charset = '#', $flush_pagecache = true )
+function headers_content_mightcache($type = 'text/html', $max_age = '#', $charset = '#', $flush_pagecache = true)
 {
-	global $Messages, $is_admin_page;
-	global $PageCache, $Debuglog;
+    global $Messages, $is_admin_page;
+    global $PageCache, $Debuglog;
 
-	header_content_type( $type, $charset );
+    header_content_type($type, $charset);
 
-	if( empty($max_age) || $is_admin_page || is_logged_in() || $Messages->count() )
-	{	// Don't cache if no max_age given
-		// + NEVER EVER allow admin pages to cache
-		// + NEVER EVER allow logged in data to be cached
-		// + NEVER EVER allow transactional Messages to be cached!:
-		header_nocache();
+    if (empty($max_age) || $is_admin_page || is_logged_in() || $Messages->count()) {	// Don't cache if no max_age given
+        // + NEVER EVER allow admin pages to cache
+        // + NEVER EVER allow logged in data to be cached
+        // + NEVER EVER allow transactional Messages to be cached!:
+        header_nocache();
 
-		// Check server caching too, but note that this is a different caching process then caching on the client
-		// It's important that this is a double security check only and server caching should be prevented before this
-		// If something should not be cached on the client, it should never be cached on the server either
-		if( !empty( $PageCache ) )
-		{ // Abort PageCache collect
-			$Debuglog->add( 'Abort server caching in headers_content_mightcache() function. This should have been prevented!' );
-			$PageCache->abort_collect( $flush_pagecache );
-		}
-		return;
-	}
+        // Check server caching too, but note that this is a different caching process then caching on the client
+        // It's important that this is a double security check only and server caching should be prevented before this
+        // If something should not be cached on the client, it should never be cached on the server either
+        if (! empty($PageCache)) { // Abort PageCache collect
+            $Debuglog->add('Abort server caching in headers_content_mightcache() function. This should have been prevented!');
+            $PageCache->abort_collect($flush_pagecache);
+        }
+        return;
+    }
 
-	// If we are on a "normal" page, we may, under some circumstances, tell the browser it can cache the data.
-	// This MAY be extremely confusing though, every time a user logs in and gets back to a screen with no evobar!
-	// This cannot be enabled by default and requires admin switches.
+    // If we are on a "normal" page, we may, under some circumstances, tell the browser it can cache the data.
+    // This MAY be extremely confusing though, every time a user logs in and gets back to a screen with no evobar!
+    // This cannot be enabled by default and requires admin switches.
 
-	// For feeds, it is a little bit less confusing. We might want to have the param enabled by default in that case.
+    // For feeds, it is a little bit less confusing. We might want to have the param enabled by default in that case.
 
-	// WARNING: extra special care needs to be taken before ever caching a blog page that might contain a form or a comment preview
-	// having user details cached would be extremely bad.
+    // WARNING: extra special care needs to be taken before ever caching a blog page that might contain a form or a comment preview
+    // having user details cached would be extremely bad.
 
-	// in the meantime...
-	header_nocache();
+    // in the meantime...
+    header_nocache();
 }
 
 
@@ -95,32 +93,24 @@ function headers_content_mightcache( $type = 'text/html', $max_age = '#', $chars
  */
 function get_returnto_url()
 {
-	global $Hit, $Blog, $baseurl, $ReqHost;
+    global $Hit, $Blog, $baseurl, $ReqHost;
 
-	// See if there's a redirect_to request param given:
-	$redirect_to = param( 'redirect_to', 'url', '' );
+    // See if there's a redirect_to request param given:
+    $redirect_to = param('redirect_to', 'url', '');
 
-	if( empty( $redirect_to ) )
-	{	// If default redirect_to param is not defined:
-		if( ! empty( $Hit->referer ) )
-		{	// Use referer page:
-			$redirect_to = $Hit->referer;
-		}
-		elseif( isset( $Blog ) && is_object( $Blog ) )
-		{	// Use collection default page URL:
-			$redirect_to = $Blog->get( 'url' );
-		}
-		else
-		{	// Use base URL:
-			$redirect_to = $baseurl;
-		}
-	}
-	elseif( $redirect_to[0] == '/' )
-	{	// relative URL, prepend current host:
-		$redirect_to = $ReqHost.$redirect_to;
-	}
+    if (empty($redirect_to)) {	// If default redirect_to param is not defined:
+        if (! empty($Hit->referer)) {	// Use referer page:
+            $redirect_to = $Hit->referer;
+        } elseif (isset($Blog) && is_object($Blog)) {	// Use collection default page URL:
+            $redirect_to = $Blog->get('url');
+        } else {	// Use base URL:
+            $redirect_to = $baseurl;
+        }
+    } elseif ($redirect_to[0] == '/') {	// relative URL, prepend current host:
+        $redirect_to = $ReqHost . $redirect_to;
+    }
 
-	return $redirect_to;
+    return $redirect_to;
 }
 
 
@@ -131,38 +121,36 @@ function get_returnto_url()
  * @param string URL
  * @return boolean
  */
-function is_internal_url( $url )
+function is_internal_url($url)
 {
-	global $Blog, $basehost, $baseurl;
+    global $Blog, $basehost, $baseurl;
 
-	if( strpos( $url, $baseurl ) === 0 ||
-	    strpos( $url, force_https_url( $baseurl ) ) === 0 ||
-	    ( ! empty( $Blog ) && strpos( $url, $Blog->gen_baseurl() ) === 0 ) ||
-	    ( ! empty( $Blog ) && strpos( $url, force_https_url( $Blog->gen_baseurl() ) ) === 0 ) )
-	{	// The URL is base URL or URL of current collection:
-		return true;
-	}
+    if (strpos($url, $baseurl) === 0 ||
+        strpos($url, force_https_url($baseurl)) === 0 ||
+        (! empty($Blog) && strpos($url, $Blog->gen_baseurl()) === 0) ||
+        (! empty($Blog) && strpos($url, force_https_url($Blog->gen_baseurl())) === 0)) {	// The URL is base URL or URL of current collection:
+        return true;
+    }
 
-	$url_domain = preg_replace( '~(https?://|//)([^/]+)/?.*~i', '$2', $url );
+    $url_domain = preg_replace('~(https?://|//)([^/]+)/?.*~i', '$2', $url);
 
-	if( preg_match( '~\.'.preg_quote( $basehost, '~' ).'(:\d+)?$~', $url_domain ) )
-	{	// The URL goes to a subdomain of basehost:
-		return true;
-	}
+    if (preg_match('~\.' . preg_quote($basehost, '~') . '(:\d+)?$~', $url_domain)) {	// The URL goes to a subdomain of basehost:
+        return true;
+    }
 
-	// Check if URL domain is used as absolute URL for at least 1 collection on the system:
-	global $DB;
+    // Check if URL domain is used as absolute URL for at least 1 collection on the system:
+    global $DB;
 
-	$abs_url_coll_SQL = new SQL( 'Find collection with absolute URL by requested URL domain' );
-	$abs_url_coll_SQL->SELECT( 'blog_ID' );
-	$abs_url_coll_SQL->FROM( 'T_blogs' );
-	$abs_url_coll_SQL->WHERE( 'blog_access_type = "absolute"' );
-	$abs_url_coll_SQL->WHERE_and( 'blog_siteurl LIKE '.$DB->quote( '%://'.str_replace( '_', '\_', $url_domain.'/%' ) ) );
-	$abs_url_coll_SQL->LIMIT( '1' );
-	$abs_url_coll_ID = $DB->get_var( $abs_url_coll_SQL );
+    $abs_url_coll_SQL = new SQL('Find collection with absolute URL by requested URL domain');
+    $abs_url_coll_SQL->SELECT('blog_ID');
+    $abs_url_coll_SQL->FROM('T_blogs');
+    $abs_url_coll_SQL->WHERE('blog_access_type = "absolute"');
+    $abs_url_coll_SQL->WHERE_and('blog_siteurl LIKE ' . $DB->quote('%://' . str_replace('_', '\_', $url_domain . '/%')));
+    $abs_url_coll_SQL->LIMIT('1');
+    $abs_url_coll_ID = $DB->get_var($abs_url_coll_SQL);
 
-	// If at least one collection has the same domain as requested URL:
-	return ! empty( $abs_url_coll_ID );
+    // If at least one collection has the same domain as requested URL:
+    return ! empty($abs_url_coll_ID);
 }
 
 
@@ -180,173 +168,145 @@ function is_internal_url( $url )
  * @param boolean is this a redirected post display? This param may be true only if we should redirect to a post url where the post status is 'redirected'!
  * @param boolean do we want to return to the caller if the redirect is forbidden? (useful when trying to redirect after post edit)
  */
-function header_redirect( $redirect_to = NULL, $status = false, $redirected_post = false, $return_to_caller_if_forbidden = false )
+function header_redirect($redirect_to = null, $status = false, $redirected_post = false, $return_to_caller_if_forbidden = false)
 {
-	/**
-	 * put your comment there...
-	 *
-	 * @var Hit
-	 */
-	global $Hit;
-	global $baseurl, $Collection, $Blog, $htsrv_url, $ReqHost, $ReqURL, $dispatcher;
-	global $Session, $Debuglog, $Messages, $debug;
-	global $http_response_code, $allow_redirects_to_different_domain;
+    /**
+     * put your comment there...
+     *
+     * @var Hit
+     */
+    global $Hit;
+    global $baseurl, $Collection, $Blog, $htsrv_url, $ReqHost, $ReqURL, $dispatcher;
+    global $Session, $Debuglog, $Messages, $debug;
+    global $http_response_code, $allow_redirects_to_different_domain;
 
-	if( empty( $redirect_to ) )
-	{	// Use automatic return URL if a redirect URL is not defined:
-		$redirect_to = get_returnto_url();
-	}
+    if (empty($redirect_to)) {	// Use automatic return URL if a redirect URL is not defined:
+        $redirect_to = get_returnto_url();
+    }
 
-	// Keep ONLY allowed params from current URL by config:
-	$redirect_to = url_keep_params( $redirect_to );
+    // Keep ONLY allowed params from current URL by config:
+    $redirect_to = url_keep_params($redirect_to);
 
-	$Debuglog->add('Preparing to redirect to: '.$redirect_to, 'request' );
+    $Debuglog->add('Preparing to redirect to: ' . $redirect_to, 'request');
 
-	// Determine if this is an external or internal redirect:
+    // Determine if this is an external or internal redirect:
 
-	$external_redirect = true; // Start with worst case, then whitelist:
+    $external_redirect = true; // Start with worst case, then whitelist:
 
-	if( $redirect_to[0] == '/' || $redirect_to[0] == '?' )
-	{ // We stay on the same domain or same page:
-		$external_redirect = false;
-	}
-	elseif( strpos( $redirect_to, $dispatcher ) === 0 )
-	{ // $dispatcher is DEPRECATED and pages should use $admin_url URL instead, but at least we're staying on the same site:
-		$external_redirect = false;
-	}
-	elseif( strpos( $redirect_to, $baseurl ) === 0 )
-	{
-		$Debuglog->add('Redirecting within $baseurl, all is fine.', 'request' );
-		$external_redirect = false;
-	}
-	elseif( strpos( $redirect_to, force_https_url( $baseurl ) ) === 0 )
-	{	// Protocol https may be forced for all login, registration and etc. pages:
-		$Debuglog->add('Redirecting within https of $baseurl, all is fine.', 'request' );
-		$external_redirect = false;
-	}
-	elseif( ! empty( $Blog ) && strpos( $redirect_to, $Blog->gen_baseurl() ) === 0 )
-	{
-		$Debuglog->add( 'Redirecting within current collection URL, all is fine.', 'request' );
-		$external_redirect = false;
-	}
-	elseif( ! empty( $Blog ) && strpos( $redirect_to, force_https_url( $Blog->gen_baseurl() ) ) === 0 )
-	{	// Protocol https may be forced for all login, registration and etc. pages:
-		$Debuglog->add('Redirecting within https of current collection URL, all is fine.', 'request' );
-		$external_redirect = false;
-	}
+    if ($redirect_to[0] == '/' || $redirect_to[0] == '?') { // We stay on the same domain or same page:
+        $external_redirect = false;
+    } elseif (strpos($redirect_to, $dispatcher) === 0) { // $dispatcher is DEPRECATED and pages should use $admin_url URL instead, but at least we're staying on the same site:
+        $external_redirect = false;
+    } elseif (strpos($redirect_to, $baseurl) === 0) {
+        $Debuglog->add('Redirecting within $baseurl, all is fine.', 'request');
+        $external_redirect = false;
+    } elseif (strpos($redirect_to, force_https_url($baseurl)) === 0) {	// Protocol https may be forced for all login, registration and etc. pages:
+        $Debuglog->add('Redirecting within https of $baseurl, all is fine.', 'request');
+        $external_redirect = false;
+    } elseif (! empty($Blog) && strpos($redirect_to, $Blog->gen_baseurl()) === 0) {
+        $Debuglog->add('Redirecting within current collection URL, all is fine.', 'request');
+        $external_redirect = false;
+    } elseif (! empty($Blog) && strpos($redirect_to, force_https_url($Blog->gen_baseurl())) === 0) {	// Protocol https may be forced for all login, registration and etc. pages:
+        $Debuglog->add('Redirecting within https of current collection URL, all is fine.', 'request');
+        $external_redirect = false;
+    }
 
+    // Remove login and pwd parameters from URL, so that they do not trigger the login screen again (and also as global security measure):
+    $redirect_to = preg_replace('~(?<=\?|&) (login|pwd) = [^&]+ ~x', '', $redirect_to);
 
-	// Remove login and pwd parameters from URL, so that they do not trigger the login screen again (and also as global security measure):
-	$redirect_to = preg_replace( '~(?<=\?|&) (login|pwd) = [^&]+ ~x', '', $redirect_to );
+    if ($external_redirect == false) {	// (blueyed>) Remove "confirm(ed)?" from redirect_to so it doesn't do the same thing twice
+        // TODO: fp> confirm should be normalized to confirmed
+        $redirect_to = preg_replace('~(?<=\?|&) (confirm(ed)?) = [^&]+ ~x', '', $redirect_to);
+    }
 
-	if( $external_redirect == false )
-	{	// (blueyed>) Remove "confirm(ed)?" from redirect_to so it doesn't do the same thing twice
-		// TODO: fp> confirm should be normalized to confirmed
-		$redirect_to = preg_replace( '~(?<=\?|&) (confirm(ed)?) = [^&]+ ~x', '', $redirect_to );
-	}
+    $allow_collection_redirect = false;
 
+    if ($external_redirect
+        && $allow_redirects_to_different_domain == 'all_collections_and_redirected_posts'
+        && ! $redirected_post) {	// If a redirect is external and we allow to redirect to all collection domains:
+        $allow_collection_redirect = is_internal_url($redirect_to);
+    }
 
-	$allow_collection_redirect = false;
+    // Check if we're trying to redirect to an external URL:
+    if ($external_redirect // Attempting external redirect
+        && ($allow_redirects_to_different_domain != 'always') // Always allow redirects to different domains is not set
+        && (! $allow_collection_redirect) // This is not a redirect to collection domain of this site
+        && (! (in_array($allow_redirects_to_different_domain, ['all_collections_and_redirected_posts', 'only_redirected_posts']) && $redirected_post))) { // This is not a 'redirected' post display request
+        // Force header redirects into the same domain. Do not allow external URLs.
+        $Messages->add(T_('A redirection to an external URL was blocked for security reasons.'), 'error');
+        syslog_insert('A redirection to an external URL ' . $redirect_to . ' was blocked for security reasons.', 'error', null);
+        if ($return_to_caller_if_forbidden) {	// Return to caller meaning we did not redirect:
+            return false;
+        }
+        $redirect_to = $baseurl;
+    }
 
-	if( $external_redirect
-		&& $allow_redirects_to_different_domain == 'all_collections_and_redirected_posts'
-		&& ! $redirected_post )
-	{	// If a redirect is external and we allow to redirect to all collection domains:
-		$allow_collection_redirect = is_internal_url( $redirect_to );
-	}
+    // Send the predefined cookies:
+    evo_sendcookies();
 
-	// Check if we're trying to redirect to an external URL:
-	if( $external_redirect // Attempting external redirect
-		&& ( $allow_redirects_to_different_domain != 'always' ) // Always allow redirects to different domains is not set
-		&& ( ! $allow_collection_redirect ) // This is not a redirect to collection domain of this site
-		&& ( ! ( in_array( $allow_redirects_to_different_domain, array( 'all_collections_and_redirected_posts', 'only_redirected_posts' ) ) && $redirected_post ) ) ) // This is not a 'redirected' post display request
-	{ // Force header redirects into the same domain. Do not allow external URLs.
-		$Messages->add( T_('A redirection to an external URL was blocked for security reasons.'), 'error' );
-		syslog_insert( 'A redirection to an external URL '.$redirect_to.' was blocked for security reasons.', 'error', NULL );
-		if( $return_to_caller_if_forbidden )
-		{	// Return to caller meaning we did not redirect:
-			return false;
-		}
-		$redirect_to = $baseurl;
-	}
+    if (is_integer($status)) {
+        $http_response_code = $status;
+    } else {
+        $http_response_code = $status ? 301 : 303;
+    }
+    $Debuglog->add('***** REDIRECT TO ' . $redirect_to . ' (status ' . $http_response_code . ') *****', 'request');
 
-	// Send the predefined cookies:
-	evo_sendcookies();
+    if (! empty($Session)) {	// Session is required here
+        if (! empty($debug)) {	// Transfer full debug info to next page only when debug is enabled:
+            ob_start();
+            debug_info(true);
+            $current_debug_info = ob_get_clean();
+            if (! empty($current_debug_info)) {	// Save full debug info into Session, so that it's available after redirect (gets loaded by Session constructor):
+                $sess_debug_infos = $Session->get('debug_infos');
+                if (empty($sess_debug_infos)) {
+                    $sess_debug_infos = [];
+                }
+                // NOTE: We must encode data in order to avoid error "Session data corrupted" because of special chars on unserialize the data:
+                $sess_debug_infos[] = gzencode($current_debug_info);
+                $Session->set('debug_infos', $sess_debug_infos, 60 /* expire in 60 seconds */);
+            }
+        }
 
-	if( is_integer($status) )
-	{
-		$http_response_code = $status;
-	}
-	else
-	{
-		$http_response_code = $status ? 301 : 303;
-	}
-	$Debuglog->add('***** REDIRECT TO '.$redirect_to.' (status '.$http_response_code.') *****', 'request' );
+        // Transfer of Messages to next page:
+        if ($Messages->count()) {	// Set Messages into user's session, so they get restored on the next page (after redirect):
+            $Session->set('Messages', $Messages);
+            // echo 'Passing Messages to next page';
+        }
 
-	if( ! empty($Session) )
-	{	// Session is required here
-		if( ! empty( $debug ) )
-		{	// Transfer full debug info to next page only when debug is enabled:
-			ob_start();
-			debug_info( true );
-			$current_debug_info = ob_get_clean();
-			if( ! empty( $current_debug_info ) )
-			{	// Save full debug info into Session, so that it's available after redirect (gets loaded by Session constructor):
-				$sess_debug_infos = $Session->get( 'debug_infos' );
-				if( empty( $sess_debug_infos ) )
-				{
-					$sess_debug_infos = array();
-				}
-				// NOTE: We must encode data in order to avoid error "Session data corrupted" because of special chars on unserialize the data:
-				$sess_debug_infos[] = gzencode( $current_debug_info );
-				$Session->set( 'debug_infos', $sess_debug_infos, 60 /* expire in 60 seconds */ );
-			}
-		}
+        $Session->dbsave(); // If we don't save now, we run the risk that the redirect goes faster than the PHP script shutdown.
+    }
 
-		// Transfer of Messages to next page:
-		if( $Messages->count() )
-		{	// Set Messages into user's session, so they get restored on the next page (after redirect):
-			$Session->set( 'Messages', $Messages );
-		 // echo 'Passing Messages to next page';
-		}
+    // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+    switch ($http_response_code) {
+        case 301:
+            // This should be a permanent move redirect!
+            header_http_response('301 Moved Permanently');
+            break;
 
-		$Session->dbsave(); // If we don't save now, we run the risk that the redirect goes faster than the PHP script shutdown.
-	}
+        case 303:
+            // This should be a "follow up" redirect
+            // Note: Also see http://de3.php.net/manual/en/function.header.php#50588 and the other comments around
+            header_http_response('303 See Other');
+            break;
 
-	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-	switch( $http_response_code )
-	{
-		case 301:
-			// This should be a permanent move redirect!
-			header_http_response( '301 Moved Permanently' );
-			break;
+        case 302:
+        default:
+            header_http_response('302 Found');
+    }
 
-		case 303:
-			// This should be a "follow up" redirect
-			// Note: Also see http://de3.php.net/manual/en/function.header.php#50588 and the other comments around
-			header_http_response( '303 See Other' );
-			break;
+    if ($debug &&
+        ! empty($ReqHost) &&
+        strpos($redirect_to, $ReqHost) !== 0) {	// Append param to redirect from different domain in order to see debug info of the current page after redirect:
+        $redirect_to = url_add_param($redirect_to, 'get_redirected_debuginfo_from_sess_ID=' . $Session->ID, '&');
+    }
 
-		case 302:
-		default:
-			header_http_response( '302 Found' );
-	}
-
-	if( $debug &&
-	    ! empty( $ReqHost ) &&
-	    strpos( $redirect_to, $ReqHost ) !== 0 )
-	{	// Append param to redirect from different domain in order to see debug info of the current page after redirect:
-		$redirect_to = url_add_param( $redirect_to, 'get_redirected_debuginfo_from_sess_ID='.$Session->ID, '&' );
-	}
-
-	// debug_die($redirect_to);
-	if( headers_sent($filename, $line) )
-	{
-		debug_die( sprintf('Headers have already been sent in %s on line %d.', basename($filename), $line)
-						.'<br />Cannot <a href="'.htmlspecialchars($redirect_to).'">redirect</a>.' );
-	}
-	header( 'Location: '.$redirect_to, true, $http_response_code ); // explictly setting the status is required for (fast)cgi
-	exit(0);
+    // debug_die($redirect_to);
+    if (headers_sent($filename, $line)) {
+        debug_die(sprintf('Headers have already been sent in %s on line %d.', basename($filename), $line)
+                        . '<br />Cannot <a href="' . htmlspecialchars($redirect_to) . '">redirect</a>.');
+    }
+    header('Location: ' . $redirect_to, true, $http_response_code); // explictly setting the status is required for (fast)cgi
+    exit(0);
 }
 
 
@@ -359,32 +319,30 @@ function header_redirect( $redirect_to = NULL, $status = false, $redirected_post
  * @param string Email log ID
  * @param string Email log key
  */
-function header_redirect_from_email( $redirect_to, $status = false, $email_log_message = NULL, $email_log_ID = NULL, $email_log_key = NULL )
+function header_redirect_from_email($redirect_to, $status = false, $email_log_message = null, $email_log_ID = null, $email_log_key = null)
 {
-	global $baseurl;
+    global $baseurl;
 
-	if( empty( $redirect_to ) )
-	{	// Use base site URL for redirect if it is not provided:
-		$redirect_to = $baseurl;
-	}
+    if (empty($redirect_to)) {	// Use base site URL for redirect if it is not provided:
+        $redirect_to = $baseurl;
+    }
 
-	// 1) Try to redirect if it is allowed by config $allow_redirects_to_different_domain,
-	// (Use $return_to_caller_if_forbidden = true in order to return false without redirect)
-	$redirect_result = header_redirect( $redirect_to, $status, false, true );
-	// May be EXITed here!
+    // 1) Try to redirect if it is allowed by config $allow_redirects_to_different_domain,
+    // (Use $return_to_caller_if_forbidden = true in order to return false without redirect)
+    $redirect_result = header_redirect($redirect_to, $status, false, true);
+    // May be EXITed here!
 
-	// 2) Otherwise(when $redirect_result === false) use additional checking by email log:
-	if( ! check_redirect_url_by_email_log( $redirect_to, $email_log_message, $email_log_ID, $email_log_key ) )
-	{	// Deny redirect to URL what is not found in the email message:
-		$redirect_to = $baseurl;
-	}
+    // 2) Otherwise(when $redirect_result === false) use additional checking by email log:
+    if (! check_redirect_url_by_email_log($redirect_to, $email_log_message, $email_log_ID, $email_log_key)) {	// Deny redirect to URL what is not found in the email message:
+        $redirect_to = $baseurl;
+    }
 
-	// Campaign author explicitly wanted to link to an external URL:
-	// Use php function header() instead of b2evolution core function header_redirect(),
-	// because we already used it above to redirect and it can prevent redirection depending
-	// on some advanced settings like $allow_redirects_to_different_domain!
-	header( 'Location: '.$redirect_to, true, $status ); // explictly setting the status is required for (fast)cgi
-	exit(0);
+    // Campaign author explicitly wanted to link to an external URL:
+    // Use php function header() instead of b2evolution core function header_redirect(),
+    // because we already used it above to redirect and it can prevent redirection depending
+    // on some advanced settings like $allow_redirects_to_different_domain!
+    header('Location: ' . $redirect_to, true, $status); // explictly setting the status is required for (fast)cgi
+    exit(0);
 }
 
 
@@ -394,18 +352,17 @@ function header_redirect_from_email( $redirect_to, $status = false, $email_log_m
  *
  * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
  */
-function header_nocache( $timestamp = NULL )
+function header_nocache($timestamp = null)
 {
-	global $servertimenow;
-	if( empty($timestamp) )
-	{
-		$timestamp = $servertimenow;
-	}
+    global $servertimenow;
+    if (empty($timestamp)) {
+        $timestamp = $servertimenow;
+    }
 
-	header('Expires: '.gmdate('r',$timestamp));
-	header('Last-Modified: '.gmdate('r',$timestamp));
-	header('Cache-Control: no-cache, must-revalidate');
-	header('Pragma: no-cache');
+    header('Expires: ' . gmdate('r', $timestamp));
+    header('Last-Modified: ' . gmdate('r', $timestamp));
+    header('Cache-Control: no-cache, must-revalidate');
+    header('Pragma: no-cache');
 }
 
 
@@ -418,8 +375,8 @@ function header_nocache( $timestamp = NULL )
  */
 function header_noexpire()
 {
-	global $servertimenow;
-	header('Expires: '.gmdate('r', $servertimenow + 31536000)); // 86400*365 (1 year)
+    global $servertimenow;
+    header('Expires: ' . gmdate('r', $servertimenow + 31536000)); // 86400*365 (1 year)
 }
 
 
@@ -437,23 +394,19 @@ function header_noexpire()
  */
 function gen_current_page_etag()
 {
-	global $current_User, $Messages;
+    global $current_User, $Messages;
 
-	if( isset($current_User) )
-	{
-		$etag = 'user:'.$current_User->ID;
-	}
-	else
-	{
-		$etag = 'user:anon';
-	}
+    if (isset($current_User)) {
+        $etag = 'user:' . $current_User->ID;
+    } else {
+        $etag = 'user:anon';
+    }
 
-	if( $Messages->count() )
-	{	// This case has never been observed yet, but let's forward protect us against client side cached messages
-		$etag .= '-msg:'.md5($Messages->get_string('',''));
-	}
+    if ($Messages->count()) {	// This case has never been observed yet, but let's forward protect us against client side cached messages
+        $etag .= '-msg:' . md5($Messages->get_string('', ''));
+    }
 
-	return '"'.$etag.'"';
+    return '"' . $etag . '"';
 }
 
 
@@ -462,9 +415,9 @@ function gen_current_page_etag()
  *
  * @param string etag MUST be "quoted"
  */
-function header_etag( $etag )
+function header_etag($etag)
 {
-	header( 'ETag: '.$etag );
+    header('ETag: ' . $etag);
 }
 
 
@@ -485,519 +438,466 @@ function header_etag( $etag )
  * @param array params
  *        - "auto_pilot": "seo_title": Use the SEO title autopilot. (Default: "none")
  */
-function get_request_title( $params = array() )
+function get_request_title($params = [])
 {
-	global $MainList, $preview, $disp, $action, $Collection, $Blog, $admin_url;
+    global $MainList, $preview, $disp, $action, $Collection, $Blog, $admin_url;
 
-	$r = array();
+    $r = [];
 
-	$params = array_merge( array(
-			'auto_pilot'          => 'none', // This can be used to override several params at once. Possible value: 'seo_title'
-			'title_before'        => '',
-			'title_after'         => '',
-			'title_none'          => '',
-			'title_single_disp'   => true,
-			'title_single_before' => '#',
-			'title_single_after'  => '#',
-			'title_page_disp'     => true,
-			'title_page_before'   => '#',
-			'title_page_after'    => '#',
-			'title_widget_page_disp'   => false,	// We never want a title to be automatically displayed on a widget page.
-			'title_widget_page_before' => '#',
-			'title_widget_page_after'  => '#',
-			'title_terms_disp'    => true,
-			'title_terms_before'  => '#',
-			'title_terms_after'   => '#',
-			'glue'                => ' - ',
-			'format'              => 'htmlbody',
-			// Title for each disp:
-			// fp> TODO: Make a global array of $disp => Clear text disp
-			'anonpost_text'       => '#',// # - 'New [Post]' ('Post' is item type name)
-			'arcdir_text'         => T_('Archive Directory'),
-			'catdir_text'         => T_('Category Directory'),
-			'mediaidx_text'       => T_('Photo Index'),
-			'postidx_text'        => T_('Post Index'),
-			'search_text'         => T_('Search'),
-			'sitemap_text'        => T_('Site Map'),
-			'msgform_text'        => T_('Contact'),
-			'messages_text'       => T_('Messages'),
-			'contacts_text'       => T_('Contacts'),
-			'requires_login_text_seo' => T_('Login Required'),
-			'login_text'          => /* TRANS: trailing space = verb */ T_('Login '),
-			'register_text'       => T_('Register'),
-			'register_finish_text'=> T_('Finish Registration'),
-			'req_activate_email'  => T_('Account activation'),
-			'account_activation'  => T_('Account activation'),
-			'lostpassword_text'   => T_('Lost your password?'),
-			'profile_text'        => T_('User Profile'),
-			'avatar_text'         => T_('Profile picture'),
-			'pwdchange_text'      => T_('Password change'),
-			'userprefs_text'      => T_('User preferences'),
-			'user_text'           => T_('User: %s'),
-			'users_text'          => T_('Users'),
-			'closeaccount_text'   => T_('Account closure'),
-			'subs_text'           => T_('Notifications & Subscriptions'),
-			'visits_text'         => T_('Who visited my profile?'),
-			'comments_text'       => T_('Latest Comments'),
-			'feedback-popup_text' => T_('Feedback'),
-			'edit_comment_text'   => T_('Editing comment'),
-			'front_text'          => '',		// We don't want to display a special title on the front page
-			'posts_text'          => '#',		// Automatic - display filters
-			'useritems_text'      => T_('User posts'),
-			'usercomments_text'   => T_('User comments'),
-			'download_head_text'  => T_('Download').' - $file_title$ - $post_title$',
-			'download_body_text'  => '',
-			// fp> TODO: verify if we really want this:
-			'display_edit_links'  => true, // Display the links to advanced editing on disp=edit|edit_comment
-			'edit_links_template' => array(), // More params for the links to advanced editing on disp=edit|edit_comment
-			'tags_text'           => T_('Tags'),
-			'flagged_text'        => T_('Flagged posts'),
-			'mustread_text'       => T_('Must Read Items'),
-			'help_text'           => T_('In case of issues with this site...'),
-			'compare_text'           => /* TRANS: title for disp=compare */ T_('%s compared'),
-			'compare_text_separator' => /* TRANS: title separator for disp=compare */ ' '.T_('vs').' ',
-			'proposechange_text'     => T_('Propose change for Item %s'),
-		), $params );
+    $params = array_merge([
+        'auto_pilot' => 'none', // This can be used to override several params at once. Possible value: 'seo_title'
+        'title_before' => '',
+        'title_after' => '',
+        'title_none' => '',
+        'title_single_disp' => true,
+        'title_single_before' => '#',
+        'title_single_after' => '#',
+        'title_page_disp' => true,
+        'title_page_before' => '#',
+        'title_page_after' => '#',
+        'title_widget_page_disp' => false,	// We never want a title to be automatically displayed on a widget page.
+        'title_widget_page_before' => '#',
+        'title_widget_page_after' => '#',
+        'title_terms_disp' => true,
+        'title_terms_before' => '#',
+        'title_terms_after' => '#',
+        'glue' => ' - ',
+        'format' => 'htmlbody',
+        // Title for each disp:
+        // fp> TODO: Make a global array of $disp => Clear text disp
+        'anonpost_text' => '#', // # - 'New [Post]' ('Post' is item type name)
+        'arcdir_text' => T_('Archive Directory'),
+        'catdir_text' => T_('Category Directory'),
+        'mediaidx_text' => T_('Photo Index'),
+        'postidx_text' => T_('Post Index'),
+        'search_text' => T_('Search'),
+        'sitemap_text' => T_('Site Map'),
+        'msgform_text' => T_('Contact'),
+        'messages_text' => T_('Messages'),
+        'contacts_text' => T_('Contacts'),
+        'requires_login_text_seo' => T_('Login Required'),
+        'login_text' => /* TRANS: trailing space = verb */ T_('Login '),
+        'register_text' => T_('Register'),
+        'register_finish_text' => T_('Finish Registration'),
+        'req_activate_email' => T_('Account activation'),
+        'account_activation' => T_('Account activation'),
+        'lostpassword_text' => T_('Lost your password?'),
+        'profile_text' => T_('User Profile'),
+        'avatar_text' => T_('Profile picture'),
+        'pwdchange_text' => T_('Password change'),
+        'userprefs_text' => T_('User preferences'),
+        'user_text' => T_('User: %s'),
+        'users_text' => T_('Users'),
+        'closeaccount_text' => T_('Account closure'),
+        'subs_text' => T_('Notifications & Subscriptions'),
+        'visits_text' => T_('Who visited my profile?'),
+        'comments_text' => T_('Latest Comments'),
+        'feedback-popup_text' => T_('Feedback'),
+        'edit_comment_text' => T_('Editing comment'),
+        'front_text' => '',		// We don't want to display a special title on the front page
+        'posts_text' => '#',		// Automatic - display filters
+        'useritems_text' => T_('User posts'),
+        'usercomments_text' => T_('User comments'),
+        'download_head_text' => T_('Download') . ' - $file_title$ - $post_title$',
+        'download_body_text' => '',
+        // fp> TODO: verify if we really want this:
+        'display_edit_links' => true, // Display the links to advanced editing on disp=edit|edit_comment
+        'edit_links_template' => [], // More params for the links to advanced editing on disp=edit|edit_comment
+        'tags_text' => T_('Tags'),
+        'flagged_text' => T_('Flagged posts'),
+        'mustread_text' => T_('Must Read Items'),
+        'help_text' => T_('In case of issues with this site...'),
+        'compare_text' => /* TRANS: title for disp=compare */ T_('%s compared'),
+        'compare_text_separator' => /* TRANS: title separator for disp=compare */ ' ' . T_('vs') . ' ',
+        'proposechange_text' => T_('Propose change for Item %s'),
+    ], $params);
 
-	if( $params['auto_pilot'] == 'seo_title' )
-	{	// We want to use the SEO title autopilot. Do overrides:
-		$params['format'] = 'htmlhead';
-		$params['title_after'] = $params['glue'].$Blog->get('name');
-		$params['title_single_after'] = '';
-		$params['title_page_after'] = '';
-		$params['title_none'] = $Blog->dget('name','htmlhead');
-	}
+    if ($params['auto_pilot'] == 'seo_title') {	// We want to use the SEO title autopilot. Do overrides:
+        $params['format'] = 'htmlhead';
+        $params['title_after'] = $params['glue'] . $Blog->get('name');
+        $params['title_single_after'] = '';
+        $params['title_page_after'] = '';
+        $params['title_none'] = $Blog->dget('name', 'htmlhead');
+    }
 
+    $before = $params['title_before'];
+    $after = $params['title_after'];
 
-	$before = $params['title_before'];
-	$after = $params['title_after'];
+    switch ($disp) {
+        case 'front':
+            // We are requesting a front page:
+            if (! empty($params['front_text'])) {
+                $r[] = $params['front_text'];
+            }
+            break;
 
-	switch( $disp )
-	{
-		case 'front':
-			// We are requesting a front page:
-			if( !empty( $params['front_text'] ) )
-			{
-				$r[] = $params['front_text'];
-			}
-			break;
+        case 'arcdir':
+            // We are requesting the archive directory:
+            $r[] = $params['arcdir_text'];
+            break;
 
-		case 'arcdir':
-			// We are requesting the archive directory:
-			$r[] = $params['arcdir_text'];
-			break;
+        case 'catdir':
+            // We are requesting the archive directory:
+            $r[] = $params['catdir_text'];
+            break;
 
-		case 'catdir':
-			// We are requesting the archive directory:
-			$r[] = $params['catdir_text'];
-			break;
+        case 'mediaidx':
+            $r[] = $params['mediaidx_text'];
+            break;
 
-		case 'mediaidx':
-			$r[] = $params['mediaidx_text'];
-			break;
+        case 'postidx':
+            $r[] = $params['postidx_text'];
+            break;
 
-		case 'postidx':
-			$r[] = $params['postidx_text'];
-			break;
+        case 'sitemap':
+            $r[] = $params['sitemap_text'];
+            break;
 
-		case 'sitemap':
-			$r[] = $params['sitemap_text'];
-			break;
+        case 'search':
+            $r[] = $params['search_text'];
+            break;
 
-		case 'search':
-			$r[] = $params['search_text'];
-			break;
+        case 'comments':
+            // We are requesting the latest comments:
+            global $Item;
+            if (isset($Item)) {
+                $r[] = sprintf($params['comments_text'] . T_(' on %s'), $Item->get('title'));
+            } else {
+                $r[] = $params['comments_text'];
+            }
+            break;
 
-		case 'comments':
-			// We are requesting the latest comments:
-			global $Item;
-			if( isset( $Item ) )
-			{
-				$r[] = sprintf( $params['comments_text'] . T_(' on %s'), $Item->get('title') );
-			}
-			else
-			{
-				$r[] = $params['comments_text'];
-			}
-			break;
+        case 'feedback-popup':
+            // We are requesting the comments on a specific post:
+            // Should be in first position
+            $Item = &$MainList->get_by_idx(0);
+            $r[] = sprintf($params['feedback-popup_text'] . T_(' on %s'), $Item->get('title'));
+            break;
 
-		case 'feedback-popup':
-			// We are requesting the comments on a specific post:
-			// Should be in first position
-			$Item = & $MainList->get_by_idx( 0 );
-			$r[] = sprintf( $params['feedback-popup_text'] . T_(' on %s'), $Item->get('title') );
-			break;
+        case 'profile':
+            // We are requesting the user profile:
+            $r[] = $params['profile_text'];
+            break;
 
-		case 'profile':
-			// We are requesting the user profile:
-			$r[] = $params['profile_text'];
-			break;
+        case 'avatar':
+            // We are requesting the user avatar:
+            $r[] = $params['avatar_text'];
+            break;
 
-		case 'avatar':
-			// We are requesting the user avatar:
-			$r[] = $params['avatar_text'];
-			break;
+        case 'pwdchange':
+            // We are requesting the user change password:
+            $r[] = $params['pwdchange_text'];
+            break;
 
-		case 'pwdchange':
-			// We are requesting the user change password:
-			$r[] = $params['pwdchange_text'];
-			break;
+        case 'userprefs':
+            // We are requesting the user preferences:
+            $r[] = $params['userprefs_text'];
+            break;
 
-		case 'userprefs':
-			// We are requesting the user preferences:
-			$r[] = $params['userprefs_text'];
-			break;
+        case 'subs':
+            // We are requesting the subscriptions screen:
+            $r[] = $params['subs_text'];
+            break;
 
-		case 'subs':
-			// We are requesting the subscriptions screen:
-			$r[] = $params['subs_text'];
-			break;
+        case 'register_finish':
+            // We are requesting the register finish form:
+            $r[] = $params['register_finish_text'];
+            break;
 
-		case 'register_finish':
-			// We are requesting the register finish form:
-			$r[] = $params['register_finish_text'];
-			break;
+        case 'visits':
+            // We are requesting the profile visits screen:
+            $user_ID = param('user_ID', 'integer', 0);
+            $r[] = $params['visits_text'];
+            break;
 
-		case 'visits':
-			// We are requesting the profile visits screen:
-			$user_ID = param( 'user_ID', 'integer', 0 );
-			$r[] = $params['visits_text'];
-			break;
+        case 'msgform':
+            // We are requesting the message form:
+            $msgform_title = utf8_trim($Blog->get_setting('msgform_title'));
+            $r[] = empty($msgform_title) ? $params['msgform_text'] : $msgform_title;
+            break;
 
-		case 'msgform':
-			// We are requesting the message form:
-			$msgform_title = utf8_trim( $Blog->get_setting( 'msgform_title' ) );
-			$r[] = empty( $msgform_title ) ? $params['msgform_text'] : $msgform_title;
-			break;
+        case 'threads':
+        case 'messages':
+            // We are requesting the messages form
+            global $disp_detail;
+            $thrd_ID = param('thrd_ID', 'integer', 0);
+            if (! empty($thrd_ID)) {	// We get a thread title by ID
+                load_class('messaging/model/_thread.class.php', 'Thread');
+                $ThreadCache = &get_ThreadCache();
+                if ($Thread = $ThreadCache->get_by_ID($thrd_ID, false)) {	// Thread exists and we get a title
+                    if ($params['auto_pilot'] == 'seo_title') {	// Display thread title only for tag <title>
+                        $r[] = $Thread->title;
+                        break;
+                    }
+                }
+            }
 
-		case 'threads':
-		case 'messages':
-			// We are requesting the messages form
-			global $disp_detail;
-			$thrd_ID = param( 'thrd_ID', 'integer', 0 );
-			if( ! empty( $thrd_ID ) )
-			{	// We get a thread title by ID
-				load_class( 'messaging/model/_thread.class.php', 'Thread' );
-				$ThreadCache = & get_ThreadCache();
-				if( $Thread = $ThreadCache->get_by_ID( $thrd_ID, false ) )
-				{	// Thread exists and we get a title
-					if( $params['auto_pilot'] == 'seo_title' )
-					{	// Display thread title only for tag <title>
-						$r[] = $Thread->title;
-						break;
-					}
-				}
-			}
+            if ($disp_detail == 'msgform') {	// disp=msgform for logged in user:
+                $msgform_title = utf8_trim($Blog->get_setting('msgform_title'));
+                $r[] = empty($msgform_title) ? $params['msgform_text'] : $msgform_title;
+            } else {
+                $r[] = strip_tags($params['messages_text']);
+            }
+            break;
 
-			if( $disp_detail == 'msgform' )
-			{	// disp=msgform for logged in user:
-				$msgform_title = utf8_trim( $Blog->get_setting( 'msgform_title' ) );
-				$r[] = empty( $msgform_title ) ? $params['msgform_text'] : $msgform_title;
-			}
-			else
-			{
-				$r[] = strip_tags( $params['messages_text'] );
-			}
-			break;
+        case 'contacts':
+            // We are requesting the message form:
+            $r[] = $params['contacts_text'];
+            break;
 
-		case 'contacts':
-			// We are requesting the message form:
-			$r[] = $params['contacts_text'];
-			break;
+        case 'access_requires_login':
+        case 'content_requires_login':
+            // We are requesting the login form when anonymous user has no access to the Collection:
+            if ($params['auto_pilot'] == 'seo_title') {	// Use text only for <title> tag in <head>:
+                $r[] = $params['requires_login_text_seo'];
+            }
+            break;
 
-		case 'access_requires_login':
-		case 'content_requires_login':
-			// We are requesting the login form when anonymous user has no access to the Collection:
-			if( $params['auto_pilot'] == 'seo_title' )
-			{	// Use text only for <title> tag in <head>:
-				$r[] = $params['requires_login_text_seo'];
-			}
-			break;
+        case 'login':
+            // We are requesting the login form:
+            if ($action == 'req_activate_email') {
+                $r[] = $params['req_activate_email'];
+            } else {
+                $r[] = $params['login_text'];
+            }
+            break;
 
-		case 'login':
-			// We are requesting the login form:
-			if( $action == 'req_activate_email' )
-			{
-				$r[] = $params['req_activate_email'];
-			}
-			else
-			{
-				$r[] = $params['login_text'];
-			}
-			break;
+        case 'register':
+            // We are requesting the registration form:
+            $r[] = $params['register_text'];
+            break;
 
-		case 'register':
-			// We are requesting the registration form:
-			$r[] = $params['register_text'];
-			break;
+        case 'activateinfo':
+            // We are requesting the activate info form:
+            $r[] = $params['account_activation'];
+            break;
 
-		case 'activateinfo':
-			// We are requesting the activate info form:
-			$r[] = $params['account_activation'];
-			break;
+        case 'lostpassword':
+            // We are requesting the lost password form:
+            $r[] = $params['lostpassword_text'];
+            break;
 
-		case 'lostpassword':
-			// We are requesting the lost password form:
-			$r[] = $params['lostpassword_text'];
-			break;
+        case 'single':
+        case 'page':
+        case 'widget_page':
+        case 'terms':
+            // We are displaying a single message:
+            if ($preview) {	// We are requesting a post preview:
+                $r[] = /* TRANS: Noun */ T_('PREVIEW');
+            } elseif ($params['title_' . $disp . '_disp'] && isset($MainList)) {
+                $r = array_merge($r, $MainList->get_filter_titles(['visibility', 'hide_future'], $params));
+            }
+            if ($params['title_' . $disp . '_before'] != '#') {
+                $before = $params['title_' . $disp . '_before'];
+            }
+            if ($params['title_' . $disp . '_after'] != '#') {
+                $after = $params['title_' . $disp . '_after'];
+            }
+            break;
 
-		case 'single':
-		case 'page':
-		case 'widget_page':
-		case 'terms':
-			// We are displaying a single message:
-			if( $preview )
-			{	// We are requesting a post preview:
-				$r[] = /* TRANS: Noun */ T_('PREVIEW');
-			}
-			elseif( $params['title_'.$disp.'_disp'] && isset( $MainList ) )
-			{
-				$r = array_merge( $r, $MainList->get_filter_titles( array( 'visibility', 'hide_future' ), $params ) );
-			}
-			if( $params['title_'.$disp.'_before'] != '#' )
-			{
-				$before = $params['title_'.$disp.'_before'];
-			}
-			if( $params['title_'.$disp.'_after'] != '#' )
-			{
-				$after = $params['title_'.$disp.'_after'];
-			}
-			break;
+        case 'download':
+            // We are displaying a download page:
+            global $download_Link;
 
-		case 'download':
-			// We are displaying a download page:
-			global $download_Link;
+            $download_text = ($params['format'] == 'htmlhead') ? $params['download_head_text'] : $params['download_body_text'];
+            if (strpos($download_text, '$file_title$') !== false) { // Replace a mask $file_title$ with real file name
+                $download_File = &$download_Link->get_File();
+                $download_text = str_replace('$file_title$', $download_File->get_name(), $download_text);
+            }
+            if (strpos($download_text, '$post_title$') !== false) { // Replace a mask $file_title$ with real file name
+                $download_text = str_replace('$post_title$', implode($params['glue'], $MainList->get_filter_titles(['visibility', 'hide_future'])), $download_text);
+            }
+            $r[] = $download_text;
+            break;
 
-			$download_text = ( $params['format'] == 'htmlhead' ) ? $params['download_head_text'] : $params['download_body_text'];
-			if( strpos( $download_text, '$file_title$' ) !== false )
-			{ // Replace a mask $file_title$ with real file name
-				$download_File = & $download_Link->get_File();
-				$download_text = str_replace( '$file_title$', $download_File->get_name(), $download_text );
-			}
-			if( strpos( $download_text, '$post_title$' ) !== false )
-			{ // Replace a mask $file_title$ with real file name
-				$download_text = str_replace( '$post_title$', implode( $params['glue'], $MainList->get_filter_titles( array( 'visibility', 'hide_future' ) ) ), $download_text );
-			}
-			$r[] = $download_text;
-			break;
+        case 'user':
+            // We are requesting the user page:
+            $user_ID = param('user_ID', 'integer', 0);
+            $UserCache = &get_UserCache();
+            $User = &$UserCache->get_by_ID($user_ID, false, false);
+            $user_login = $User ? $User->get('login') : '';
+            $r[] = sprintf($params['user_text'], $user_login);
+            break;
 
-		case 'user':
-			// We are requesting the user page:
-			$user_ID = param( 'user_ID', 'integer', 0 );
-			$UserCache = & get_UserCache();
-			$User = & $UserCache->get_by_ID( $user_ID, false, false );
-			$user_login = $User ? $User->get( 'login' ) : '';
-			$r[] = sprintf( $params['user_text'], $user_login );
-			break;
+        case 'users':
+            $r[] = $params['users_text'];
+            break;
 
-		case 'users':
-			$r[] = $params['users_text'];
-			break;
+        case 'closeaccount':
+            $r[] = $params['closeaccount_text'];
+            break;
 
-		case 'closeaccount':
-			$r[] = $params['closeaccount_text'];
-			break;
+        case 'anonpost':
+            if ($params['anonpost_text'] == '#') {	// Initialize default auto title:
+                $new_Item = get_session_Item(0, true);
+                $r[] = sprintf(T_('New [%s]'), $new_Item->get_type_setting('name'));
+            } else {	// Use custom title from param:
+                $r[] = $params['anonpost_text'];
+            }
+            break;
 
-		case 'anonpost':
-			if( $params['anonpost_text'] == '#' )
-			{	// Initialize default auto title:
-				$new_Item = get_session_Item( 0, true );
-				$r[] = sprintf( T_('New [%s]'), $new_Item->get_type_setting( 'name' ) );
-			}
-			else
-			{	// Use custom title from param:
-				$r[] = $params['anonpost_text'];
-			}
-			break;
+        case 'edit':
+            global $edited_Item;
+            $type_name = $edited_Item->get_type_setting('name');
 
-		case 'edit':
-			global $edited_Item;
-			$type_name = $edited_Item->get_type_setting( 'name' );
+            $action = param_action(); // Edit post by switching into 'In skin' mode from Back-office
+            $p = param('p', 'integer', 0); // Edit post from Front-office
+            $post_ID = param('post_ID', 'integer', 0); // Update the edited post( If user is redirected to edit form again with some error messages )
+            $cp = param('cp', 'integer', 0); // Copy post from Front-office
+            if ($action == 'edit_switchtab' || $p > 0 || $post_ID > 0) {	// Edit post
+                $title = sprintf(T_('Edit [%s]'), $type_name);
+            } elseif ($cp > 0) {	// Copy post
+                $title = sprintf(T_('Duplicate [%s]'), $type_name);
+            } else {	// Create post
+                $title = sprintf(T_('New [%s]'), $type_name);
+            }
+            if ($params['display_edit_links'] && $params['auto_pilot'] != 'seo_title') { // Add advanced edit and close icon
+                $params['edit_links_template'] = array_merge([
+                    'before' => '<span class="title_action_icons">',
+                    'after' => '</span>',
+                    'advanced_link_class' => '',
+                    'close_link_class' => '',
+                ], $params['edit_links_template']);
 
-			$action = param_action(); // Edit post by switching into 'In skin' mode from Back-office
-			$p = param( 'p', 'integer', 0 ); // Edit post from Front-office
-			$post_ID = param ( 'post_ID', 'integer', 0 ); // Update the edited post( If user is redirected to edit form again with some error messages )
-			$cp = param( 'cp', 'integer', 0 ); // Copy post from Front-office
-			if( $action == 'edit_switchtab' || $p > 0 || $post_ID > 0 )
-			{	// Edit post
-				$title = sprintf( T_('Edit [%s]'), $type_name );
-			}
-			else if( $cp > 0 )
-			{	// Copy post
-				$title = sprintf( T_('Duplicate [%s]'), $type_name );
-			}
-			else
-			{	// Create post
-				$title = sprintf( T_('New [%s]'), $type_name );
-			}
-			if( $params['display_edit_links'] && $params['auto_pilot'] != 'seo_title' )
-			{ // Add advanced edit and close icon
-				$params['edit_links_template'] = array_merge( array(
-						'before'              => '<span class="title_action_icons">',
-						'after'               => '</span>',
-						'advanced_link_class' => '',
-						'close_link_class'    => '',
-					), $params['edit_links_template'] );
+                global $edited_Item;
+                if (! empty($edited_Item) && $edited_Item->ID > 0) { // Set the cancel editing url as permanent url of the item
+                    $cancel_url = $edited_Item->get_permanent_url();
+                } else { // Set the cancel editing url to home page of the blog
+                    $cancel_url = $Blog->gen_blogurl();
+                }
 
-				global $edited_Item;
-				if( !empty( $edited_Item ) && $edited_Item->ID > 0 )
-				{ // Set the cancel editing url as permanent url of the item
-					$cancel_url = $edited_Item->get_permanent_url();
-				}
-				else
-				{ // Set the cancel editing url to home page of the blog
-					$cancel_url = $Blog->gen_blogurl();
-				}
+                $title .= $params['edit_links_template']['before'];
+                if (check_user_perm('admin', 'restricted')) {
+                    global $advanced_edit_link;
+                    $title .= action_icon(T_('Go to advanced edit screen'), 'edit', $advanced_edit_link['href'], ' ' . T_('Advanced editing'), null, 3, [
+                        'onclick' => $advanced_edit_link['onclick'],
+                        'class' => $params['edit_links_template']['advanced_link_class'] . ' action_icon',
+                        'data-shortcut' => 'f2,ctrl+f2',
+                    ]);
+                }
+                $title .= action_icon(T_('Cancel editing'), 'close', $cancel_url, ' ' . T_('Cancel editing'), null, 3, [
+                    'class' => $params['edit_links_template']['close_link_class'] . ' action_icon',
+                ]);
+                $title .= $params['edit_links_template']['after'];
+            }
+            $r[] = $title;
+            break;
 
-				$title .= $params['edit_links_template']['before'];
-				if( check_user_perm( 'admin', 'restricted' ) )
-				{
-					global $advanced_edit_link;
-					$title .= action_icon( T_('Go to advanced edit screen'), 'edit', $advanced_edit_link['href'], ' '.T_('Advanced editing'), NULL, 3, array(
-							'onclick' => $advanced_edit_link['onclick'],
-							'class'   => $params['edit_links_template']['advanced_link_class'].' action_icon',
-							'data-shortcut' => 'f2,ctrl+f2',
-						) );
-				}
-				$title .= action_icon( T_('Cancel editing'), 'close', $cancel_url, ' '.T_('Cancel editing'), NULL, 3, array(
-						'class' => $params['edit_links_template']['close_link_class'].' action_icon',
-					) );
-				$title .= $params['edit_links_template']['after'];
-			}
-			$r[] = $title;
-			break;
+        case 'proposechange':
+            global $edited_Item;
+            $r[] = sprintf($params['proposechange_text'], '"' . $edited_Item->get_title() . '"');
+            break;
 
-		case 'proposechange':
-			global $edited_Item;
-			$r[] = sprintf( $params['proposechange_text'], '"'.$edited_Item->get_title().'"' );
-			break;
+        case 'edit_comment':
+            global $comment_Item, $edited_Comment;
+            $title = $params['edit_comment_text'];
+            if ($params['display_edit_links'] && $params['auto_pilot'] != 'seo_title') { // Add advanced edit and close icon
+                $params['edit_links_template'] = array_merge([
+                    'before' => '<span class="title_action_icons">',
+                    'after' => '</span>',
+                    'advanced_link_class' => '',
+                    'close_link_class' => '',
+                ], $params['edit_links_template']);
 
-		case 'edit_comment':
-			global $comment_Item, $edited_Comment;
-			$title = $params['edit_comment_text'];
-			if( $params['display_edit_links'] && $params['auto_pilot'] != 'seo_title' )
-			{ // Add advanced edit and close icon
-				$params['edit_links_template'] = array_merge( array(
-						'before'              => '<span class="title_action_icons">',
-						'after'               => '</span>',
-						'advanced_link_class' => '',
-						'close_link_class'    => '',
-					), $params['edit_links_template'] );
+                $title .= $params['edit_links_template']['before'];
+                if (check_user_perm('admin', 'restricted')) {
+                    $advanced_edit_url = url_add_param($admin_url, 'ctrl=comments&amp;action=edit&amp;blog=' . $Blog->ID . '&amp;comment_ID=' . $edited_Comment->ID);
+                    $title .= action_icon(T_('Go to advanced edit screen'), 'edit', $advanced_edit_url, ' ' . T_('Advanced editing'), null, 3, [
+                        'onclick' => 'return switch_edit_view();',
+                        'class' => $params['edit_links_template']['advanced_link_class'] . ' action_icon',
+                    ]);
+                }
+                if (empty($comment_Item)) {
+                    $comment_Item = &$edited_Comment->get_Item();
+                }
+                if (! empty($comment_Item)) {
+                    $title .= action_icon(T_('Cancel editing'), 'close', url_add_tail($comment_Item->get_permanent_url(), '#c' . $edited_Comment->ID), ' ' . T_('Cancel editing'), null, 3, [
+                        'class' => $params['edit_links_template']['close_link_class'] . ' action_icon',
+                    ]);
+                }
+                $title .= $params['edit_links_template']['after'];
+            }
+            $r[] = $title;
+            break;
 
-				$title .= $params['edit_links_template']['before'];
-				if( check_user_perm( 'admin', 'restricted' ) )
-				{
-					$advanced_edit_url = url_add_param( $admin_url, 'ctrl=comments&amp;action=edit&amp;blog='.$Blog->ID.'&amp;comment_ID='.$edited_Comment->ID );
-					$title .= action_icon( T_('Go to advanced edit screen'), 'edit', $advanced_edit_url, ' '.T_('Advanced editing'), NULL, 3, array(
-							'onclick' => 'return switch_edit_view();',
-							'class'   => $params['edit_links_template']['advanced_link_class'].' action_icon',
-						) );
-				}
-				if( empty( $comment_Item ) )
-				{
-					$comment_Item = & $edited_Comment->get_Item();
-				}
-				if( !empty( $comment_Item ) )
-				{
-					$title .= action_icon( T_('Cancel editing'), 'close', url_add_tail( $comment_Item->get_permanent_url(), '#c'.$edited_Comment->ID ), ' '.T_('Cancel editing'), NULL, 3, array(
-							'class' => $params['edit_links_template']['close_link_class'].' action_icon',
-						) );
-				}
-				$title .= $params['edit_links_template']['after'];
-			}
-			$r[] = $title;
-			break;
+        case 'useritems':
+            // We are requesting the user items list:
+            $r[] = $params['useritems_text'];
+            break;
 
-		case 'useritems':
-			// We are requesting the user items list:
-			$r[] = $params['useritems_text'];
-			break;
+        case 'usercomments':
+            // We are requesting the user comments list:
+            $r[] = $params['usercomments_text'];
+            break;
 
-		case 'usercomments':
-			// We are requesting the user comments list:
-			$r[] = $params['usercomments_text'];
-			break;
+        case 'tags':
+            // We are requesting the tags directory:
+            $r[] = $params['tags_text'];
+            break;
 
-		case 'tags':
-			// We are requesting the tags directory:
-			$r[] = $params['tags_text'];
-			break;
+        case 'flagged':
+            // We are requesting the flagged posts list:
+            $r[] = $params['flagged_text'];
+            break;
 
-		case 'flagged':
-			// We are requesting the flagged posts list:
-			$r[] = $params['flagged_text'];
-			break;
+        case 'mustread':
+            // We are requesting the must read posts list:
+            $r[] = $params['mustread_text'];
+            break;
 
-		case 'mustread':
-			// We are requesting the must read posts list:
-			$r[] = $params['mustread_text'];
-			break;
+        case 'help':
+            $r[] = $params['help_text'];
+            break;
 
-		case 'help':
-			$r[] = $params['help_text'];
-			break;
+        case 'compare':
+            // We are requesting the compare list:
+            $items = trim(param('items', '/^[\d,]*$/'), ',');
 
-		case 'compare':
-			// We are requesting the compare list:
-			$items = trim( param( 'items', '/^[\d,]*$/' ), ',' );
+            if (! empty($items)) {	// It at least one item is selected to compare
+                $items = explode(',', $items);
 
-			if( ! empty( $items ) )
-			{	// It at least one item is selected to compare
-				$items = explode( ',', $items );
+                // Load all requested posts into the cache:
+                $ItemCache = &get_ItemCache();
+                $ItemCache->load_list($items);
 
-				// Load all requested posts into the cache:
-				$ItemCache = & get_ItemCache();
-				$ItemCache->load_list( $items );
+                $compare_item_titles = [];
+                foreach ($items as $item_ID) {
+                    if ($Item = &$ItemCache->get_by_ID($item_ID, false, false)) {	// Use only existing Item:
+                        $compare_item_titles[] = $Item->get('title');
+                    }
+                }
 
-				$compare_item_titles = array();
-				foreach( $items as $item_ID )
-				{
-					if( $Item = & $ItemCache->get_by_ID( $item_ID, false, false ) )
-					{	// Use only existing Item:
-						$compare_item_titles[] = $Item->get( 'title' );
-					}
-				}
+                $r[] = sprintf($params['compare_text'], implode($params['compare_text_separator'], $compare_item_titles));
+            }
 
-				$r[] = sprintf( $params['compare_text'], implode( $params['compare_text_separator'], $compare_item_titles ) );
-			}
+            break;
 
-			break;
+        case 'posts':
+            // We are requesting a posts page:
+            if ($params['posts_text'] != '#') {
+                $r[] = $params['posts_text'];
+                break;
+            }
+            // no break if empty, Use title from default case
+        default:
+            if (isset($MainList)) {
+                $r = array_merge($r, $MainList->get_filter_titles(['visibility', 'hide_future', 'itemtype'], $params));
+            }
+            break;
+    }
 
-		case 'posts':
-			// We are requesting a posts page:
-			if( $params['posts_text'] != '#' )
-			{
-				$r[] = $params['posts_text'];
-				break;
-			}
-			// No break if empty, Use title from default case
-		default:
-			if( isset( $MainList ) )
-			{
-				$r = array_merge( $r, $MainList->get_filter_titles( array( 'visibility', 'hide_future', 'itemtype' ), $params ) );
-			}
-			break;
-	}
+    if (! empty($r)) {	// We have at leats one title match:
+        $r = implode($params['glue'], $r);
+        if (! empty($r)) {	// This is in case we asked for an empty title (e-g for search)
+            $r = $before . format_to_output($r, $params['format']) . $after;
+        }
+    } elseif (! empty($params['title_none'])) {
+        $r = $params['title_none'];
+    } else {	// never return array()
+        $r = '';
+    }
 
-
-	if( ! empty( $r ) )
-	{	// We have at leats one title match:
-		$r = implode( $params['glue'], $r );
-		if( ! empty( $r ) )
-		{	// This is in case we asked for an empty title (e-g for search)
-			$r = $before.format_to_output( $r, $params['format'] ).$after;
-		}
-	}
-	elseif( !empty( $params['title_none'] ) )
-	{
-		$r = $params['title_none'];
-	}
-	else
-	{	// never return array()
-		$r = '';
-	}
-
-	return $r;
+    return $r;
 }
 
 
@@ -1007,14 +907,13 @@ function get_request_title( $params = array() )
  * @param array params
  *        - "auto_pilot": "seo_title": Use the SEO title autopilot. (Default: "none")
  */
-function request_title( $params = array() )
+function request_title($params = [])
 {
-	$r = get_request_title( $params );
+    $r = get_request_title($params);
 
-	if( !empty( $r ) )
-	{ // We have something to display:
-		echo $r;
-	}
+    if (! empty($r)) { // We have something to display:
+        echo $r;
+    }
 }
 
 
@@ -1024,17 +923,16 @@ function request_title( $params = array() )
  * @param string URL to use (this gets used as base URL for all relative links on the HTML page)
  * @return string
  */
-function base_tag( $url, $target = NULL )
+function base_tag($url, $target = null)
 {
-	global $base_tag_set;
-	$base_tag_set = $url;
-	echo '<base href="'.$url.'"';
+    global $base_tag_set;
+    $base_tag_set = $url;
+    echo '<base href="' . $url . '"';
 
-	if( !empty($target) )
-	{
-		echo ' target="'.$target.'"';
-	}
-	echo " />\n";
+    if (! empty($target)) {
+        echo ' target="' . $target . '"';
+    }
+    echo " />\n";
 }
 
 
@@ -1045,30 +943,31 @@ function base_tag( $url, $target = NULL )
  */
 function robots_tag()
 {
-	global $robots_index, $robots_follow;
+    global $robots_index, $robots_follow;
 
-	if( is_null($robots_index) && is_null($robots_follow) )
-	{
-		return;
-	}
+    if (is_null($robots_index) && is_null($robots_follow)) {
+        return;
+    }
 
-	$r = '<meta name="robots" content="';
+    $r = '<meta name="robots" content="';
 
-	if( $robots_index === false )
-		$r .= 'NOINDEX';
-	else
-		$r .= 'INDEX';
+    if ($robots_index === false) {
+        $r .= 'NOINDEX';
+    } else {
+        $r .= 'INDEX';
+    }
 
-	$r .= ',';
+    $r .= ',';
 
-	if( $robots_follow === false )
-		$r .= 'NOFOLLOW';
-	else
-		$r .= 'FOLLOW';
+    if ($robots_follow === false) {
+        $r .= 'NOFOLLOW';
+    } else {
+        $r .= 'FOLLOW';
+    }
 
-	$r .= '" />'."\n";
+    $r .= '" />' . "\n";
 
-	echo $r;
+    echo $r;
 }
 
 
@@ -1078,18 +977,15 @@ function robots_tag()
  * We need this function because if no Blog is currently active (some admin pages or site pages)
  * then we'll go to the general home.
  */
-function blog_home_link( $before = '', $after = '', $blog_text = 'Blog', $home_text = 'Home' )
+function blog_home_link($before = '', $after = '', $blog_text = 'Blog', $home_text = 'Home')
 {
-	global $Collection, $Blog, $baseurl;
+    global $Collection, $Blog, $baseurl;
 
-	if( !empty( $Blog ) )
-	{
-		echo $before.'<a href="'.$Blog->get( 'url' ).'">'.$blog_text.'</a>'.$after;
-	}
-	elseif( !empty($home_text) )
-	{
-		echo $before.'<a href="'.$baseurl.'">'.$home_text.'</a>'.$after;
-	}
+    if (! empty($Blog)) {
+        echo $before . '<a href="' . $Blog->get('url') . '">' . $blog_text . '</a>' . $after;
+    } elseif (! empty($home_text)) {
+        echo $before . '<a href="' . $baseurl . '">' . $home_text . '</a>' . $after;
+    }
 }
 
 
@@ -1099,28 +995,23 @@ function blog_home_link( $before = '', $after = '', $blog_text = 'Blog', $home_t
  * @param string Name
  * @param string Value
  */
-function expose_var_to_js( $name, $value, $parent_object = NULL )
+function expose_var_to_js($name, $value, $parent_object = null)
 {
-	global $evo_exposed_js_vars;
+    global $evo_exposed_js_vars;
 
-	if( ! is_array( $evo_exposed_js_vars ) )
-	{	// Initialize array once:
-		$evo_exposed_js_vars = array();
-	}
+    if (! is_array($evo_exposed_js_vars)) {	// Initialize array once:
+        $evo_exposed_js_vars = [];
+    }
 
-	if( ! empty( $parent_object ) )
-	{
-		if( ! isset( $evo_exposed_js_vars[$parent_object] ) )
-		{
-			$evo_exposed_js_vars[$parent_object] = array();
-		}
+    if (! empty($parent_object)) {
+        if (! isset($evo_exposed_js_vars[$parent_object])) {
+            $evo_exposed_js_vars[$parent_object] = [];
+        }
 
-		$evo_exposed_js_vars[$parent_object][$name] = $value;
-	}
-	else
-	{
-		$evo_exposed_js_vars[ $name ] = $value;
-	}
+        $evo_exposed_js_vars[$parent_object][$name] = $value;
+    } else {
+        $evo_exposed_js_vars[$name] = $value;
+    }
 }
 
 
@@ -1129,30 +1020,25 @@ function expose_var_to_js( $name, $value, $parent_object = NULL )
  */
 function include_js_vars()
 {
-	global $evo_exposed_js_vars;
+    global $evo_exposed_js_vars;
 
-	if( empty( $evo_exposed_js_vars ) ||
-	    ! is_array( $evo_exposed_js_vars ) )
-	{	// No exposed JS variables found:
-		return;
-	}
+    if (empty($evo_exposed_js_vars) ||
+        ! is_array($evo_exposed_js_vars)) {	// No exposed JS variables found:
+        return;
+    }
 
-	echo "<script>\n/* <![CDATA[ */\n";
+    echo "<script>\n/* <![CDATA[ */\n";
 
-	foreach( $evo_exposed_js_vars as $var_name => $var_value )
-	{
-		if( is_array( $var_value ) )
-		{
-			$var_value = evo_json_encode( $var_value, JSON_FORCE_OBJECT );
-		}
-		elseif( is_bool( $var_value ) )
-		{
-			$var_value = $var_value ? 'true' : 'false';
-		}
-		echo 'var '.$var_name.' = '.$var_value.";\n";
-	}
+    foreach ($evo_exposed_js_vars as $var_name => $var_value) {
+        if (is_array($var_value)) {
+            $var_value = evo_json_encode($var_value, JSON_FORCE_OBJECT);
+        } elseif (is_bool($var_value)) {
+            $var_value = $var_value ? 'true' : 'false';
+        }
+        echo 'var ' . $var_name . ' = ' . $var_value . ";\n";
+    }
 
-	echo "\n/* ]]> */\n</script>";
+    echo "\n/* ]]> */\n</script>";
 }
 
 
@@ -1168,110 +1054,81 @@ function include_js_vars()
  * @return string URL
  * @param string version number to append at the end of requested url to avoid getting an old version from the cache
  */
-function get_require_url( $lib_file, $relative_to = 'rsc_url', $subfolder = 'js', $version = '#' )
+function get_require_url($lib_file, $relative_to = 'rsc_url', $subfolder = 'js', $version = '#')
 {
-	global $library_local_urls, $library_cdn_urls, $use_cdns, $debug, $rsc_url, $rsc_uri;
-	global $Collection, $Blog, $baseurl, $assets_baseurl, $ReqURL;
+    global $library_local_urls, $library_cdn_urls, $use_cdns, $debug, $rsc_url, $rsc_uri;
+    global $Collection, $Blog, $baseurl, $assets_baseurl, $ReqURL;
 
-	if( $relative_to == 'blog' && ( is_admin_page() || empty( $Blog ) ) )
-	{	// Make sure we never use resource url relative to any blog url in case of an admin page ( important in case of multi-domain installations ):
-		$relative_to = 'rsc_url';
-	}
+    if ($relative_to == 'blog' && (is_admin_page() || empty($Blog))) {	// Make sure we never use resource url relative to any blog url in case of an admin page ( important in case of multi-domain installations ):
+        $relative_to = 'rsc_url';
+    }
 
-	// Check if we have a public CDN we want to use for this library file:
-	if( $use_cdns && ! empty( $library_cdn_urls[ $lib_file ] ) )
-	{ // Rewrite local urls with public CDN urls if they are defined in _advanced.php
-		$library_local_urls[ $lib_file ] = $library_cdn_urls[ $lib_file ];
-		// Don't append version for global CDN urls
-		$version = NULL;
-	}
+    // Check if we have a public CDN we want to use for this library file:
+    if ($use_cdns && ! empty($library_cdn_urls[$lib_file])) { // Rewrite local urls with public CDN urls if they are defined in _advanced.php
+        $library_local_urls[$lib_file] = $library_cdn_urls[$lib_file];
+        // Don't append version for global CDN urls
+        $version = null;
+    }
 
-	if( ! empty( $library_local_urls[ $lib_file ] ) )
-	{ // We are requesting an alias
-		if( $debug && ! empty( $library_local_urls[ $lib_file ][1] ) )
-		{ // Load JS file for debug mode (optional)
-			$lib_file = $library_local_urls[ $lib_file ][1];
-		}
-		else
-		{ // Load JS file for production mode
-			$lib_file = $library_local_urls[ $lib_file ][0];
-		}
+    if (! empty($library_local_urls[$lib_file])) { // We are requesting an alias
+        if ($debug && ! empty($library_local_urls[$lib_file][1])) { // Load JS file for debug mode (optional)
+            $lib_file = $library_local_urls[$lib_file][1];
+        } else { // Load JS file for production mode
+            $lib_file = $library_local_urls[$lib_file][0];
+        }
 
-		if( $relative_to === 'relative' || $relative_to === true )
-		{ // Aliases cannot be relative to <base>, make it relative to $rsc_url
-			$relative_to = 'rsc_url';
-		}
-	}
+        if ($relative_to === 'relative' || $relative_to === true) { // Aliases cannot be relative to <base>, make it relative to $rsc_url
+            $relative_to = 'rsc_url';
+        }
+    }
 
-	if( strpos( $lib_file, 'ext:' ) === 0 || strpos( $lib_file, 'customized:' ) === 0 )
-	{	// This file must be loaded from subfolder '/rsc/ext/' or '/rsc/customized/' :
-		$subfolder = strpos( $lib_file, 'ext:' ) === 0 ? 'ext' : 'customized';
-		// Remove prefix 'ext:' from beginning of the file:
-		$lib_file = substr( $lib_file, strlen( $subfolder ) + 1 );
-	}
+    if (strpos($lib_file, 'ext:') === 0 || strpos($lib_file, 'customized:') === 0) {	// This file must be loaded from subfolder '/rsc/ext/' or '/rsc/customized/' :
+        $subfolder = strpos($lib_file, 'ext:') === 0 ? 'ext' : 'customized';
+        // Remove prefix 'ext:' from beginning of the file:
+        $lib_file = substr($lib_file, strlen($subfolder) + 1);
+    }
 
-	if( $relative_to === 'relative' || $relative_to === true )
-	{ // Make the file relative to current page <base>:
-		$lib_url = $lib_file;
-	}
-	elseif( $relative_to === 'absolute' || preg_match( '~^(https?:)?//~', $lib_file ) )
-	{	// It's already an absolute url, keep it as is:
-		// (used to require CSS and JS files from Skin and Plugin because there we always use absolute URLs)
-		$lib_url = $lib_file;
-	}
-	elseif( $relative_to === 'blog' && ! empty( $Blog ) )
-	{ // Get the file from $rsc_uri relative to the current blog's domain (may be a subdomain or a custom domain):
-		if( $assets_baseurl !== $baseurl )
-		{ // We are using a specific domain, don't try to load from blog specific domain
-			$lib_url = $rsc_url.$subfolder.'/'.$lib_file;
-		}
-		else
-		{
-			$lib_url = $Blog->get_local_rsc_url().$subfolder.'/'.$lib_file;
-		}
-	}
-	elseif( $relative_to === 'siteskin' )
-	{	// Get the file from current site skin if it is enabled otherwise from relative current page or head tag <base>:
-		if( $site_Skin = & get_site_Skin() )
-		{
-			$lib_url = $site_Skin->get_url().$lib_file;
-		}
-		else
-		{
-			$lib_url = $lib_file;
-		}
-	}
-	elseif( $relative_to === 'rsc_uri' )
-	{ // Get the file from $rsc_uri:
-		$lib_url = $rsc_uri.$subfolder.'/'.$lib_file;
-	}
-	else
-	{ // Get the file from $rsc_url:
-		$lib_url = $rsc_url.$subfolder.'/'.$lib_file;
-	}
+    if ($relative_to === 'relative' || $relative_to === true) { // Make the file relative to current page <base>:
+        $lib_url = $lib_file;
+    } elseif ($relative_to === 'absolute' || preg_match('~^(https?:)?//~', $lib_file)) {	// It's already an absolute url, keep it as is:
+        // (used to require CSS and JS files from Skin and Plugin because there we always use absolute URLs)
+        $lib_url = $lib_file;
+    } elseif ($relative_to === 'blog' && ! empty($Blog)) { // Get the file from $rsc_uri relative to the current blog's domain (may be a subdomain or a custom domain):
+        if ($assets_baseurl !== $baseurl) { // We are using a specific domain, don't try to load from blog specific domain
+            $lib_url = $rsc_url . $subfolder . '/' . $lib_file;
+        } else {
+            $lib_url = $Blog->get_local_rsc_url() . $subfolder . '/' . $lib_file;
+        }
+    } elseif ($relative_to === 'siteskin') {	// Get the file from current site skin if it is enabled otherwise from relative current page or head tag <base>:
+        if ($site_Skin = &get_site_Skin()) {
+            $lib_url = $site_Skin->get_url() . $lib_file;
+        } else {
+            $lib_url = $lib_file;
+        }
+    } elseif ($relative_to === 'rsc_uri') { // Get the file from $rsc_uri:
+        $lib_url = $rsc_uri . $subfolder . '/' . $lib_file;
+    } else { // Get the file from $rsc_url:
+        $lib_url = $rsc_url . $subfolder . '/' . $lib_file;
+    }
 
-	if( ! empty( $version ) )
-	{ // Be sure to get a fresh copy of this CSS file after application upgrades:
-		if( $version == '#' )
-		{
-			global $app_version_long, $Skin;
+    if (! empty($version)) { // Be sure to get a fresh copy of this CSS file after application upgrades:
+        if ($version == '#') {
+            global $app_version_long, $Skin;
 
-			$version = $app_version_long;
+            $version = $app_version_long;
 
-			if( ( $relative_to == 'relative' || $relative_to === true ) && ! is_admin_page() && isset( $Skin ) )
-			{	// Prepand skin version to clear file from browser cache after skin switching:
-				$version = $Skin->folder.'+'.$Skin->version.'+'.$version;
-			}
-		}
-		$lib_url = url_add_param( $lib_url, 'v='.$version );
-	}
+            if (($relative_to == 'relative' || $relative_to === true) && ! is_admin_page() && isset($Skin)) {	// Prepand skin version to clear file from browser cache after skin switching:
+                $version = $Skin->folder . '+' . $Skin->version . '+' . $version;
+            }
+        }
+        $lib_url = url_add_param($lib_url, 'v=' . $version);
+    }
 
-	if( preg_match( '~^https://~', $ReqURL ) )
-	{ // If base url is safe then fix all media urls to protocol-relative format:
-		$lib_url = preg_replace( '~^http://~', '//', $lib_url );
-	}
+    if (preg_match('~^https://~', $ReqURL)) { // If base url is safe then fix all media urls to protocol-relative format:
+        $lib_url = preg_replace('~^http://~', '//', $lib_url);
+    }
 
-	return $lib_url;
+    return $lib_url;
 }
 
 
@@ -1284,43 +1141,36 @@ function get_require_url( $lib_file, $relative_to = 'rsc_url', $subfolder = 'js'
  * @param string version number to append at the end of requested url to avoid getting an old version from the cache
  * @return integer Index of first file that was dequeued because it is bundled inside current requested file
  */
-function check_bundled_file( $file, $relative_to = 'rsc_url', $subfolder = 'js', $version = '#' )
+function check_bundled_file($file, $relative_to = 'rsc_url', $subfolder = 'js', $version = '#')
 {
-	global $required_js, $required_css, $bundled_files;
+    global $required_js, $required_css, $bundled_files;
 
-	// Store here index of first file that was dequeued because it is bundled inside current requested file:
-	$first_dequeued_file_index = NULL;
+    // Store here index of first file that was dequeued because it is bundled inside current requested file:
+    $first_dequeued_file_index = null;
 
-	if( isset( $bundled_files[ $file ] ) )
-	{	// If currently required file contains other JS files which must not be required twice:
-		foreach( $bundled_files[ $file ] as $bundled_file )
-		{	// Include all bundled files in the global array in order to don't call them twice:
-			$bundled_url = strtolower( get_require_url( $bundled_file, $relative_to, $subfolder, $version ) );
-			if( $subfolder == 'js' )
-			{	// JS file:
-				if( empty( $required_js ) || ! in_array( $bundled_url, $required_js ) )
-				{	// Include bundled file into this global array in order to don't require this if it will be required further:
-					$required_js[] = $bundled_url;
-				}
-			}
-			else // 'css' or 'build'
-			{	// CSS file:
-				if( empty( $required_css ) || ! in_array( $bundled_url, $required_css ) )
-				{	// Include bundled file into this global array in order to don't require this if it will be required further:
-					$required_css[] = $bundled_url;
-				}
-			}
-			// Dequeue the file if it was required before:
-			$dequeued_file_index = dequeue( $bundled_file, $relative_to );
-			if( $first_dequeued_file_index === NULL )
-			{	// We need to know first dequeued file in order to insert currently
-				// required file in that place instead of insert it as last ordered:
-				$first_dequeued_file_index = $dequeued_file_index;
-			}
-		}
-	}
+    if (isset($bundled_files[$file])) {	// If currently required file contains other JS files which must not be required twice:
+        foreach ($bundled_files[$file] as $bundled_file) {	// Include all bundled files in the global array in order to don't call them twice:
+            $bundled_url = strtolower(get_require_url($bundled_file, $relative_to, $subfolder, $version));
+            if ($subfolder == 'js') {	// JS file:
+                if (empty($required_js) || ! in_array($bundled_url, $required_js)) {	// Include bundled file into this global array in order to don't require this if it will be required further:
+                    $required_js[] = $bundled_url;
+                }
+            } else { // 'css' or 'build'
+                // CSS file:
+                if (empty($required_css) || ! in_array($bundled_url, $required_css)) {	// Include bundled file into this global array in order to don't require this if it will be required further:
+                    $required_css[] = $bundled_url;
+                }
+            }
+            // Dequeue the file if it was required before:
+            $dequeued_file_index = dequeue($bundled_file, $relative_to);
+            if ($first_dequeued_file_index === null) {	// We need to know first dequeued file in order to insert currently
+                // required file in that place instead of insert it as last ordered:
+                $first_dequeued_file_index = $dequeued_file_index;
+            }
+        }
+    }
 
-	return $first_dequeued_file_index;
+    return $first_dequeued_file_index;
 }
 
 
@@ -1341,75 +1191,61 @@ function check_bundled_file( $file, $relative_to = 'rsc_url', $subfolder = 'js',
  * @param string version number to append at the end of requested url to avoid getting an old version from the cache
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  */
-function require_js( $js_file, $relative_to = 'rsc_url', $async_defer = false, $output = false, $version = '#', $position = 'headlines' )
+function require_js($js_file, $relative_to = 'rsc_url', $async_defer = false, $output = false, $version = '#', $position = 'headlines')
 {
-	global $required_js; // Use this var as global and NOT static, because it is used in other functions(e.g. display_ajax_form(), check_bundled_file())
-	global $use_defer;
+    global $required_js; // Use this var as global and NOT static, because it is used in other functions(e.g. display_ajax_form(), check_bundled_file())
+    global $use_defer;
 
-	if( is_admin_page() && in_array( $js_file, array( 'functions.js', 'ajax.js', 'form_extensions.js', 'extracats.js', 'dynamic_select.js', 'backoffice.js' ) ) )
-	{	// Don't require this file on back-office because it is auto loaded by bundled file evo_backoffice.bmin.js:
-		return;
-	}
+    if (is_admin_page() && in_array($js_file, ['functions.js', 'ajax.js', 'form_extensions.js', 'extracats.js', 'dynamic_select.js', 'backoffice.js'])) {	// Don't require this file on back-office because it is auto loaded by bundled file evo_backoffice.bmin.js:
+        return;
+    }
 
-	if( is_dequeued( $js_file, $relative_to ) )
-	{	// Don't require if the file was already dequeued once:
-		return;
-	}
+    if (is_dequeued($js_file, $relative_to)) {	// Don't require if the file was already dequeued once:
+        return;
+    }
 
-	// Get index of first file that was dequeued because it is bundled inside current requested file:
-	$first_dequeued_file_index = check_bundled_file( $js_file, $relative_to, 'js', $version );
+    // Get index of first file that was dequeued because it is bundled inside current requested file:
+    $first_dequeued_file_index = check_bundled_file($js_file, $relative_to, 'js', $version);
 
-	if( in_array( $js_file, array( '#jqueryUI#', 'communication.js', 'functions.js' ) ) )
-	{	// Dependency : ensure jQuery is loaded
-		// Don't use TRUE for $async and $output because it may loads jQuery twice on AJAX request, e.g. on comment AJAX form,
-		// and all jQuery UI libraries(like resizable, sortable and etc.) will not work, e.g. on attachments fieldset
-		require_js_defer( '#jquery#', $relative_to, false, $version, $position );
-	}
+    if (in_array($js_file, ['#jqueryUI#', 'communication.js', 'functions.js'])) {	// Dependency : ensure jQuery is loaded
+        // Don't use TRUE for $async and $output because it may loads jQuery twice on AJAX request, e.g. on comment AJAX form,
+        // and all jQuery UI libraries(like resizable, sortable and etc.) will not work, e.g. on attachments fieldset
+        require_js_defer('#jquery#', $relative_to, false, $version, $position);
+    }
 
-	// Get library url of JS file by alias name
-	$js_url = get_require_url( $js_file, $relative_to, 'js', $version );
+    // Get library url of JS file by alias name
+    $js_url = get_require_url($js_file, $relative_to, 'js', $version);
 
-	// Add to headlines, if not done already:
-	if( empty( $required_js ) || ! in_array( strtolower( $js_url ), $required_js ) )
-	{
-		$required_js[] = strtolower( $js_url );
+    // Add to headlines, if not done already:
+    if (empty($required_js) || ! in_array(strtolower($js_url), $required_js)) {
+        $required_js[] = strtolower($js_url);
 
-		$script_tag = '<script';
-		if( $async_defer == 'async' || $async_defer === true )
-		{
-			$script_tag .= ' async';
-		}
-		elseif( use_defer() && $async_defer == 'defer' )
-		{
-			$script_tag .= ' defer';
-		}
-		//else 'immediate' or false
-		$script_tag .= ' src="'.$js_url.'">';
-		$script_tag .= '</script>';
+        $script_tag = '<script';
+        if ($async_defer == 'async' || $async_defer === true) {
+            $script_tag .= ' async';
+        } elseif (use_defer() && $async_defer == 'defer') {
+            $script_tag .= ' defer';
+        }
+        //else 'immediate' or false
+        $script_tag .= ' src="' . $js_url . '">';
+        $script_tag .= '</script>';
 
-		if( $output )
-		{ // Print script tag right here
-			echo $script_tag;
-		}
-		else
-		{ // Add script tag to <head>
-			if( $position == 'headlines' )
-			{
-				add_headline( $script_tag, $js_file, $relative_to, $first_dequeued_file_index );
-			}
-			elseif( $position == 'footerlines' )
-			{
-				add_footerline( $script_tag, $js_file, $relative_to, $first_dequeued_file_index );
-			}
-		}
-	}
+        if ($output) { // Print script tag right here
+            echo $script_tag;
+        } else { // Add script tag to <head>
+            if ($position == 'headlines') {
+                add_headline($script_tag, $js_file, $relative_to, $first_dequeued_file_index);
+            } elseif ($position == 'footerlines') {
+                add_footerline($script_tag, $js_file, $relative_to, $first_dequeued_file_index);
+            }
+        }
+    }
 
-	/* Yura: Don't require this plugin when it is already concatenated in jquery.bundle.js
-	 * But we should don't forget it for CDN jQuery file and when js code uses deprecated things of jQuery */
-	if( $js_file == '#jquery#' )
-	{ // Dependency : The plugin restores deprecated features and behaviors so that older code will still run properly on jQuery 1.9 and later
-		require_js_defer( '#jquery_migrate#', $relative_to, $output, $version );
-	}
+    /* Yura: Don't require this plugin when it is already concatenated in jquery.bundle.js
+     * But we should don't forget it for CDN jQuery file and when js code uses deprecated things of jQuery */
+    if ($js_file == '#jquery#') { // Dependency : The plugin restores deprecated features and behaviors so that older code will still run properly on jQuery 1.9 and later
+        require_js_defer('#jquery_migrate#', $relative_to, $output, $version);
+    }
 }
 
 
@@ -1422,9 +1258,9 @@ function require_js( $js_file, $relative_to = 'rsc_url', $async_defer = false, $
  * @param string Version number to append at the end of requested url to avoid getting an old version from the cache
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  */
-function require_js_async( $js_file, $relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines' )
+function require_js_async($js_file, $relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines')
 {
-	require_js( $js_file, $relative_to, 'async', $output, $version, $position );
+    require_js($js_file, $relative_to, 'async', $output, $version, $position);
 }
 
 
@@ -1437,9 +1273,9 @@ function require_js_async( $js_file, $relative_to = 'rsc_url', $output = false, 
  * @param string Version number to append at the end of requested url to avoid getting an old version from the cache
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  */
-function require_js_defer( $js_file, $relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines' )
+function require_js_defer($js_file, $relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines')
 {
-	require_js( $js_file, $relative_to, 'defer', $output, $version, $position );
+    require_js($js_file, $relative_to, 'defer', $output, $version, $position);
 }
 
 
@@ -1459,73 +1295,61 @@ function require_js_defer( $js_file, $relative_to = 'rsc_url', $output = false, 
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  * @param boolean TRUE to load CSS file asynchronously, FALSE otherwise.
  */
-function require_css( $css_file, $relative_to = 'rsc_url', $title = NULL, $media = NULL, $version = '#', $output = false, $position = 'headlines', $async = false )
+function require_css($css_file, $relative_to = 'rsc_url', $title = null, $media = null, $version = '#', $output = false, $position = 'headlines', $async = false)
 {
-	global $required_css; // Use this var as global and NOT static, because it is used in other functions(e.g. check_bundled_file())
+    global $required_css; // Use this var as global and NOT static, because it is used in other functions(e.g. check_bundled_file())
 
-	// Which subfolder do we want to use in case of absolute paths? (doesn't appy to 'relative')
-	$subfolder = 'css';
-	if( $relative_to == 'rsc_url' || $relative_to == 'rsc_uri' || $relative_to == 'blog' )
-	{
-		if( preg_match( '/\.(bundle|bmin|min)\.css$/', $css_file ) )
-		{
-			$subfolder = 'build';
-		}
-	}
+    // Which subfolder do we want to use in case of absolute paths? (doesn't appy to 'relative')
+    $subfolder = 'css';
+    if ($relative_to == 'rsc_url' || $relative_to == 'rsc_uri' || $relative_to == 'blog') {
+        if (preg_match('/\.(bundle|bmin|min)\.css$/', $css_file)) {
+            $subfolder = 'build';
+        }
+    }
 
-	if( is_dequeued( $css_file, $relative_to ) )
-	{	// Don't require if the file was already dequeued once:
-		return;
-	}
+    if (is_dequeued($css_file, $relative_to)) {	// Don't require if the file was already dequeued once:
+        return;
+    }
 
-	// Get index of first file that was dequeued because it is bundled inside current requested file:
-	$first_dequeued_file_index = check_bundled_file( $css_file, $relative_to, $subfolder, $version );
+    // Get index of first file that was dequeued because it is bundled inside current requested file:
+    $first_dequeued_file_index = check_bundled_file($css_file, $relative_to, $subfolder, $version);
 
-	// Get library url of CSS file by alias name
-	$css_url = get_require_url( $css_file, $relative_to, $subfolder, $version );
+    // Get library url of CSS file by alias name
+    $css_url = get_require_url($css_file, $relative_to, $subfolder, $version);
 
-	// Add to headlines/footerlines, if not done already:
-	if( empty( $required_css ) || ! in_array( strtolower( $css_url ), $required_css ) )
-	{
-		$required_css[] = strtolower( $css_url );
+    // Add to headlines/footerlines, if not done already:
+    if (empty($required_css) || ! in_array(strtolower($css_url), $required_css)) {
+        $required_css[] = strtolower($css_url);
 
-		$stylesheet_tag = '';
+        $stylesheet_tag = '';
 
-		if( $async )
-		{
-			$stylesheet_tag .= '<link rel="preload" as="style" onload="this.onload=null;this.rel=\'stylesheet\'"';
-			$stylesheet_tag .= empty( $title ) ? '' : ' title="'.$title.'"';
-			$stylesheet_tag .= empty( $media ) ? '' : ' media="'.$media.'"';
-			$stylesheet_tag .= ' href="'.$css_url.'" />';
-			$stylesheet_tag .= '<noscript>';
-		}
-		
-		$stylesheet_tag .= '<link type="text/css" rel="stylesheet"';
-		$stylesheet_tag .= empty( $title ) ? '' : ' title="'.$title.'"';
-		$stylesheet_tag .= empty( $media ) ? '' : ' media="'.$media.'"';
-		$stylesheet_tag .= ' href="'.$css_url.'" />';
+        if ($async) {
+            $stylesheet_tag .= '<link rel="preload" as="style" onload="this.onload=null;this.rel=\'stylesheet\'"';
+            $stylesheet_tag .= empty($title) ? '' : ' title="' . $title . '"';
+            $stylesheet_tag .= empty($media) ? '' : ' media="' . $media . '"';
+            $stylesheet_tag .= ' href="' . $css_url . '" />';
+            $stylesheet_tag .= '<noscript>';
+        }
 
-		if( $async )
-		{
-			$stylesheet_tag .= '</noscript>';
-		}
+        $stylesheet_tag .= '<link type="text/css" rel="stylesheet"';
+        $stylesheet_tag .= empty($title) ? '' : ' title="' . $title . '"';
+        $stylesheet_tag .= empty($media) ? '' : ' media="' . $media . '"';
+        $stylesheet_tag .= ' href="' . $css_url . '" />';
 
-		if( $output )
-		{	// Print stylesheet tag right here
-			echo $stylesheet_tag;
-		}
-		else
-		{	// Add stylesheet tag to <head>
-			if($position == 'headlines' )
-			{
-				add_headline( $stylesheet_tag, $css_file, $relative_to, $first_dequeued_file_index );
-			}
-			elseif( $position == 'footerlines' )
-			{
-				add_footerline( $stylesheet_tag, $css_file, $relative_to, $first_dequeued_file_index );
-			}
-		}
-	}
+        if ($async) {
+            $stylesheet_tag .= '</noscript>';
+        }
+
+        if ($output) {	// Print stylesheet tag right here
+            echo $stylesheet_tag;
+        } else {	// Add stylesheet tag to <head>
+            if ($position == 'headlines') {
+                add_headline($stylesheet_tag, $css_file, $relative_to, $first_dequeued_file_index);
+            } elseif ($position == 'footerlines') {
+                add_footerline($stylesheet_tag, $css_file, $relative_to, $first_dequeued_file_index);
+            }
+        }
+    }
 }
 
 
@@ -1540,9 +1364,9 @@ function require_css( $css_file, $relative_to = 'rsc_url', $title = NULL, $media
  * @param boolean TRUE to print script tag on the page, FALSE to store in array to print then inside <head> or <body>
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  */
-function require_css_async( $css_file, $relative_to = 'rsc_url', $title = NULL, $media = NULL, $version = '#', $output = false, $position = 'headlines' )
+function require_css_async($css_file, $relative_to = 'rsc_url', $title = null, $media = null, $version = '#', $output = false, $position = 'headlines')
 {
-	require_css( $css_file, $relative_to, $title, $media, $version, $output, $position, true );
+    require_css($css_file, $relative_to, $title, $media, $version, $output, $position, true);
 }
 
 
@@ -1551,105 +1375,92 @@ function require_css_async( $css_file, $relative_to = 'rsc_url', $title = NULL, 
  *
  * @param string alias, url or filename (relative to rsc/js) for javascript file
  * @param boolean|string What group of headlines/footerlines touch to dequeue
- * @return integer|NULL Index/order of the file in global array on required files, NULL - if the file was not found
+ * @return integer|null Index/order of the file in global array on required files, NULL - if the file was not found
  */
-function dequeue( $file_name, $group_relative_to = '#anygroup#' )
+function dequeue($file_name, $group_relative_to = '#anygroup#')
 {
-	global $headline_include_file, $headline_file_index, $dequeued_headlines;
+    global $headline_include_file, $headline_file_index, $dequeued_headlines;
 
-	if( is_dequeued( $file_name, $group_relative_to ) )
-	{	// Don't dequeue twice:
-		pre_dump( 'is_dequeued' );
-		return NULL;
-	}
+    if (is_dequeued($file_name, $group_relative_to)) {	// Don't dequeue twice:
+        pre_dump('is_dequeued');
+        return null;
+    }
 
-	// Convert boolean, NULL and etc. values to string format:
-	$group_relative_to = strval( $group_relative_to );
+    // Convert boolean, NULL and etc. values to string format:
+    $group_relative_to = strval($group_relative_to);
 
-	if( ! is_array( $dequeued_headlines ) )
-	{	// Initialize array first time:
-		$dequeued_headlines = array();
-	}
+    if (! is_array($dequeued_headlines)) {	// Initialize array first time:
+        $dequeued_headlines = [];
+    }
 
-	// Store each dequeued file in order to don't require this next time:
-	$dequeued_headlines[ $group_relative_to ][ $file_name ] = true;
+    // Store each dequeued file in order to don't require this next time:
+    $dequeued_headlines[$group_relative_to][$file_name] = true;
 
-	// Find and store here index/order of first file:
-	$dequeued_file_index = NULL;
+    // Find and store here index/order of first file:
+    $dequeued_file_index = null;
 
-	// Try to find and dequeue headline file:
-	if( ! empty( $headline_file_index ) )
-	{
-		$headline_file_indexes = ( $group_relative_to == '#anygroup#' ? $headline_file_index : array() );
-		if( $group_relative_to == '#anygroup#' )
-		{	// Dequeue the file from any group:
-			$headline_file_indexes = $headline_file_index;
-		}
-		elseif( isset( $headline_file_index[ $group_relative_to ] ) )
-		{	// Dequeue the file only from the requested group:
-			$headline_file_indexes = array( $group_relative_to => $headline_file_index[ $group_relative_to ] );
-		}
-		if( ! empty( $headline_file_indexes ) )
-		{	// If relative_to group is found:
-			foreach( $headline_file_indexes as $group_key => $group_headlines )
-			{
-				if( isset( $group_headlines[ $file_name ] ) )
-				{	// Dequeue html/include tag with src/href of the file:
-					$dequeued_file_index = $headline_file_index[ $group_key ][ $file_name ];
-					unset( $headline_include_file[ $group_headlines[ $file_name ] ] );
-					// Dequeue index/order of the file:
-					unset( $headline_file_index[ $group_key ][ $file_name ] );
-					// Don't find the file in next groups because it must be unique:
-					return $dequeued_file_index;
-				}
-			}
-		}
-	}
+    // Try to find and dequeue headline file:
+    if (! empty($headline_file_index)) {
+        $headline_file_indexes = ($group_relative_to == '#anygroup#' ? $headline_file_index : []);
+        if ($group_relative_to == '#anygroup#') {	// Dequeue the file from any group:
+            $headline_file_indexes = $headline_file_index;
+        } elseif (isset($headline_file_index[$group_relative_to])) {	// Dequeue the file only from the requested group:
+            $headline_file_indexes = [
+                $group_relative_to => $headline_file_index[$group_relative_to],
+            ];
+        }
+        if (! empty($headline_file_indexes)) {	// If relative_to group is found:
+            foreach ($headline_file_indexes as $group_key => $group_headlines) {
+                if (isset($group_headlines[$file_name])) {	// Dequeue html/include tag with src/href of the file:
+                    $dequeued_file_index = $headline_file_index[$group_key][$file_name];
+                    unset($headline_include_file[$group_headlines[$file_name]]);
+                    // Dequeue index/order of the file:
+                    unset($headline_file_index[$group_key][$file_name]);
+                    // Don't find the file in next groups because it must be unique:
+                    return $dequeued_file_index;
+                }
+            }
+        }
+    }
 
-	// Footerlines if the files is not found in Headlines above:
-	global $footerline_include_file, $footerline_file_index, $dequeued_footerlines;
+    // Footerlines if the files is not found in Headlines above:
+    global $footerline_include_file, $footerline_file_index, $dequeued_footerlines;
 
-	if( ! is_array( $dequeued_footerlines ) )
-	{	// Initialize array first time:
-		$dequeued_footerlines = array();
-	}
+    if (! is_array($dequeued_footerlines)) {	// Initialize array first time:
+        $dequeued_footerlines = [];
+    }
 
-	// Store each dequeued file in order to don't require this next time:
-	$dequeued_footerlines[ $group_relative_to ][ $file_name ] = true;
+    // Store each dequeued file in order to don't require this next time:
+    $dequeued_footerlines[$group_relative_to][$file_name] = true;
 
-	// Find and store here index/order of first file:
-	$dequeued_file_index = NULL;
+    // Find and store here index/order of first file:
+    $dequeued_file_index = null;
 
-	// Try to find and dequeue footerline file:
-	if( ! empty( $footerline_file_index ) )
-	{	// Try to dequeue footerline file:
-		$footerline_file_indexes = ( $group_relative_to == '#anygroup#' ? $footerline_file_index : array() );
-		if( $group_relative_to == '#anygroup#' )
-		{	// Dequeue the file from any group:
-			$footerline_file_indexes = $footerline_file_index;
-		}
-		elseif( isset( $footerline_file_index[ $group_relative_to ] ) )
-		{	// Dequeue the file only from the requested group:
-			$footerline_file_indexes = array( $group_relative_to => $footerline_file_index[ $group_relative_to ] );
-		}
-		if( ! empty( $footerline_file_indexes ) )
-		{	// If relative_to group is found:
-			foreach( $footerline_file_indexes as $group_key => $group_footerlines )
-			{
-				if( isset( $group_footerlines[ $file_name ] ) )
-				{	// Dequeue html/include tag with src/href of the file:
-					$dequeued_file_index = $footerline_file_index[ $group_key ][ $file_name ];
-					unset( $footerline_include_file[ $group_footerlines[ $file_name ] ] );
-					// Dequeue index/order of the file:
-					unset( $footerline_file_index[ $group_key ][ $file_name ] );
-					// Don't find the file in next groups because it must be unique:
-					return $dequeued_file_index;
-				}
-			}
-		}
-	}
+    // Try to find and dequeue footerline file:
+    if (! empty($footerline_file_index)) {	// Try to dequeue footerline file:
+        $footerline_file_indexes = ($group_relative_to == '#anygroup#' ? $footerline_file_index : []);
+        if ($group_relative_to == '#anygroup#') {	// Dequeue the file from any group:
+            $footerline_file_indexes = $footerline_file_index;
+        } elseif (isset($footerline_file_index[$group_relative_to])) {	// Dequeue the file only from the requested group:
+            $footerline_file_indexes = [
+                $group_relative_to => $footerline_file_index[$group_relative_to],
+            ];
+        }
+        if (! empty($footerline_file_indexes)) {	// If relative_to group is found:
+            foreach ($footerline_file_indexes as $group_key => $group_footerlines) {
+                if (isset($group_footerlines[$file_name])) {	// Dequeue html/include tag with src/href of the file:
+                    $dequeued_file_index = $footerline_file_index[$group_key][$file_name];
+                    unset($footerline_include_file[$group_footerlines[$file_name]]);
+                    // Dequeue index/order of the file:
+                    unset($footerline_file_index[$group_key][$file_name]);
+                    // Don't find the file in next groups because it must be unique:
+                    return $dequeued_file_index;
+                }
+            }
+        }
+    }
 
-	return $dequeued_file_index;
+    return $dequeued_file_index;
 }
 
 
@@ -1659,15 +1470,15 @@ function dequeue( $file_name, $group_relative_to = '#anygroup#' )
  * @param string Alias, url or relative file path of JS/CSS file
  * @param boolean|string Group of file
  */
-function is_dequeued( $file_name, $group_relative_to )
+function is_dequeued($file_name, $group_relative_to)
 {
-	global $dequeued_headlines, $dequeued_footerlines;
+    global $dequeued_headlines, $dequeued_footerlines;
 
-	// Convert boolean, NULL and etc. values to string format:
-	$group_relative_to = strval( $group_relative_to );
+    // Convert boolean, NULL and etc. values to string format:
+    $group_relative_to = strval($group_relative_to);
 
-	return isset( $dequeued_headlines[ $group_relative_to ][ $file_name ] ) ||
-		isset( $dequeued_footerlines[ $group_relative_to ][ $file_name ] );
+    return isset($dequeued_headlines[$group_relative_to][$file_name]) ||
+        isset($dequeued_footerlines[$group_relative_to][$file_name]);
 }
 
 
@@ -1680,138 +1491,133 @@ function is_dequeued( $file_name, $group_relative_to )
  *
  * @param string helper, name of the required helper
  */
-function require_js_helper( $helper = '', $relative_to = 'rsc_url' )
+function require_js_helper($helper = '', $relative_to = 'rsc_url')
 {
-	static $helpers;
+    static $helpers;
 
-	if( empty( $helpers ) || !in_array( $helper, $helpers ) )
-	{ // Helper not already added, add the helper:
-
-		switch( $helper )
-		{
-			case 'helper' :
-				// main helper object required
-				global $debug;
-				require_js_defer( '#jquery#', $relative_to ); // dependency
-				require_js_defer( 'helper.js', $relative_to );
-				add_js_headline('jQuery(document).ready(function()
+    if (empty($helpers) || ! in_array($helper, $helpers)) { // Helper not already added, add the helper:
+        switch ($helper) {
+            case 'helper':
+                // main helper object required
+                global $debug;
+                require_js_defer('#jquery#', $relative_to); // dependency
+                require_js_defer('helper.js', $relative_to);
+                add_js_headline('jQuery(document).ready(function()
 				{
 					b2evoHelper.Init({
-						debug:'.( $debug ? 'true' : 'false' ).'
+						debug:' . ($debug ? 'true' : 'false') . '
 					});
 				});');
-				break;
+                break;
 
-			case 'communications' :
-				// communications object required
-				require_js_helper('helper', $relative_to ); // dependency
+            case 'communications':
+                // communications object required
+                require_js_helper('helper', $relative_to); // dependency
 
-				global $dispatcher;
-				require_js_defer( 'communication.js', $relative_to );
-				add_js_headline('jQuery(document).ready(function()
+                global $dispatcher;
+                require_js_defer('communication.js', $relative_to);
+                add_js_headline('jQuery(document).ready(function()
 				{
 					b2evoCommunications.Init({
-						dispatcher:"'.$dispatcher.'"
+						dispatcher:"' . $dispatcher . '"
 					});
-				});' );
-				// add translation strings
-				T_('Update cancelled', NULL, array( 'for_helper' => true ) );
-				T_('Update paused', NULL, array( 'for_helper' => true ) );
-				T_('Changes pending', NULL, array( 'for_helper' => true ) );
-				T_('Saving changes', NULL, array( 'for_helper' => true ) );
-				break;
+				});');
+                // add translation strings
+                T_('Update cancelled', null, [
+                    'for_helper' => true,
+                ]);
+                T_('Update paused', null, [
+                    'for_helper' => true,
+                ]);
+                T_('Changes pending', null, [
+                    'for_helper' => true,
+                ]);
+                T_('Saving changes', null, [
+                    'for_helper' => true,
+                ]);
+                break;
 
-			case 'colorbox':
-				// Colorbox: a lightweight Lightbox alternative -- allows zooming on images and slideshows in groups of images
-				// Added by fplanque - (MIT License) - http://colorpowered.com/colorbox/
+            case 'colorbox':
+                // Colorbox: a lightweight Lightbox alternative -- allows zooming on images and slideshows in groups of images
+                // Added by fplanque - (MIT License) - http://colorpowered.com/colorbox/
 
-				global $b2evo_icons_type, $blog;
-				$blog_param = empty( $blog ) ? '' : '&blog='.$blog;
-				// Colorbox params to translate the strings:
-				$colorbox_strings_params = 'current: "{current} / {total}",
-					previous: "'.TS_('Previous').'",
-					next: "'.TS_('Next').'",
-					close: "'.TS_('Close').'",
-					openNewWindowText: "'.TS_('Open in a new window').'",
-					slideshowStart: "'.TS_('Start slideshow').'",
-					slideshowStop: "'.TS_('Stop slideshow').'",';
-				// Colorbox params to display a voting panel:
-				$colorbox_voting_params = '{'.$colorbox_strings_params.'
+                global $b2evo_icons_type, $blog;
+                $blog_param = empty($blog) ? '' : '&blog=' . $blog;
+                // Colorbox params to translate the strings:
+                $colorbox_strings_params = 'current: "{current} / {total}",
+					previous: "' . TS_('Previous') . '",
+					next: "' . TS_('Next') . '",
+					close: "' . TS_('Close') . '",
+					openNewWindowText: "' . TS_('Open in a new window') . '",
+					slideshowStart: "' . TS_('Start slideshow') . '",
+					slideshowStop: "' . TS_('Stop slideshow') . '",';
+                // Colorbox params to display a voting panel:
+                $colorbox_voting_params = '{' . $colorbox_strings_params . '
 					displayVoting: true,
-					votingUrl: "'.get_htsrv_url().'anon_async.php?action=voting&vote_type=link&b2evo_icons_type='.$b2evo_icons_type.$blog_param.'",
+					votingUrl: "' . get_htsrv_url() . 'anon_async.php?action=voting&vote_type=link&b2evo_icons_type=' . $b2evo_icons_type . $blog_param . '",
 					minWidth: 320}';
-				// Colorbox params without voting panel:
-				$colorbox_no_voting_params = '{'.$colorbox_strings_params.'
+                // Colorbox params without voting panel:
+                $colorbox_no_voting_params = '{' . $colorbox_strings_params . '
 					minWidth: 255}';
 
-				// Initialize js variables b2evo_colorbox_params* that are used in async loaded colorbox file
-				if( is_logged_in() )
-				{ // User is logged in
-					// All unknown images have a voting panel
-					$colorbox_params_other = 'var b2evo_colorbox_params_other = '.$colorbox_voting_params;
-					if( is_admin_page() )
-					{ // Display a voting panel for all images in backoffice
-						$colorbox_params_post = 'var b2evo_colorbox_params_post = '.$colorbox_voting_params;
-						$colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = '.$colorbox_voting_params;
-						$colorbox_params_user = 'var b2evo_colorbox_params_user = '.$colorbox_voting_params;
-					}
-					else
-					{ // Display a voting panel depending on skin settings
-						global $Skin;
-						if( ! empty( $Skin ) )
-						{
-							$colorbox_params_post = 'var b2evo_colorbox_params_post = '.( $Skin->get_setting( 'colorbox_vote_post' ) ? $colorbox_voting_params : $colorbox_no_voting_params );
-							$colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = '.( $Skin->get_setting( 'colorbox_vote_comment' ) ? $colorbox_voting_params : $colorbox_no_voting_params );
-							$colorbox_params_user = 'var b2evo_colorbox_params_user = '.( $Skin->get_setting( 'colorbox_vote_user' ) ? $colorbox_voting_params : $colorbox_no_voting_params );
-						}
-					}
-				}
-				if( ! isset( $colorbox_params_post ) )
-				{ // Don't display a voting panel for all images if user is NOT logged in OR for case when $Skin is not defined
-					$colorbox_params_other = 'var b2evo_colorbox_params_other = '.$colorbox_no_voting_params;
-					$colorbox_params_post = 'var b2evo_colorbox_params_post = '.$colorbox_no_voting_params;
-					$colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = '.$colorbox_no_voting_params;
-					$colorbox_params_user = 'var b2evo_colorbox_params_user = '.$colorbox_no_voting_params;
-				}
+                // Initialize js variables b2evo_colorbox_params* that are used in async loaded colorbox file
+                if (is_logged_in()) { // User is logged in
+                    // All unknown images have a voting panel
+                    $colorbox_params_other = 'var b2evo_colorbox_params_other = ' . $colorbox_voting_params;
+                    if (is_admin_page()) { // Display a voting panel for all images in backoffice
+                        $colorbox_params_post = 'var b2evo_colorbox_params_post = ' . $colorbox_voting_params;
+                        $colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = ' . $colorbox_voting_params;
+                        $colorbox_params_user = 'var b2evo_colorbox_params_user = ' . $colorbox_voting_params;
+                    } else { // Display a voting panel depending on skin settings
+                        global $Skin;
+                        if (! empty($Skin)) {
+                            $colorbox_params_post = 'var b2evo_colorbox_params_post = ' . ($Skin->get_setting('colorbox_vote_post') ? $colorbox_voting_params : $colorbox_no_voting_params);
+                            $colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = ' . ($Skin->get_setting('colorbox_vote_comment') ? $colorbox_voting_params : $colorbox_no_voting_params);
+                            $colorbox_params_user = 'var b2evo_colorbox_params_user = ' . ($Skin->get_setting('colorbox_vote_user') ? $colorbox_voting_params : $colorbox_no_voting_params);
+                        }
+                    }
+                }
+                if (! isset($colorbox_params_post)) { // Don't display a voting panel for all images if user is NOT logged in OR for case when $Skin is not defined
+                    $colorbox_params_other = 'var b2evo_colorbox_params_other = ' . $colorbox_no_voting_params;
+                    $colorbox_params_post = 'var b2evo_colorbox_params_post = ' . $colorbox_no_voting_params;
+                    $colorbox_params_cmnt = 'var b2evo_colorbox_params_cmnt = ' . $colorbox_no_voting_params;
+                    $colorbox_params_user = 'var b2evo_colorbox_params_user = ' . $colorbox_no_voting_params;
+                }
 
-				require_js_defer( '#jquery#', $relative_to );
-				// Initialize the colorbox settings:
-				add_js_footerline(
-					// For post images
-					$colorbox_params_post.';
+                require_js_defer('#jquery#', $relative_to);
+                // Initialize the colorbox settings:
+                add_js_footerline(
+                    // For post images
+                    $colorbox_params_post . ';
 					'// For comment images
-					.$colorbox_params_cmnt.';
+                    . $colorbox_params_cmnt . ';
 					'// For user images
-					.$colorbox_params_user.';
+                    . $colorbox_params_user . ';
 					'// For all other images
-					.$colorbox_params_other.';' );
-				// TODO: translation strings for colorbox buttons
+                    . $colorbox_params_other . ';'
+                );
+                // TODO: translation strings for colorbox buttons
 
-				// Do NOT require colorbox.bmin.js here because it is grunted in evo_generic.bmin.js:
-				// require_js_defer( 'build/colorbox.bmin.js', $relative_to );
+                // Do NOT require colorbox.bmin.js here because it is grunted in evo_generic.bmin.js:
+                // require_js_defer( 'build/colorbox.bmin.js', $relative_to );
 
-				if( is_admin_page() )
-				{
-					global $AdminUI;
-					if( ! empty( $AdminUI ) )
-					{
-						$colorbox_css_file = $AdminUI->get_template( 'colorbox_css_file' );
-					}
-				}
-				else
-				{
-					global $Skin;
-					if( ! empty( $Skin ) )
-					{
-						$colorbox_css_file = $Skin->get_template( 'colorbox_css_file' );
-					}
-				}
-				require_css( ( empty( $colorbox_css_file ) ? 'colorbox-regular.min.css' : $colorbox_css_file ), $relative_to );
-				break;
-		}
-		// add to list of loaded helpers
-		$helpers[] = $helper;
-	}
+                if (is_admin_page()) {
+                    global $AdminUI;
+                    if (! empty($AdminUI)) {
+                        $colorbox_css_file = $AdminUI->get_template('colorbox_css_file');
+                    }
+                } else {
+                    global $Skin;
+                    if (! empty($Skin)) {
+                        $colorbox_css_file = $Skin->get_template('colorbox_css_file');
+                    }
+                }
+                require_css((empty($colorbox_css_file) ? 'colorbox-regular.min.css' : $colorbox_css_file), $relative_to);
+                break;
+        }
+        // add to list of loaded helpers
+        $helpers[] = $helper;
+    }
 }
 
 /**
@@ -1821,13 +1627,12 @@ function require_js_helper( $helper = '', $relative_to = 'rsc_url' )
  * @param string string, untranslated string
  * @param string translation, translated string
  */
-function add_js_translation( $string, $translation )
+function add_js_translation($string, $translation)
 {
-	global $js_translations;
-	if( $string != $translation )
-	{ // it's translated
-		$js_translations[ $string ] = $translation;
-	}
+    global $js_translations;
+    if ($string != $translation) { // it's translated
+        $js_translations[$string] = $translation;
+    }
 }
 
 
@@ -1843,35 +1648,28 @@ function add_js_translation( $string, $translation )
  * @param boolean|string Group headlines by this group in order to allow use files with same names from several places
  * @param integer Insert new headline in the given index, Useful to insert superbundled file instead of first bundled file
  */
-function add_headline( $headline, $file_name = NULL, $group_relative_to = '#nogroup#', $file_index = NULL )
+function add_headline($headline, $file_name = null, $group_relative_to = '#nogroup#', $file_index = null)
 {
-	if( $file_name === NULL )
-	{	// Add inline code:
-		global $headline_inline_code;
-		$headline_inline_code[] = $headline;
-	}
-	else
-	{	// Add include file:
-		global $headline_include_file, $headline_file_index;
-		// Convert boolean, NULL and etc. values to string format:
-		$group_relative_to = strval( $group_relative_to );
-		if( isset( $headline_file_index[ $group_relative_to ][ $file_name ] ) )
-		{	// Skip already included file from the same group:
-			return;
-		}
-		if( $file_index === NULL || isset( $headline_include_file[ $file_index ] ) )
-		{	// Use auto order/index:
-			$headline_include_file[] = $headline;
-			$file_index = max( array_keys( $headline_include_file ) );
-		}
-		else
-		{	// Use specific order/index when it is requested and the index is free:
-			$headline_include_file[ $file_index ] = $headline;
-		}
-		// Flag to don't include same file from same group twice,
-		// Also store value as index/order in order to dequeue it quickly:
-		$headline_file_index[ $group_relative_to ][ $file_name ] = $file_index;
-	}
+    if ($file_name === null) {	// Add inline code:
+        global $headline_inline_code;
+        $headline_inline_code[] = $headline;
+    } else {	// Add include file:
+        global $headline_include_file, $headline_file_index;
+        // Convert boolean, NULL and etc. values to string format:
+        $group_relative_to = strval($group_relative_to);
+        if (isset($headline_file_index[$group_relative_to][$file_name])) {	// Skip already included file from the same group:
+            return;
+        }
+        if ($file_index === null || isset($headline_include_file[$file_index])) {	// Use auto order/index:
+            $headline_include_file[] = $headline;
+            $file_index = max(array_keys($headline_include_file));
+        } else {	// Use specific order/index when it is requested and the index is free:
+            $headline_include_file[$file_index] = $headline;
+        }
+        // Flag to don't include same file from same group twice,
+        // Also store value as index/order in order to dequeue it quickly:
+        $headline_file_index[$group_relative_to][$file_name] = $file_index;
+    }
 }
 
 
@@ -1887,35 +1685,28 @@ function add_headline( $headline, $file_name = NULL, $group_relative_to = '#nogr
  * @param boolean|string Group footerlines by this group in order to allow use files with same names from several places
  * @param integer Insert new headline in the given index, Useful to insert superbundled file instead of first bundled file
  */
-function add_footerline( $footerline, $file_name = NULL, $group_relative_to = '#nogroup#', $file_index = NULL )
+function add_footerline($footerline, $file_name = null, $group_relative_to = '#nogroup#', $file_index = null)
 {
-	if( $file_name === NULL )
-	{	// Add inline code:
-		global $footerline_inline_code;
-		$footerline_inline_code[] = $footerline;
-	}
-	else
-	{	// Add include file:
-		global $footerline_include_file, $footerline_file_index;
-		// Convert boolean, NULL and etc. values to string format:
-		$group_relative_to = strval( $group_relative_to );
-		if( isset( $footerline_file_index[ $group_relative_to ][ $file_name ] ) )
-		{	// Skip already included file from the same group:
-			return;
-		}
-		if( $file_index === NULL || isset( $footerline_include_file[ $file_index ] ) )
-		{	// Use auto order/index:
-			$footerline_include_file[] = $footerline;
-			$file_index = max( array_keys( $footerline_include_file ) );
-		}
-		else
-		{	// Use specific order/index when it is requested and the index is free:
-			$footerline_include_file[ $file_index ] = $footerline;
-		}
-		// Flag to don't include same file from same group twice,
-		// Also store value as index/order in order to dequeue it quickly:
-		$footerline_file_index[ $group_relative_to ][ $file_name ] = $file_index;
-	}
+    if ($file_name === null) {	// Add inline code:
+        global $footerline_inline_code;
+        $footerline_inline_code[] = $footerline;
+    } else {	// Add include file:
+        global $footerline_include_file, $footerline_file_index;
+        // Convert boolean, NULL and etc. values to string format:
+        $group_relative_to = strval($group_relative_to);
+        if (isset($footerline_file_index[$group_relative_to][$file_name])) {	// Skip already included file from the same group:
+            return;
+        }
+        if ($file_index === null || isset($footerline_include_file[$file_index])) {	// Use auto order/index:
+            $footerline_include_file[] = $footerline;
+            $file_index = max(array_keys($footerline_include_file));
+        } else {	// Use specific order/index when it is requested and the index is free:
+            $footerline_include_file[$file_index] = $footerline;
+        }
+        // Flag to don't include same file from same group twice,
+        // Also store value as index/order in order to dequeue it quickly:
+        $footerline_file_index[$group_relative_to][$file_name] = $file_index;
+    }
 }
 
 
@@ -1928,8 +1719,8 @@ function add_footerline( $footerline, $file_name = NULL, $group_relative_to = '#
  */
 function add_js_headline($headline)
 {
-	add_headline("<script>\n\t/* <![CDATA[ */\n\t\t"
-		.$headline."\n\t/* ]]> */\n\t</script>");
+    add_headline("<script>\n\t/* <![CDATA[ */\n\t\t"
+        . $headline . "\n\t/* ]]> */\n\t</script>");
 }
 
 
@@ -1942,8 +1733,8 @@ function add_js_headline($headline)
  */
 function add_js_footerline($footerline)
 {
-	add_footerline("<script>\n\t/* <![CDATA[ */\n\t\t"
-		.$footerline."\n\t/* ]]> */\n\t</script>");
+    add_footerline("<script>\n\t/* <![CDATA[ */\n\t\t"
+        . $footerline . "\n\t/* ]]> */\n\t</script>");
 }
 
 
@@ -1956,7 +1747,7 @@ function add_js_footerline($footerline)
  */
 function add_css_headline($headline)
 {
-	add_headline("<style type=\"text/css\">\n\t".$headline."\n\t</style>");
+    add_headline("<style type=\"text/css\">\n\t" . $headline . "\n\t</style>");
 }
 
 
@@ -1969,7 +1760,7 @@ function add_css_headline($headline)
  */
 function add_css_footerline($footerline)
 {
-	add_footerline("<style type=\"text/css\">\n\t".$footerline."\n\t</style>");
+    add_footerline("<style type=\"text/css\">\n\t" . $footerline . "\n\t</style>");
 }
 
 
@@ -1978,9 +1769,9 @@ function add_css_footerline($footerline)
  *
  * @deprecated because #evo_toolbar doesn't use js anymore, only css is enough
  */
-function add_js_for_toolbar( $relative_to = 'rsc_url' )
+function add_js_for_toolbar($relative_to = 'rsc_url')
 {
-	return true;
+    return true;
 }
 
 
@@ -1989,31 +1780,30 @@ function add_js_for_toolbar( $relative_to = 'rsc_url' )
  *
  * @deprecated Because we don't need communication.js to work with AJAX forms
  */
-function init_ajax_forms( $relative_to = 'blog' )
+function init_ajax_forms($relative_to = 'blog')
 {
-	/*global $Collection, $Blog;
+    /*global $Collection, $Blog;
 
-	if( !empty($Blog) && $Blog->get_setting('ajax_form_enabled') )
-	{
-		require_js_defer( 'communication.js', $relative_to );
-	}*/
+    if( !empty($Blog) && $Blog->get_setting('ajax_form_enabled') )
+    {
+        require_js_defer( 'communication.js', $relative_to );
+    }*/
 }
 
 
 /**
  * Registers headlines required by comments forms
  */
-function init_ratings_js( $relative_to = 'blog', $force_init = false )
+function init_ratings_js($relative_to = 'blog', $force_init = false)
 {
-	global $Item;
+    global $Item;
 
-	// fp> Note, the following test is good for $disp == 'single', not for 'posts'
-	if( $force_init || ( !empty($Item) && $Item->can_rate() ) )
-	{
-		require_js_defer( '#jquery#', $relative_to ); // dependency
-		require_js_defer( 'customized:jquery/raty/jquery.raty.min.js', $relative_to );
-		require_js_defer( 'src/evo_init_comment_rating.js', $relative_to );
-	}
+    // fp> Note, the following test is good for $disp == 'single', not for 'posts'
+    if ($force_init || (! empty($Item) && $Item->can_rate())) {
+        require_js_defer('#jquery#', $relative_to); // dependency
+        require_js_defer('customized:jquery/raty/jquery.raty.min.js', $relative_to);
+        require_js_defer('src/evo_init_comment_rating.js', $relative_to);
+    }
 }
 
 
@@ -2023,30 +1813,28 @@ function init_ratings_js( $relative_to = 'blog', $force_init = false )
  * @param string alias, url or filename (relative to rsc/css, rsc/js) for JS/CSS files
  * @param string Library: 'bubbletip', 'popover'
  */
-function init_bubbletip_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
+function init_bubbletip_js($relative_to = 'rsc_url', $library = 'bubbletip')
 {
-	if( ! check_setting( 'bubbletip' ) )
-	{ // If setting "bubbletip" is OFF for current case
-		return;
-	}
+    if (! check_setting('bubbletip')) { // If setting "bubbletip" is OFF for current case
+        return;
+    }
 
-	require_js_defer( '#jquery#', $relative_to );
+    require_js_defer('#jquery#', $relative_to);
 
-	switch( $library )
-	{
-		case 'popover':
-			// Use popover library of bootstrap
-			require_js_defer( 'build/popover.bmin.js', $relative_to );
-			break;
+    switch ($library) {
+        case 'popover':
+            // Use popover library of bootstrap
+            require_js_defer('build/popover.bmin.js', $relative_to);
+            break;
 
-		case 'bubbletip':
-		default:
-			// Use bubbletip plugin of jQuery
-			require_js_defer( 'customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to );
-			require_js_defer( 'build/bubbletip.bmin.js', $relative_to );
-			require_css( 'customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to );
-			break;
-	}
+        case 'bubbletip':
+        default:
+            // Use bubbletip plugin of jQuery
+            require_js_defer('customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to);
+            require_js_defer('build/bubbletip.bmin.js', $relative_to);
+            require_css('customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to);
+            break;
+    }
 }
 
 
@@ -2056,27 +1844,26 @@ function init_bubbletip_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
  * @param string alias, url or filename (relative to rsc/css, rsc/js) for JS/CSS files
  * @param string Library: 'bubbletip', 'popover'
  */
-function init_userfields_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
+function init_userfields_js($relative_to = 'rsc_url', $library = 'bubbletip')
 {
-	// Load to autocomplete user fields with list type
-	require_js_defer( '#jqueryUI#', $relative_to );
-	require_css( '#jqueryUI_css#', $relative_to );
+    // Load to autocomplete user fields with list type
+    require_js_defer('#jqueryUI#', $relative_to);
+    require_css('#jqueryUI_css#', $relative_to);
 
-	switch( $library )
-	{
-		case 'popover':
-			// Use popover library of bootstrap
-			require_js_defer( 'build/popover.bmin.js', $relative_to );
-			break;
+    switch ($library) {
+        case 'popover':
+            // Use popover library of bootstrap
+            require_js_defer('build/popover.bmin.js', $relative_to);
+            break;
 
-		case 'bubbletip':
-		default:
-			// Use bubbletip plugin of jQuery
-			require_js_defer( 'customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to );
-			require_js_defer( 'build/bubbletip.bmin.js', $relative_to );
-			require_css( 'customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to );
-			break;
-	}
+        case 'bubbletip':
+        default:
+            // Use bubbletip plugin of jQuery
+            require_js_defer('customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to);
+            require_js_defer('build/bubbletip.bmin.js', $relative_to);
+            require_css('customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to);
+            break;
+    }
 }
 
 
@@ -2088,9 +1875,9 @@ function init_userfields_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
  * @param string alias, url or filename (relative to rsc/css, rsc/js) for JS/CSS files
  * @param string Library: 'bubbletip', 'popover'
  */
-function init_plugins_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
+function init_plugins_js($relative_to = 'rsc_url', $library = 'bubbletip')
 {
-	init_popover_js( $relative_to, $library );
+    init_popover_js($relative_to, $library);
 }
 
 
@@ -2100,94 +1887,90 @@ function init_plugins_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
  * @param string alias, url or filename (relative to rsc/css, rsc/js) for JS/CSS files
  * @param string Library: 'bubbletip', 'popover'
  */
-function init_popover_js( $relative_to = 'rsc_url', $library = 'bubbletip' )
+function init_popover_js($relative_to = 'rsc_url', $library = 'bubbletip')
 {
-	require_js_defer( '#jquery#', $relative_to );
+    require_js_defer('#jquery#', $relative_to);
 
-	switch( $library )
-	{
-		case 'popover':
-			// Use popover library of bootstrap
-			require_js_defer( 'build/popover.bmin.js', $relative_to );
-			break;
+    switch ($library) {
+        case 'popover':
+            // Use popover library of bootstrap
+            require_js_defer('build/popover.bmin.js', $relative_to);
+            break;
 
-		case 'bubbletip':
-		default:
-			// Use bubbletip plugin of jQuery
-			require_js_defer( 'customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to );
-			require_js_defer( 'build/bubbletip.bmin.js', $relative_to );
-			require_css( 'customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to );
-			break;
-	}
+        case 'bubbletip':
+        default:
+            // Use bubbletip plugin of jQuery
+            require_js_defer('customized:jquery/bubbletip/js/jquery.bubbletip.min.js', $relative_to);
+            require_js_defer('build/bubbletip.bmin.js', $relative_to);
+            require_css('customized:jquery/bubbletip/css/jquery.bubbletip.css', $relative_to);
+            break;
+    }
 }
 
 
 /**
  * Registers headlines for initialization of datepicker inputs
  */
-function init_datepicker_js( $relative_to = 'rsc_url' )
+function init_datepicker_js($relative_to = 'rsc_url')
 {
-	require_js_defer( '#jqueryUI#', $relative_to );
-	require_css( '#jqueryUI_css#', $relative_to );
+    require_js_defer('#jqueryUI#', $relative_to);
+    require_css('#jqueryUI_css#', $relative_to);
 
-	// We did not use json_encode here as it will escape the dateFormat:
-	expose_var_to_js( 'evo_init_datepicker', '{'
-				.'selector: ".form_date_input",'
-				.'config: {'
-					.'dateFormat: "'.jquery_datepicker_datefmt().'",'
-					.'monthNames: '.jquery_datepicker_month_names().','
-					.'dayNamesMin: '.jquery_datepicker_day_names().','
-					.'firstDay: '.locale_startofweek().'}'
-			.'}' );
+    // We did not use json_encode here as it will escape the dateFormat:
+    expose_var_to_js('evo_init_datepicker', '{'
+                . 'selector: ".form_date_input",'
+                . 'config: {'
+                    . 'dateFormat: "' . jquery_datepicker_datefmt() . '",'
+                    . 'monthNames: ' . jquery_datepicker_month_names() . ','
+                    . 'dayNamesMin: ' . jquery_datepicker_day_names() . ','
+                    . 'firstDay: ' . locale_startofweek() . '}'
+            . '}');
 }
 
 
 /**
  * Registers headlines for initialization of jQuery Tokeninput plugin
  */
-function init_tokeninput_js( $relative_to = 'rsc_url' )
+function init_tokeninput_js($relative_to = 'rsc_url')
 {
-	require_js_defer( '#jquery#', $relative_to ); // dependency
-	require_js_defer( 'customized:jquery/tokeninput/js/jquery.tokeninput.js', $relative_to );
-	require_css( 'customized:jquery/tokeninput/css/jquery.token-input-facebook.css', $relative_to );
+    require_js_defer('#jquery#', $relative_to); // dependency
+    require_js_defer('customized:jquery/tokeninput/js/jquery.tokeninput.js', $relative_to);
+    require_css('customized:jquery/tokeninput/css/jquery.token-input-facebook.css', $relative_to);
 }
 
 
 /**
  * Registers headlines for initialization of functions to work with Results tables
  */
-function init_results_js( $relative_to = 'rsc_url' )
+function init_results_js($relative_to = 'rsc_url')
 {
-	require_js_defer( '#jquery#', $relative_to ); // dependency
-	require_js_defer( 'results.js', $relative_to );
+    require_js_defer('#jquery#', $relative_to); // dependency
+    require_js_defer('results.js', $relative_to);
 }
 
 
 /**
  * Registers headlines for initialization of functions to work with affixed Messages
  */
-function init_affix_messages_js( $offset = NULL )
+function init_affix_messages_js($offset = null)
 {
-	global $display_mode, $site_Skin;
+    global $display_mode, $site_Skin;
 
-	if( isset( $display_mode ) && $display_mode == 'js' )
-	{	// Don't use affixed Messages in JS mode from modal windows:
-		return;
-	}
+    if (isset($display_mode) && $display_mode == 'js') {	// Don't use affixed Messages in JS mode from modal windows:
+        return;
+    }
 
-	if( empty( $offset ) && ! ( ( $offset === '0' ) || ( $offset === 0 ) ) )
-	{	// This should not include evobar and header height - those will be taken care of by the message affix JS script:
-		$offset = 10;
-	}
+    if (empty($offset) && ! (($offset === '0') || ($offset === 0))) {	// This should not include evobar and header height - those will be taken care of by the message affix JS script:
+        $offset = 10;
+    }
 
-	$site_header_fixed = 'false';
-	if( $site_Skin )
-	{	// Get fixed header setting to pass to messages affix JS script:
-		$site_header_fixed = $site_Skin->get_setting( 'fixed_header' ) == 1 ? 'true' : 'false';
-	}
+    $site_header_fixed = 'false';
+    if ($site_Skin) {	// Get fixed header setting to pass to messages affix JS script:
+        $site_header_fixed = $site_Skin->get_setting('fixed_header') == 1 ? 'true' : 'false';
+    }
 
-	add_js_headline( 'evo_affix_msg_offset = '.format_to_js( $offset ).'; evo_affix_fixed_header = '.format_to_js( $site_header_fixed ).';' );
-	require_js_defer( 'src/evo_init_affix_messages.js', 'blog' );
+    add_js_headline('evo_affix_msg_offset = ' . format_to_js($offset) . '; evo_affix_fixed_header = ' . format_to_js($site_header_fixed) . ';');
+    require_js_defer('src/evo_init_affix_messages.js', 'blog');
 }
 
 
@@ -2196,27 +1979,26 @@ function init_affix_messages_js( $offset = NULL )
  *
  * @param boolean|string Is the file's path relative to the base path/url?
  */
-function init_voting_comment_js( $relative_to = 'rsc_url' )
+function init_voting_comment_js($relative_to = 'rsc_url')
 {
-	global $Collection, $Blog, $b2evo_icons_type;
+    global $Collection, $Blog, $b2evo_icons_type;
 
-	if( empty( $Blog ) || ! is_logged_in( false ) || ! $Blog->get_setting('allow_rating_comment_helpfulness') )
-	{	// If User is not logged OR Users cannot vote
-		return false;
-	}
+    if (empty($Blog) || ! is_logged_in(false) || ! $Blog->get_setting('allow_rating_comment_helpfulness')) {	// If User is not logged OR Users cannot vote
+        return false;
+    }
 
-	require_js_defer( '#jquery#', $relative_to ); // dependency
-	require_js_defer( 'voting.js', $relative_to );
+    require_js_defer('#jquery#', $relative_to); // dependency
+    require_js_defer('voting.js', $relative_to);
 
-	$js_config = array(
-		'action_url' => url_add_param( get_htsrv_url().'anon_async.php', array(
-					'action'           => 'voting',
-					'vote_type'        => 'comment',
-					'b2evo_icons_type' => $b2evo_icons_type
-			) ),
-		);
+    $js_config = [
+        'action_url' => url_add_param(get_htsrv_url() . 'anon_async.php', [
+            'action' => 'voting',
+            'vote_type' => 'comment',
+            'b2evo_icons_type' => $b2evo_icons_type,
+        ]),
+    ];
 
-	expose_var_to_js( 'evo_init_comment_voting_config', evo_json_encode( $js_config ) );
+    expose_var_to_js('evo_init_comment_voting_config', evo_json_encode($js_config));
 }
 
 
@@ -2225,74 +2007,69 @@ function init_voting_comment_js( $relative_to = 'rsc_url' )
  *
  * @param boolean|string Is the file's path relative to the base path/url?
  */
-function init_voting_item_js( $relative_to = 'rsc_url' )
+function init_voting_item_js($relative_to = 'rsc_url')
 {
-	global $Collection, $Blog, $b2evo_icons_type;
+    global $Collection, $Blog, $b2evo_icons_type;
 
-	if( empty( $Blog ) || ! is_logged_in( false ) || ! $Blog->get_setting( 'voting_positive' ) )
-	{	// If User is not logged OR Users cannot vote:
-		return false;
-	}
+    if (empty($Blog) || ! is_logged_in(false) || ! $Blog->get_setting('voting_positive')) {	// If User is not logged OR Users cannot vote:
+        return false;
+    }
 
-	require_js_defer( '#jquery#', $relative_to );
-	require_js_defer( 'voting.js', $relative_to );
+    require_js_defer('#jquery#', $relative_to);
+    require_js_defer('voting.js', $relative_to);
 
-	$js_config = array(
-		'action_url' => url_add_param( get_htsrv_url().'anon_async.php', array(
-				'action'           => 'voting',
-				'vote_type'        => 'item',
-				'b2evo_icons_type' => $b2evo_icons_type
-			) ),
-		);
+    $js_config = [
+        'action_url' => url_add_param(get_htsrv_url() . 'anon_async.php', [
+            'action' => 'voting',
+            'vote_type' => 'item',
+            'b2evo_icons_type' => $b2evo_icons_type,
+        ]),
+    ];
 
-	expose_var_to_js( 'evo_init_item_voting_config', evo_json_encode( $js_config ) );
+    expose_var_to_js('evo_init_item_voting_config', evo_json_encode($js_config));
 }
 
 
 /**
  * Registers headlines for initialization of colorpicker inputs
  */
-function init_colorpicker_js( $relative_to = 'rsc_url' )
+function init_colorpicker_js($relative_to = 'rsc_url')
 {
-	if( ! is_logged_in() )
-	{	// Colorpicker is initialized only for logged in users:
-		return;
-	}
+    if (! is_logged_in()) {	// Colorpicker is initialized only for logged in users:
+        return;
+    }
 
-	global $current_User, $UserSettings;
+    global $current_User, $UserSettings;
 
-	require_js_defer( '#jquery#', $relative_to );
-	require_js_defer( 'ext:bootstrap/colorpicker/js/bootstrap-colorpicker.min.js', $relative_to );
-	require_css( 'ext:bootstrap/colorpicker/css/bootstrap-colorpicker.min.css', $relative_to );
+    require_js_defer('#jquery#', $relative_to);
+    require_js_defer('ext:bootstrap/colorpicker/js/bootstrap-colorpicker.min.js', $relative_to);
+    require_css('ext:bootstrap/colorpicker/css/bootstrap-colorpicker.min.css', $relative_to);
 
-	// Get preselected colors from settings of current User:
-	$user_colors = $UserSettings->get( 'colorpicker', $current_User->ID );
-	if( empty( $user_colors ) )
-	{	// Use these default colors if user didn't selected any color yet:
-		$user_colors = array(
-			'black'   => '#000000',
-			'grey'    => '#999999',
-			'white'   => '#ffffff',
-			'red'     => '#FF0000',
-			'default' => '#777777',
-			'primary' => '#337ab7',
-			'success' => '#5cb85c',
-			'info'    => '#5bc0de',
-			'warning' => '#f0ad4e',
-			'danger'  => '#d9534f'
-		);
-	}
-	else
-	{	// Convert user colors to array:
-		$user_colors = explode( ';', $user_colors );
-	}
+    // Get preselected colors from settings of current User:
+    $user_colors = $UserSettings->get('colorpicker', $current_User->ID);
+    if (empty($user_colors)) {	// Use these default colors if user didn't selected any color yet:
+        $user_colors = [
+            'black' => '#000000',
+            'grey' => '#999999',
+            'white' => '#ffffff',
+            'red' => '#FF0000',
+            'default' => '#777777',
+            'primary' => '#337ab7',
+            'success' => '#5cb85c',
+            'info' => '#5bc0de',
+            'warning' => '#f0ad4e',
+            'danger' => '#d9534f',
+        ];
+    } else {	// Convert user colors to array:
+        $user_colors = explode(';', $user_colors);
+    }
 
-	add_js_headline( 'jQuery( document ).ready( function() { evo_initialize_colorpicker_inputs() } );
+    add_js_headline('jQuery( document ).ready( function() { evo_initialize_colorpicker_inputs() } );
 function evo_initialize_colorpicker_inputs()
 {
 	jQuery( ".form_color_input" ).each( function()
 	{
-		var predefined_colors = ["'.implode( '","', $user_colors ).'"];
+		var predefined_colors = ["' . implode('","', $user_colors) . '"];
 		var colored_input = jQuery( this );
 		colored_input.parent().colorpicker( {
 			format: jQuery( this ).hasClass( "form_color_transparent" ) ? false : "hex",
@@ -2342,12 +2119,12 @@ function evo_initialize_colorpicker_inputs()
 				data: {
 					"action": "colorpicker",
 					"colors": new_colors.join( ";" ),
-					"crumb_colorpicker": "'.get_crumb( 'colorpicker' ).'"
+					"crumb_colorpicker": "' . get_crumb('colorpicker') . '"
 				}
 			} );
 		} );
 	} );
-}' );
+}');
 }
 
 
@@ -2357,40 +2134,39 @@ function evo_initialize_colorpicker_inputs()
  * @param string alias, url or filename (relative to rsc/css, rsc/js) for JS/CSS files
  * @param string Library: 'hintbox', 'typeahead'
  */
-function init_autocomplete_login_js( $relative_to = 'rsc_url', $library = 'hintbox' )
+function init_autocomplete_login_js($relative_to = 'rsc_url', $library = 'hintbox')
 {
-	global $Collection, $Blog;
+    global $Collection, $Blog;
 
-	require_js_defer( '#jquery#', $relative_to ); // dependency
+    require_js_defer('#jquery#', $relative_to); // dependency
 
-	switch( $library )
-	{
-		case 'typeahead':
-			// Use typeahead library of bootstrap
-			require_js_defer( '#bootstrap_typeahead#', $relative_to );
-			expose_var_to_js( 'evo_autocomplete_login_config', '{
-					url: "'.( isset( $Blog ) ? 'collections/'.$Blog->get( 'urlname' ).'/assignees' : 'users/logins' ).'",
+    switch ($library) {
+        case 'typeahead':
+            // Use typeahead library of bootstrap
+            require_js_defer('#bootstrap_typeahead#', $relative_to);
+            expose_var_to_js('evo_autocomplete_login_config', '{
+					url: "' . (isset($Blog) ? 'collections/' . $Blog->get('urlname') . '/assignees' : 'users/logins') . '",
 					selector: "input.autocomplete_login",
-				}' );
-			break;
+				}');
+            break;
 
-		case 'hintbox':
-		default:
-			// Use hintbox plugin of jQuery
+        case 'hintbox':
+        default:
+            // Use hintbox plugin of jQuery
 
-			// Add jQuery hintbox (autocompletion).
-			// Form 'username' field requires the following JS and CSS.
-			// fp> TODO: think about a way to bundle this with other JS on the page -- maybe always load hintbox in the backoffice
-			//     dh> Handle it via http://www.appelsiini.net/projects/lazyload ?
-			// dh> TODO: should probably also get ported to use jquery.ui.autocomplete (or its successor)
-			require_css( 'ext:jquery/hintbox/css/jquery.hintbox.css', $relative_to );
-			require_js( 'ext:jquery/hintbox/js/jquery.hintbox.min.js', $relative_to );
-			add_js_headline( 'jQuery( document ).on( "focus", "input.autocomplete_login", function()
+            // Add jQuery hintbox (autocompletion).
+            // Form 'username' field requires the following JS and CSS.
+            // fp> TODO: think about a way to bundle this with other JS on the page -- maybe always load hintbox in the backoffice
+            //     dh> Handle it via http://www.appelsiini.net/projects/lazyload ?
+            // dh> TODO: should probably also get ported to use jquery.ui.autocomplete (or its successor)
+            require_css('ext:jquery/hintbox/css/jquery.hintbox.css', $relative_to);
+            require_js('ext:jquery/hintbox/js/jquery.hintbox.min.js', $relative_to);
+            add_js_headline('jQuery( document ).on( "focus", "input.autocomplete_login", function()
 			{
 				var ajax_url = "";
 				if( jQuery( this ).hasClass( "only_assignees" ) )
 				{
-					ajax_url = restapi_url + "'.( isset( $Blog ) ? 'collections/'.$Blog->get( 'urlname' ).'/assignees' : 'users/logins' ).'";
+					ajax_url = restapi_url + "' . (isset($Blog) ? 'collections/' . $Blog->get('urlname') . '/assignees' : 'users/logins') . '";
 				}
 				else
 				{
@@ -2408,11 +2184,11 @@ function init_autocomplete_login_js( $relative_to = 'rsc_url', $library = 'hintb
 					json: true,
 				} );
 				'
-				// Don't submit a form by Enter when user is editing the owner fields
-				.get_prevent_key_enter_js( 'input.autocomplete_login' ).'
-			} );' );
-			break;
-	}
+                // Don't submit a form by Enter when user is editing the owner fields
+                . get_prevent_key_enter_js('input.autocomplete_login') . '
+			} );');
+            break;
+    }
 }
 
 
@@ -2424,55 +2200,52 @@ function init_autocomplete_login_js( $relative_to = 'rsc_url', $library = 'hintb
  * @param string Version number to append at the end of requested url to avoid getting an old version from the cache
  * @param string Position where the CSS files will be inserted, either 'headlines' (inside <head>) or 'footerlines' (before </body>)
  */
-function init_jqplot_js( $relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines' )
+function init_jqplot_js($relative_to = 'rsc_url', $output = false, $version = '#', $position = 'headlines')
 {
-	require_js_defer( 'build/evo_jqplot.bmin.js', $relative_to, $output, $version, $position );
-	require_js_defer( 'src/evo_init_canvas_bar_chart.js', $relative_to, $output, $version, $position );
-	require_css_async( 'b2evo_jqplot.bmin.css', $relative_to, NULL, NULL, $version, $output, $position );
+    require_js_defer('build/evo_jqplot.bmin.js', $relative_to, $output, $version, $position);
+    require_js_defer('src/evo_init_canvas_bar_chart.js', $relative_to, $output, $version, $position);
+    require_css_async('b2evo_jqplot.bmin.css', $relative_to, null, null, $version, $output, $position);
 }
 
 
 /**
  * Initialize JavaScript variables for jQuery QueryBuilder plugin
  */
-function init_querybuilder_js( $relative_to = 'rsc_url' )
+function init_querybuilder_js($relative_to = 'rsc_url')
 {
-	global $current_locale;
+    global $current_locale;
 
-	require_js_defer( '#jquery#', $relative_to ); // dependency
-	require_css( '#jqueryUI_css#', $relative_to ); // dependency for date picker
-	require_js_defer( 'ext:jquery/query-builder/js/doT.min.js', $relative_to ); // dependency
-	require_js_defer( 'ext:jquery/query-builder/js/jquery.extendext.min.js', $relative_to ); // dependency
-	require_js_defer( 'ext:jquery/query-builder/js/moment.js', $relative_to ); // dependency
+    require_js_defer('#jquery#', $relative_to); // dependency
+    require_css('#jqueryUI_css#', $relative_to); // dependency for date picker
+    require_js_defer('ext:jquery/query-builder/js/doT.min.js', $relative_to); // dependency
+    require_js_defer('ext:jquery/query-builder/js/jquery.extendext.min.js', $relative_to); // dependency
+    require_js_defer('ext:jquery/query-builder/js/moment.js', $relative_to); // dependency
 
-	require_js_defer( 'ext:jquery/query-builder/js/query-builder.min.js', $relative_to );
-	require_css( 'ext:jquery/query-builder/css/jquery.query-builder.default.css', $relative_to );
+    require_js_defer('ext:jquery/query-builder/js/query-builder.min.js', $relative_to);
+    require_css('ext:jquery/query-builder/css/jquery.query-builder.default.css', $relative_to);
 
-	// Load language file if such file exists:
-	$query_builder_langs = array( 'ar', 'az', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fa-IR', 'fr', 'he', 'it', 'nl', 'no', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sq', 'tr', 'ua', 'zh-CN' );
-	if( in_array( $current_locale, $query_builder_langs ) )
-	{	// Load lang by full locale name like "en-US":
-		require_js_defer( 'ext:jquery/query-builder/js/i18n/query-builder.'.$current_locale.'.js', $relative_to );
-	}
-	elseif( in_array( substr( $current_locale, 0, 2 ), $query_builder_langs ) )
-	{	// Load lang by locale code like "en":
-		require_js_defer( 'ext:jquery/query-builder/js/i18n/query-builder.'.substr( $current_locale, 0, 2 ).'.js', $relative_to );
-	}
+    // Load language file if such file exists:
+    $query_builder_langs = ['ar', 'az', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fa-IR', 'fr', 'he', 'it', 'nl', 'no', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sq', 'tr', 'ua', 'zh-CN'];
+    if (in_array($current_locale, $query_builder_langs)) {	// Load lang by full locale name like "en-US":
+        require_js_defer('ext:jquery/query-builder/js/i18n/query-builder.' . $current_locale . '.js', $relative_to);
+    } elseif (in_array(substr($current_locale, 0, 2), $query_builder_langs)) {	// Load lang by locale code like "en":
+        require_js_defer('ext:jquery/query-builder/js/i18n/query-builder.' . substr($current_locale, 0, 2) . '.js', $relative_to);
+    }
 }
 
 
 /**
  * Initialize Hotkeys library
  */
-function init_hotkeys_js( $relative_to = 'rsc_url', $hotkeys = array(), $top_hotkeys = array() )
+function init_hotkeys_js($relative_to = 'rsc_url', $hotkeys = [], $top_hotkeys = [])
 {
-	require_js_defer( '#jquery#', $relative_to ); // dependency
-	require_js_defer( '#hotkeys#', $relative_to );
+    require_js_defer('#jquery#', $relative_to); // dependency
+    require_js_defer('#hotkeys#', $relative_to);
 
-	add_js_headline( 'var shortcut_keys = '.json_encode( $hotkeys ).';' );
-	add_js_headline( 'var top_shortcut_keys = '.json_encode( $top_hotkeys ).';' );
+    add_js_headline('var shortcut_keys = ' . json_encode($hotkeys) . ';');
+    add_js_headline('var top_shortcut_keys = ' . json_encode($top_hotkeys) . ';');
 
-	require_js_defer( 'ext:hotkeys/hotkeys.init.js', $relative_to );
+    require_js_defer('ext:hotkeys/hotkeys.init.js', $relative_to);
 }
 
 
@@ -2483,27 +2256,24 @@ function init_hotkeys_js( $relative_to = 'rsc_url', $hotkeys = array(), $top_hot
  */
 function include_headlines()
 {
-	global $headline_include_file, $headline_file_index, $headline_inline_code;
+    global $headline_include_file, $headline_file_index, $headline_inline_code;
 
-	$all_headlines = array();
-	if( is_array( $headline_include_file ) )
-	{	// Include files:
-		// Sort because after dequeued bundled files we need to move main superbundled file on proper order:
-		ksort( $headline_include_file );
-		$all_headlines = $headline_include_file;
-		unset( $headline_include_file, $headline_file_index );
-	}
-	if( is_array( $headline_inline_code ) )
-	{	// Include inline codes:
-		$all_headlines = array_merge( $all_headlines, $headline_inline_code );
-		unset( $headline_inline_code );
-	}
+    $all_headlines = [];
+    if (is_array($headline_include_file)) {	// Include files:
+        // Sort because after dequeued bundled files we need to move main superbundled file on proper order:
+        ksort($headline_include_file);
+        $all_headlines = $headline_include_file;
+        unset($headline_include_file, $headline_file_index);
+    }
+    if (is_array($headline_inline_code)) {	// Include inline codes:
+        $all_headlines = array_merge($all_headlines, $headline_inline_code);
+        unset($headline_inline_code);
+    }
 
-	if( ! empty( $all_headlines ) )
-	{	// Include headlines only if at least one headline is found in any group:
-		echo "\n\t<!-- headlines: -->\n\t".implode( "\n\t", $all_headlines );
-		echo "\n\n";
-	}
+    if (! empty($all_headlines)) {	// Include headlines only if at least one headline is found in any group:
+        echo "\n\t<!-- headlines: -->\n\t" . implode("\n\t", $all_headlines);
+        echo "\n\n";
+    }
 }
 
 
@@ -2516,46 +2286,39 @@ function include_headlines()
  */
 function include_footerlines()
 {
-	global $js_translations, $footerline_include_file, $footerline_file_index, $footerline_inline_code;
+    global $js_translations, $footerline_include_file, $footerline_file_index, $footerline_inline_code;
 
-	if( !empty( $js_translations ) )
-	{
-		$r = '';
+    if (! empty($js_translations)) {
+        $r = '';
 
-		foreach( $js_translations as $string => $translation )
-		{ // output each translation
-			if( $string != $translation )
-			{ // this is translated
-				$r .= '<div><span class="b2evo_t_string">'.$string.'</span><span class="b2evo_translation">'.$translation.'</span></div>'."\n";
-			}
-		}
-		if( $r )
-		{ // we have some translations
-			echo '<div id="b2evo_translations" style="display:none;">'."\n";
-			echo $r;
-			echo '</div>'."\n";
-		}
-	}
+        foreach ($js_translations as $string => $translation) { // output each translation
+            if ($string != $translation) { // this is translated
+                $r .= '<div><span class="b2evo_t_string">' . $string . '</span><span class="b2evo_translation">' . $translation . '</span></div>' . "\n";
+            }
+        }
+        if ($r) { // we have some translations
+            echo '<div id="b2evo_translations" style="display:none;">' . "\n";
+            echo $r;
+            echo '</div>' . "\n";
+        }
+    }
 
-	$all_footerlines = array();
-	if( is_array( $footerline_include_file ) )
-	{	// Include files:
-		$all_footerlines = $footerline_include_file;
-		// Sort because after dequeued bundled files we need to move main superbundled file on proper order:
-		ksort( $footerline_include_file );
-		unset( $footerline_include_file, $footerline_file_index );
-	}
-	if( is_array( $footerline_inline_code ) )
-	{	// Include inline codes:
-		$all_footerlines = array_merge( $all_footerlines, $footerline_inline_code );
-		unset( $footerline_inline_code );
-	}
+    $all_footerlines = [];
+    if (is_array($footerline_include_file)) {	// Include files:
+        $all_footerlines = $footerline_include_file;
+        // Sort because after dequeued bundled files we need to move main superbundled file on proper order:
+        ksort($footerline_include_file);
+        unset($footerline_include_file, $footerline_file_index);
+    }
+    if (is_array($footerline_inline_code)) {	// Include inline codes:
+        $all_footerlines = array_merge($all_footerlines, $footerline_inline_code);
+        unset($footerline_inline_code);
+    }
 
-	if( ! empty( $all_footerlines ) )
-	{	// Include footerlines only if at least one footerline is found in any group:
-		echo "\n\t<!-- footerlines: -->\n\t".implode( "\n\t", $all_footerlines );
-		echo "\n\n";
-	}
+    if (! empty($all_footerlines)) {	// Include footerlines only if at least one footerline is found in any group:
+        echo "\n\t<!-- footerlines: -->\n\t" . implode("\n\t", $all_footerlines);
+        echo "\n\n";
+    }
 }
 
 
@@ -2564,8 +2327,8 @@ function include_footerlines()
  */
 function app_version()
 {
-	global $app_version;
-	echo $app_version;
+    global $app_version;
+    echo $app_version;
 }
 
 
@@ -2574,87 +2337,83 @@ function app_version()
  *
  * @param boolean true for full bullet, false for empty bullet
  */
-function bullet( $bool )
+function bullet($bool)
 {
-	if( $bool )
-		return get_icon( 'bullet_full', 'imgtag' );
+    if ($bool) {
+        return get_icon('bullet_full', 'imgtag');
+    }
 
-	return get_icon( 'bullet_empty', 'imgtag' );
+    return get_icon('bullet_empty', 'imgtag');
 }
 
 
 /**
  * Stub: Links to previous and next post in single post mode
  */
-function item_prevnext_links( $params = array() )
+function item_prevnext_links($params = [])
 {
-	global $disp, $MainList;
+    global $disp, $MainList;
 
-	if( ! isset( $MainList ) || ! $MainList->single_post || $disp == 'download' )
-	{	// Don't display the links in NOT single post mode and on download page:
-		return;
-	}
+    if (! isset($MainList) || ! $MainList->single_post || $disp == 'download') {	// Don't display the links in NOT single post mode and on download page:
+        return;
+    }
 
-	$params = array_merge( array( 'target_blog' => 'auto' ), $params );
+    $params = array_merge([
+        'target_blog' => 'auto',
+    ], $params);
 
-	$MainList->prevnext_item_links( $params );
+    $MainList->prevnext_item_links($params);
 }
 
 
 /**
  * Stub: Links to previous and next user in single user mode
  */
-function user_prevnext_links( $params = array() )
+function user_prevnext_links($params = [])
 {
-	global $UserList, $AdminUI, $Skin;
+    global $UserList, $AdminUI, $Skin;
 
-	$params = array_merge( array(
-			'template'     => '$prev$$back$$next$',
-			'block_start'  => '<table class="prevnext_user"><tr>',
-			'prev_start'   => '<td width="33%">',
-			'prev_end'     => '</td>',
-			'prev_no_user' => '<td width="33%">&nbsp;</td>',
-			'back_start'   => '<td width="33%" class="back_users_list">',
-			'back_end'     => '</td>',
-			'next_start'   => '<td width="33%" class="right">',
-			'next_end'     => '</td>',
-			'next_no_user' => '<td width="33%">&nbsp;</td>',
-			'block_end'    => '</tr></table>',
-			'user_tab'     => 'profile',
-		), $params );
+    $params = array_merge([
+        'template' => '$prev$$back$$next$',
+        'block_start' => '<table class="prevnext_user"><tr>',
+        'prev_start' => '<td width="33%">',
+        'prev_end' => '</td>',
+        'prev_no_user' => '<td width="33%">&nbsp;</td>',
+        'back_start' => '<td width="33%" class="back_users_list">',
+        'back_end' => '</td>',
+        'next_start' => '<td width="33%" class="right">',
+        'next_end' => '</td>',
+        'next_no_user' => '<td width="33%">&nbsp;</td>',
+        'block_end' => '</tr></table>',
+        'user_tab' => 'profile',
+    ], $params);
 
-	if( !empty( $AdminUI ) )
-	{ // Set template from AdminUI
-		$user_navigation = $AdminUI->get_template( 'user_navigation' );
-	}
-	elseif( !empty( $Skin ) )
-	{ // Set template from Skin
-		$user_navigation = $Skin->get_template( 'user_navigation' );
-	}
-	if( !empty( $user_navigation ) && is_array( $user_navigation ) )
-	{
-		$params = array_merge( $params, $user_navigation );
-	}
+    if (! empty($AdminUI)) { // Set template from AdminUI
+        $user_navigation = $AdminUI->get_template('user_navigation');
+    } elseif (! empty($Skin)) { // Set template from Skin
+        $user_navigation = $Skin->get_template('user_navigation');
+    }
+    if (! empty($user_navigation) && is_array($user_navigation)) {
+        $params = array_merge($params, $user_navigation);
+    }
 
-	if( isset($UserList) )
-	{
-		$UserList->prevnext_user_links( $params );
-	}
+    if (isset($UserList)) {
+        $UserList->prevnext_user_links($params);
+    }
 }
 
 
 /**
  * Stub
  */
-function messages( $params = array() )
+function messages($params = [])
 {
-	global $Messages;
+    global $Messages;
 
-	if( isset( $params['has_errors'] ) )
-	{
-		$params['has_errors'] = $Messages->has_errors();
-	}
-	$Messages->disp( $params['block_start'], $params['block_end'] );
+    if (isset($params['has_errors'])) {
+        $params['has_errors'] = $Messages->has_errors();
+    }
+    $Messages->disp($params['block_start'], $params['block_end']);
 }
 
 
@@ -2664,18 +2423,16 @@ function messages( $params = array() )
  * @param array Params
  * @param object ItemList2, NULL to use global $MainList
  */
-function mainlist_page_links( $params = array(), $ItemList2 = NULL )
+function mainlist_page_links($params = [], $ItemList2 = null)
 {
-	if( is_null( $ItemList2 ) )
-	{
-		global $MainList;
-		$ItemList2 = $MainList;
-	}
+    if (is_null($ItemList2)) {
+        global $MainList;
+        $ItemList2 = $MainList;
+    }
 
-	if( ! empty( $ItemList2 ) )
-	{
-		$ItemList2->page_links( $params );
-	}
+    if (! empty($ItemList2)) {
+        $ItemList2->page_links($params);
+    }
 }
 
 
@@ -2686,28 +2443,24 @@ function mainlist_page_links( $params = array(), $ItemList2 = NULL )
  *
  * @return Item
  */
-function & mainlist_get_item()
+function &mainlist_get_item()
 {
-	global $MainList, $featured_displayed_item_IDs;
+    global $MainList, $featured_displayed_item_IDs;
 
-	if( isset( $MainList ) )
-	{
-		$Item = & $MainList->get_item();
+    if (isset($MainList)) {
+        $Item = &$MainList->get_item();
 
-		if( $Item && in_array( $Item->ID, $featured_displayed_item_IDs ) )
-		{ // This post was already displayed as a Featured post, let's skip it and get the next one:
-			$Item = & mainlist_get_item();
-		}
-	}
-	else
-	{
-		$Item = NULL;
-	}
+        if ($Item && in_array($Item->ID, $featured_displayed_item_IDs)) { // This post was already displayed as a Featured post, let's skip it and get the next one:
+            $Item = &mainlist_get_item();
+        }
+    } else {
+        $Item = null;
+    }
 
-	// Make this available globally:
-	$GLOBALS['Item'] = & $Item;
+    // Make this available globally:
+    $GLOBALS['Item'] = &$Item;
 
-	return $Item;
+    return $Item;
 }
 
 
@@ -2716,33 +2469,32 @@ function & mainlist_get_item()
  *
  * @return boolean true if empty MainList
  */
-function display_if_empty( $params = array() )
+function display_if_empty($params = [])
 {
-	global $MainList, $featured_displayed_item_IDs;
+    global $MainList, $featured_displayed_item_IDs;
 
-	if( isset( $MainList ) && empty( $featured_displayed_item_IDs ) )
-	{
-		return $MainList->display_if_empty( $params );
-	}
+    if (isset($MainList) && empty($featured_displayed_item_IDs)) {
+        return $MainList->display_if_empty($params);
+    }
 
-	return NULL;
+    return null;
 }
 
 
 /**
  * Check if current page is a single Item's page
  *
- * @param integer|NULL ID of Item to be sure we currently see single page of the Item, NULL - to don't check
+ * @param integer|null ID of Item to be sure we currently see single page of the Item, NULL - to don't check
  * @return boolean
  */
-function is_single_page( $check_item_ID = NULL )
+function is_single_page($check_item_ID = null)
 {
-	global $disp, $MainList, $Item;
+    global $disp, $MainList, $Item;
 
-	return ( $disp == 'single' || $disp == 'page' ) &&
-		( isset( $MainList ) && $MainList->single_post ) &&
-		( isset( $Item ) && $Item->ID > 0 ) &&
-		( $check_item_ID === NULL || $check_item_ID == $Item->ID );
+    return ($disp == 'single' || $disp == 'page') &&
+        (isset($MainList) && $MainList->single_post) &&
+        (isset($Item) && $Item->ID > 0) &&
+        ($check_item_ID === null || $check_item_ID == $Item->ID);
 }
 
 
@@ -2754,36 +2506,34 @@ function is_single_page( $check_item_ID = NULL )
  *
  * @param array
  */
-function credits( $params = array() )
+function credits($params = [])
 {
-	/**
-	 * @var AbstractSettings
-	 */
-	global $global_Cache;
-	global $Collection, $Blog;
+    /**
+     * @var AbstractSettings
+     */
+    global $global_Cache;
+    global $Collection, $Blog;
 
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'list_start'  => ' ',
-			'list_end'    => ' ',
-			'item_start'  => ' ',
-			'item_end'    => ' ',
-			'separator'   => ',',
-			'after_item'  => '#',
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'list_start' => ' ',
+        'list_end' => ' ',
+        'item_start' => ' ',
+        'item_end' => ' ',
+        'separator' => ',',
+        'after_item' => '#',
+    ], $params);
 
+    $cred_links = $global_Cache->getx('creds');
+    if (empty($cred_links)) {	// Use basic default:
+        $cred_links = unserialize('a:2:{i:0;a:2:{i:0;s:24:"http://b2evolution.net/r";i:1;s:3:"CMS";}i:1;a:2:{i:0;s:36:"http://b2evolution.net/web-hosting/r";i:1;s:19:"quality web hosting";}}');
+    }
 
-	$cred_links = $global_Cache->getx( 'creds' );
-	if( empty( $cred_links ) )
-	{	// Use basic default:
-		$cred_links = unserialize('a:2:{i:0;a:2:{i:0;s:24:"http://b2evolution.net/r";i:1;s:3:"CMS";}i:1;a:2:{i:0;s:36:"http://b2evolution.net/web-hosting/r";i:1;s:19:"quality web hosting";}}');
-	}
+    $max_credits = (empty($Blog) ? null : $Blog->get_setting('max_footer_credits'));
 
-	$max_credits = (empty($Blog) ? NULL : $Blog->get_setting( 'max_footer_credits' ));
+    display_list($cred_links, $params['list_start'], $params['list_end'], $params['separator'], $params['item_start'], $params['item_end'], null, $max_credits);
 
-	display_list( $cred_links, $params['list_start'], $params['list_end'], $params['separator'], $params['item_start'], $params['item_end'], NULL, $max_credits );
-
-	return $max_credits;
+    return $max_credits;
 }
 
 
@@ -2793,55 +2543,53 @@ function credits( $params = array() )
  * @param integer Number of stars
  * @param string Class name
  */
-function star_rating( $stars, $class = 'not-used-any-more' )
+function star_rating($stars, $class = 'not-used-any-more')
 {
-	echo get_star_rating( $stars );
+    echo get_star_rating($stars);
 }
 
 
 /**
  * Display "powered by b2evolution" logo
  */
-function powered_by( $params = array() )
+function powered_by($params = [])
 {
-	global $global_Cache, $rsc_uri, $Blog;
+    global $global_Cache, $rsc_uri, $Blog;
 
-	if( isset( $Blog ) &&
-	    ( $Blog instanceof Blog ) &&
-	    is_pro() &&
-	    $Blog->get_setting( 'powered_by_logos' ) )
-	{	// Don't display "Powered by b2evolution" logos if it is desabled on PRO version:
-		return;
-	}
+    if (isset($Blog) &&
+        ($Blog instanceof Blog) &&
+        is_pro() &&
+        $Blog->get_setting('powered_by_logos')) {	// Don't display "Powered by b2evolution" logos if it is desabled on PRO version:
+        return;
+    }
 
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'block_start' => '<div class="powered_by">',
-			'block_end'   => '</div>',
-			'img_url'     => '$rsc$img/powered-by-b2evolution-120t.gif',
-			'img_width'   => '',
-			'img_height'  => '',
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'block_start' => '<div class="powered_by">',
+        'block_end' => '</div>',
+        'img_url' => '$rsc$img/powered-by-b2evolution-120t.gif',
+        'img_width' => '',
+        'img_height' => '',
+    ], $params);
 
-	echo $params['block_start'];
+    echo $params['block_start'];
 
-	$img_url = str_replace( '$rsc$', $rsc_uri, $params['img_url'] );
+    $img_url = str_replace('$rsc$', $rsc_uri, $params['img_url']);
 
-	$evo_links = $global_Cache->getx( 'evo_links' );
-	if( empty( $evo_links ) )
-	{	// Use basic default:
-		$evo_links = unserialize('a:1:{s:0:"";a:1:{i:0;a:3:{i:0;i:100;i:1;s:23:"http://b2evolution.net/";i:2;a:2:{i:0;a:2:{i:0;i:55;i:1;s:26:"powered by b2evolution CMS";}i:1;a:2:{i:0;i:100;i:1;s:29:"powered by an open-source CMS";}}}}}');
-	}
+    $evo_links = $global_Cache->getx('evo_links');
+    if (empty($evo_links)) {	// Use basic default:
+        $evo_links = unserialize('a:1:{s:0:"";a:1:{i:0;a:3:{i:0;i:100;i:1;s:23:"http://b2evolution.net/";i:2;a:2:{i:0;a:2:{i:0;i:55;i:1;s:26:"powered by b2evolution CMS";}i:1;a:2:{i:0;i:100;i:1;s:29:"powered by an open-source CMS";}}}}}');
+    }
 
-	echo resolve_link_params( $evo_links, NULL, array(
-			'type'        => 'img',
-			'img_url'     => $img_url,
-			'img_width'   => $params['img_width'],
-			'img_height'  => $params['img_height'],
-			'title'       => 'b2evolution CMS',
-		) );
+    echo resolve_link_params($evo_links, null, [
+        'type' => 'img',
+        'img_url' => $img_url,
+        'img_width' => $params['img_width'],
+        'img_height' => $params['img_height'],
+        'title' => 'b2evolution CMS',
+    ]);
 
-	echo $params['block_end'];
+    echo $params['block_end'];
 }
 
 
@@ -2849,10 +2597,10 @@ function powered_by( $params = array() )
 /**
  * DEPRECATED
  */
-function bloginfo( $what )
+function bloginfo($what)
 {
-	global $Collection, $Blog;
-	$Blog->disp( $what );
+    global $Collection, $Blog;
+    $Blog->disp($what);
 }
 
 /**
@@ -2861,11 +2609,11 @@ function bloginfo( $what )
  *
  * @param string format
  */
-function comment_allowed_tags( $format = 'htmlbody' )
+function comment_allowed_tags($format = 'htmlbody')
 {
-	global $comment_allowed_tags;
+    global $comment_allowed_tags;
 
-	echo format_to_output( $comment_allowed_tags, $format );
+    echo format_to_output($comment_allowed_tags, $format);
 }
 
 /**
@@ -2873,25 +2621,25 @@ function comment_allowed_tags( $format = 'htmlbody' )
  */
 function link_pages()
 {
-	echo '<!-- link_pages() is DEPRECATED -->';
+    echo '<!-- link_pages() is DEPRECATED -->';
 }
 
 
 /**
  * Return a formatted percentage (should probably go to _misc.funcs)
  */
-function percentage( $hit_count, $hit_total, $decimals = 1, $dec_point = '.' )
+function percentage($hit_count, $hit_total, $decimals = 1, $dec_point = '.')
 {
-	$percentage = $hit_total > 0 ? $hit_count * 100 / $hit_total : 0;
-	return number_format( $percentage, $decimals, $dec_point, '' ).'&nbsp;%';
+    $percentage = $hit_total > 0 ? $hit_count * 100 / $hit_total : 0;
+    return number_format($percentage, $decimals, $dec_point, '') . '&nbsp;%';
 }
 
-function addup_percentage( $hit_count, $hit_total, $decimals = 1, $dec_point = '.' )
+function addup_percentage($hit_count, $hit_total, $decimals = 1, $dec_point = '.')
 {
-	static $addup = 0;
+    static $addup = 0;
 
-	$addup += $hit_count;
-	return number_format( $addup * 100 / $hit_total, $decimals, $dec_point, '' ).'&nbsp;%';
+    $addup += $hit_count;
+    return number_format($addup * 100 / $hit_total, $decimals, $dec_point, '') . '&nbsp;%';
 }
 
 
@@ -2902,40 +2650,34 @@ function addup_percentage( $hit_count, $hit_total, $decimals = 1, $dec_point = '
  * @param array contains object which were already seen
  * @return boolean true if contains recursion false otherwise
  */
-function is_recursive( /*array*/ & $array, /*array*/ & $alreadySeen = array() )
+function is_recursive(/*array*/ &$array, /*array*/ &$alreadySeen = [])
 {
     static $uniqueObject;
-    if( !$uniqueObject )
-    {
-        $uniqueObject = new stdClass;
+    if (! $uniqueObject) {
+        $uniqueObject = new stdClass();
     }
 
     // Set main array as already seen
-    $alreadySeen[] = & $array;
+    $alreadySeen[] = &$array;
 
-    foreach( $array as & $item )
-    { // for each item in array
-        if( !is_array( $item ) )
-        { // if not array, we don't have to check it
+    foreach ($array as &$item) { // for each item in array
+        if (! is_array($item)) { // if not array, we don't have to check it
             continue;
         }
 
         // put the unique object into the end of the array
         $item[] = $uniqueObject;
         $recursionDetected = false;
-        foreach( $alreadySeen as $candidate )
-        {
-            if( end( $candidate ) === $uniqueObject )
-            { // In the end of an already scanned array is the same unique Obect, this means that recursion was detected
+        foreach ($alreadySeen as $candidate) {
+            if (end($candidate) === $uniqueObject) { // In the end of an already scanned array is the same unique Obect, this means that recursion was detected
                 $recursionDetected = true;
                 break;
             }
         }
 
-        array_pop( $item );
+        array_pop($item);
 
-        if( $recursionDetected || is_recursive( $item, $alreadySeen ) )
-        { // Check until recursion detected or there are not more arrays
+        if ($recursionDetected || is_recursive($item, $alreadySeen)) { // Check until recursion detected or there are not more arrays
             return true;
         }
     }
@@ -2949,59 +2691,54 @@ function is_recursive( /*array*/ & $array, /*array*/ & $alreadySeen = array() )
  *
  * @param array params
  */
-function display_ajax_form( $params )
+function display_ajax_form($params)
 {
-	global $rsc_url, $ajax_form_number, $required_js, $b2evo_icons_type;
+    global $rsc_url, $ajax_form_number, $required_js, $b2evo_icons_type;
 
-	if( is_recursive( $params ) )
-	{	// The params array contains recursion, don't try to encode, display error message instead
-		// We don't use translation because this situation should not really happen ( Probably it happesn with some wrong skin )
-		echo '<p style="color:red;font-weight:bold">'.T_( 'This section can\'t be displayed because wrong params were created by the skin.' ).'</p>';
-		return;
-	}
+    if (is_recursive($params)) {	// The params array contains recursion, don't try to encode, display error message instead
+        // We don't use translation because this situation should not really happen ( Probably it happesn with some wrong skin )
+        echo '<p style="color:red;font-weight:bold">' . T_('This section can\'t be displayed because wrong params were created by the skin.') . '</p>';
+        return;
+    }
 
-	// Set icons type to display correct icons on bootstrap skins:
-	$params['b2evo_icons_type'] = $b2evo_icons_type;
+    // Set icons type to display correct icons on bootstrap skins:
+    $params['b2evo_icons_type'] = $b2evo_icons_type;
 
-	if( ! empty( $required_js ) )
-	{	// Send all loaded JS files to ajax request in order to don't load them twice:
-		// yura: It was done because JS of bootstrap modal doesn't work when jquery JS file is loaded twice.
-		$params['required_js'] = $required_js;
-	}
+    if (! empty($required_js)) {	// Send all loaded JS files to ajax request in order to don't load them twice:
+        // yura: It was done because JS of bootstrap modal doesn't work when jquery JS file is loaded twice.
+        $params['required_js'] = $required_js;
+    }
 
-	if( ! isset( $params['b2evo_icons_type'] ) && isset( $b2evo_icons_type ) )
-	{	// Send current icons type to display proper icons on the loaded AJAX form:
-		$params['b2evo_icons_type'] = $b2evo_icons_type;
-	}
+    if (! isset($params['b2evo_icons_type']) && isset($b2evo_icons_type)) {	// Send current icons type to display proper icons on the loaded AJAX form:
+        $params['b2evo_icons_type'] = $b2evo_icons_type;
+    }
 
-	if( empty( $ajax_form_number ) )
-	{	// Set number for ajax form to use unique ID for each new form
-		$ajax_form_number = 0;
-	}
-	$ajax_form_number++;
+    if (empty($ajax_form_number)) {	// Set number for ajax form to use unique ID for each new form
+        $ajax_form_number = 0;
+    }
+    $ajax_form_number++;
 
-	echo '<div id="ajax_form_number_'.$ajax_form_number.'" class="section_requires_javascript">';
+    echo '<div id="ajax_form_number_' . $ajax_form_number . '" class="section_requires_javascript">';
 
-	if( isset( $params['action'], $params['p'] ) && $params['action'] == 'get_comment_form' )
-	{	// Display anchor here even form is not loaded yet because it is used e.g. for reply links:
-		$comment_form_anchor = empty( $params['params']['comment_form_anchor'] ) ? 'form_p' : $params['params']['comment_form_anchor'];
-		echo '<a id="'.format_to_output( $comment_form_anchor.$params['p'], 'htmlattr' ).'"></a>';
-	}
+    if (isset($params['action'], $params['p']) && $params['action'] == 'get_comment_form') {	// Display anchor here even form is not loaded yet because it is used e.g. for reply links:
+        $comment_form_anchor = empty($params['params']['comment_form_anchor']) ? 'form_p' : $params['params']['comment_form_anchor'];
+        echo '<a id="' . format_to_output($comment_form_anchor . $params['p'], 'htmlattr') . '"></a>';
+    }
 
-	// Display loader gif until the ajax call returns:
-	echo '<p class="ajax-loader"><span class="loader_img loader_ajax_form" title="'.T_('Loading...').'"></span><br />'.T_( 'Form is loading...' ).'</p>';
-	$ajax_form_config = array(
-			'form_number' => $ajax_form_number,
-			'json_params' => $params,
-			'load_ajax_form_on_page_load' => !empty( $params['params']['load_ajax_form_on_page_load'] ),
-		);
-	expose_var_to_js( 'ajax_form_'.$ajax_form_number, $ajax_form_config, 'evo_ajax_form_config' );
-	?>
+    // Display loader gif until the ajax call returns:
+    echo '<p class="ajax-loader"><span class="loader_img loader_ajax_form" title="' . T_('Loading...') . '"></span><br />' . T_('Form is loading...') . '</p>';
+    $ajax_form_config = [
+        'form_number' => $ajax_form_number,
+        'json_params' => $params,
+        'load_ajax_form_on_page_load' => ! empty($params['params']['load_ajax_form_on_page_load']),
+    ];
+    expose_var_to_js('ajax_form_' . $ajax_form_number, $ajax_form_config, 'evo_ajax_form_config');
+    ?>
 	<noscript>
-		<?php echo '<p>'.T_( 'This section can only be displayed by javascript enabled browsers.' ).'</p>'; ?>
+		<?php echo '<p>' . T_('This section can only be displayed by javascript enabled browsers.') . '</p>'; ?>
 	</noscript>
 	<?php
-	echo '</div>';
+    echo '</div>';
 }
 
 
@@ -3010,231 +2747,233 @@ function display_ajax_form( $params )
  *
  * @param array params
  */
-function display_login_form( $params )
+function display_login_form($params)
 {
-	global $Settings, $Plugins, $Session, $Collection, $Blog, $blog, $dummy_fields;
-	global $admin_url, $baseurl, $ReqHost, $redirect_to;
+    global $Settings, $Plugins, $Session, $Collection, $Blog, $blog, $dummy_fields;
+    global $admin_url, $baseurl, $ReqHost, $redirect_to;
 
-	$params = array_merge( array(
-			'form_before' => '',
-			'form_after' => '',
-			'form_action' => '',
-			'form_name' => 'login_form',
-			'form_title' => '',
-			'form_layout' => '',
-			'form_class' => 'bComment',
-			'source' => 'inskin login form',
-			'inskin' => true,
-			'inskin_urls' => true, // Use urls of front-end
-			'login_required' => true,
-			'validate_required' => NULL,
-			'redirect_to' => '',
-			'return_to' => '',
-			'login' => '',
-			'action' => '',
-			'reqID' => '',
-			'sessID' => '',
-			'transmit_hashed_password' => false,
-			'get_widget_login_hidden_fields' => false,
-			'display_abort_link'  => true,
-			'abort_link_position' => 'above_form', // 'above_form', 'form_title'
-			'abort_link_text'     => T_('Abort login!'),
-			'login_button_text'     => T_('Log in!'),
-			'login_button_class'    => 'btn btn-success btn-lg',
-			'display_lostpass_link' => true,
-			'lostpass_link_text'    => T_('Lost your password?'),
-			'lostpass_link_class'   => '',
-			'display_reg_link'      => false, // Display registration link after login button
-			'reg_link_text'         => T_('Register').' &raquo;',
-			'reg_link_class'        => 'btn btn-primary btn-lg pull-right',
-		), $params );
+    $params = array_merge([
+        'form_before' => '',
+        'form_after' => '',
+        'form_action' => '',
+        'form_name' => 'login_form',
+        'form_title' => '',
+        'form_layout' => '',
+        'form_class' => 'bComment',
+        'source' => 'inskin login form',
+        'inskin' => true,
+        'inskin_urls' => true, // Use urls of front-end
+        'login_required' => true,
+        'validate_required' => null,
+        'redirect_to' => '',
+        'return_to' => '',
+        'login' => '',
+        'action' => '',
+        'reqID' => '',
+        'sessID' => '',
+        'transmit_hashed_password' => false,
+        'get_widget_login_hidden_fields' => false,
+        'display_abort_link' => true,
+        'abort_link_position' => 'above_form', // 'above_form', 'form_title'
+        'abort_link_text' => T_('Abort login!'),
+        'login_button_text' => T_('Log in!'),
+        'login_button_class' => 'btn btn-success btn-lg',
+        'display_lostpass_link' => true,
+        'lostpass_link_text' => T_('Lost your password?'),
+        'lostpass_link_class' => '',
+        'display_reg_link' => false, // Display registration link after login button
+        'reg_link_text' => T_('Register') . ' &raquo;',
+        'reg_link_class' => 'btn btn-primary btn-lg pull-right',
+    ], $params);
 
-	$inskin = $params['inskin'];
-	$login = $params['login'];
-	$redirect_to = $params['redirect_to'];
-	$return_to = $params['return_to'];
-	$links = array();
-	$form_links = array();
+    $inskin = $params['inskin'];
+    $login = $params['login'];
+    $redirect_to = $params['redirect_to'];
+    $return_to = $params['return_to'];
+    $links = [];
+    $form_links = [];
 
-	if( $params['display_abort_link']
-		&& empty( $params['login_required'] )
-		&& $params['action'] != 'req_activate_email'
-		&& strpos( $return_to, $admin_url ) !== 0
-		&& strpos( $ReqHost.$return_to, $admin_url ) !== 0 )
-	{ // No login required, allow to pass through
-		// TODO: dh> validate return_to param?!
-		// check if return_to url requires logged in user
-		if( empty( $return_to ) || require_login( $return_to, true ) )
-		{ // logged in user require for return_to url
-			if( !empty( $blog ) )
-			{ // blog is set
-				if( empty( $Blog ) )
-				{
-					$BlogCache = & get_BlogCache();
-					$Collection = $Blog = $BlogCache->get_by_ID( $blog, false );
-				}
-				// set abort url to Blog url
-				$abort_url = $Blog->gen_blogurl();
-			}
-			else
-			{ // set abort login url to base url
-				$abort_url = $baseurl;
-			}
-		}
-		else
-		{ // logged in user isn't required for return_to url, set abort url to return_to
-			$abort_url = $return_to;
-		}
-		// Gets displayed as link to the location on the login form if no login is required
-		$abort_link = '<a href="'.htmlspecialchars( url_rel_to_same_host( $abort_url, $ReqHost ) ).'">'.$params['abort_link_text'].'</a>';
-		if( $params['abort_link_position'] == 'above_form' )
-		{ // Display an abort link under login form
-			$links[] = $abort_link;
-		}
-		elseif( $params['abort_link_position'] == 'form_title' )
-		{ // Display an abort link in form title block
-			$form_links[] = $abort_link;
-		}
-	}
+    if ($params['display_abort_link']
+        && empty($params['login_required'])
+        && $params['action'] != 'req_activate_email'
+        && strpos($return_to, $admin_url) !== 0
+        && strpos($ReqHost . $return_to, $admin_url) !== 0) { // No login required, allow to pass through
+        // TODO: dh> validate return_to param?!
+        // check if return_to url requires logged in user
+        if (empty($return_to) || require_login($return_to, true)) { // logged in user require for return_to url
+            if (! empty($blog)) { // blog is set
+                if (empty($Blog)) {
+                    $BlogCache = &get_BlogCache();
+                    $Collection = $Blog = $BlogCache->get_by_ID($blog, false);
+                }
+                // set abort url to Blog url
+                $abort_url = $Blog->gen_blogurl();
+            } else { // set abort login url to base url
+                $abort_url = $baseurl;
+            }
+        } else { // logged in user isn't required for return_to url, set abort url to return_to
+            $abort_url = $return_to;
+        }
+        // Gets displayed as link to the location on the login form if no login is required
+        $abort_link = '<a href="' . htmlspecialchars(url_rel_to_same_host($abort_url, $ReqHost)) . '">' . $params['abort_link_text'] . '</a>';
+        if ($params['abort_link_position'] == 'above_form') { // Display an abort link under login form
+            $links[] = $abort_link;
+        } elseif ($params['abort_link_position'] == 'form_title') { // Display an abort link in form title block
+            $form_links[] = $abort_link;
+        }
+    }
 
-	if( ! $inskin && is_logged_in() )
-	{ // if we arrive here, but are logged in, provide an option to logout (e.g. during the email validation procedure)
-		$links[] = get_user_logout_link();
-	}
+    if (! $inskin && is_logged_in()) { // if we arrive here, but are logged in, provide an option to logout (e.g. during the email validation procedure)
+        $links[] = get_user_logout_link();
+    }
 
-	if( count( $links ) )
-	{
-		echo '<div class="evo_form__login_links">'
-				.'<div class="floatright">'.implode( ' &middot; ', $links ).'</div>'
-				.'<div class="clear"></div>'
-			.'</div>';
-	}
+    if (count($links)) {
+        echo '<div class="evo_form__login_links">'
+                . '<div class="floatright">' . implode(' &middot; ', $links) . '</div>'
+                . '<div class="clear"></div>'
+            . '</div>';
+    }
 
-	$form_links = count( $form_links ) ? '<span class="pull-right">'.implode( ' ', $form_links ).'</span>' : '';
-	echo str_replace( '$form_links$', $form_links, $params['form_before'] );
+    $form_links = count($form_links) ? '<span class="pull-right">' . implode(' ', $form_links) . '</span>' : '';
+    echo str_replace('$form_links$', $form_links, $params['form_before']);
 
-	$Form = new Form( $params['form_action'] , $params['form_name'], 'post', $params['form_layout'] );
+    $Form = new Form($params['form_action'], $params['form_name'], 'post', $params['form_layout']);
 
-	$Form->begin_form( $params['form_class'] );
+    $Form->begin_form($params['form_class']);
 
-	$Form->add_crumb( 'loginform' );
-	$source = param( 'source', 'string', $params['source'].' login form' );
-	if( ! empty( $blog ) )
-	{
-		$Form->hidden( 'blog', $blog );
-	}
-	$Form->hidden( 'source', $source );
-	$Form->hidden( 'redirect_to', $redirect_to );
-	$Form->hidden( 'return_to', $return_to );
-	if( $inskin || $params['inskin_urls'] )
-	{ // inskin login form
-		$Form->hidden( 'inskin', true );
-		$separator = '<br />';
-	}
-	else
-	{ // basic login form
+    $Form->add_crumb('loginform');
+    $source = param('source', 'string', $params['source'] . ' login form');
+    if (! empty($blog)) {
+        $Form->hidden('blog', $blog);
+    }
+    $Form->hidden('source', $source);
+    $Form->hidden('redirect_to', $redirect_to);
+    $Form->hidden('return_to', $return_to);
+    if ($inskin || $params['inskin_urls']) { // inskin login form
+        $Form->hidden('inskin', true);
+        $separator = '<br />';
+    } else { // basic login form
+        if (! empty($params['form_title'])) {
+            echo '<h4>' . $params['form_title'] . '</h4>';
+        }
 
-		if( ! empty( $params['form_title'] ) )
-		{
-			echo '<h4>'.$params['form_title'].'</h4>';
-		}
+        $Form->hidden('validate_required', $params['validate_required']);
+        if (isset($params['action'],  $params['reqID'], $params['sessID']) && $params['action'] == 'activateacc_sec') { // the user clicked the link from the "validate your account" email, but has not been logged in; pass on the relevant data:
+            $Form->hidden('action', 'activateacc_sec');
+            $Form->hidden('reqID', $params['reqID']);
+            $Form->hidden('sessID', $params['sessID']);
+        }
+        $separator = '';
+    }
 
-		$Form->hidden( 'validate_required', $params[ 'validate_required' ] );
-		if( isset( $params[ 'action' ],  $params[ 'reqID' ], $params[ 'sessID' ] ) &&  $params[ 'action' ] == 'activateacc_sec' )
-		{ // the user clicked the link from the "validate your account" email, but has not been logged in; pass on the relevant data:
-			$Form->hidden( 'action', 'activateacc_sec' );
-			$Form->hidden( 'reqID', $params[ 'reqID' ] );
-			$Form->hidden( 'sessID', $params[ 'sessID' ] );
-		}
-		$separator = '';
-	}
+    // check if should transmit hashed password
+    if ($params['transmit_hashed_password']) { // used by JS-password encryption/hashing:
+        $pepper = $Session->get('core.pepper');
+        if (empty($pepper)) { // Do not regenerate if already set because we want to reuse the previous salt on login screen reloads
+            // fp> Question: the comment implies that the salt is reset even on failed login attemps. Why that? I would only have reset it on successful login. Do experts recommend it this way?
+            // but if you kill the session you get a new salt anyway, so it's no big deal.
+            // At that point, why not reset the salt at every reload? (it may be good to keep it, but I think the reason should be documented here)
+            $pepper = generate_random_key(64);
+            $Session->set('core.pepper', $pepper, 86400 /* expire in 1 day */);
+            $Session->dbsave(); // save now, in case there's an error later, and not saving it would prevent the user from logging in.
+        }
+        $Form->hidden('pepper', $pepper);
+        // Add container for the hashed password hidden inputs
+        echo '<div id="pwd_hashed_container"></div>'; // gets filled by JS
+    }
 
-	// check if should transmit hashed password
-	if( $params[ 'transmit_hashed_password' ] )
-	{ // used by JS-password encryption/hashing:
-		$pepper = $Session->get( 'core.pepper' );
-		if( empty( $pepper ) )
-		{ // Do not regenerate if already set because we want to reuse the previous salt on login screen reloads
-			// fp> Question: the comment implies that the salt is reset even on failed login attemps. Why that? I would only have reset it on successful login. Do experts recommend it this way?
-			// but if you kill the session you get a new salt anyway, so it's no big deal.
-			// At that point, why not reset the salt at every reload? (it may be good to keep it, but I think the reason should be documented here)
-			$pepper = generate_random_key(64);
-			$Session->set( 'core.pepper', $pepper, 86400 /* expire in 1 day */ );
-			$Session->dbsave(); // save now, in case there's an error later, and not saving it would prevent the user from logging in.
-		}
-		$Form->hidden( 'pepper', $pepper );
-		// Add container for the hashed password hidden inputs
-		echo '<div id="pwd_hashed_container"></div>'; // gets filled by JS
-	}
+    if ($inskin) {
+        $Form->login_input(
+            $dummy_fields['login'],
+            $params['login'],
+            18, /* TRANS: noun */
+            T_('Login'),
+            $separator . T_('Enter your username (or email address).'),
+            [
+                'maxlength' => 255,
+                'required' => true,
+            ]
+        );
+    } else {
+        $Form->login_input(
+            $dummy_fields['login'],
+            $params['login'],
+            18,
+            '',
+            '',
+            [
+                'maxlength' => 255,
+                'required' => true,
+                'placeholder' => T_('Username (or email address)'),
+            ]
+        );
+    }
 
-	if( $inskin )
-	{
-		$Form->login_input( $dummy_fields['login'], $params['login'], 18, /* TRANS: noun */ T_('Login'), $separator.T_('Enter your username (or email address).'),
-					array( 'maxlength' => 255, 'required' => true ) );
-	}
-	else
-	{
-		$Form->login_input( $dummy_fields[ 'login' ], $params[ 'login' ], 18, '', '',
-					array( 'maxlength' => 255, 'required' => true, 'placeholder' => T_('Username (or email address)') ) );
-	}
+    if ($params['display_lostpass_link']) {	// Display a lost password link:
+        $lost_password_url = get_lostpassword_url($redirect_to, '&amp;', $return_to);
+        if (! empty($login)) {	// Append login to the lost password form url:
+            $lost_password_url = url_add_param($lost_password_url, $dummy_fields['login'] . '=' . rawurlencode($login));
+        }
+        $lost_password_link = '<a href="' . $lost_password_url . '"'
+            . (empty($params['lostpass_link_text']) ? '' : ' class="' . format_to_output($params['lostpass_link_class'], 'htmlattr') . '"') . '>'
+            . $params['lostpass_link_text'] . '</a>';
+    } else {	// Don't display a lost password link:
+        $lost_password_link = '';
+    }
 
-	if( $params['display_lostpass_link'] )
-	{	// Display a lost password link:
-		$lost_password_url = get_lostpassword_url( $redirect_to, '&amp;', $return_to );
-		if( ! empty( $login ) )
-		{	// Append login to the lost password form url:
-			$lost_password_url = url_add_param( $lost_password_url, $dummy_fields['login'].'='.rawurlencode( $login ) );
-		}
-		$lost_password_link = '<a href="'.$lost_password_url.'"'
-			.( empty( $params['lostpass_link_text'] ) ? '' : ' class="'.format_to_output( $params['lostpass_link_class'], 'htmlattr' ).'"' ).'>'
-			.$params['lostpass_link_text'].'</a>';
-	}
-	else
-	{	// Don't display a lost password link:
-		$lost_password_link = '';
-	}
+    if ($inskin) {
+        $Form->begin_field();
+        $Form->password_input($dummy_fields['pwd'], '', 18, T_('Password'), [
+            'note' => $lost_password_link,
+            'maxlength' => 70,
+            'class' => 'input_text',
+            'required' => true,
+        ]);
+        $Form->end_field();
+    } else {
+        $Form->password_input($dummy_fields['pwd'], '', 18, '', [
+            'placeholder' => T_('Password'),
+            'note' => $lost_password_link,
+            'maxlength' => 70,
+            'class' => 'input_text',
+            'input_required' => 'required',
+        ]);
+    }
 
-	if( $inskin )
-	{
-		$Form->begin_field();
-		$Form->password_input( $dummy_fields[ 'pwd' ], '', 18, T_('Password'), array( 'note' => $lost_password_link, 'maxlength' => 70, 'class' => 'input_text', 'required' => true ) );
-		$Form->end_field();
-	}
-	else
-	{
-		$Form->password_input( $dummy_fields[ 'pwd' ], '', 18, '', array( 'placeholder' => T_('Password'), 'note' => $lost_password_link, 'maxlength' => 70, 'class' => 'input_text', 'input_required' => 'required' ) );
-	}
+    // Allow a plugin to add fields/payload
+    $Plugins->trigger_event('DisplayLoginFormFieldset', [
+        'Form' => &$Form,
+    ]);
 
-	// Allow a plugin to add fields/payload
-	$Plugins->trigger_event( 'DisplayLoginFormFieldset', array( 'Form' => & $Form ) );
+    // Display registration link after login button
+    $register_link = $params['display_reg_link'] ? get_user_register_link('', '', $params['reg_link_text'], '#', true /*disp_when_logged_in*/, $redirect_to, $source, $params['reg_link_class']) : '';
 
-	// Display registration link after login button
-	$register_link = $params['display_reg_link'] ? get_user_register_link( '', '', $params['reg_link_text'], '#', true /*disp_when_logged_in*/, $redirect_to, $source, $params['reg_link_class'] ) : '';
+    // Submit button(s):
+    $submit_buttons = [[
+        'name' => 'login_action[login]',
+        'value' => $params['login_button_text'],
+        'class' => $params['login_button_class'],
+        'input_suffix' => $register_link,
+    ]];
 
-	// Submit button(s):
-	$submit_buttons = array( array( 'name' => 'login_action[login]', 'value' => $params['login_button_text'], 'class' => $params['login_button_class'], 'input_suffix' => $register_link ) );
+    $Form->buttons_input($submit_buttons);
 
-	$Form->buttons_input( $submit_buttons );
+    if ($inskin) {
+        $before_register_link = '<div class="login_actions" style="text-align:right; margin: 1em 0 1ex"><strong>';
+        $after_register_link = '</strong></div>';
+        user_register_link($before_register_link, $after_register_link, T_('No account yet? Register here') . ' &raquo;', '#', true /*disp_when_logged_in*/, $redirect_to, $source);
+    } else {
+        // Passthrough REQUEST data (when login is required after having POSTed something)
+        // (Exclusion of 'login_action', 'login', and 'action' has been removed. This should get handled via detection in Form (included_input_field_names),
+        //  and "action" is protected via crumbs)
+        $Form->hiddens_by_key($_REQUEST, ['pwd_hashed', 'submit']);
+    }
 
-	if( $inskin )
-	{
-		$before_register_link = '<div class="login_actions" style="text-align:right; margin: 1em 0 1ex"><strong>';
-		$after_register_link = '</strong></div>';
-		user_register_link( $before_register_link, $after_register_link, T_('No account yet? Register here').' &raquo;', '#', true /*disp_when_logged_in*/, $redirect_to, $source );
-	}
-	else
-	{
-		// Passthrough REQUEST data (when login is required after having POSTed something)
-		// (Exclusion of 'login_action', 'login', and 'action' has been removed. This should get handled via detection in Form (included_input_field_names),
-		//  and "action" is protected via crumbs)
-		$Form->hiddens_by_key( $_REQUEST, array( 'pwd_hashed', 'submit' ) );
-	}
+    $Form->end_form();
 
-	$Form->end_form();
+    echo $params['form_after'];
 
-	echo $params['form_after'];
-
-	display_login_js_handler( $params );
+    display_login_js_handler($params);
 }
 
 
@@ -3243,42 +2982,39 @@ function display_login_form( $params )
  *
  * @param array Params
  */
-function display_login_form_footer( $params = array() )
+function display_login_form_footer($params = [])
 {
-	global $Hit;
+    global $Hit;
 
-	$params = array_merge( array(
-			'login_link_class' => 'evo_login_dialog_standard_link',
-			'ip_address_class' => 'evo_login_dialog_footer text-muted',
-			'source'           => NULL,
-			'redirect_to'      => NULL,
-			'return_to'        => NULL,
-		), $params );
+    $params = array_merge([
+        'login_link_class' => 'evo_login_dialog_standard_link',
+        'ip_address_class' => 'evo_login_dialog_footer text-muted',
+        'source' => null,
+        'redirect_to' => null,
+        'return_to' => null,
+    ], $params);
 
-	if( $params['source'] === NULL )
-	{	// Default source:
-		$params['source'] = param( 'source', 'string', 'inskin login form' );
-	}
+    if ($params['source'] === null) {	// Default source:
+        $params['source'] = param('source', 'string', 'inskin login form');
+    }
 
-	if( $params['redirect_to'] === NULL )
-	{	// Default redirect URL:
-		$params['redirect_to'] = param( 'redirect_to', 'url', '' );
-	}
+    if ($params['redirect_to'] === null) {	// Default redirect URL:
+        $params['redirect_to'] = param('redirect_to', 'url', '');
+    }
 
-	if( $params['return_to'] === NULL )
-	{	// Default return URL:
-		$params['return_to'] = param( 'return_to', 'url', '' );
-	}
+    if ($params['return_to'] === null) {	// Default return URL:
+        $params['return_to'] = param('return_to', 'url', '');
+    }
 
-	echo '<div class="'.$params['login_link_class'].'">'
-			.'<a href="'.get_htsrv_url( 'login' ).'login.php?source='.rawurlencode( $params['source'] ).'&amp;redirect_to='.rawurlencode( $params['redirect_to'] ).'&amp;return_to='.rawurlencode( $params['return_to'] ).'">'
-				.T_('Use basic login form instead').' &raquo;'
-			.'</a>'
-		.'</div>';
+    echo '<div class="' . $params['login_link_class'] . '">'
+            . '<a href="' . get_htsrv_url('login') . 'login.php?source=' . rawurlencode($params['source']) . '&amp;redirect_to=' . rawurlencode($params['redirect_to']) . '&amp;return_to=' . rawurlencode($params['return_to']) . '">'
+                . T_('Use basic login form instead') . ' &raquo;'
+            . '</a>'
+        . '</div>';
 
-	echo '<div class="'.$params['ip_address_class'].'">'
-			.sprintf( T_('Your IP address: %s'), $Hit->IP )
-		.'</div>';
+    echo '<div class="' . $params['ip_address_class'] . '">'
+            . sprintf(T_('Your IP address: %s'), $Hit->IP)
+        . '</div>';
 }
 
 
@@ -3287,22 +3023,24 @@ function display_login_form_footer( $params = array() )
  *
  * @param array params
  */
-function display_login_js_handler( $params )
+function display_login_js_handler($params)
 {
-	global $dummy_fields, $Session;
+    global $dummy_fields, $Session;
 
-	$params = array_merge( array( 'get_widget_login_hidden_fields' => false ), $params );
+    $params = array_merge([
+        'get_widget_login_hidden_fields' => false,
+    ], $params);
 
-	$login_handler_config = array(
-			'dummy_field_login'                     => $dummy_fields['login'],
-			'dummy_field_pwd'                       => $dummy_fields['pwd'],
-			'params_get_widget_login_hidden_fields' => $params['get_widget_login_hidden_fields'],
-			'params_transmit_hashed_password'       => $params['transmit_hashed_password'],
-			'session_ID'                            => $Session->ID,
-			'crumb_loginsalt'                       => get_crumb('loginsalt'),
-		);
+    $login_handler_config = [
+        'dummy_field_login' => $dummy_fields['login'],
+        'dummy_field_pwd' => $dummy_fields['pwd'],
+        'params_get_widget_login_hidden_fields' => $params['get_widget_login_hidden_fields'],
+        'params_transmit_hashed_password' => $params['transmit_hashed_password'],
+        'session_ID' => $Session->ID,
+        'crumb_loginsalt' => get_crumb('loginsalt'),
+    ];
 
-	expose_var_to_js( 'display_login_js_handler_config', json_encode( $login_handler_config ) );
+    expose_var_to_js('display_login_js_handler_config', json_encode($login_handler_config));
 }
 
 
@@ -3313,280 +3051,274 @@ function display_login_js_handler( $params )
  * @param array login form hidden params
  * @param array Params
  */
-function display_lostpassword_form( $login, $hidden_params, $params = array() )
+function display_lostpassword_form($login, $hidden_params, $params = [])
 {
-	global $dummy_fields, $redirect_to, $Session;
+    global $dummy_fields, $redirect_to, $Session;
 
-	$params = array_merge( array(
-			'form_before'     => '',
-			'form_after'      => '',
-			'form_action'     => get_htsrv_url( 'login' ).'login.php',
-			'form_name'       => 'lostpass_form',
-			'form_class'      => 'fform',
-			'form_template'   => NULL,
-			'inskin'          => true,
-			'inskin_urls'     => true,
-			'abort_link_text' => '',
-		), $params );
+    $params = array_merge([
+        'form_before' => '',
+        'form_after' => '',
+        'form_action' => get_htsrv_url('login') . 'login.php',
+        'form_name' => 'lostpass_form',
+        'form_class' => 'fform',
+        'form_template' => null,
+        'inskin' => true,
+        'inskin_urls' => true,
+        'abort_link_text' => '',
+    ], $params);
 
-	if( param( 'field_error', 'integer', 0 ) )
-	{ // Mark login field as error because it was on page before redirection
-		param_error( $dummy_fields['login'], '', '' );
-	}
+    if (param('field_error', 'integer', 0)) { // Mark login field as error because it was on page before redirection
+        param_error($dummy_fields['login'], '', '');
+    }
 
-	$login_url = get_login_url( get_param( 'source' ), $redirect_to );
+    $login_url = get_login_url(get_param('source'), $redirect_to);
 
-	$form_links = array();
-	if( ! empty( $params['abort_link_text'] ) )
-	{ // A link to "close" the window
-		$form_links[] = '<a href="'.$login_url.'">'.$params['abort_link_text'].'</a>';
-	}
+    $form_links = [];
+    if (! empty($params['abort_link_text'])) { // A link to "close" the window
+        $form_links[] = '<a href="' . $login_url . '">' . $params['abort_link_text'] . '</a>';
+    }
 
-	$form_links = count( $form_links ) ? '<span class="pull-right">'.implode( ' ', $form_links ).'</span>' : '';
-	echo str_replace( '$form_links$', $form_links, $params['form_before'] );
+    $form_links = count($form_links) ? '<span class="pull-right">' . implode(' ', $form_links) . '</span>' : '';
+    echo str_replace('$form_links$', $form_links, $params['form_before']);
 
-	$Form = new Form( $params['form_action'], $params['form_name'], 'post', 'fieldset' );
+    $Form = new Form($params['form_action'], $params['form_name'], 'post', 'fieldset');
 
-	if( ! empty( $params['form_template'] ) )
-	{ // Switch layout to template from array
-		$params['form_template']['formstart'] = str_replace( '$form_links$', $form_links, $params['form_template']['formstart'] );
+    if (! empty($params['form_template'])) { // Switch layout to template from array
+        $params['form_template']['formstart'] = str_replace('$form_links$', $form_links, $params['form_template']['formstart']);
 
-		$Form->switch_template_parts( $params['form_template'] );
-	}
+        $Form->switch_template_parts($params['form_template']);
+    }
 
-	$Form->begin_form( $params['form_class'] );
+    $Form->begin_form($params['form_class']);
 
-	// Display hidden fields
-	$Form->add_crumb( 'lostpassform' );
-	$Form->hidden( 'action', 'resetpassword' );
-	foreach( $hidden_params as $key => $value )
-	{
-		$Form->hidden( $key, $value );
-	}
+    // Display hidden fields
+    $Form->add_crumb('lostpassform');
+    $Form->hidden('action', 'resetpassword');
+    foreach ($hidden_params as $key => $value) {
+        $Form->hidden($key, $value);
+    }
 
-	$Form->begin_fieldset();
+    $Form->begin_fieldset();
 
-	if( $params['inskin'] )
-	{
-		$Form->text( $dummy_fields[ 'login' ], $login, 30, /* TRANS: noun */ T_('Login'), '', 255, 'input_text' );
-	}
-	else
-	{
-		$Form->text_input( $dummy_fields[ 'login' ], $login, 30, '', '', array( 'maxlength' => 255, 'placeholder' => T_('Username (or email address)'), 'input_required' => 'required' ) );
-	}
+    if ($params['inskin']) {
+        $Form->text($dummy_fields['login'], $login, 30, /* TRANS: noun */ T_('Login'), '', 255, 'input_text');
+    } else {
+        $Form->text_input($dummy_fields['login'], $login, 30, '', '', [
+            'maxlength' => 255,
+            'placeholder' => T_('Username (or email address)'),
+            'input_required' => 'required',
+        ]);
+    }
 
-	$Form->buttons_input( array( array( /* TRANS: Text for submit button to request an activation link by email */ 'value' => T_('Send me a recovery email!'), 'class' => 'btn-primary btn-lg' ) ) );
+    $Form->buttons_input([[
+        /* TRANS: Text for submit button to request an activation link by email */ 'value' => T_('Send me a recovery email!'),
+        'class' => 'btn-primary btn-lg',
+    ]]);
 
-	echo '<b>'.T_('How to reset your password:').'</b>';
-	echo '<ol>';
-	echo '<li>'.T_('Please enter your login (or email address) above.').'</li>';
-	echo '<li>'.T_('An email will be sent to your registered email address immediately.').'</li>';
-	echo '<li>'.T_('As soon as you receive the email, click on the link therein to reset your password.').'</li>';
-	echo '<li>'.T_('Your browser will open a page where you can set a new password.').'</li>';
-	echo '</ol>';
-	echo '<p class="red"><strong>'.T_('Important: for security reasons, you must do steps 1 and 4 on the same computer and same web browser. Do not close your browser in between.').'</strong></p>';
+    echo '<b>' . T_('How to reset your password:') . '</b>';
+    echo '<ol>';
+    echo '<li>' . T_('Please enter your login (or email address) above.') . '</li>';
+    echo '<li>' . T_('An email will be sent to your registered email address immediately.') . '</li>';
+    echo '<li>' . T_('As soon as you receive the email, click on the link therein to reset your password.') . '</li>';
+    echo '<li>' . T_('Your browser will open a page where you can set a new password.') . '</li>';
+    echo '</ol>';
+    echo '<p class="red"><strong>' . T_('Important: for security reasons, you must do steps 1 and 4 on the same computer and same web browser. Do not close your browser in between.') . '</strong></p>';
 
-	$login_link = '<a href="'.$login_url.'" class="floatleft">'.'&laquo; '.T_('Back to login form').'</a>';
+    $login_link = '<a href="' . $login_url . '" class="floatleft">' . '&laquo; ' . T_('Back to login form') . '</a>';
 
-	if( $params['inskin'] )
-	{
-		echo '<div class="login_actions" style="text-align:right; margin: 1em 0 1ex"><strong>';
-		echo $login_link;
-		echo '</strong></div>';
-	}
+    if ($params['inskin']) {
+        echo '<div class="login_actions" style="text-align:right; margin: 1em 0 1ex"><strong>';
+        echo $login_link;
+        echo '</strong></div>';
+    }
 
-	$Form->end_fieldset();
+    $Form->end_fieldset();
 
-	$Form->end_form();
+    $Form->end_form();
 
-	echo $params['form_after'];
+    echo $params['form_after'];
 
-	if( ! $params['inskin'] )
-	{
-		echo '<div class="evo_form__login_links">';
-		echo $login_link;
-		echo '<div class="clear"></div>';
-		echo '</div>';
-	}
+    if (! $params['inskin']) {
+        echo '<div class="evo_form__login_links">';
+        echo $login_link;
+        echo '<div class="clear"></div>';
+        echo '</div>';
+    }
 }
 
 
 /**
  * Display user activate info form content
  *
- * @param Object activateinfo Form
+ * @param object activateinfo Form
  */
-function display_activateinfo( $params )
+function display_activateinfo($params)
 {
-	global $current_User, $Settings, $UserSettings, $Plugins;
-	global $rsc_path, $rsc_url, $dummy_fields;
+    global $current_User, $Settings, $UserSettings, $Plugins;
+    global $rsc_path, $rsc_url, $dummy_fields;
 
-	if( !is_logged_in() )
-	{ // if this happens, it means the code is not correct somewhere before this
-		debug_die( "You must log in to see this page." );
-	}
+    if (! is_logged_in()) { // if this happens, it means the code is not correct somewhere before this
+        debug_die("You must log in to see this page.");
+    }
 
-	$params = array_merge( array(
-			'use_form_wrapper' => true,
-			'form_before'      => '',
-			'form_after'       => '',
-			'form_action'      => get_htsrv_url( 'login' ).'login.php',
-			'form_name'        => 'form_validatemail',
-			'form_class'       => 'fform',
-			'form_layout'      => 'fieldset',
-			'form_template'    => NULL,
-			'form_title'       => '',
-			'inskin'           => false,
-		), $params );
+    $params = array_merge([
+        'use_form_wrapper' => true,
+        'form_before' => '',
+        'form_after' => '',
+        'form_action' => get_htsrv_url('login') . 'login.php',
+        'form_name' => 'form_validatemail',
+        'form_class' => 'fform',
+        'form_layout' => 'fieldset',
+        'form_template' => null,
+        'form_title' => '',
+        'inskin' => false,
+    ], $params);
 
-	// init force request new email address param
-	$force_request = param( 'force_request', 'boolean', false );
+    // init force request new email address param
+    $force_request = param('force_request', 'boolean', false);
 
-	// get last activation email timestamp from User Settings
-	$last_activation_email_date = $UserSettings->get( 'last_activation_email', $current_User->ID );
+    // get last activation email timestamp from User Settings
+    $last_activation_email_date = $UserSettings->get('last_activation_email', $current_User->ID);
 
-	if( $force_request || empty( $last_activation_email_date ) )
-	{ // notification email was not sent yet, or user needs another one ( forced request )
-		echo $params['use_form_wrapper'] ? $params['form_before'] : '';
+    if ($force_request || empty($last_activation_email_date)) { // notification email was not sent yet, or user needs another one ( forced request )
+        echo $params['use_form_wrapper'] ? $params['form_before'] : '';
 
-		$Form = new Form( $params[ 'form_action' ], $params[ 'form_name' ], 'post', $params[ 'form_layout' ] );
+        $Form = new Form($params['form_action'], $params['form_name'], 'post', $params['form_layout']);
 
-		if( ! empty( $params['form_template'] ) )
-		{ // Switch layout to template from array
-			$Form->switch_template_parts( $params['form_template'] );
-		}
+        if (! empty($params['form_template'])) { // Switch layout to template from array
+            $Form->switch_template_parts($params['form_template']);
+        }
 
-		$Form->begin_form( $params[ 'form_class' ] );
+        $Form->begin_form($params['form_class']);
 
-		$Form->add_crumb( 'validateform' );
-		$Form->hidden( 'action', 'req_activate_email');
-		$Form->hidden( 'redirect_to', $params[ 'redirect_to' ] );
-		if( $params[ 'inskin' ] )
-		{
-			$Form->hidden( 'inskin', $params[ 'inskin' ] );
-			$Form->hidden( 'blog', $params[ 'blog' ] );
-		}
-		else
-		{ // Form title in basic form
-			echo '<h4>'.$params['form_title'].'</h4>';
-		}
-		$Form->hidden( 'req_activate_email_submit', 1 ); // to know if the form has been submitted
+        $Form->add_crumb('validateform');
+        $Form->hidden('action', 'req_activate_email');
+        $Form->hidden('redirect_to', $params['redirect_to']);
+        if ($params['inskin']) {
+            $Form->hidden('inskin', $params['inskin']);
+            $Form->hidden('blog', $params['blog']);
+        } else { // Form title in basic form
+            echo '<h4>' . $params['form_title'] . '</h4>';
+        }
+        $Form->hidden('req_activate_email_submit', 1); // to know if the form has been submitted
 
-		$Form->begin_fieldset();
+        $Form->begin_fieldset();
 
-		echo '<ol>';
-		echo '<li>'.T_('Please confirm your email address below:').'</li>';
-		echo '</ol>';
+        echo '<ol>';
+        echo '<li>' . T_('Please confirm your email address below:') . '</li>';
+        echo '</ol>';
 
-		// set email text input content only if this is not a forced request. This way the user may have bigger chance to write a correct email address.
-		$user_email = ( $force_request ? '' : $current_User->email );
-		$Form->email_input( $dummy_fields[ 'email' ], $user_email, 42, T_('Your email'), array( 'maxlength' => 255, 'class' => 'input_text', 'required' => true, 'input_required' => 'required' ) );
-		$Form->end_fieldset();
+        // set email text input content only if this is not a forced request. This way the user may have bigger chance to write a correct email address.
+        $user_email = ($force_request ? '' : $current_User->email);
+        $Form->email_input($dummy_fields['email'], $user_email, 42, T_('Your email'), [
+            'maxlength' => 255,
+            'class' => 'input_text',
+            'required' => true,
+            'input_required' => 'required',
+        ]);
+        $Form->end_fieldset();
 
-		// Submit button:
-		$submit_button = array( array( 'name'=>'submit', 'value'=>T_('Send me a new activation email now!'), 'class'=>'btn-primary btn-lg' ) );
+        // Submit button:
+        $submit_button = [[
+            'name' => 'submit',
+            'value' => T_('Send me a new activation email now!'),
+            'class' => 'btn-primary btn-lg',
+        ]];
 
-		$Form->buttons_input($submit_button);
+        $Form->buttons_input($submit_button);
 
-		if( !$params[ 'inskin' ] )
-		{
-			$Plugins->trigger_event( 'DisplayValidateAccountFormFieldset', array( 'Form' => & $Form ) );
-		}
+        if (! $params['inskin']) {
+            $Plugins->trigger_event('DisplayValidateAccountFormFieldset', [
+                'Form' => &$Form,
+            ]);
+        }
 
-		$Form->end_form();
+        $Form->end_form();
 
-		echo $params['use_form_wrapper'] ? $params['form_after'] : '';
+        echo $params['use_form_wrapper'] ? $params['form_after'] : '';
 
-		return;
-	}
+        return;
+    }
 
-	// get notification email from general Settings
-	$notification_email = $Settings->get( 'notification_sender_email' );
-	// convert date to timestamp
-	$last_activation_email_ts = mysql2timestamp( $last_activation_email_date );
-	// get difference between local time and server time
-	$time_difference = $Settings->get('time_difference');
-	// get last activation email local date and time
-	$last_email_date = date( locale_datefmt(), $last_activation_email_ts + $time_difference );
-	$last_email_time = date( locale_shorttimefmt(), $last_activation_email_ts + $time_difference );
-	$user_email = $current_User->email;
+    // get notification email from general Settings
+    $notification_email = $Settings->get('notification_sender_email');
+    // convert date to timestamp
+    $last_activation_email_ts = mysql2timestamp($last_activation_email_date);
+    // get difference between local time and server time
+    $time_difference = $Settings->get('time_difference');
+    // get last activation email local date and time
+    $last_email_date = date(locale_datefmt(), $last_activation_email_ts + $time_difference);
+    $last_email_time = date(locale_shorttimefmt(), $last_activation_email_ts + $time_difference);
+    $user_email = $current_User->email;
 
-	echo $params['form_before'];
+    echo $params['form_before'];
 
-	if( ! $params['inskin'] )
-	{
-		echo '<div class="'.$params['form_class'].'">';
-	}
+    if (! $params['inskin']) {
+        echo '<div class="' . $params['form_class'] . '">';
+    }
 
-	echo '<ol start="1" class="expanded">';
-	$instruction =  sprintf( T_('Open your email account for %s and find a message we sent you on %s at %s with the following title:'), $user_email, $last_email_date, $last_email_time );
-	echo '<li>'.$instruction.'<br /><b>'.sprintf( T_('Activate your account: %s'), $current_User->login ).'</b>';
-	$request_validation_url = 'href="'.regenerate_url( '', 'force_request=1&validate_required=true&redirect_to='.rawurlencode( $params[ 'redirect_to' ] ) ).'"';
-	echo '<p>'.sprintf( T_('NOTE: If you don\'t find it, check your "Junk", "Spam" or "Unsolicited email" folders. If you really can\'t find it, <a %s>request a new activation email</a>.'), $request_validation_url ).'</p></li>';
-	echo '<li>'.sprintf( T_('Add us (%s) to your contacts to make sure you receive future email notifications, especially when someone sends you a private message.'), '<b><span class="nowrap">'.$notification_email.'</span></b>').'</li>';
-	echo '<li><b class="red">'.T_('Click on the activation link in the email.').'</b>';
-	echo '<p>'.T_('If this does not work, please copy/paste that link into the address bar of your browser.').'</p>';
-	echo '<p>'.sprintf( T_('If you need assistance, please send an email to %s'), '<b><a href="mailto:"'.$notification_email.'"><span class="nowrap">'.$notification_email.'</span></a></b>' ).'</p></li>';
-	echo '</ol>';
+    echo '<ol start="1" class="expanded">';
+    $instruction = sprintf(T_('Open your email account for %s and find a message we sent you on %s at %s with the following title:'), $user_email, $last_email_date, $last_email_time);
+    echo '<li>' . $instruction . '<br /><b>' . sprintf(T_('Activate your account: %s'), $current_User->login) . '</b>';
+    $request_validation_url = 'href="' . regenerate_url('', 'force_request=1&validate_required=true&redirect_to=' . rawurlencode($params['redirect_to'])) . '"';
+    echo '<p>' . sprintf(T_('NOTE: If you don\'t find it, check your "Junk", "Spam" or "Unsolicited email" folders. If you really can\'t find it, <a %s>request a new activation email</a>.'), $request_validation_url) . '</p></li>';
+    echo '<li>' . sprintf(T_('Add us (%s) to your contacts to make sure you receive future email notifications, especially when someone sends you a private message.'), '<b><span class="nowrap">' . $notification_email . '</span></b>') . '</li>';
+    echo '<li><b class="red">' . T_('Click on the activation link in the email.') . '</b>';
+    echo '<p>' . T_('If this does not work, please copy/paste that link into the address bar of your browser.') . '</p>';
+    echo '<p>' . sprintf(T_('If you need assistance, please send an email to %s'), '<b><a href="mailto:"' . $notification_email . '"><span class="nowrap">' . $notification_email . '</span></a></b>') . '</p></li>';
+    echo '</ol>';
 
-	if( ( strpos( $user_email, '@hotmail.' ) || strpos( $user_email, '@live.' ) || strpos( $user_email, '@msn.' ) )
-		&& file_exists( $rsc_path.'img/login_help/hotmail-validation.png' ) )
-	{ // The user is on hotmail and we have a help screen to show him: (needs to be localized and include correct site name)
-		echo '<div class="center" style="margin: 2em auto"><img src="'.$rsc_url.'img/login_help/hotmail-validation.png" /></div>';
-	}
-	elseif( ( strpos( $user_email, '@gmail.com' ) || strpos( $user_email, '@googlemail.com' ) )
-		&& file_exists( $rsc_path.'img/login_help/gmail-validation.png' ) )
-	{ // The user is on hotmail and we have a help screen to show him: (needs to be localized and include correct site name)
-		echo '<div class="center" style="margin: 2em auto"><img src="'.$rsc_url.'img/login_help/gmail-validation.png" /></div>';
-	}
+    if ((strpos($user_email, '@hotmail.') || strpos($user_email, '@live.') || strpos($user_email, '@msn.'))
+        && file_exists($rsc_path . 'img/login_help/hotmail-validation.png')) { // The user is on hotmail and we have a help screen to show him: (needs to be localized and include correct site name)
+        echo '<div class="center" style="margin: 2em auto"><img src="' . $rsc_url . 'img/login_help/hotmail-validation.png" /></div>';
+    } elseif ((strpos($user_email, '@gmail.com') || strpos($user_email, '@googlemail.com'))
+        && file_exists($rsc_path . 'img/login_help/gmail-validation.png')) { // The user is on hotmail and we have a help screen to show him: (needs to be localized and include correct site name)
+        echo '<div class="center" style="margin: 2em auto"><img src="' . $rsc_url . 'img/login_help/gmail-validation.png" /></div>';
+    }
 
-	if( ! $params['inskin'] )
-	{
-		echo '</div>';
-	}
+    if (! $params['inskin']) {
+        echo '</div>';
+    }
 
-	echo $params['form_after'];
+    echo $params['form_after'];
 
-	if( $current_User->grp_ID == 1 )
-	{ // allow admin users to validate themselves by a single click:
-		global $Session, $redirect_to;
+    if ($current_User->grp_ID == 1) { // allow admin users to validate themselves by a single click:
+        global $Session, $redirect_to;
 
-		if( empty( $redirect_to ) )
-		{ // Set where to redirect
-			$redirect_to = regenerate_url();
-		}
+        if (empty($redirect_to)) { // Set where to redirect
+            $redirect_to = regenerate_url();
+        }
 
-		echo $params['use_form_wrapper'] ? $params['form_before'] : '';
+        echo $params['use_form_wrapper'] ? $params['form_before'] : '';
 
-		$Form = new Form( get_htsrv_url( 'login' ).'login.php', 'form_validatemail', 'post', 'fieldset' );
+        $Form = new Form(get_htsrv_url('login') . 'login.php', 'form_validatemail', 'post', 'fieldset');
 
-		if( ! empty( $params['form_template'] ) )
-		{ // Switch layout to template from array
-			$Form->switch_template_parts( $params['form_template'] );
-		}
+        if (! empty($params['form_template'])) { // Switch layout to template from array
+            $Form->switch_template_parts($params['form_template']);
+        }
 
-		$Form->begin_form( 'evo_form__login' );
+        $Form->begin_form('evo_form__login');
 
-		$Form->add_crumb( 'validateform' );
-		$Form->hidden( 'action', 'activateacc_sec' );
-		$Form->hidden( 'redirect_to', url_rel_to_same_host( $redirect_to, get_htsrv_url( 'login' ) ) );
-		$Form->hidden( 'reqID', 1 );
-		$Form->hidden( 'sessID', $Session->ID );
+        $Form->add_crumb('validateform');
+        $Form->hidden('action', 'activateacc_sec');
+        $Form->hidden('redirect_to', url_rel_to_same_host($redirect_to, get_htsrv_url('login')));
+        $Form->hidden('reqID', 1);
+        $Form->hidden('sessID', $Session->ID);
 
-		echo '<p>'.sprintf( T_('Since you are an admin user, you can activate your account (%s) by a single click.' ), $current_User->email ).'</p>';
-		// TODO: the form submit value is too wide (in Konqueror and most probably in IE!)
-		$Form->end_form( array( array(
-				'name'  => 'form_validatemail_admin_submit',
-				'value' => T_('Activate my account!'),
-				'class' => 'ActionButton btn btn-primary'
-			) ) ); // display hidden fields etc
+        echo '<p>' . sprintf(T_('Since you are an admin user, you can activate your account (%s) by a single click.'), $current_User->email) . '</p>';
+        // TODO: the form submit value is too wide (in Konqueror and most probably in IE!)
+        $Form->end_form([[
+            'name' => 'form_validatemail_admin_submit',
+            'value' => T_('Activate my account!'),
+            'class' => 'ActionButton btn btn-primary',
+        ]]); // display hidden fields etc
 
-		echo $params['use_form_wrapper'] ? $params['form_after'] : '';
-	}
+        echo $params['use_form_wrapper'] ? $params['form_after'] : '';
+    }
 
-	echo '<div class="evo_form__login_links floatright">';
-	user_logout_link();
-	echo '</div>';
+    echo '<div class="evo_form__login_links floatright">';
+    user_logout_link();
+    echo '</div>';
 }
 
 
@@ -3595,34 +3327,34 @@ function display_activateinfo( $params )
  *
  * @param array Params
  */
-function display_password_indicator( $params = array() )
+function display_password_indicator($params = [])
 {
-	global $Settings, $Collection, $Blog, $rsc_url, $disp, $dummy_fields;
+    global $Settings, $Collection, $Blog, $rsc_url, $disp, $dummy_fields;
 
-	$password_indicator_config = array_merge( array(
-			'pass1_id'    => $dummy_fields[ 'pass1' ],
-			'pass2_id'    => $dummy_fields[ 'pass2' ],
-			'login_id'    => $dummy_fields[ 'login' ],
-			'email_id'    => $dummy_fields[ 'email' ],
-			'field_width' => NULL, // Use current field width
-			'disp_status' => true,
-			'disp_time'   => false,
-			'blacklist'   => array( 'b2evo', 'b2evolution' ), // Identify the password as "weak" if it includes any of these words
-			'rsc_url'     => force_https_url( $rsc_url, 'login'),
-			'msg_status_very_weak' => format_to_output( T_('Very weak'), 'htmlattr' ),
-			'msg_status_weak'      => format_to_output( T_('Weak'), 'htmlattr' ),
-			'msg_status_soso'      => format_to_output( T_('So-so'), 'htmlattr' ),
-			'msg_status_good'      => format_to_output( T_('Good'), 'htmlattr' ),
-			'msg_status_great'     => format_to_output( T_('Great'), 'htmlattr' ),
-			'msg_est_crack_time'   => T_('Estimated crack time'),
-			'msg_illegal_char'     => sprintf( TS_('Password cannot contain the following characters: %s'), '<code><</code> <code>></code> <code>&</code>' ),
-			'msg_min_pwd_len'      => sprintf( TS_('The minimum password length is %d characters.'), $Settings->get( 'user_minpwdlen' ) ),
-			'msg_pwd_not_matching' => TS_('The second password is different from the first.'),
-			'min_pwd_len'          => (int) $Settings->get( 'user_minpwdlen' ),
-			'error_icon'           => get_icon( 'xross' ),
-		), $params );
+    $password_indicator_config = array_merge([
+        'pass1_id' => $dummy_fields['pass1'],
+        'pass2_id' => $dummy_fields['pass2'],
+        'login_id' => $dummy_fields['login'],
+        'email_id' => $dummy_fields['email'],
+        'field_width' => null, // Use current field width
+        'disp_status' => true,
+        'disp_time' => false,
+        'blacklist' => ['b2evo', 'b2evolution'], // Identify the password as "weak" if it includes any of these words
+        'rsc_url' => force_https_url($rsc_url, 'login'),
+        'msg_status_very_weak' => format_to_output(T_('Very weak'), 'htmlattr'),
+        'msg_status_weak' => format_to_output(T_('Weak'), 'htmlattr'),
+        'msg_status_soso' => format_to_output(T_('So-so'), 'htmlattr'),
+        'msg_status_good' => format_to_output(T_('Good'), 'htmlattr'),
+        'msg_status_great' => format_to_output(T_('Great'), 'htmlattr'),
+        'msg_est_crack_time' => T_('Estimated crack time'),
+        'msg_illegal_char' => sprintf(TS_('Password cannot contain the following characters: %s'), '<code><</code> <code>></code> <code>&</code>'),
+        'msg_min_pwd_len' => sprintf(TS_('The minimum password length is %d characters.'), $Settings->get('user_minpwdlen')),
+        'msg_pwd_not_matching' => TS_('The second password is different from the first.'),
+        'min_pwd_len' => (int) $Settings->get('user_minpwdlen'),
+        'error_icon' => get_icon('xross'),
+    ], $params);
 
-	expose_var_to_js( 'evo_init_password_indicator_config', evo_json_encode( $password_indicator_config ) );
+    expose_var_to_js('evo_init_password_indicator_config', evo_json_encode($password_indicator_config));
 }
 
 
@@ -3633,14 +3365,14 @@ function display_password_indicator( $params = array() )
  */
 function display_password_js_edit()
 {
-	global $Settings;
+    global $Settings;
 
-	$password_edit_config = array(
-			'user_minpwdlen' => intval( $Settings->get('user_minpwdlen') ),
-			'msg_pwd_trim_warning' => T_('The leading and trailing spaces will be trimmed.'),
-		);
+    $password_edit_config = [
+        'user_minpwdlen' => intval($Settings->get('user_minpwdlen')),
+        'msg_pwd_trim_warning' => T_('The leading and trailing spaces will be trimmed.'),
+    ];
 
-	expose_var_to_js( 'evo_init_password_edit_config', evo_json_encode( $password_edit_config ) );
+    expose_var_to_js('evo_init_password_edit_config', evo_json_encode($password_edit_config));
 }
 
 
@@ -3649,24 +3381,30 @@ function display_password_js_edit()
  *
  * @param array Params
  */
-function display_login_validator( $params = array() )
+function display_login_validator($params = [])
 {
-	global $rsc_url, $dummy_fields;
+    global $rsc_url, $dummy_fields;
 
-	$login_validator_config = array(
-			'login_id'             => $dummy_fields[ 'login' ],
-			'rsc_url'              => $rsc_url,
-			'login_htsrv_url'      => get_htsrv_url( 'login' ),
-			'login_icon_load'      => '<img src="'.$rsc_url.'img/ajax-loader.gif" alt="'.T_('Loading...').'" title="'.T_('Loading...').'" style="margin:2px 0 0 5px" align="top" />',
-			'login_icon_available' => get_icon( 'allowback', 'imgtag', array( 'title' => T_('This username is available.') ) ),
-			'login_icon_exists'    => get_icon( 'xross', 'imgtag', array( 'title' => T_('This username is already in use. Please choose another one.') ) ),
-			'login_icon_error'     => get_icon( 'xross', 'imgtag', array( 'title' => '$error_msg$' ) ),
-			'login_text_empty'     => T_('Choose a username'),
-			'login_text_available' => T_('This username is available.'),
-			'login_text_exists'    => T_('This username is already in use. Please choose another one.'),
-		);
+    $login_validator_config = [
+        'login_id' => $dummy_fields['login'],
+        'rsc_url' => $rsc_url,
+        'login_htsrv_url' => get_htsrv_url('login'),
+        'login_icon_load' => '<img src="' . $rsc_url . 'img/ajax-loader.gif" alt="' . T_('Loading...') . '" title="' . T_('Loading...') . '" style="margin:2px 0 0 5px" align="top" />',
+        'login_icon_available' => get_icon('allowback', 'imgtag', [
+            'title' => T_('This username is available.'),
+        ]),
+        'login_icon_exists' => get_icon('xross', 'imgtag', [
+            'title' => T_('This username is already in use. Please choose another one.'),
+        ]),
+        'login_icon_error' => get_icon('xross', 'imgtag', [
+            'title' => '$error_msg$',
+        ]),
+        'login_text_empty' => T_('Choose a username'),
+        'login_text_available' => T_('This username is available.'),
+        'login_text_exists' => T_('This username is already in use. Please choose another one.'),
+    ];
 
-	expose_var_to_js( 'evo_init_login_validator_config', evo_json_encode( $login_validator_config ) );
+    expose_var_to_js('evo_init_login_validator_config', evo_json_encode($login_validator_config));
 }
 
 
@@ -3676,19 +3414,19 @@ function display_login_validator( $params = array() )
  *
  * @param array Params
  */
-function init_field_editor_js( $params = array() )
+function init_field_editor_js($params = [])
 {
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'field_prefix' => 'order-',
-			'action_url'   => '',
-			'question'     => TS_("Do you want discard your changes for this order field?"),
-			'relative_to'  => 'rsc_url',
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'field_prefix' => 'order-',
+        'action_url' => '',
+        'question' => TS_("Do you want discard your changes for this order field?"),
+        'relative_to' => 'rsc_url',
+    ], $params);
 
-	require_js_defer( '#jquery#', $params['relative_to'] ); // dependency
+    require_js_defer('#jquery#', $params['relative_to']); // dependency
 
-	add_js_headline( 'jQuery( document ).on( "click", "[id^='.$params['field_prefix'].']", function()
+    add_js_headline('jQuery( document ).on( "click", "[id^=' . $params['field_prefix'] . ']", function()
 {
 	if( jQuery( this ).find( "input" ).length > 0 )
 	{ // This order field is already editing now
@@ -3751,7 +3489,7 @@ function init_field_editor_js( $params = array() )
 		}
 		else if( key == 13 )
 		{ // "Enter" key
-			results_ajax_load( jQuery( this ), "'.$params['action_url'].'" + parent_obj.attr( "id" ) + "&new_value=" + jQuery( this ).val() );
+			results_ajax_load( jQuery( this ), "' . $params['action_url'] . '" + parent_obj.attr( "id" ) + "&new_value=" + jQuery( this ).val() );
 		}
 	} );
 
@@ -3762,7 +3500,7 @@ function init_field_editor_js( $params = array() )
 		var parent_obj = jQuery( this ).parent();
 		if( parent_obj.attr( "rel" ) != jQuery( this ).val() )
 		{ // Value was changed, ask about saving
-			if( confirm( "'.$params['question'].'" ) )
+			if( confirm( "' . $params['question'] . '" ) )
 			{
 				revert_changes = true;
 			}
@@ -3787,23 +3525,22 @@ function init_field_editor_js( $params = array() )
 	} );
 
 	return false;
-} );' );
+} );');
 }
 
 
 /**
  * Registers headlines for initialization of functions to autocomplete usernames in textarea
  */
-function init_autocomplete_usernames_js( $relative_to = 'rsc_url' )
+function init_autocomplete_usernames_js($relative_to = 'rsc_url')
 {
-	global $Collection, $Blog;
+    global $Collection, $Blog;
 
-	if( ! empty( $Blog ) )
-	{	// Set global blog ID for textcomplete(Used to sort users by collection members and assignees):
-		add_js_headline( 'var blog = '.$Blog->ID );
-	}
-	require_js_defer( '#jquery#', $relative_to );
-	require_js_defer( 'build/textcomplete.bmin.js', $relative_to );
+    if (! empty($Blog)) {	// Set global blog ID for textcomplete(Used to sort users by collection members and assignees):
+        add_js_headline('var blog = ' . $Blog->ID);
+    }
+    require_js_defer('#jquery#', $relative_to);
+    require_js_defer('build/textcomplete.bmin.js', $relative_to);
 }
 
 
@@ -3813,14 +3550,13 @@ function init_autocomplete_usernames_js( $relative_to = 'rsc_url' )
  *
  * @param string Selection for jQuery selector
  */
-function get_prevent_key_enter_js( $jquery_selection )
+function get_prevent_key_enter_js($jquery_selection)
 {
-	if( empty( $jquery_selection ) )
-	{ // jQuery selection must be filled
-		return '';
-	}
+    if (empty($jquery_selection)) { // jQuery selection must be filled
+        return '';
+    }
 
-	return 'jQuery( "'.$jquery_selection.'" ).keypress( function( e ) { if( e.keyCode == 13 ) return false; } );';
+    return 'jQuery( "' . $jquery_selection . '" ).keypress( function( e ) { if( e.keyCode == 13 ) return false; } );';
 }
 
 
@@ -3833,17 +3569,16 @@ function get_prevent_key_enter_js( $jquery_selection )
  * @param boolean|string 'relative' or true (relative to <base>) or 'rsc_url' (relative to $rsc_url) or 'blog' (relative to current blog URL -- may be subdomain or custom domain)
  * @param boolean TRUE - to require css file, FALSE - is used when css file is already loaded inside superbundle file
  */
-function init_fontawesome_icons( $icons_type = 'fontawesome', $relative_to = 'rsc_url', $require_files = true )
+function init_fontawesome_icons($icons_type = 'fontawesome', $relative_to = 'rsc_url', $require_files = true)
 {
-	global $b2evo_icons_type;
+    global $b2evo_icons_type;
 
-	// Use font-awesome icons, @see get_icon()
-	$b2evo_icons_type = $icons_type;
+    // Use font-awesome icons, @see get_icon()
+    $b2evo_icons_type = $icons_type;
 
-	if( $require_files )
-	{	// Load main CSS file of font-awesome icons
-		require_css( '#fontawesome#', $relative_to );
-	}
+    if ($require_files) {	// Load main CSS file of font-awesome icons
+        require_css('#fontawesome#', $relative_to);
+    }
 }
 
 
@@ -3855,78 +3590,64 @@ function init_fontawesome_icons( $icons_type = 'fontawesome', $relative_to = 'rs
  * @param array Additional parameters
  * @return string HTML of stars
  */
-function get_star_rating( $value, $stars_num = 5, $params = array() )
+function get_star_rating($value, $stars_num = 5, $params = [])
 {
-	global $b2evo_icons_type;
+    global $b2evo_icons_type;
 
-	if( isset( $b2evo_icons_type ) && strpos( $b2evo_icons_type, 'fontawesome' ) !== false )
-	{	// Use font-awesome stars if it is allowed for current skin:
-		$icon_type = 'fa';
-		$default_params = array(
-			'stars_before'       => '<span class="evo_stars">',
-			'stars_star_full'    => '<i class="fa fa-star"></i>',
-			'stars_star_percent' => '<i class="fa fa-star evo_star_percent"><i class="fa fa-star" style="width:$percent$"></i></i>', // $percent$ is replaced with values like 10%, 67%
-			'stars_star_empty'   => '<i class="fa fa-star evo_star_empty"></i>',
-			'stars_after'        => '</span>',
-		);
-	}
-	else
-	{	// Use image stars for v5 skins:
-		$icon_type = 'img';
-		$default_params = array(
-			'stars_before'       => '<span class="evo_stars_img" style="width:$stars_width$px">',
-			'stars_star_full'    => '<i>*</i>',
-			'stars_star_percent' => '<i class="evo_stars_img_empty"><i style="width:$percent$">%</i></i>', // $percent$ is replaced with values like 10%, 67%
-			'stars_star_empty'   => '<i class="evo_stars_img_empty">-</i>',
-			'stars_after'        => '</span>',
-		);
-	}
+    if (isset($b2evo_icons_type) && strpos($b2evo_icons_type, 'fontawesome') !== false) {	// Use font-awesome stars if it is allowed for current skin:
+        $icon_type = 'fa';
+        $default_params = [
+            'stars_before' => '<span class="evo_stars">',
+            'stars_star_full' => '<i class="fa fa-star"></i>',
+            'stars_star_percent' => '<i class="fa fa-star evo_star_percent"><i class="fa fa-star" style="width:$percent$"></i></i>', // $percent$ is replaced with values like 10%, 67%
+            'stars_star_empty' => '<i class="fa fa-star evo_star_empty"></i>',
+            'stars_after' => '</span>',
+        ];
+    } else {	// Use image stars for v5 skins:
+        $icon_type = 'img';
+        $default_params = [
+            'stars_before' => '<span class="evo_stars_img" style="width:$stars_width$px">',
+            'stars_star_full' => '<i>*</i>',
+            'stars_star_percent' => '<i class="evo_stars_img_empty"><i style="width:$percent$">%</i></i>', // $percent$ is replaced with values like 10%, 67%
+            'stars_star_empty' => '<i class="evo_stars_img_empty">-</i>',
+            'stars_after' => '</span>',
+        ];
+    }
 
-	$params = array_merge( $default_params, $params );
+    $params = array_merge($default_params, $params);
 
-	if( ! is_numeric( $stars_num ) )
-	{	// Fix for old function where second param was a string:
-		$stars_num = 5;
-	}
+    if (! is_numeric($stars_num)) {	// Fix for old function where second param was a string:
+        $stars_num = 5;
+    }
 
-	$stars_num = intval( $stars_num );
+    $stars_num = intval($stars_num);
 
-	if( $stars_num < 1 )
-	{	// Nothing to display:
-		return '';
-	}
+    if ($stars_num < 1) {	// Nothing to display:
+        return '';
+    }
 
-	if( $icon_type == 'fa' )
-	{
-		$stars_template = $params['stars_before'];
-	}
-	else
-	{	// Image icons must have a specific width depending on number of stars:
-		// (16px is width of one image star icon)
-		$stars_template = str_replace( '$stars_width$', $stars_num * 16, $params['stars_before'] );
-	}
+    if ($icon_type == 'fa') {
+        $stars_template = $params['stars_before'];
+    } else {	// Image icons must have a specific width depending on number of stars:
+        // (16px is width of one image star icon)
+        $stars_template = str_replace('$stars_width$', $stars_num * 16, $params['stars_before']);
+    }
 
-	$full_stars_max = floor( $value );
-	$percents = round( ( $value - $full_stars_max ) * 100 );
-	for( $s = 1; $s <= $stars_num; $s++ )
-	{
-		if( $s == $full_stars_max + 1 && $percents > 0 )
-		{	// Percent star:
-			$stars_template .= str_replace( '$percent$', $percents.'%', $params['stars_star_percent'] );
-		}
-		elseif( $s > $full_stars_max )
-		{	// Empty star:
-			$stars_template .= $params['stars_star_empty'];
-		}
-		else
-		{	// Full star:
-			$stars_template .= $params['stars_star_full'];
-		}
-	}
+    $full_stars_max = floor($value);
+    $percents = round(($value - $full_stars_max) * 100);
+    for ($s = 1; $s <= $stars_num; $s++) {
+        if ($s == $full_stars_max + 1 && $percents > 0) {	// Percent star:
+            $stars_template .= str_replace('$percent$', $percents . '%', $params['stars_star_percent']);
+        } elseif ($s > $full_stars_max) {	// Empty star:
+            $stars_template .= $params['stars_star_empty'];
+        } else {	// Full star:
+            $stars_template .= $params['stars_star_full'];
+        }
+    }
 
-	$stars_template .= $params['stars_after'];
+    $stars_template .= $params['stars_after'];
 
-	return $stars_template;
+    return $stars_template;
 }
 
 
@@ -3936,23 +3657,20 @@ function get_star_rating( $value, $stars_num = 5, $params = array() )
  * @param boolean|string 'relative' or true (relative to <base>) or 'rsc_url' (relative to $rsc_url) or 'blog' (relative to current blog URL -- may be subdomain or custom domain)
  * @param boolean TRUE to make the links table sortable
  */
-function init_fileuploader_js( $relative_to = 'rsc_url', $load_sortable_js = true )
+function init_fileuploader_js($relative_to = 'rsc_url', $load_sortable_js = true)
 {
-	require_js_defer( '#jquery#', $relative_to, true );
-	// Used to make uploader area resizable:
-	require_js_defer( '#jqueryUI#', $relative_to, true );
+    require_js_defer('#jquery#', $relative_to, true);
+    // Used to make uploader area resizable:
+    require_js_defer('#jqueryUI#', $relative_to, true);
 
-	if( $load_sortable_js )
-	{	// Load JS file uploader with sortable feature for links/attachments:
-		require_js_defer( 'build/evo_fileuploader_sortable.bmin.js', $relative_to, true );
-	}
-	else
-	{	// Load JS file uploader:
-		require_js_defer( 'build/evo_fileuploader.bmin.js', $relative_to, true );
-	}
+    if ($load_sortable_js) {	// Load JS file uploader with sortable feature for links/attachments:
+        require_js_defer('build/evo_fileuploader_sortable.bmin.js', $relative_to, true);
+    } else {	// Load JS file uploader:
+        require_js_defer('build/evo_fileuploader.bmin.js', $relative_to, true);
+    }
 
-	// Styles for file uploader:
-	require_css( 'fine-uploader.css', $relative_to, NULL, NULL, '#', true );
+    // Styles for file uploader:
+    require_css('fine-uploader.css', $relative_to, null, null, '#', true);
 }
 
 
@@ -3963,7 +3681,7 @@ function init_fileuploader_js( $relative_to = 'rsc_url', $load_sortable_js = tru
  */
 function get_pro_label()
 {
-	return '<span class="label label-sm label-primary">PRO</span>';
+    return '<span class="label label-sm label-primary">PRO</span>';
 }
 
 
@@ -3974,53 +3692,49 @@ function get_pro_label()
  * @param object Collection
  * @return string Content mode
  */
-function resolve_auto_content_mode( $content_mode, $setting_Blog = NULL )
+function resolve_auto_content_mode($content_mode, $setting_Blog = null)
 {
-	global $disp_detail;
+    global $disp_detail;
 
-	if( $content_mode != 'auto' )
-	{	// Use this function only for auto content mode:
-		return $content_mode;
-	}
+    if ($content_mode != 'auto') {	// Use this function only for auto content mode:
+        return $content_mode;
+    }
 
-	if( $setting_Blog === NULL )
-	{	// Use current Collection:
-		global $Blog;
-		$setting_Blog = $Blog;
-	}
+    if ($setting_Blog === null) {	// Use current Collection:
+        global $Blog;
+        $setting_Blog = $Blog;
+    }
 
-	if( empty( $setting_Blog ) )
-	{	// Collection must be defined on call this function:
-		debug_die( 'Collection is not initialized to resolve auto content mode!' );
-	}
+    if (empty($setting_Blog)) {	// Collection must be defined on call this function:
+        debug_die('Collection is not initialized to resolve auto content mode!');
+    }
 
-	switch( $disp_detail )
-	{
-		case 'posts-cat':
-		case 'posts-topcat-intro':
-		case 'posts-topcat-nointro':
-		case 'posts-subcat-intro':
-		case 'posts-subcat-nointro':
-			return $setting_Blog->get_setting('chapter_content');
+    switch ($disp_detail) {
+        case 'posts-cat':
+        case 'posts-topcat-intro':
+        case 'posts-topcat-nointro':
+        case 'posts-subcat-intro':
+        case 'posts-subcat-nointro':
+            return $setting_Blog->get_setting('chapter_content');
 
-		case 'posts-tag':
-			return $setting_Blog->get_setting('tag_content');
+        case 'posts-tag':
+            return $setting_Blog->get_setting('tag_content');
 
-		case 'posts-date':
-			return $setting_Blog->get_setting('archive_content');
+        case 'posts-date':
+            return $setting_Blog->get_setting('archive_content');
 
-		case 'single':
-		case 'page':
-			return 'full';
+        case 'single':
+        case 'page':
+            return 'full';
 
-		case 'posts-default':  // home page 1
-		case 'posts-next':     // next page 2, 3, etc
-		case 'posts-next-intro':   // next page with intro
-		case 'posts-next-nointro': // next page without intro
-			return $setting_Blog->get_setting('main_content');
+        case 'posts-default':  // home page 1
+        case 'posts-next':     // next page 2, 3, etc
+        case 'posts-next-intro':   // next page with intro
+        case 'posts-next-nointro': // next page without intro
+            return $setting_Blog->get_setting('main_content');
 
-		default: // posts-filtered, search, flagged and etc.
-			return $setting_Blog->get_setting('filtered_content');
-	}
+        default: // posts-filtered, search, flagged and etc.
+            return $setting_Blog->get_setting('filtered_content');
+    }
 }
 ?>

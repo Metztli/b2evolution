@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,156 +26,147 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_member_count_Widget extends ComponentWidget
 {
-	var $icon = 'users';
+    public $icon = 'users';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_member_count' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_member_count');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('member-count-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'member-count-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Member count');
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display a count of the collection members.');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Member count');
-	}
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Collection, $Blog;
 
+        $this->init_display($params);
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display a count of the collection members.');
-	}
+        $this->disp_params = array_merge([
+            'before' => ' ',
+            'after' => ' ',
+        ], $this->disp_params);
 
+        if (empty($Blog) || $Blog->get_setting('allow_access') != 'members') {	// Use this widget only when blog is allowed only for members:
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because of collection restriction.');
+            return false;
+        }
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Collection, $Blog;
+        echo $this->disp_params['block_start'];
 
-		$this->init_display( $params );
+        echo $this->disp_params['before'];
 
-		$this->disp_params = array_merge( array(
-				'before'    => ' ',
-				'after'     => ' ',
-			), $this->disp_params );
+        echo '<a href="' . url_add_param($Blog->get('usersurl'), 'filter=new&amp;membersonly=1') . '">' . sprintf(T_('%d members'), $this->get_members_count()) . '</a>';
 
-		if( empty( $Blog ) || $Blog->get_setting( 'allow_access' ) != 'members' )
-		{	// Use this widget only when blog is allowed only for members:
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because of collection restriction.' );
-			return false;
-		}
+        echo $this->disp_params['after'];
 
-		echo $this->disp_params['block_start'];
+        echo $this->disp_params['block_end'];
 
-		echo $this->disp_params['before'];
+        return true;
+    }
 
-		echo '<a href="'.url_add_param( $Blog->get( 'usersurl' ), 'filter=new&amp;membersonly=1' ).'">'.sprintf( T_('%d members'), $this->get_members_count() ).'</a>';
+    /**
+     * Get a count of blog members
+     *
+     * @return integer Members count
+     */
+    public function get_members_count()
+    {
+        global $Collection, $Blog, $DB;
 
-		echo $this->disp_params['after'];
+        // Get blog owner
+        $blogowner_SQL = new SQL();
+        $blogowner_SQL->SELECT('user_ID, user_status');
+        $blogowner_SQL->FROM('T_users');
+        $blogowner_SQL->FROM_add('INNER JOIN T_blogs ON blog_owner_user_ID = user_ID');
+        $blogowner_SQL->WHERE('blog_ID = ' . $DB->quote($Blog->ID));
 
-		echo $this->disp_params['block_end'];
+        // Calculate what users are members of the blog
+        $userperms_SQL = new SQL();
+        $userperms_SQL->SELECT('user_ID, user_status');
+        $userperms_SQL->FROM('T_users');
+        $userperms_SQL->FROM_add('INNER JOIN T_coll_user_perms ON ( bloguser_user_ID = user_ID AND bloguser_ismember = 1 )');
+        $userperms_SQL->WHERE('bloguser_blog_ID = ' . $DB->quote($Blog->ID));
 
-		return true;
-	}
-
-
-	/**
-	 * Get a count of blog members
-	 *
-	 * @return integer Members count
-	 */
-	function get_members_count()
-	{
-		global $Collection, $Blog, $DB;
-
-		// Get blog owner
-		$blogowner_SQL = new SQL();
-		$blogowner_SQL->SELECT( 'user_ID, user_status' );
-		$blogowner_SQL->FROM( 'T_users' );
-		$blogowner_SQL->FROM_add( 'INNER JOIN T_blogs ON blog_owner_user_ID = user_ID' );
-		$blogowner_SQL->WHERE( 'blog_ID = '.$DB->quote( $Blog->ID ) );
-
-		// Calculate what users are members of the blog
-		$userperms_SQL = new SQL();
-		$userperms_SQL->SELECT( 'user_ID, user_status' );
-		$userperms_SQL->FROM( 'T_users' );
-		$userperms_SQL->FROM_add( 'INNER JOIN T_coll_user_perms ON ( bloguser_user_ID = user_ID AND bloguser_ismember = 1 )' );
-		$userperms_SQL->WHERE( 'bloguser_blog_ID = '.$DB->quote( $Blog->ID ) );
-
-		// Calculate what user groups are members of the blog
-		$usergroups_SQL = new SQL();
-		$usergroups_SQL->SELECT( 'user_ID, user_status' );
-		$usergroups_SQL->FROM( 'T_users' );
-		$usergroups_SQL->FROM_add( 'INNER JOIN T_groups ON grp_ID = user_grp_ID' );
-		$usergroups_SQL->FROM_add( 'LEFT JOIN T_coll_group_perms ON ( bloggroup_ismember = 1
+        // Calculate what user groups are members of the blog
+        $usergroups_SQL = new SQL();
+        $usergroups_SQL->SELECT('user_ID, user_status');
+        $usergroups_SQL->FROM('T_users');
+        $usergroups_SQL->FROM_add('INNER JOIN T_groups ON grp_ID = user_grp_ID');
+        $usergroups_SQL->FROM_add('LEFT JOIN T_coll_group_perms ON ( bloggroup_ismember = 1
 			AND ( bloggroup_group_ID = grp_ID
-			      OR bloggroup_group_ID IN ( SELECT sug_grp_ID FROM T_users__secondary_user_groups WHERE sug_user_ID = user_ID ) ) )' );
-		$usergroups_SQL->WHERE( 'bloggroup_blog_ID = '.$DB->quote( $Blog->ID ) );
+			      OR bloggroup_group_ID IN ( SELECT sug_grp_ID FROM T_users__secondary_user_groups WHERE sug_user_ID = user_ID ) ) )');
+        $usergroups_SQL->WHERE('bloggroup_blog_ID = ' . $DB->quote($Blog->ID));
 
-		$members_count_sql = 'SELECT COUNT( user_ID ) AS coll_member_count FROM ( '
-			.$blogowner_SQL->get()
-			.' UNION '
-			.$userperms_SQL->get()
-			.' UNION '
-			.$usergroups_SQL->get().' ) AS members '
-			.'WHERE members.user_status != "closed"';
+        $members_count_sql = 'SELECT COUNT( user_ID ) AS coll_member_count FROM ( '
+            . $blogowner_SQL->get()
+            . ' UNION '
+            . $userperms_SQL->get()
+            . ' UNION '
+            . $usergroups_SQL->get() . ' ) AS members '
+            . 'WHERE members.user_status != "closed"';
 
-		return intval( $DB->get_var( $members_count_sql ) );
-	}
+        return intval($DB->get_var($members_count_sql));
+    }
 
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => 'any',     // Have the settings of ANY blog changed ? (ex: new skin here, new name on another)
+        ];
+    }
 
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		return array(
-				'wi_ID'       => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID' => 'any',     // Have the settings of ANY blog changed ? (ex: new skin here, new name on another)
-			);
-	}
-
-
-	/**
-	 * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
-	 *
-	 * @param string Message
-	 */
-	function display_debug_message( $message = NULL )
-	{
-		if( $this->mode == 'designer' )
-		{	// Display message on designer mode:
-			echo $this->disp_params['block_start'];
-			echo $this->disp_params['before'];
-			echo $message;
-			echo $this->disp_params['after'];
-			echo $this->disp_params['block_end'];
-		}
-	}
+    /**
+     * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
+     *
+     * @param string Message
+     */
+    public function display_debug_message($message = null)
+    {
+        if ($this->mode == 'designer') {	// Display message on designer mode:
+            echo $this->disp_params['block_start'];
+            echo $this->disp_params['before'];
+            echo $message;
+            echo $this->disp_params['after'];
+            echo $this->disp_params['block_end'];
+        }
+    }
 }

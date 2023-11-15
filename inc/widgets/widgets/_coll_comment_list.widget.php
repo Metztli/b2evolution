@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,267 +26,251 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_comment_list_Widget extends ComponentWidget
 {
-	var $icon = 'comments-o';
+    public $icon = 'comments-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_comment_list' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_comment_list');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'note' => T_('Title to display in your skin.'),
+                'size' => 40,
+                'defaultvalue' => T_('Recent Comments'),
+            ],
+            'disp_order' => [
+                'label' => T_('Order'),
+                'note' => T_('Order to display items'),
+                'type' => 'select',
+                'options' => [
+                    'DESC' => T_('Newest to oldest'),
+                    'ASC' => T_('Oldest to newest'),
+                    'RAND' => T_('Random selection'),
+                ],
+                'defaultvalue' => 'DESC',
+            ],
+            'limit' => [
+                'label' => T_('Max items'),
+                'note' => T_('Maximum number of items to display.'),
+                'size' => 4,
+                'defaultvalue' => 20,
+            ],
+            'author_links' => [
+                'label' => T_('Link to author'),
+                'note' => T_('Link the author to their url'),
+                'defaultvalue' => true,
+                'type' => 'checkbox',
+            ],
+            'hover_text' => [
+                'label' => T_('Hover text'),
+                'note' => T_('Text to show when hovering over the link'),
+                'size' => 40,
+                'defaultvalue' => T_('Read the full comment'),
+                'type' => 'text',
+            ],
+            'comment_excerpt' => [
+                'label' => T_('Comment excerpt'),
+                'note' => T_('Show comment excerpt version'),
+                'defaultvalue' => false,
+                'type' => 'checkbox',
+            ],
+            'max_words' => [
+                'label' => T_('Max words'),
+                'note' => T_('Maximum number of words shown in the excerpt'),
+                'size' => 4,
+                'defaultvalue' => 20,
+            ],
+            'blog_ID' => [
+                'label' => T_('Collection'),
+                'note' => T_('ID of the collection to use, leave empty for the current collection.'),
+                'size' => 4,
+                'type' => 'integer',
+                'allow_empty' => true,
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-			'title' => array(
-				'label' => T_('Block title'),
-				'note' => T_( 'Title to display in your skin.' ),
-				'size' => 40,
-				'defaultvalue' => T_('Recent Comments'),
-			),
-			'disp_order' => array(
-				'label' => T_('Order'),
-				'note' => T_('Order to display items'),
-				'type' => 'select',
-				'options' => array( 'DESC' => T_( 'Newest to oldest' ), 'ASC' => T_( 'Oldest to newest' ), 'RAND' => T_( 'Random selection' ) ),
-				'defaultvalue' => 'DESC',
-			),
-			'limit' => array(
-				'label' => T_( 'Max items' ),
-				'note' => T_( 'Maximum number of items to display.' ),
-				'size' => 4,
-				'defaultvalue' => 20,
-			),
-			'author_links' => array(
-				'label' => T_( 'Link to author'),
-				'note' => T_( 'Link the author to their url' ),
-				'defaultvalue' => true,
-				'type' => 'checkbox',
-			),
-			'hover_text' => array(
-				'label' => T_( 'Hover text'),
-				'note' => T_( 'Text to show when hovering over the link' ),
-				'size' => 40,
-				'defaultvalue' => T_( 'Read the full comment' ),
-				'type' => 'text',
-			),
-			'comment_excerpt' => array(
-				'label' => T_('Comment excerpt'),
-				'note' => T_('Show comment excerpt version'),
-				'defaultvalue' => false,
-				'type' => 'checkbox'
-			),
-			'max_words' => array(
-				'label' => T_('Max words'),
-				'note' => T_('Maximum number of words shown in the excerpt'),
-				'size' => 4,
-				'defaultvalue' => 20
-			),
-			'blog_ID' => array(
-				'label' => T_( 'Collection' ),
-				'note' => T_( 'ID of the collection to use, leave empty for the current collection.' ),
-				'size' => 4,
-				'type' => 'integer',
-				'allow_empty' => true,
-			),
-		), parent::get_param_definitions( $params )	);
+        return $r;
+    }
 
-		return $r;
-	}
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('comment-list-widget');
+    }
 
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Comment list');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'comment-list-widget' );
-	}
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output($this->disp_params['title']);
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('List of comments; click goes to comment.');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Comment list');
-	}
+    /**
+     * Prepare display params
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function init_display($params)
+    {
+        parent::init_display($params);
 
+        $this->disp_params['comment_excerpt_before'] = '<p class="comment_excerpt">';
+        $this->disp_params['comment_excerpt_after'] = '</p>';
+    }
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output($this->disp_params['title']);
-	}
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Collection, $Blog;
 
+        $this->init_display($params);
 
-  /**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('List of comments; click goes to comment.');
-	}
+        $blog_ID = intval($this->disp_params['blog_ID']);
 
+        $blogCache = &get_BlogCache();
+        $listBlog = ($blog_ID ? $blogCache->get_by_ID($blog_ID) : $Blog);
 
-	/**
-	 * Prepare display params
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function init_display( $params )
-	{
-		parent::init_display( $params );
+        // Create ItemList
+        // Note: we pass a widget specific prefix in order to make sure to never interfere with the mainlist
+        $limit = intval($this->disp_params['limit']);
+        $order = $this->disp_params['disp_order'];
 
-		$this->disp_params['comment_excerpt_before'] = '<p class="comment_excerpt">';
-		$this->disp_params['comment_excerpt_after'] = '</p>';
-	}
+        $CommentList = new CommentList2($listBlog, $limit, 'CommentCache', $this->code . '_');
 
+        $filters = [
+            'types' => ['comment', 'trackback', 'pingback', 'webmention'],
+            'statuses' => explode(',', $listBlog->get_setting('comment_inskin_statuses')),
+            'order' => $order,
+            'comments' => $limit,
+        ];
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Collection, $Blog;
+        if (isset($this->disp_params['page'])) {
+            $filters['page'] = $this->disp_params['page'];
+        }
 
-		$this->init_display( $params );
+        // Filter list:
+        $CommentList->set_filters($filters, false); // we don't want to memorize these params
 
-		$blog_ID = intval( $this->disp_params['blog_ID'] );
+        // Get ready for display (runs the query):
+        $CommentList->display_init();
 
-		$blogCache = & get_BlogCache();
-		$listBlog = ( $blog_ID ? $blogCache->get_by_ID( $blog_ID ) : $Blog );
+        // Get count of comments to be displayed
+        $count = $CommentList->get_total_rows();
 
-		// Create ItemList
-		// Note: we pass a widget specific prefix in order to make sure to never interfere with the mainlist
-		$limit = intval( $this->disp_params['limit'] );
-		$order = $this->disp_params['disp_order'];
+        if ($count) {
+            echo $this->disp_params['block_start'];
 
-		$CommentList = new CommentList2( $listBlog, $limit, 'CommentCache', $this->code.'_' );
+            // Display title if requested
+            $this->disp_title();
 
-		$filters = array(
-				'types' => array( 'comment', 'trackback', 'pingback', 'webmention' ),
-				'statuses' => explode( ',', $listBlog->get_setting( 'comment_inskin_statuses' ) ),
-				'order' => $order,
-				'comments' => $limit,
-			);
+            echo $this->disp_params['block_body_start'];
 
-		if( isset( $this->disp_params['page'] ) )
-		{
-			$filters['page'] = $this->disp_params['page'];
-		}
+            echo $this->disp_params['list_start'];
 
-		// Filter list:
-		$CommentList->set_filters( $filters, false ); // we don't want to memorize these params
+            if (empty($this->disp_params['author_link_text'])) {
+                $this->disp_params['author_link_text'] = 'auto';
+            }
 
-		// Get ready for display (runs the query):
-		$CommentList->display_init();
+            /**
+             * @var Comment
+             */
+            while ($Comment = &$CommentList->get_next()) { // Loop through comments:
+                // Load comment's Item object:
+                $Comment->get_Item();
+                echo $this->disp_params['item_start'];
+                $Comment->author('', ' ', '', ' ', 'htmlbody', $this->disp_params['author_links'], $this->disp_params['author_link_text']);
+                echo T_('on ');
+                $Comment->permanent_link([
+                    'text' => $Comment->Item->title,
+                    'title' => $this->disp_params['hover_text'],
+                ]);
+                if ($this->disp_params['comment_excerpt']) {
+                    echo $this->disp_params['comment_excerpt_before'];
+                    echo excerpt_words($Comment->get_content(), $this->disp_params['max_words'], [
+                        'cutting_mark' => '',
+                        'continued_link' => $Comment->get_permanent_url(),
+                    ]);
+                    echo $this->disp_params['comment_excerpt_after'];
+                }
+                echo $this->disp_params['item_end'];
+            }	// End of comment loop.}
 
-		// Get count of comments to be displayed
-		$count = $CommentList->get_total_rows();
+            if (isset($this->disp_params['page'])) {
+                if (empty($this->disp_params['pagination'])) {
+                    $this->disp_params['pagination'] = [];
+                }
+                $CommentList->page_links($this->disp_params['pagination']);
+            }
 
-		if( $count )
-		{
-			echo $this->disp_params['block_start'];
+            echo $this->disp_params['list_end'];
 
-			// Display title if requested
-			$this->disp_title();
+            echo $this->disp_params['block_body_end'];
 
-			echo $this->disp_params['block_body_start'];
+            echo $this->disp_params['block_end'];
 
-			echo $this->disp_params[ 'list_start' ];
+            return true;
+        } else {	// If there are no comments to display:
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because there are no comments to display.');
+            return false;
+        }
+    }
 
-			if( empty( $this->disp_params[ 'author_link_text' ] ) )
-			{
-				$this->disp_params[ 'author_link_text' ] = 'auto';
-			}
-
-			/**
-			 * @var Comment
-			 */
-			while( $Comment = & $CommentList->get_next() )
-			{ // Loop through comments:
-				// Load comment's Item object:
-				$Comment->get_Item();
-				echo $this->disp_params[ 'item_start' ];
-				$Comment->author( '', ' ', '', ' ', 'htmlbody', $this->disp_params[ 'author_links' ], $this->disp_params[ 'author_link_text' ] );
-				echo T_( 'on ' );
-				$Comment->permanent_link( array(
-					'text'        => $Comment->Item->title,
-					'title'       => $this->disp_params[ 'hover_text' ],
-					) );
-				if( $this->disp_params['comment_excerpt'] )
-				{
-					echo $this->disp_params['comment_excerpt_before'];
-					echo excerpt_words( $Comment->get_content(), $this->disp_params['max_words'], array(
-							'cutting_mark'   => '',
-							'continued_link' => $Comment->get_permanent_url(),
-						) );
-					echo $this->disp_params['comment_excerpt_after'];
-				}
-				echo $this->disp_params[ 'item_end' ];
-			}	// End of comment loop.}
-
-			if( isset( $this->disp_params['page'] ) )
-			{
-				if( empty( $this->disp_params['pagination'] ) )
-				{
-					$this->disp_params['pagination'] = array();
-				}
-				$CommentList->page_links( $this->disp_params['pagination'] );
-			}
-
-			echo $this->disp_params[ 'list_end' ];
-
-			echo $this->disp_params['block_body_end'];
-
-			echo $this->disp_params['block_end'];
-
-			return true;
-		}
-		else
-		{	// If there are no comments to display:
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because there are no comments to display.' );
-			return false;
-		}
-	}
-
-
-	/**
-	 * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
-	 *
-	 * @param string Message
-	 */
-	function display_debug_message( $message = NULL )
-	{
-		if( $this->mode == 'designer' )
-		{	// Display message on designer mode:
-			echo $this->disp_params['block_start'];
-			echo $this->disp_params['block_body_start'];
-			echo $this->disp_params['list_start'];
-			echo $this->disp_params['item_start'];
-			echo $message;
-			echo $this->disp_params['item_end'];
-			echo $this->disp_params['list_end'];
-			echo $this->disp_params['block_body_end'];
-			echo $this->disp_params['block_end'];
-		}
-	}
+    /**
+     * Display debug message e-g on designer mode when we need to show widget when nothing to display currently
+     *
+     * @param string Message
+     */
+    public function display_debug_message($message = null)
+    {
+        if ($this->mode == 'designer') {	// Display message on designer mode:
+            echo $this->disp_params['block_start'];
+            echo $this->disp_params['block_body_start'];
+            echo $this->disp_params['list_start'];
+            echo $this->disp_params['item_start'];
+            echo $message;
+            echo $this->disp_params['item_end'];
+            echo $this->disp_params['list_end'];
+            echo $this->disp_params['block_body_end'];
+            echo $this->disp_params['block_end'];
+        }
+    }
 }
-
-?>

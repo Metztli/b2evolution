@@ -13,24 +13,21 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF POSTS -------------------------------------
 // Display message if no post:
-display_if_empty( array(
-		'msg_empty' => sprintf( T_("You haven't flagged any post yet. You can click on the flag icon (%s) on any post in order to save it here for later review."), get_icon( 'flag_off', 'imgtag' ) )
-	) );
+display_if_empty([
+    'msg_empty' => sprintf(T_("You haven't flagged any post yet. You can click on the flag icon (%s) on any post in order to save it here for later review."), get_icon('flag_off', 'imgtag')),
+]);
 
-while( mainlist_get_item() )
-{	// For each collection post, do everything below up to the closing curly brace "}"
-
-	// ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-	skin_include( '_item_block.inc.php', array(
-			'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
-			'image_size'	 =>	'fit-400x320',
-		) );
-	// ----------------------------END ITEM BLOCK  ----------------------------
-
+while (mainlist_get_item()) {	// For each collection post, do everything below up to the closing curly brace "}"
+    // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+    skin_include('_item_block.inc.php', [
+        'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
+        'image_size' => 'fit-400x320',
+    ]);
+    // ----------------------------END ITEM BLOCK  ----------------------------
 }	// ---------------------------------- END OF POSTS ------------------------------------
-
-?>

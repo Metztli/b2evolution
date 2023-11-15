@@ -11,30 +11,30 @@
  *
  * @package htsrv
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Header
 $page_title = T_('Change password');
 $wrap_width = '650px';
-require dirname(__FILE__).'/_html_header.inc.php';
+require dirname(__FILE__) . '/_html_header.inc.php';
 
 // Change password form
-$params = array(
-		'display_profile_tabs'      => false,
-		'display_abandon_link'      => false,
-		'button_class'              => ' btn-lg',
-		'skin_form_params'          => $login_form_params,
-		'form_action'               => get_htsrv_url( 'login' ).'login.php',
-		'form_button_action'        => 'updatepwd',
-		'form_hidden_crumb'         => 'regform',
-		'check_User_from_Session'   => false,
-	);
+$params = [
+    'display_profile_tabs' => false,
+    'display_abandon_link' => false,
+    'button_class' => ' btn-lg',
+    'skin_form_params' => $login_form_params,
+    'form_action' => get_htsrv_url('login') . 'login.php',
+    'form_button_action' => 'updatepwd',
+    'form_hidden_crumb' => 'regform',
+    'check_User_from_Session' => false,
+];
 $disp = 'pwdchange'; // Select a form to change a password
-$Session->set( 'core.unsaved_User', $forgetful_User );
-require skin_fallback_path( '_profile.disp.php', 6 );
+$Session->set('core.unsaved_User', $forgetful_User);
+require skin_fallback_path('_profile.disp.php', 6);
 
 // Footer
-require dirname(__FILE__).'/_html_footer.inc.php';
-
-?>
+require dirname(__FILE__) . '/_html_footer.inc.php';

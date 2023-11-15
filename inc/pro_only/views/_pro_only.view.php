@@ -11,15 +11,16 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-$info_Widget = new Widget( 'block_item' );
+$info_Widget = new Widget('block_item');
 
 $info_Widget->title = TB_('PRO version information');
-$info_Widget->disp_template_replaced( 'block_start' );
+$info_Widget->disp_template_replaced('block_start');
 
 echo TB_('This feature is available only in b2evolution PRO.');
 
-$info_Widget->disp_template_raw( 'block_end' );
-?>
+$info_Widget->disp_template_raw('block_end');

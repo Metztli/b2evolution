@@ -11,96 +11,90 @@
  * @package evocore
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $admin_url, $Collection, $Blog, $edited_Item;
 
 // Create query
 $SQL = new SQL();
-$SQL->SELECT( 'it.*' );
-$SQL->FROM( 'T_items__type AS it' );
-$SQL->FROM_add( 'INNER JOIN T_items__type_coll ON itc_ityp_ID = ityp_ID AND itc_coll_ID = '.$Blog->ID );
+$SQL->SELECT('it.*');
+$SQL->FROM('T_items__type AS it');
+$SQL->FROM_add('INNER JOIN T_items__type_coll ON itc_ityp_ID = ityp_ID AND itc_coll_ID = ' . $Blog->ID);
 // Check what item types are allowed for current user and selected blog
-$item_type_perm_levels = array( 'standard', 'restricted', 'admin' );
-foreach( $item_type_perm_levels as $i => $item_type_perm_level )
-{
-	if( ! check_user_perm( 'blog_item_type_'.$item_type_perm_level, 'edit', false, $Blog->ID ) )
-	{
-		unset( $item_type_perm_levels[ $i ] );
-	}
+$item_type_perm_levels = ['standard', 'restricted', 'admin'];
+foreach ($item_type_perm_levels as $i => $item_type_perm_level) {
+    if (! check_user_perm('blog_item_type_' . $item_type_perm_level, 'edit', false, $Blog->ID)) {
+        unset($item_type_perm_levels[$i]);
+    }
 }
 $item_type_perm_levels[] = '-1'; // to restrict all item types if no one is allowed
-$SQL->WHERE( 'ityp_perm_level IN ( '.$DB->quote( $item_type_perm_levels ).' )' );
+$SQL->WHERE('ityp_perm_level IN ( ' . $DB->quote($item_type_perm_levels) . ' )');
 
 // Create result set:
-$Results = new Results( $SQL->get(), 'editityp_' );
+$Results = new Results($SQL->get(), 'editityp_');
 
 $Results->title = TB_('Change Post Type');
 
-if( $edited_Item->ID > 0 )
-{
-	$close_url = $admin_url.'?ctrl=items&amp;action=edit&amp;blog='.$Blog->ID.'&amp;restore=1&amp;p='.$edited_Item->ID;
+if ($edited_Item->ID > 0) {
+    $close_url = $admin_url . '?ctrl=items&amp;action=edit&amp;blog=' . $Blog->ID . '&amp;restore=1&amp;p=' . $edited_Item->ID;
+} else {
+    $close_url = $admin_url . '?ctrl=items&amp;action=new&amp;blog=' . $Blog->ID . '&amp;restore=1';
 }
-else
-{
-	$close_url = $admin_url.'?ctrl=items&amp;action=new&amp;blog='.$Blog->ID.'&amp;restore=1';
-}
-$Results->global_icon( TB_('Do NOT change the type'), 'close', $close_url );
+$Results->global_icon(TB_('Do NOT change the type'), 'close', $close_url);
 
 
 /**
  * Callback to make post type name depending on post type id
  */
-function get_name_for_itemtype( $ityp_ID, $name )
+function get_name_for_itemtype($ityp_ID, $name)
 {
-	global $admin_url, $edited_Item, $from_tab, $blog;
+    global $admin_url, $edited_Item, $from_tab, $blog;
 
-	$current = $edited_Item->ityp_ID == $ityp_ID ? ' '.TB_('(current)') : '';
+    $current = $edited_Item->ityp_ID == $ityp_ID ? ' ' . TB_('(current)') : '';
 
-	$from_tab_param = empty( $from_tab ) ? '' : '&amp;from_tab='.$from_tab;
+    $from_tab_param = empty($from_tab) ? '' : '&amp;from_tab=' . $from_tab;
 
-	$duplicated_item_param = get_param( 'p' ) > 0 ? '&amp;p='.get_param( 'p' ) : '';
+    $duplicated_item_param = get_param('p') > 0 ? '&amp;p=' . get_param('p') : '';
 
-	return '<strong><a href="'.$admin_url.'?ctrl=items&amp;action=update_type&amp;blog='.$blog.'&amp;post_ID='.$edited_Item->ID.'&amp;ityp_ID='.$ityp_ID.$from_tab_param.$duplicated_item_param.'&amp;'.url_crumb( 'item' ).'">'
-		.$name.'</a></strong>'
-		.$current;
+    return '<strong><a href="' . $admin_url . '?ctrl=items&amp;action=update_type&amp;blog=' . $blog . '&amp;post_ID=' . $edited_Item->ID . '&amp;ityp_ID=' . $ityp_ID . $from_tab_param . $duplicated_item_param . '&amp;' . url_crumb('item') . '">'
+        . $name . '</a></strong>'
+        . $current;
 }
 
-$Results->cols[] = array(
-		'th' => TB_('ID'),
-		'order' => 'ityp_ID',
-		'th_class' => 'shrinkwrap',
-		'td_class' => '%conditional( "'.$edited_Item->ityp_ID.'" == #ityp_ID#, "info shrinkwrap", "shrinkwrap" )%',
-		'td' => '$ityp_ID$',
-	);
+$Results->cols[] = [
+    'th' => TB_('ID'),
+    'order' => 'ityp_ID',
+    'th_class' => 'shrinkwrap',
+    'td_class' => '%conditional( "' . $edited_Item->ityp_ID . '" == #ityp_ID#, "info shrinkwrap", "shrinkwrap" )%',
+    'td' => '$ityp_ID$',
+];
 
-$Results->cols[] = array(
-		'th' => TB_('Name'),
-		'order' => 'ityp_name',
-		'td' => '%get_name_for_itemtype( #ityp_ID#, #ityp_name# )%',
-		'td_class' => '%conditional( "'.$edited_Item->ityp_ID.'" == #ityp_ID#, "info", "" )%',
-	);
+$Results->cols[] = [
+    'th' => TB_('Name'),
+    'order' => 'ityp_name',
+    'td' => '%get_name_for_itemtype( #ityp_ID#, #ityp_name# )%',
+    'td_class' => '%conditional( "' . $edited_Item->ityp_ID . '" == #ityp_ID#, "info", "" )%',
+];
 
-$Results->cols[] = array(
-		'th' => TB_('Template name'),
-		'order' => 'ityp_template_name',
-		'td' => '%conditional( #ityp_template_name# == "", "", #ityp_template_name#.".*.php" )%',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'center %conditional( "'.$edited_Item->ityp_ID.'" == #ityp_ID#, " info", "" )%'
-	);
+$Results->cols[] = [
+    'th' => TB_('Template name'),
+    'order' => 'ityp_template_name',
+    'td' => '%conditional( #ityp_template_name# == "", "", #ityp_template_name#.".*.php" )%',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'center %conditional( "' . $edited_Item->ityp_ID . '" == #ityp_ID#, " info", "" )%',
+];
 
-if( check_user_perm( 'options', 'edit' ) )
-{	// Add aactions if current user has a permission:
-	$Results->cols[] = array(
-			'th' => TB_('Actions'),
-			'td' => action_icon( TB_('Edit this Post Type...'), 'edit', $admin_url.'?ctrl=itemtypes&amp;action=edit&amp;ityp_ID=$ityp_ID$' ),
-			'th_class' => 'shrinkwrap',
-			'td_class' => 'center',
-		);
+if (check_user_perm('options', 'edit')) {	// Add aactions if current user has a permission:
+    $Results->cols[] = [
+        'th' => TB_('Actions'),
+        'td' => action_icon(TB_('Edit this Post Type...'), 'edit', $admin_url . '?ctrl=itemtypes&amp;action=edit&amp;ityp_ID=$ityp_ID$'),
+        'th_class' => 'shrinkwrap',
+        'td_class' => 'center',
+    ];
 }
 
 // Display results:
 $Results->display();
-
-?>

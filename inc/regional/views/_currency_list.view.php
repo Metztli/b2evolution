@@ -10,148 +10,165 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $admin_url;
 
 // Get params from request
-$s = param( 's', 'string', '', true );
+$s = param('s', 'string', '', true);
 
 //Create query
 $SQL = new SQL();
-$SQL->SELECT( '*' );
-$SQL->FROM( 'T_regional__currency' );
+$SQL->SELECT('*');
+$SQL->FROM('T_regional__currency');
 
-if( !empty($s) )
-{	// We want to filter on search keyword:
-	// Note: we use CONCAT_WS (Concat With Separator) because CONCAT returns NULL if any arg is NULL
-	$SQL->WHERE( 'CONCAT_WS( " ", curr_code, curr_name ) LIKE "%'.$DB->escape($s).'%"' );
+if (! empty($s)) {	// We want to filter on search keyword:
+    // Note: we use CONCAT_WS (Concat With Separator) because CONCAT returns NULL if any arg is NULL
+    $SQL->WHERE('CONCAT_WS( " ", curr_code, curr_name ) LIKE "%' . $DB->escape($s) . '%"');
 }
 
 // Create result set:
-$Results = new Results( $SQL->get(), 'curr_', '-A');
+$Results = new Results($SQL->get(), 'curr_', '-A');
 
-$Results->Cache = & get_CurrencyCache();
+$Results->Cache = &get_CurrencyCache();
 
-$Results->title = T_('Currencies list').get_manual_link('currencies-list');
+$Results->title = T_('Currencies list') . get_manual_link('currencies-list');
 
 /*
  * STATUS TD:
  */
-function curr_td_enabled( $curr_enabled, $curr_ID )
+function curr_td_enabled($curr_enabled, $curr_ID)
 {
-	$r = '';
+    $r = '';
 
-	if( $curr_enabled == true )
-	{
-		$r .= action_icon( T_('Disable the currency!'), 'bullet_full',
-										regenerate_url( 'action', 'action=disable_currency&amp;curr_ID='.$curr_ID.'&amp;'.url_crumb('currency') ) );
-	}
-	else
-	{
-		$r .= action_icon( T_('Enable the currency!'), 'bullet_empty',
-										regenerate_url( 'action', 'action=enable_currency&amp;curr_ID='.$curr_ID.'&amp;'.url_crumb('currency') ) );
-	}
+    if ($curr_enabled == true) {
+        $r .= action_icon(
+            T_('Disable the currency!'),
+            'bullet_full',
+            regenerate_url('action', 'action=disable_currency&amp;curr_ID=' . $curr_ID . '&amp;' . url_crumb('currency'))
+        );
+    } else {
+        $r .= action_icon(
+            T_('Enable the currency!'),
+            'bullet_empty',
+            regenerate_url('action', 'action=enable_currency&amp;curr_ID=' . $curr_ID . '&amp;' . url_crumb('currency'))
+        );
+    }
 
-	return $r;
-
+    return $r;
 }
-$Results->cols[] = array(
-		'th' => /* TRANS: shortcut for enabled */ T_('En'),
-		'th_title' => T_('Enabled'),
-		'order' => 'curr_enabled',
-		'td' => '%curr_td_enabled( #curr_enabled#, #curr_ID# )%',
-		'td_class' => 'center'
-	);
+$Results->cols[] = [
+    'th' => /* TRANS: shortcut for enabled */ T_('En'),
+    'th_title' => T_('Enabled'),
+    'order' => 'curr_enabled',
+    'td' => '%curr_td_enabled( #curr_enabled#, #curr_ID# )%',
+    'td_class' => 'center',
+];
 
 /**
  * Callback to add filters on top of the result set
  *
  * @param Form
  */
-function filter_currencies( & $Form )
+function filter_currencies(&$Form)
 {
-	$Form->text( 's', get_param('s'), 30, T_('Search'), '', 255 );
+    $Form->text('s', get_param('s'), 30, T_('Search'), '', 255);
 }
 
-$Results->filter_area = array(
-	'callback' => 'filter_currencies',
-	);
-$Results->register_filter_preset( 'all', T_('All'), '?ctrl=currencies' );
+$Results->filter_area = [
+    'callback' => 'filter_currencies',
+];
+$Results->register_filter_preset('all', T_('All'), '?ctrl=currencies');
 
-if( check_user_perm( 'options', 'edit', false ) )
-{ // We have permission to modify:
-	$Results->cols[] = array(
-							'th' => T_('Code'),
-							'order' => 'curr_code',
-							'td' => '<strong><a href="'.$admin_url.'?ctrl=currencies&amp;curr_ID=$curr_ID$&amp;action=edit" title="'.
-											T_('Edit this currency...').'">$curr_code$</a></strong>',
-							'td_class' => 'center',
-						);
-}
-else
-{	// View only:
-	$Results->cols[] = array(
-							'th' => T_('Code'),
-							'order' => 'curr_code',
-							'td' => '<strong>$curr_code$</strong>',
-							'td_class' => 'center',
-						);
-
+if (check_user_perm('options', 'edit', false)) { // We have permission to modify:
+    $Results->cols[] = [
+        'th' => T_('Code'),
+        'order' => 'curr_code',
+        'td' => '<strong><a href="' . $admin_url . '?ctrl=currencies&amp;curr_ID=$curr_ID$&amp;action=edit" title="' .
+                        T_('Edit this currency...') . '">$curr_code$</a></strong>',
+        'td_class' => 'center',
+    ];
+} else {	// View only:
+    $Results->cols[] = [
+        'th' => T_('Code'),
+        'order' => 'curr_code',
+        'td' => '<strong>$curr_code$</strong>',
+        'td_class' => 'center',
+    ];
 }
 
-$Results->cols[] = array(
-						'th' => T_('Shortcut'),
-						'order' => 'curr_shortcut',
-						'td' => '$curr_shortcut$',
-						'td_class' => 'center',
-					);
+$Results->cols[] = [
+    'th' => T_('Shortcut'),
+    'order' => 'curr_shortcut',
+    'td' => '$curr_shortcut$',
+    'td_class' => 'center',
+];
 
-$Results->cols[] = array(
-						'th' => T_('Name'),
-						'order' => 'curr_name',
-						'td' => '$curr_name$',
-					);
+$Results->cols[] = [
+    'th' => T_('Name'),
+    'order' => 'curr_name',
+    'td' => '$curr_name$',
+];
 
 /*
  * ACTIONS TD:
  */
-function curr_td_actions($curr_enabled, $curr_ID )
+function curr_td_actions($curr_enabled, $curr_ID)
 {
-	$r = '';
+    $r = '';
 
-	if( $curr_enabled == true )
-	{
-		$r .= action_icon( T_('Disable the currency!'), 'deactivate',
-										regenerate_url( 'action', 'action=disable_currency&amp;curr_ID='.$curr_ID.'&amp;'.url_crumb('currency') ) );
-	}
-	else
-	{
-		$r .= action_icon( T_('Enable the currency!'), 'activate',
-										regenerate_url( 'action', 'action=enable_currency&amp;curr_ID='.$curr_ID.'&amp;'.url_crumb('currency') ) );
-	}
-	$r .= action_icon( T_('Edit this currency...'), 'edit',
-										regenerate_url( 'action', 'curr_ID='.$curr_ID.'&amp;action=edit' ) );
-	$r .= action_icon( T_('Duplicate this currency...'), 'copy',
-										regenerate_url( 'action', 'curr_ID='.$curr_ID.'&amp;action=new' ) );
-	$r .= action_icon( T_('Delete this currency!'), 'delete',
-										regenerate_url( 'action', 'curr_ID='.$curr_ID.'&amp;action=delete&amp;'.url_crumb('currency') ) );
+    if ($curr_enabled == true) {
+        $r .= action_icon(
+            T_('Disable the currency!'),
+            'deactivate',
+            regenerate_url('action', 'action=disable_currency&amp;curr_ID=' . $curr_ID . '&amp;' . url_crumb('currency'))
+        );
+    } else {
+        $r .= action_icon(
+            T_('Enable the currency!'),
+            'activate',
+            regenerate_url('action', 'action=enable_currency&amp;curr_ID=' . $curr_ID . '&amp;' . url_crumb('currency'))
+        );
+    }
+    $r .= action_icon(
+        T_('Edit this currency...'),
+        'edit',
+        regenerate_url('action', 'curr_ID=' . $curr_ID . '&amp;action=edit')
+    );
+    $r .= action_icon(
+        T_('Duplicate this currency...'),
+        'copy',
+        regenerate_url('action', 'curr_ID=' . $curr_ID . '&amp;action=new')
+    );
+    $r .= action_icon(
+        T_('Delete this currency!'),
+        'delete',
+        regenerate_url('action', 'curr_ID=' . $curr_ID . '&amp;action=delete&amp;' . url_crumb('currency'))
+    );
 
-	return $r;
+    return $r;
 }
-if( check_user_perm( 'options', 'edit', false ) )
-{ // We have permission to modify:
-	$Results->cols[] = array(
-			'th' => T_('Actions'),
-			'th_class' => 'shrinkwrap',
-			'td' => '%curr_td_actions( #curr_enabled#, #curr_ID# )%',
-			'td_class' => 'shrinkwrap',
-		);
+if (check_user_perm('options', 'edit', false)) { // We have permission to modify:
+    $Results->cols[] = [
+        'th' => T_('Actions'),
+        'th_class' => 'shrinkwrap',
+        'td' => '%curr_td_actions( #curr_enabled#, #curr_ID# )%',
+        'td_class' => 'shrinkwrap',
+    ];
 
-	$Results->global_icon( T_('Create a new currency...'), 'new',
-				regenerate_url( 'action', 'action=new'), T_('New currency').' &raquo;', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+    $Results->global_icon(
+        T_('Create a new currency...'),
+        'new',
+        regenerate_url('action', 'action=new'),
+        T_('New currency') . ' &raquo;',
+        3,
+        4,
+        [
+            'class' => 'action_icon btn-primary',
+        ]
+    );
 }
 
 $Results->display();
-
-?>

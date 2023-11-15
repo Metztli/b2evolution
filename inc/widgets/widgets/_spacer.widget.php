@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,151 +26,138 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class spacer_Widget extends ComponentWidget
 {
-	var $icon = 'arrows-alt';
+    public $icon = 'arrows-alt';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'spacer' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'spacer');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('spacer-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'spacer-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Spacer');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     *
+     * @return string The block title, the first 60 characters of the block
+     *                content or an empty string.
+     */
+    public function get_short_desc()
+    {
+        return T_('Spacer');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Spacer');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display a spacer with your width and height.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'width' => [
+                'label' => T_('Width'),
+                'note' => T_('E-g: ') . '40px, 2em, ' . T_('etc.'),
+            ],
+            'height' => [
+                'label' => T_('Height'),
+                'note' => T_('E-g: ') . '40px, 2em, ' . T_('etc.'),
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 *
-	 * @return string The block title, the first 60 characters of the block
-	 *                content or an empty string.
-	 */
-	function get_short_desc()
-	{
-		return T_('Spacer');
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        $this->init_display($params);
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display a spacer with your width and height.');
-	}
+        $styles = [];
 
+        // Width:
+        $width = trim($this->disp_params['width']);
+        if (is_numeric($width)) {	// Use pixels by default for numbers without units:
+            $width .= 'px';
+        }
+        if (! empty($width)) {
+            $styles[] = 'width:' . $width;
+        }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-				'width' => array(
-					'label' => T_('Width'),
-					'note' => T_('E-g: ').'40px, 2em, '.T_('etc.'),
-				),
-				'height' => array(
-					'label' => T_('Height'),
-					'note' => T_('E-g: ').'40px, 2em, '.T_('etc.'),
-				),
-			), parent::get_param_definitions( $params ) );
+        // Height:
+        $height = trim($this->disp_params['height']);
+        if (is_numeric($height)) {	// Use pixels by default for numbers without units:
+            $height .= 'px';
+        }
+        if (! empty($height)) {
+            $styles[] = 'height:' . $height;
+        }
 
-		return $r;
-	}
+        $wrapper_html_tags = [
+            ['block_start', 'block_end'],
+            ['block_body_start', 'block_body_end'],
+            ['list_start', 'list_end'],
+            ['item_start', 'item_end'],
+        ];
 
+        // Print out wrapper start html tags:
+        $wrapper_end_html_tags = '';
+        $start_tag_is_detected = false;
+        foreach ($wrapper_html_tags as $wrapper_html_tag) {
+            $wrapper_start = $this->disp_params[$wrapper_html_tag[0]];
+            if (strpos($wrapper_start, '<') !== false) {	// Find first wrapper with html tag and append style attribute for it:
+                $wrapper_start = update_html_tag_attribs($wrapper_start, [
+                    'style' => implode(';', $styles),
+                ]);
+                $start_tag_is_detected = true;
+            }
+            echo $wrapper_start;
+            $wrapper_end_html_tags = $this->disp_params[$wrapper_html_tag[1]] . $wrapper_end_html_tags;
+            if ($start_tag_is_detected) {	// If first html tag has been detected then don't touch others:
+                break;
+            }
+        }
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		$this->init_display( $params );
+        if (! $start_tag_is_detected) {	// If no html tag has been detected then use simple <div> instead:
+            $styles[] = 'display:inline-block';
+            echo '<div style="' . implode(';', $styles) . '"></div>';
+        }
 
-		$styles = array();
+        // Print out wrapper end html tags:
+        echo $wrapper_end_html_tags;
 
-		// Width:
-		$width = trim( $this->disp_params['width'] );
-		if( is_numeric( $width ) )
-		{	// Use pixels by default for numbers without units:
-			$width .= 'px';
-		}
-		if( ! empty( $width ) )
-		{
-			$styles[] = 'width:'.$width;
-		}
-
-		// Height:
-		$height = trim( $this->disp_params['height'] );
-		if( is_numeric( $height ) )
-		{	// Use pixels by default for numbers without units:
-			$height .= 'px';
-		}
-		if( ! empty( $height ) )
-		{
-			$styles[] = 'height:'.$height;
-		}
-
-		$wrapper_html_tags = array(
-			array( 'block_start', 'block_end' ),
-			array( 'block_body_start', 'block_body_end' ),
-			array( 'list_start', 'list_end' ),
-			array( 'item_start', 'item_end' ),
-		);
-
-		// Print out wrapper start html tags:
-		$wrapper_end_html_tags = '';
-		$start_tag_is_detected = false;
-		foreach( $wrapper_html_tags as $wrapper_html_tag )
-		{
-			$wrapper_start = $this->disp_params[ $wrapper_html_tag[0] ];
-			if( strpos( $wrapper_start, '<' ) !== false )
-			{	// Find first wrapper with html tag and append style attribute for it:
-				$wrapper_start = update_html_tag_attribs( $wrapper_start, array( 'style' => implode( ';', $styles ) ) );
-				$start_tag_is_detected = true;
-			}
-			echo $wrapper_start;
-			$wrapper_end_html_tags = $this->disp_params[ $wrapper_html_tag[1] ].$wrapper_end_html_tags;
-			if( $start_tag_is_detected )
-			{	// If first html tag has been detected then don't touch others:
-				break;
-			}
-		}
-
-		if( ! $start_tag_is_detected )
-		{	// If no html tag has been detected then use simple <div> instead:
-			$styles[] = 'display:inline-block';
-			echo '<div style="'.implode( ';', $styles ).'"></div>';
-		}
-
-		// Print out wrapper end html tags:
-		echo $wrapper_end_html_tags;
-
-		return true;
-	}
+        return true;
+    }
 }
-?>

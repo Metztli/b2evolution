@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class('_core/ui/results/_filteredresults.class.php', 'FilteredResults' );
+load_class('_core/ui/results/_filteredresults.class.php', 'FilteredResults');
 
 
 /**
@@ -30,238 +32,212 @@ load_class('_core/ui/results/_filteredresults.class.php', 'FilteredResults' );
  */
 class DataObjectList2 extends FilteredResults
 {
+    /**
+     * Constructor
+     *
+     * If provided, executes SQL query via parent Results object
+     *
+     * @param DataObjectCache
+     * @param integer number of lines displayed on one screen (null for default [20])
+     * @param string prefix to differentiate page/order params when multiple Results appear on same page
+     * @param string default ordering of columns (special syntax)
+     */
+    public function __construct(&$Cache, $limit = null, $param_prefix = '', $default_order = null)
+    {
+        // WARNING: we are not passing any SQL query to the Results object
+        // This will make the Results object behave a little bit differently than usual:
+        Results::__construct(null, $param_prefix, $default_order, $limit, null, false);
 
+        // The list objects will also be cached in this cache.
+        // The Cache object may also be useful to get table information for the Items.
+        $this->Cache = &$Cache;
 
-	/**
-	 * Constructor
-	 *
-	 * If provided, executes SQL query via parent Results object
-	 *
-	 * @param DataObjectCache
-	 * @param integer number of lines displayed on one screen (null for default [20])
-	 * @param string prefix to differentiate page/order params when multiple Results appear on same page
-	 * @param string default ordering of columns (special syntax)
-	 */
-	function __construct( & $Cache, $limit = null, $param_prefix = '', $default_order = NULL )
-	{
-		// WARNING: we are not passing any SQL query to the Results object
-		// This will make the Results object behave a little bit differently than usual:
-		Results::__construct( NULL, $param_prefix, $default_order, $limit, NULL, false );
+        // Colum used for IDs
+        $this->ID_col = $Cache->dbIDname;
+    }
 
-		// The list objects will also be cached in this cache.
-		// The Cache object may also be useful to get table information for the Items.
-		$this->Cache = & $Cache;
+    public function &get_row_by_idx($idx)
+    {
+        return $this->rows[$idx];
+    }
 
-		// Colum used for IDs
-		$this->ID_col = $Cache->dbIDname;
-	}
+    /**
+     * Instantiate an object for requested row and cache it:
+     */
+    public function &get_by_idx($idx)
+    {
+        return $this->Cache->instantiate($this->rows[$idx]); // pass by reference: creates $rows[$idx]!
+    }
 
+    /**
+     * Instantiate an object for requested row by field and cache it:
+     *
+     * @param string DB field name
+     * @param string Value
+     * @return object
+     */
+    public function &get_by_field($field_name, $field_value)
+    {
+        $obj_ID = 0;
+        $null_Obj = null;
 
-	function & get_row_by_idx( $idx )
-	{
-		return $this->rows[ $idx ];
-	}
+        foreach ($this->rows as $row) {	// Find object ID by field value
+            if ($row->$field_name == $field_value) {
+                $obj_ID = $row->{$this->ID_col};
+                break;
+            }
+        }
 
+        if ($obj_ID == 0) {	// No object ID found, Exit here
+            return $null_Obj;
+        }
 
-	/**
-	 * Instantiate an object for requested row and cache it:
-	 */
-	function & get_by_idx( $idx )
-	{
-		return $this->Cache->instantiate( $this->rows[$idx] ); // pass by reference: creates $rows[$idx]!
-	}
+        $this->restart();
+        while ($Obj = &$this->get_next()) {	// Find Object by ID
+            if ($Obj->ID == $obj_ID) {
+                return $Obj;
+            }
+        }
 
+        return $null_Obj;
+    }
 
-	/**
-	 * Instantiate an object for requested row by field and cache it:
-	 *
-	 * @param string DB field name
-	 * @param string Value
-	 * @return object
-	 */
-	function & get_by_field( $field_name, $field_value )
-	{
-		$obj_ID = 0;
-		$null_Obj = NULL;
+    /**
+     * Get next object in list
+     */
+    public function &get_next()
+    {
+        // echo '<br />Get next, current idx was: '.$this->current_idx.'/'.$this->result_num_rows;
 
-		foreach( $this->rows as $row )
-		{	// Find object ID by field value
-			if( $row->$field_name == $field_value )
-			{
-				$obj_ID = $row->{$this->ID_col};
-				break;
-			}
-		}
+        if ($this->current_idx >= $this->result_num_rows) {	// No more object in list
+            $this->current_Obj = null;
+            $r = false; // TODO: try with NULL
+            return $r;
+        }
 
-		if( $obj_ID == 0 )
-		{	// No object ID found, Exit here
-			return $null_Obj;
-		}
+        // We also keep a local ref in case we want to use it for display:
+        $this->current_Obj = &$this->get_by_idx($this->current_idx);
+        $this->next_idx();
 
-		$this->restart();
-		while( $Obj = & $this->get_next() )
-		{	// Find Object by ID
-			if( $Obj->ID == $obj_ID )
-			{
-				return $Obj;
-			}
-		}
+        return $this->current_Obj;
+    }
 
-		return $null_Obj;
-	}
+    /**
+     * Display a global title matching filter params
+     *
+     * @todo implement $order
+     *
+     * @param string prefix to display if a title is generated
+     * @param string suffix to display if a title is generated
+     * @param string glue to use if multiple title elements are generated
+     * @param string comma separated list of titles inthe order we would like to display them
+     * @param string format to output, default 'htmlbody'
+     */
+    public function get_filter_title($prefix = ' ', $suffix = '', $glue = ' - ', $order = null, $format = 'htmlbody')
+    {
+        $title_array = $this->get_filter_titles();
 
+        if (empty($title_array)) {
+            return '';
+        }
 
-	/**
-	 * Get next object in list
-	 */
-	function & get_next()
-	{
-		// echo '<br />Get next, current idx was: '.$this->current_idx.'/'.$this->result_num_rows;
+        // We have something to display:
+        $r = implode($glue, $title_array);
+        $r = $prefix . format_to_output($r, $format) . $suffix;
+        return $r;
+    }
 
-		if( $this->current_idx >= $this->result_num_rows )
-		{	// No more object in list
-			$this->current_Obj = NULL;
-			$r = false; // TODO: try with NULL
-			return $r;
-		}
+    /**
+     * Move up the element order in database
+     *
+     * @param integer id element
+     * @return unknown
+     */
+    public function move_up($id)
+    {
+        global $DB, $Messages, $result_fadeout;
 
-		// We also keep a local ref in case we want to use it for display:
-		$this->current_Obj = & $this->get_by_idx( $this->current_idx );
-		$this->next_idx();
+        $DB->begin();
 
-		return $this->current_Obj;
-	}
+        if (($obj = &$this->Cache->get_by_ID($id)) === false) {
+            $Messages->add(sprintf(T_('Requested &laquo;%s&raquo; object does not exist any longer.'), T_('Entry')), 'error');
+            $DB->commit();
+            return false;
+        }
+        $order = $obj->order;
 
+        // Get the ID of the inferior element which his order is the nearest
+        $rows = $DB->get_results('SELECT ' . $this->Cache->dbIDname
+                . ' FROM ' . $this->Cache->dbtablename
+                . ' WHERE ' . $this->Cache->dbprefix . 'order < ' . $order
+                . ' ORDER BY ' . $this->Cache->dbprefix . 'order DESC'
+                . ' LIMIT 0,1');
 
-	/**
-	 * Display a global title matching filter params
-	 *
-	 * @todo implement $order
-	 *
-	 * @param string prefix to display if a title is generated
-	 * @param string suffix to display if a title is generated
-	 * @param string glue to use if multiple title elements are generated
-	 * @param string comma separated list of titles inthe order we would like to display them
-	 * @param string format to output, default 'htmlbody'
-	 */
-	function get_filter_title( $prefix = ' ', $suffix = '', $glue = ' - ', $order = NULL, $format = 'htmlbody' )
-	{
-		$title_array = $this->get_filter_titles();
+        if (count($rows)) {
+            // instantiate the inferior element
+            $obj_inf = &$this->Cache->get_by_ID($rows[0]->{$this->Cache->dbIDname});
 
-		if( empty( $title_array ) )
-		{
-			return '';
-		}
+            //  Update element order
+            $obj->set('order', $obj_inf->order);
+            $obj->dbupdate();
 
-		// We have something to display:
-		$r = implode( $glue, $title_array );
-		$r = $prefix.format_to_output( $r, $format ).$suffix;
-		return $r;
-	}
+            // Update inferior element order
+            $obj_inf->set('order', $order);
+            $obj_inf->dbupdate();
 
+            // EXPERIMENTAL FOR FADEOUT RESULT
+            $result_fadeout[$this->Cache->dbIDname][] = $id;
+            $result_fadeout[$this->Cache->dbIDname][] = $obj_inf->ID;
+        } else {
+            $Messages->add(T_('This element is already at the top.'), 'error');
+        }
+        $DB->commit();
+    }
 
-	/**
-	 * Move up the element order in database
-	 *
-	 * @param integer id element
-	 * @return unknown
-	 */
-	function move_up( $id )
-	{
-		global $DB, $Messages, $result_fadeout;
+    /**
+     * Move down the element order in database
+     *
+     * @param integer id element
+     * @return unknown
+     */
+    public function move_down($id)
+    {
+        global $DB, $Messages, $result_fadeout;
 
-		$DB->begin();
+        $DB->begin();
 
-		if( ($obj = & $this->Cache->get_by_ID( $id )) === false )
-		{
-			$Messages->add( sprintf( T_('Requested &laquo;%s&raquo; object does not exist any longer.'), T_('Entry') ), 'error' );
-			$DB->commit();
-			return false;
-		}
-		$order = $obj->order;
+        if (($obj = &$this->Cache->get_by_ID($id)) === false) {
+            $Messages->add(sprintf(T_('Requested &laquo;%s&raquo; object does not exist any longer.'), T_('Entry')), 'error');
+            $DB->commit();
+            return false;
+        }
+        $order = $obj->order;
 
-		// Get the ID of the inferior element which his order is the nearest
-		$rows = $DB->get_results( 'SELECT '.$this->Cache->dbIDname
-			 	.' FROM '.$this->Cache->dbtablename
-				.' WHERE '.$this->Cache->dbprefix.'order < '.$order
-				.' ORDER BY '.$this->Cache->dbprefix.'order DESC'
-				.' LIMIT 0,1' );
+        // Get the ID of the inferior element which his order is the nearest
+        $rows = $DB->get_results('SELECT ' . $this->Cache->dbIDname
+                                                            . ' FROM ' . $this->Cache->dbtablename
+                                                         . ' WHERE ' . $this->Cache->dbprefix . 'order > ' . $order
+                                                    . ' ORDER BY ' . $this->Cache->dbprefix . 'order ASC
+														 		LIMIT 0,1');
 
-		if( count( $rows ) )
-		{
-			// instantiate the inferior element
-			$obj_inf = & $this->Cache->get_by_ID( $rows[0]->{$this->Cache->dbIDname} );
+        if (count($rows)) {
+            // instantiate the inferior element
+            $obj_sup = &$this->Cache->get_by_ID($rows[0]->{$this->Cache->dbIDname});
 
-			//  Update element order
-			$obj->set( 'order', $obj_inf->order );
-			$obj->dbupdate();
+            //  Update element order
+            $obj->set('order', $obj_sup->order);
+            $obj->dbupdate();
 
-			// Update inferior element order
-			$obj_inf->set( 'order', $order );
-			$obj_inf->dbupdate();
+            // Update inferior element order
+            $obj_sup->set('order', $order);
+            $obj_sup->dbupdate();
 
-			// EXPERIMENTAL FOR FADEOUT RESULT
-			$result_fadeout[$this->Cache->dbIDname][] = $id;
-			$result_fadeout[$this->Cache->dbIDname][] = $obj_inf->ID;
-		}
-		else
-		{
-			$Messages->add( T_('This element is already at the top.'), 'error' );
-		}
-		$DB->commit();
-	}
-
-
-	/**
-	 * Move down the element order in database
-	 *
-	 * @param integer id element
-	 * @return unknown
-	 */
-	function move_down( $id )
-	{
-		global $DB, $Messages, $result_fadeout;
-
-		$DB->begin();
-
-		if( ($obj = & $this->Cache->get_by_ID( $id )) === false )
-		{
-			$Messages->add( sprintf( T_('Requested &laquo;%s&raquo; object does not exist any longer.'), T_('Entry') ), 'error' );
-			$DB->commit();
-			return false;
-		}
-		$order = $obj->order;
-
-		// Get the ID of the inferior element which his order is the nearest
-		$rows = $DB->get_results( 'SELECT '.$this->Cache->dbIDname
-														 	.' FROM '.$this->Cache->dbtablename
-														 .' WHERE '.$this->Cache->dbprefix.'order > '.$order
-													.' ORDER BY '.$this->Cache->dbprefix.'order ASC
-														 		LIMIT 0,1' );
-
-		if( count( $rows ) )
-		{
-			// instantiate the inferior element
-			$obj_sup = & $this->Cache->get_by_ID( $rows[0]->{$this->Cache->dbIDname} );
-
-			//  Update element order
-			$obj->set( 'order', $obj_sup->order );
-			$obj->dbupdate();
-
-			// Update inferior element order
-			$obj_sup->set( 'order', $order );
-			$obj_sup->dbupdate();
-
-			// EXPERIMENTAL FOR FADEOUT RESULT
-			$result_fadeout[$this->Cache->dbIDname][] = $id;
-			$result_fadeout[$this->Cache->dbIDname][] = $obj_sup->ID;
-		}
-		else
-		{
-			$Messages->add( T_('This element is already at the bottom.'), 'error' );
-		}
-		$DB->commit();
-	}
+            // EXPERIMENTAL FOR FADEOUT RESULT
+            $result_fadeout[$this->Cache->dbIDname][] = $id;
+            $result_fadeout[$this->Cache->dbIDname][] = $obj_sup->ID;
+        } else {
+            $Messages->add(T_('This element is already at the bottom.'), 'error');
+        }
+        $DB->commit();
+    }
 }
-
-?>

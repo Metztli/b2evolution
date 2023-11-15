@@ -13,22 +13,19 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF POSTS -------------------------------------
 // Display message if no post:
 display_if_empty();
 
-while( mainlist_get_item() )
-{	// For each blog post, do everything below up to the closing curly brace "}"
-
-	// ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-	skin_include( '_item_block.inc.php', array_merge( array(
-			'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
-			'image_size'   => get_skin_setting( 'main_content_image_size', 'fit-1280x720' ),
-		), $params ) );
-	// ----------------------------END ITEM BLOCK  ----------------------------
-
+while (mainlist_get_item()) {	// For each blog post, do everything below up to the closing curly brace "}"
+    // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+    skin_include('_item_block.inc.php', array_merge([
+        'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
+        'image_size' => get_skin_setting('main_content_image_size', 'fit-1280x720'),
+    ], $params));
+    // ----------------------------END ITEM BLOCK  ----------------------------
 } // ---------------------------------- END OF POSTS ------------------------------------
-
-?>

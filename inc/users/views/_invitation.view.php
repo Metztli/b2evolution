@@ -11,117 +11,124 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $blog, $admin_url, $UserSettings;
 
 // Create result set:
 $SQL = new SQL();
-$SQL->SELECT( 'SQL_NO_CACHE ivc_ID, ivc_code, ivc_expire_ts, ivc_level, ivc_source, ivc_grp_ID, grp_name, grp_level' );
-$SQL->FROM( 'T_users__invitation_code' );
-$SQL->FROM_add( 'LEFT JOIN T_groups ON grp_ID = ivc_grp_ID' );
+$SQL->SELECT('SQL_NO_CACHE ivc_ID, ivc_code, ivc_expire_ts, ivc_level, ivc_source, ivc_grp_ID, grp_name, grp_level');
+$SQL->FROM('T_users__invitation_code');
+$SQL->FROM_add('LEFT JOIN T_groups ON grp_ID = ivc_grp_ID');
 
 $count_SQL = new SQL();
-$count_SQL->SELECT( 'SQL_NO_CACHE COUNT( ivc_ID )' );
-$count_SQL->FROM( 'T_users__invitation_code' );
+$count_SQL->SELECT('SQL_NO_CACHE COUNT( ivc_ID )');
+$count_SQL->FROM('T_users__invitation_code');
 
-$Results = new Results( $SQL->get(), 'ivc_', '-D', $UserSettings->get( 'results_per_page' ), $count_SQL->get() );
+$Results = new Results($SQL->get(), 'ivc_', '-D', $UserSettings->get('results_per_page'), $count_SQL->get());
 
-$Results->title = T_('Invitation codes').get_manual_link( 'invitation-codes-list' );
+$Results->title = T_('Invitation codes') . get_manual_link('invitation-codes-list');
 
 /*
  * Table icons:
  */
-if( check_user_perm( 'users', 'edit', false ) )
-{ // create new group link
-	$Results->global_icon( T_('Create a new invitation code...'), 'new', '?ctrl=invitations&amp;action=new', T_('Add invitation code').' &raquo;', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+if (check_user_perm('users', 'edit', false)) { // create new group link
+    $Results->global_icon(T_('Create a new invitation code...'), 'new', '?ctrl=invitations&amp;action=new', T_('Add invitation code') . ' &raquo;', 3, 4, [
+        'class' => 'action_icon btn-primary',
+    ]);
 }
 
-$Results->cols[] = array(
-		'th' => T_('ID'),
-		'order' => 'ivc_ID',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'right',
-		'td' => '$ivc_ID$',
-	);
+$Results->cols[] = [
+    'th' => T_('ID'),
+    'order' => 'ivc_ID',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'right',
+    'td' => '$ivc_ID$',
+];
 
-$Results->cols[] = array(
-		'th' => T_('Code').' | '.T_('Link'),
-		'order' => 'ivc_code',
-		'td' => check_user_perm( 'users', 'edit', false )
-			? '<a href="'.$admin_url.'?ctrl=invitations&amp;action=edit&amp;ivc_ID=$ivc_ID$"><b>$ivc_code$</b></a>'
-			: '$ivc_code$',
-	);
+$Results->cols[] = [
+    'th' => T_('Code') . ' | ' . T_('Link'),
+    'order' => 'ivc_code',
+    'td' => check_user_perm('users', 'edit', false)
+        ? '<a href="' . $admin_url . '?ctrl=invitations&amp;action=edit&amp;ivc_ID=$ivc_ID$"><b>$ivc_code$</b></a>'
+        : '$ivc_code$',
+];
 
-$Results->cols[] = array(
-		'th' => T_('Code').' | '.T_('Link'),
-		'td_class' => 'shrinkwrap',
-		'td' => '<a href="'.get_htsrv_url().'register.php?invitation=$ivc_code$">'.T_('Link').'</a>',
-	);
+$Results->cols[] = [
+    'th' => T_('Code') . ' | ' . T_('Link'),
+    'td_class' => 'shrinkwrap',
+    'td' => '<a href="' . get_htsrv_url() . 'register.php?invitation=$ivc_code$">' . T_('Link') . '</a>',
+];
 
-$Results->cols[] = array(
-		'th' => T_('Expires'),
-		'order' => 'ivc_expire_ts',
-		'td_class' => 'shrinkwrap',
-		'td' => '$ivc_expire_ts$',
-	);
+$Results->cols[] = [
+    'th' => T_('Expires'),
+    'order' => 'ivc_expire_ts',
+    'td_class' => 'shrinkwrap',
+    'td' => '$ivc_expire_ts$',
+];
 
-function ivc_group( $group_ID, $group_name, $group_level )
+function ivc_group($group_ID, $group_name, $group_level)
 {
-	if( $group_ID > 0 )
-	{
-		return $group_name.' ('.$group_level.')';
-	}
-	else
-	{
-		return '('.T_('Default group').')';
-	}
+    if ($group_ID > 0) {
+        return $group_name . ' (' . $group_level . ')';
+    } else {
+        return '(' . T_('Default group') . ')';
+    }
 }
-$Results->cols[] = array(
-		'th' => T_('Group'),
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'nowrap',
-		'order' => 'grp_name',
-		'td' => '%ivc_group( #ivc_grp_ID#, #grp_name#, #grp_level# )%',
-	);
+$Results->cols[] = [
+    'th' => T_('Group'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'nowrap',
+    'order' => 'grp_name',
+    'td' => '%ivc_group( #ivc_grp_ID#, #grp_name#, #grp_level# )%',
+];
 
-$Results->cols[] = array(
-		'th' => T_('Level'),
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap',
-		'order' => 'ivc_level',
-		'td' => '$ivc_level$',
-	);
+$Results->cols[] = [
+    'th' => T_('Level'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+    'order' => 'ivc_level',
+    'td' => '$ivc_level$',
+];
 
-$Results->cols[] = array(
-		'th' => T_('Source'),
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'nowrap',
-		'order' => 'ivc_source',
-		'td' => '$ivc_source$',
-	);
+$Results->cols[] = [
+    'th' => T_('Source'),
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'nowrap',
+    'order' => 'ivc_source',
+    'td' => '$ivc_source$',
+];
 
-if( check_user_perm( 'users', 'edit', false ) )
-{
-	function ivc_actions( & $row )
-	{
-		$r = action_icon( T_('Edit this invitation code...'), 'edit',
-					regenerate_url( 'ctrl,action', 'ctrl=invitations&amp;ivc_ID='.$row->ivc_ID.'&amp;action=edit') )
-				.action_icon( T_('Duplicate this invitation code...'), 'copy',
-					regenerate_url( 'ctrl,action', 'ctrl=invitations&amp;ivc_ID='.$row->ivc_ID.'&amp;action=new') )
-				.action_icon( T_('Delete this invitation code!'), 'delete',
-					regenerate_url( 'ctrl,action', 'ctrl=invitations&amp;ivc_ID='.$row->ivc_ID.'&amp;action=delete&amp;'.url_crumb('invitation') ) );
+if (check_user_perm('users', 'edit', false)) {
+    function ivc_actions(&$row)
+    {
+        $r = action_icon(
+            T_('Edit this invitation code...'),
+            'edit',
+            regenerate_url('ctrl,action', 'ctrl=invitations&amp;ivc_ID=' . $row->ivc_ID . '&amp;action=edit')
+        )
+                . action_icon(
+                    T_('Duplicate this invitation code...'),
+                    'copy',
+                    regenerate_url('ctrl,action', 'ctrl=invitations&amp;ivc_ID=' . $row->ivc_ID . '&amp;action=new')
+                )
+                . action_icon(
+                    T_('Delete this invitation code!'),
+                    'delete',
+                    regenerate_url('ctrl,action', 'ctrl=invitations&amp;ivc_ID=' . $row->ivc_ID . '&amp;action=delete&amp;' . url_crumb('invitation'))
+                );
 
-		return $r;
-	}
+        return $r;
+    }
 
-	$Results->cols[] = array(
-			'th' => T_('Actions'),
-			'td_class' => 'shrinkwrap',
-			'td' => '%ivc_actions( {row} )%',
-		);
+    $Results->cols[] = [
+        'th' => T_('Actions'),
+        'td_class' => 'shrinkwrap',
+        'td' => '%ivc_actions( {row} )%',
+    ];
 }
 
 // Display results:
 $Results->display();
-?>

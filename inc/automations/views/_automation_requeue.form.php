@@ -13,7 +13,9 @@
  * @package admin
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $edited_Automation;
@@ -21,30 +23,34 @@ global $edited_Automation;
 // Begin payload block:
 $this->disp_payload_begin();
 
-$Form = new Form( '', 'automation_checkchanges' );
+$Form = new Form('', 'automation_checkchanges');
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-$Form->add_crumb( 'automation' );
+$Form->add_crumb('automation');
 $Form->hidden_ctrl();
-$Form->hidden( 'autm_ID', $edited_Automation->ID );
+$Form->hidden('autm_ID', $edited_Automation->ID);
 // To requeue by specific step:
-$Form->hidden( 'source_step_ID', param( 'source_step_ID', 'integer', NULL ) );
+$Form->hidden('source_step_ID', param('source_step_ID', 'integer', null));
 // To requeue only a specific user:
-$Form->hidden( 'source_user_ID', param( 'source_user_ID', 'integer', NULL ) );
+$Form->hidden('source_user_ID', param('source_user_ID', 'integer', null));
 
-$Form->begin_fieldset( TB_('Requeue automation for finished steps').get_manual_link( 'requeue-automation-for-finished-steps' ), array( 'style' => 'width:420px' ) );
+$Form->begin_fieldset(TB_('Requeue automation for finished steps') . get_manual_link('requeue-automation-for-finished-steps'), [
+    'style' => 'width:420px',
+]);
 
-	// Get automations where user is NOT added yet:
-	$AutomationStepCache = & get_AutomationStepCache();
-	$automation_cache_SQL = $AutomationStepCache->get_SQL_object();
-	$automation_cache_SQL->WHERE_and( 'step_autm_ID = '.$edited_Automation->ID );
-	$AutomationStepCache->load_by_sql( $automation_cache_SQL );
-	$Form->select_input_object( 'target_step_ID', '', $AutomationStepCache, TB_('Step'), array( 'required' => true ) );
+// Get automations where user is NOT added yet:
+$AutomationStepCache = &get_AutomationStepCache();
+$automation_cache_SQL = $AutomationStepCache->get_SQL_object();
+$automation_cache_SQL->WHERE_and('step_autm_ID = ' . $edited_Automation->ID);
+$AutomationStepCache->load_by_sql($automation_cache_SQL);
+$Form->select_input_object('target_step_ID', '', $AutomationStepCache, TB_('Step'), [
+    'required' => true,
+]);
 
-	echo '<p class="center">';
-	$Form->button( array( '', 'actionArray[requeue]', TB_('Requeue'), 'SaveButton' ) );
-	echo '</p>';
+echo '<p class="center">';
+$Form->button(['', 'actionArray[requeue]', TB_('Requeue'), 'SaveButton']);
+echo '</p>';
 
 $Form->end_fieldset();
 
@@ -52,4 +58,3 @@ $Form->end_form();
 
 // End payload block:
 $this->disp_payload_end();
-?>

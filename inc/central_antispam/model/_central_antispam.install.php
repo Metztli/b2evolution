@@ -24,7 +24,9 @@
  * {@internal Below is a list of authors who have contributed to design/coding of this file: }}
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 global $db_storage_charset;
 
@@ -36,9 +38,9 @@ global $db_storage_charset;
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-$schema_queries['T_centralantispam__keyword'] = array(
-		'Creating table central antispam keywords...',
-		"CREATE TABLE T_centralantispam__keyword (
+$schema_queries['T_centralantispam__keyword'] = [
+    'Creating table central antispam keywords...',
+    "CREATE TABLE T_centralantispam__keyword (
 			cakw_ID              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			cakw_keyword         VARCHAR(2000) NULL,
 			cakw_status          ENUM('new', 'published', 'revoked', 'ignored') NOT NULL DEFAULT 'new',
@@ -48,27 +50,24 @@ $schema_queries['T_centralantispam__keyword'] = array(
 			INDEX cakw_keyword (cakw_keyword(255)),
 			INDEX cakw_statuschange_ts (cakw_statuschange_ts),
 			INDEX cakw_lastreport_ts (cakw_lastreport_ts)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" );
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"];
 
 
-$schema_queries['T_centralantispam__source'] = array(
-		'Creating table central antispam sources...',
-		"CREATE TABLE T_centralantispam__source (
+$schema_queries['T_centralantispam__source'] = [
+    'Creating table central antispam sources...',
+    "CREATE TABLE T_centralantispam__source (
 			casrc_ID      INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			casrc_baseurl VARCHAR(2000) NULL,
 			casrc_status  ENUM ('trusted', 'promising', 'unknown', 'suspect', 'blocked') NOT NULL DEFAULT 'unknown',
 			PRIMARY KEY (casrc_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" );
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"];
 
 
-$schema_queries['T_centralantispam__report'] = array(
-		'Creating table central antispam reports...',
-		"CREATE TABLE T_centralantispam__report (
+$schema_queries['T_centralantispam__report'] = [
+    'Creating table central antispam reports...',
+    "CREATE TABLE T_centralantispam__report (
 			carpt_cakw_ID  INT(10) UNSIGNED NOT NULL,
 			carpt_casrc_ID INT(10) UNSIGNED NOT NULL,
 			carpt_ts       TIMESTAMP NULL,
 			PRIMARY KEY carpt_PK (carpt_cakw_ID, carpt_casrc_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" );
-
-
-?>
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"];

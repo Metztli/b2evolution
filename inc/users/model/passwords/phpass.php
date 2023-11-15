@@ -11,10 +11,12 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-load_class( 'users/model/passwords/salted_md5.php', 'saltedMd5PasswordDriver' );
+load_class('users/model/passwords/salted_md5.php', 'saltedMd5PasswordDriver');
 
 /**
  * phpassPasswordDriver Class
@@ -23,6 +25,5 @@ load_class( 'users/model/passwords/salted_md5.php', 'saltedMd5PasswordDriver' );
  */
 class phpassPasswordDriver extends saltedMd5PasswordDriver
 {
-	protected $code = 'bb$P';
+    protected $code = 'bb$P';
 }
-?>

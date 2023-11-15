@@ -14,22 +14,21 @@
  * @package evoskins
  * @subpackage bootstrap_manual
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 // --------------------------------- START OF POSTS -------------------------------------
 // Display message if no post:
 display_if_empty();
 
-if( mainlist_get_item() )
-{ // For each blog post, do everything below up to the closing curly brace "}"
-	echo '<div class="evo_content_block">'; // Beginning of posts display
-	// ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-	skin_include( '_item_block.inc.php', array_merge( array(
-			'content_mode' => 'auto', // 'auto' will auto select depending on $disp-detail
-			'item_class'   => 'evo_post evo_content_block',
-		), $Skin->get_template( 'disp_params' ) ) );
-	// ----------------------------END ITEM BLOCK  ----------------------------
-	echo '</div>'; // End of posts display		
+if (mainlist_get_item()) { // For each blog post, do everything below up to the closing curly brace "}"
+    echo '<div class="evo_content_block">'; // Beginning of posts display
+    // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+    skin_include('_item_block.inc.php', array_merge([
+        'content_mode' => 'auto', // 'auto' will auto select depending on $disp-detail
+        'item_class' => 'evo_post evo_content_block',
+    ], $Skin->get_template('disp_params')));
+    // ----------------------------END ITEM BLOCK  ----------------------------
+    echo '</div>'; // End of posts display
 } // ---------------------------------- END OF POSTS ------------------------------------
-
-?>

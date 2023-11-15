@@ -23,9 +23,11 @@
  *
  * @version $Id: $
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -36,182 +38,167 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class item_link_Widget extends ComponentWidget
 {
-	var $icon = 'external-link';
+    public $icon = 'external-link';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'item_link' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'item_link');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('item-link-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'item-link-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Item Link');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        return format_to_output(T_('Item Link'));
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Item Link');
-	}
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display item link.');
+    }
 
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param local params like 'for_editing' => true
+     */
+    public function get_param_definitions($params)
+    {
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Title'),
+                'size' => 40,
+                'note' => T_('This is the title to display'),
+                'defaultvalue' => '',
+            ],
+            'prefix' => [
+                'label' => T_('Prefix'),
+                'size' => 20,
+                'note' => T_('Label before the link'),
+                'defaultvalue' => T_('Link'),
+            ],
+            'link_text' => [
+                'label' => T_('Link text'),
+                'size' => 50,
+                'note' => T_('Leave empty to display the actual URL'),
+                'defaultvalue' => '',
+            ],
+            'link_class' => [
+                'label' => T_('Link class'),
+                'size' => 20,
+                'defaultvalue' => '',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		return format_to_output( T_('Item Link') );
-	}
+        return $r;
+    }
 
+    /**
+     * Prepare display params
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function init_display($params)
+    {
+        global $preview;
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display item link.');
-	}
+        parent::init_display($params);
 
+        if ($preview) {	// Disable block caching for this widget when item is previewed currently:
+            $this->disp_params['allow_blockcache'] = 0;
+        }
+    }
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param local params like 'for_editing' => true
-	 */
-	function get_param_definitions( $params )
-	{
-		$r = array_merge( array(
-				'title' => array(
-					'label' => T_( 'Title' ),
-					'size' => 40,
-					'note' => T_( 'This is the title to display' ),
-					'defaultvalue' => '',
-				),
-				'prefix' => array(
-					'label' => T_( 'Prefix' ),
-					'size' => 20,
-					'note' => T_( 'Label before the link' ),
-					'defaultvalue' => T_('Link')
-				),
-				'link_text' => array(
-					'label' => T_( 'Link text' ),
-					'size' => 50,
-					'note' => T_( 'Leave empty to display the actual URL' ),
-					'defaultvalue' => ''
-				),
-				'link_class' => array(
-					'label' => T_( 'Link class' ),
-					'size' => 20,
-					'defaultvalue' => ''
-				),
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Item;
 
-			), parent::get_param_definitions( $params ) );
+        if (empty($Item)) {	// Don't display this widget when no Item object:
+            $this->display_error_message('Widget "' . $this->get_name() . '" is hidden because there is no Item.');
+            return false;
+        }
 
-		return $r;
-	}
+        if (empty($Item->url)) {	// Don't display this widget when Item has no link:
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because Item has no link.');
+            return false;
+        }
 
+        $this->init_display($params);
 
-	/**
-	 * Prepare display params
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function init_display( $params )
-	{
-		global $preview;
+        $this->disp_params = array_merge([
+            'widget_item_link_before' => '',
+            'widget_item_link_after' => '',
+        ], $this->disp_params);
 
-		parent::init_display( $params );
+        echo $this->disp_params['block_start'];
+        $this->disp_title();
+        echo $this->disp_params['block_body_start'];
 
-		if( $preview )
-		{	// Disable block caching for this widget when item is previewed currently:
-			$this->disp_params['allow_blockcache'] = 0;
-		}
-	}
+        $params = [
+            'before' => $this->disp_params['widget_item_link_before'] . $this->disp_params['prefix'] . (empty($this->disp_params['prefix']) ? '' : ': '),
+            'after' => $this->disp_params['widget_item_link_after'],
+            'link_class' => $this->disp_params['link_class'],
+            'podcast' => '#', // Auto display mp3 player if post type is podcast (=> false, to disable)
+        ];
 
+        if (! empty($this->disp_params['link_text'])) {
+            $params['text_template'] = $this->disp_params['link_text'];
+        }
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Item;
+        $Item->url_link($params);
 
-		if( empty( $Item ) )
-		{	// Don't display this widget when no Item object:
-			$this->display_error_message( 'Widget "'.$this->get_name().'" is hidden because there is no Item.' );
-			return false;
-		}
+        echo $this->disp_params['block_body_end'];
+        echo $this->disp_params['block_end'];
 
-		if( empty( $Item->url ) )
-		{	// Don't display this widget when Item has no link:
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because Item has no link.' );
-			return false;
-		}
+        return true;
+    }
 
-		$this->init_display( $params );
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog, $Item;
 
-		$this->disp_params = array_merge( array(
-				'widget_item_link_before' => '',
-				'widget_item_link_after'  => '',
-			), $this->disp_params );
-
-		echo $this->disp_params['block_start'];
-		$this->disp_title();
-		echo $this->disp_params['block_body_start'];
-
-		$params = array(
-				'before'        => $this->disp_params['widget_item_link_before'].$this->disp_params['prefix'].( empty( $this->disp_params['prefix'] ) ? '' : ': ' ),
-				'after'         => $this->disp_params['widget_item_link_after'],
-				'link_class'     => $this->disp_params['link_class'],
-				'podcast'       => '#', // Auto display mp3 player if post type is podcast (=> false, to disable)
-			);
-
-		if( ! empty( $this->disp_params['link_text'] ) )
-		{
-			$params['text_template'] = $this->disp_params['link_text'];
-		}
-
-		$Item->url_link( $params );
-
-		echo $this->disp_params['block_body_end'];
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog, $Item;
-
-		return array(
-				'wi_ID'        => $this->ID, // Have the widget settings changed ?
-				'set_coll_ID'  => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
-				'cont_coll_ID' => empty( $this->disp_params['blog_ID'] ) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
-				'item_ID'      => ( empty( $Item->ID ) ? 0 : $Item->ID ), // Has the Item page changed?
-			);
-	}
+        return [
+            'wi_ID' => $this->ID, // Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID, // Have the settings of the blog changed ? (ex: new skin)
+            'cont_coll_ID' => empty($this->disp_params['blog_ID']) ? $Blog->ID : $this->disp_params['blog_ID'], // Has the content of the displayed blog changed ?
+            'item_ID' => (empty($Item->ID) ? 0 : $Item->ID), // Has the Item page changed?
+        ];
+    }
 }
-
-?>

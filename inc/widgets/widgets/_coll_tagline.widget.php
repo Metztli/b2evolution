@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,82 +26,78 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_tagline_Widget extends ComponentWidget
 {
-	var $icon = 'window-minimize';
+    public $icon = 'window-minimize';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_tagline' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_tagline');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('collection-tagline-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'collection-tagline-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Tagline');
+    }
 
+    /**
+     * Get a very short desc. Used in the widget list.
+     */
+    public function get_short_desc()
+    {
+        global $Collection, $Blog;
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Tagline');
-	}
+        return $Blog->dget('tagline', 'htmlbody');
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        global $Collection, $Blog;
+        return sprintf(
+            T_('&laquo;%s&raquo; from the blog\'s <a %s>general settings</a>.'),
+            '<strong>' . $Blog->dget('tagline') . '</strong>',
+            'href="?ctrl=coll_settings&tab=general&blog=' . $Blog->ID . '"'
+        );
+    }
 
-	/**
-	 * Get a very short desc. Used in the widget list.
-	 */
-	function get_short_desc()
-	{
-		global $Collection, $Blog;
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $Collection, $Blog;
 
-		return $Blog->dget( 'tagline', 'htmlbody' );
-	}
+        $this->init_display($params);
 
+        // Collection tagline:
+        echo $this->disp_params['block_start'];
+        echo $this->disp_params['block_body_start'];
+        // TODO: there appears to be no possibility to wrap the tagline in e.g. "<h2>%s</h2>"
+        //       Should there be a widget param for this?  fp> probably yes
+        $Blog->disp('tagline', 'htmlbody');
+        echo $this->disp_params['block_body_end'];
+        echo $this->disp_params['block_end'];
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		global $Collection, $Blog;
-		return sprintf( T_('&laquo;%s&raquo; from the blog\'s <a %s>general settings</a>.'),
-				'<strong>'.$Blog->dget('tagline').'</strong>', 'href="?ctrl=coll_settings&tab=general&blog='.$Blog->ID.'"' );
-	}
-
-
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $Collection, $Blog;
-
-		$this->init_display( $params );
-
-		// Collection tagline:
-		echo $this->disp_params['block_start'];
-		echo $this->disp_params['block_body_start'];
-		// TODO: there appears to be no possibility to wrap the tagline in e.g. "<h2>%s</h2>"
-		//       Should there be a widget param for this?  fp> probably yes
-		$Blog->disp( 'tagline', 'htmlbody' );
-		echo $this->disp_params['block_body_end'];
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }
-
-?>

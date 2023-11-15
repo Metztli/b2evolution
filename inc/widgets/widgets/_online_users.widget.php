@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * ComponentWidget Class
@@ -24,136 +26,128 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class online_users_Widget extends ComponentWidget
 {
-	var $icon = 'user-circle-o';
+    public $icon = 'user-circle-o';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'online_users' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'online_users');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('online-users-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'online-users-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Online users');
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display currently online users.');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_( 'Online users' );
-	}
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param array local params
+     */
+    public function get_param_definitions($params)
+    {
+        load_funcs('files/model/_image.funcs.php');
 
+        $r = array_merge([
+            'title' => [
+                'label' => T_('Block title'),
+                'note' => T_('Title to display in your skin.'),
+                'size' => 40,
+                'defaultvalue' => T_('Online users'),
+            ],
+            'allow_anonymous' => [
+                'label' => T_('Allow for anonymous users'),
+                'note' => T_('Uncheck to display this widget only for logged in users'),
+                'type' => 'checkbox',
+                'defaultvalue' => 1,
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display currently online users.');
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $DB, $Settings, $UserSettings, $localtimenow;
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param array local params
-	 */
-	function get_param_definitions( $params )
-	{
-		load_funcs( 'files/model/_image.funcs.php' );
+        if (! $this->get_param('allow_anonymous') && ! is_logged_in()) {	// Display only for logged in users:
+            $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because you have no access.');
+            return false;
+        }
 
-		$r = array_merge( array(
-			'title' => array(
-				'label' => T_( 'Block title' ),
-				'note' => T_( 'Title to display in your skin.' ),
-				'size' => 40,
-				'defaultvalue' => T_( 'Online users' ),
-			),
-			'allow_anonymous' => array(
-				'label' => T_( 'Allow for anonymous users' ),
-				'note' => T_( 'Uncheck to display this widget only for logged in users' ),
-				'type' => 'checkbox',
-				'defaultvalue' => 1,
-			),
-		), parent::get_param_definitions( $params ) );
+        // load online Users
+        $UserCache = &get_UserCache();
+        $online_threshold = $localtimenow - (2 * $Settings->get('timeout_online'));
+        $UserCache->load_where('user_lastseen_ts > ' . $DB->quote(date2mysql($online_threshold) . ' AND user_status <> ' . $DB->quote('closed')));
 
-		return $r;
-	}
+        $this->init_display($params);
 
+        // START DISPLAY:
+        echo $this->disp_params['block_start'];
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $DB, $Settings, $UserSettings, $localtimenow;
+        // Display title if requested
+        $this->disp_title();
 
-		if( ! $this->get_param( 'allow_anonymous' ) && ! is_logged_in() )
-		{	// Display only for logged in users:
-			$this->display_debug_message( 'Widget "'.$this->get_name().'" is hidden because you have no access.' );
-			return false;
-		}
+        echo $this->disp_params['block_body_start'];
 
-		// load online Users
-		$UserCache = & get_UserCache();
-		$online_threshold = $localtimenow - ( 2 * $Settings->get( 'timeout_online' ) );
-		$UserCache->load_where( 'user_lastseen_ts > '.$DB->quote( date2mysql( $online_threshold ).' AND user_status <> '.$DB->quote( 'closed' ) ) );
+        $r = '';
 
-		$this->init_display( $params );
+        while (($iterator_User = &$UserCache->get_next()) != null) { // Iterate through UserCache
+            $user_lastseen_ts = mysql2timestamp($iterator_User->get('lastseen_ts'));
+            if (($user_lastseen_ts > $online_threshold)
+                && ($UserSettings->get('show_online', $iterator_User->ID))
+                && (! $iterator_User->check_status('is_closed'))) {
+                if (empty($r)) { // first user
+                    $r .= $params['list_start'];
+                }
 
-		// START DISPLAY:
-		echo $this->disp_params['block_start'];
+                $r .= $params['item_start'];
+                $r .= $iterator_User->get_identity_link([
+                    'login_mask' => '$login$',
+                ]);
+                $r .= $params['item_end'];
+            }
+        }
 
-		// Display title if requested
-		$this->disp_title();
+        if (! empty($r)) {
+            $r .= $params['list_end'];
+            echo $r;
+        }
 
-		echo $this->disp_params['block_body_start'];
+        echo $this->disp_params['block_body_end'];
 
-		$r = '';
+        echo $this->disp_params['block_end'];
 
-		while( ( $iterator_User = & $UserCache->get_next() ) != NULL )
-		{ // Iterate through UserCache
-			$user_lastseen_ts = mysql2timestamp( $iterator_User->get( 'lastseen_ts' ) );
-			if( ( $user_lastseen_ts > $online_threshold )
-				&& ( $UserSettings->get( 'show_online', $iterator_User->ID ) )
-				&& ( !$iterator_User->check_status( 'is_closed' ) ) )
-			{
-				if( empty($r) )
-				{ // first user
-					$r .= $params['list_start'];
-				}
-
-				$r .= $params['item_start'];
-				$r .= $iterator_User->get_identity_link( array( 'login_mask' => '$login$' ) );
-				$r .= $params['item_end'];
-			}
-		}
-
-		if( !empty( $r ) )
-		{
-			$r .= $params['list_end'];
-			echo $r;
-		}
-
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
+        return true;
+    }
 }

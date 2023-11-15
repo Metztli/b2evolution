@@ -12,30 +12,32 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $admin_url;
 
-$Form = new Form( NULL, 'delete_orphan_files', 'post', 'compact' );
+$Form = new Form(null, 'delete_orphan_files', 'post', 'compact');
 
-$Form->global_icon( TB_('Cancel').'!', 'close', regenerate_url( 'action,blog' ) );
+$Form->global_icon(TB_('Cancel') . '!', 'close', regenerate_url('action,blog'));
 
-$Form->begin_form( 'fform', TB_('Find and delete all orphan File objects (with no matching file on disk) - DB only.') );
+$Form->begin_form('fform', TB_('Find and delete all orphan File objects (with no matching file on disk) - DB only.'));
 
-	$Form->add_crumb( 'tools' );
-	$Form->hidden( 'ctrl', 'tools' );
-	$Form->hidden( 'action', 'delete_orphan_files' );
-	$Form->add_crumb( 'tools' );
+$Form->add_crumb('tools');
+$Form->hidden('ctrl', 'tools');
+$Form->hidden('action', 'delete_orphan_files');
+$Form->add_crumb('tools');
 
-	$Form->checklist( array(
-			array( 'delete_files', 1, TB_('Delete orphan File objects that have no Links'), 1 ),
-			array( 'delete_linked', 1, TB_( 'Also delete orphan File objects that have Links (delete Link objects then delete File objects)' ), 1 ),
-		), 'delete_files', TB_('Cleanup') );
+$Form->checklist([
+    ['delete_files', 1, TB_('Delete orphan File objects that have no Links'), 1],
+    ['delete_linked', 1, TB_('Also delete orphan File objects that have Links (delete Link objects then delete File objects)'), 1],
+], 'delete_files', TB_('Cleanup'));
 
-$Form->end_form( array(
-	array( 'button', 'button', TB_('Back to tools menu'), 'SubmitButton', 'location.href="'.$admin_url.'?ctrl=tools"' ),
-	array( 'submit', 'submit', TB_('Delete'), 'ResetButton' ),
-) );
+$Form->end_form([
+    ['button', 'button', TB_('Back to tools menu'), 'SubmitButton', 'location.href="' . $admin_url . '?ctrl=tools"'],
+    ['submit', 'submit', TB_('Delete'), 'ResetButton'],
+]);
 ?>
 <script>
 jQuery( 'input[name=delete_files]' ).click( function()

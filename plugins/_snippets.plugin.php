@@ -12,164 +12,158 @@
  *
  * @package plugins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @package plugins
  */
 class snippets_plugin extends Plugin
 {
-	var $code = 'snippets';
-	var $name = 'Snippets';
-	var $priority = 60;
-	var $version = '7.2.5';
-	var $group = 'editor';
-	var $number_of_installs = 1;
+    public $code = 'snippets';
 
+    public $name = 'Snippets';
 
-	/**
-	 * Init
-	 */
-	function PluginInit( & $params )
-	{
-		$this->short_desc = T_('Toolbar with buttons to insert text snippets');
-		$this->long_desc = T_('This plugin displays a toolbar with buttons which allow to quickly insert text snippets into items or comments.');
-	}
+    public $priority = 60;
 
+    public $version = '7.2.5';
 
-	/**
-	 * Define here default collection/blog settings that are to be made available in the backoffice.
-	 *
-	 * @param array Associative array of parameters.
-	 * @return array See {@link Plugin::GetDefaultSettings()}.
-	 */
-	function get_coll_setting_definitions( & $params )
-	{
-		return array_merge( parent::get_coll_setting_definitions( $params ), array(
-			'snippets' => array(
-				'label' => T_('Snippets'),
-				'type' => 'array',
-				'entries' => array(
-					'title' => array(
-						'label' => T_('Title'),
-						'defaultvalue' => '',
-					),
-					'text' => array(
-						'label' => T_('Text'),
-						'type' => 'textarea',
-						'defaultvalue' => '',
-					),
-					'min_user_level' => array(
-						'label' => T_('Min user level'),
-						'type' => 'integer',
-						'defaultvalue' => 0,
-						'valid_range'  => array(
-							'min' => 0,
-							'max' => 10,
-						),
-					),
-				)
-			),
-		) );
-	}
+    public $group = 'editor';
 
+    public $number_of_installs = 1;
 
-	/**
-	 * Event handler: Called when displaying editor toolbars on post/item form.
-	 *
-	 * This is for post/item edit forms only. Comments, PMs and emails use different events.
-	 *
-	 * @param array Associative array of parameters
-	 * @return boolean did we display a toolbar?
-	 */
-	function AdminDisplayToolbar( & $params )
-	{
-		$Item = & $params['Item'];
+    /**
+     * Init
+     */
+    public function PluginInit(&$params)
+    {
+        $this->short_desc = T_('Toolbar with buttons to insert text snippets');
+        $this->long_desc = T_('This plugin displays a toolbar with buttons which allow to quickly insert text snippets into items or comments.');
+    }
 
-		if( empty( $Item ) ||
-		    ! ( $item_Blog = & $Item->get_Blog() ) ||
-		    ! $this->get_coll_setting( 'coll_use_for_posts', $item_Blog ) )
-		{	// This plugin cannot be used for current Item:
-			return false;
-		}
+    /**
+     * Define here default collection/blog settings that are to be made available in the backoffice.
+     *
+     * @param array Associative array of parameters.
+     * @return array See {@link Plugin::GetDefaultSettings()}.
+     */
+    public function get_coll_setting_definitions(&$params)
+    {
+        return array_merge(parent::get_coll_setting_definitions($params), [
+            'snippets' => [
+                'label' => T_('Snippets'),
+                'type' => 'array',
+                'entries' => [
+                    'title' => [
+                        'label' => T_('Title'),
+                        'defaultvalue' => '',
+                    ],
+                    'text' => [
+                        'label' => T_('Text'),
+                        'type' => 'textarea',
+                        'defaultvalue' => '',
+                    ],
+                    'min_user_level' => [
+                        'label' => T_('Min user level'),
+                        'type' => 'integer',
+                        'defaultvalue' => 0,
+                        'valid_range' => [
+                            'min' => 0,
+                            'max' => 10,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
 
-		$params['Blog'] = $item_Blog;
+    /**
+     * Event handler: Called when displaying editor toolbars on post/item form.
+     *
+     * This is for post/item edit forms only. Comments, PMs and emails use different events.
+     *
+     * @param array Associative array of parameters
+     * @return boolean did we display a toolbar?
+     */
+    public function AdminDisplayToolbar(&$params)
+    {
+        $Item = &$params['Item'];
 
-		return $this->DisplayCodeToolbar( $params );
-	}
+        if (empty($Item) ||
+            ! ($item_Blog = &$Item->get_Blog()) ||
+            ! $this->get_coll_setting('coll_use_for_posts', $item_Blog)) {	// This plugin cannot be used for current Item:
+            return false;
+        }
 
+        $params['Blog'] = $item_Blog;
 
-	/**
-	 * Event handler: Called when displaying editor toolbars on comment form.
-	 *
-	 * @param array Associative array of parameters
-	 * @return boolean did we display a toolbar?
-	 */
-	function DisplayCommentToolbar( & $params )
-	{
-		$Comment = & $params['Comment'];
+        return $this->DisplayCodeToolbar($params);
+    }
 
-		if( empty( $Comment ) ||
-		    ! ( $comment_Item = & $Comment->get_Item() ) ||
-		    ! ( $item_Blog = & $comment_Item->get_Blog() ) ||
-		    ! $this->get_coll_setting( 'coll_use_for_comments', $item_Blog ) )
-		{	// This plugin cannot be used for current Comment:
-			return false;
-		}
+    /**
+     * Event handler: Called when displaying editor toolbars on comment form.
+     *
+     * @param array Associative array of parameters
+     * @return boolean did we display a toolbar?
+     */
+    public function DisplayCommentToolbar(&$params)
+    {
+        $Comment = &$params['Comment'];
 
-		$params['Blog'] = $item_Blog;
+        if (empty($Comment) ||
+            ! ($comment_Item = &$Comment->get_Item()) ||
+            ! ($item_Blog = &$comment_Item->get_Blog()) ||
+            ! $this->get_coll_setting('coll_use_for_comments', $item_Blog)) {	// This plugin cannot be used for current Comment:
+            return false;
+        }
 
-		return $this->DisplayCodeToolbar( $params );
-	}
+        $params['Blog'] = $item_Blog;
 
+        return $this->DisplayCodeToolbar($params);
+    }
 
-	/**
-	 * Display a code toolbar
-	 *
-	 * @param array Associative array of parameters
-	 * @return boolean did we display a toolbar?
-	 */
-	function DisplayCodeToolbar( & $params )
-	{
-		global $current_User;
+    /**
+     * Display a code toolbar
+     *
+     * @param array Associative array of parameters
+     * @return boolean did we display a toolbar?
+     */
+    public function DisplayCodeToolbar(&$params)
+    {
+        global $current_User;
 
-		$params = array_merge( array(
-				'js_prefix' => '', // Use different prefix if you use several toolbars on one page
-			), $params );
+        $params = array_merge([
+            'js_prefix' => '', // Use different prefix if you use several toolbars on one page
+        ], $params);
 
-		if( ! is_logged_in() )
-		{	// Don't try to display any snippet because they are restricted by user level:
-			return false;
-		}
+        if (! is_logged_in()) {	// Don't try to display any snippet because they are restricted by user level:
+            return false;
+        }
 
-		// Get snippets for current Collection and current User:
-		$snippets = $this->get_coll_setting( 'snippets', $params['Blog'] );
-		if( is_array( $snippets ) && ! empty( $snippets ) )
-		{
-			foreach( $snippets as $s => $snippet )
-			{
-				if( $current_User->get( 'level' ) < $snippet['min_user_level'] )
-				{	// Don't display the snippet because of min user level:
-					unset( $snippets[ $s ] );
-				}
-			}
-		}
+        // Get snippets for current Collection and current User:
+        $snippets = $this->get_coll_setting('snippets', $params['Blog']);
+        if (is_array($snippets) && ! empty($snippets)) {
+            foreach ($snippets as $s => $snippet) {
+                if ($current_User->get('level') < $snippet['min_user_level']) {	// Don't display the snippet because of min user level:
+                    unset($snippets[$s]);
+                }
+            }
+        }
 
-		if( empty( $snippets ) )
-		{	// No snippets for current user:
-			return false;
-		}
+        if (empty($snippets)) {	// No snippets for current user:
+            return false;
+        }
 
-		// Load js to work with textarea
-		require_js_defer( 'functions.js', 'blog', true );
+        // Load js to work with textarea
+        require_js_defer('functions.js', 'blog', true);
 
-		?><script>
+        ?><script>
 		//<![CDATA[
 		var <?php echo $params['js_prefix']; ?>b2evo_snippets = new Array( <?php
-		foreach( $snippets as $snippet )
-		{
-			echo '\''.format_to_js( $snippet['text'] ).'\',';
-		} ?> );
+        foreach ($snippets as $snippet) {
+            echo '\'' . format_to_js($snippet['text']) . '\',';
+        } ?> );
 		function <?php echo $params['js_prefix']; ?>b2evo_insert_snippet( canvas_field, i )
 		{
 			textarea_wrap_selection( canvas_field, <?php echo $params['js_prefix']; ?>b2evo_snippets[i], '', 0 );
@@ -177,25 +171,26 @@ class snippets_plugin extends Plugin
 		//]]>
 		</script><?php
 
-		// Display toolbar with snippets:
-		echo $this->get_template( 'toolbar_before', array( '$toolbar_class$' => $params['js_prefix'].$this->code.'_toolbar' ) );
-		echo $this->get_template( 'toolbar_title_before' ).TS_('Snippets').': '.$this->get_template( 'toolbar_title_after' );
-		echo $this->get_template( 'toolbar_group_before' );
-		$snippet_index = 0; // Index of the snippets, Used in the js func b2evo_insert_snippet to get a snippet text:
-		foreach( $snippets as $snippet )
-		{
-			echo '<input '.get_field_attribs_as_string( array(
-					'type'      => 'button',
-					'value'     => $snippet['title'],
-					'data-func' => $params['js_prefix'].'b2evo_insert_snippet|'.$params['js_prefix'].'b2evoCanvas|'.$snippet_index,
-					'class'     => $this->get_template( 'toolbar_button_class' ),
-				) ).'/>';
-			$snippet_index++;
-		}
-		echo $this->get_template( 'toolbar_group_after' );
-		echo $this->get_template( 'toolbar_after' );
+        // Display toolbar with snippets:
+        echo $this->get_template('toolbar_before', [
+            '$toolbar_class$' => $params['js_prefix'] . $this->code . '_toolbar',
+        ]);
+        echo $this->get_template('toolbar_title_before') . TS_('Snippets') . ': ' . $this->get_template('toolbar_title_after');
+        echo $this->get_template('toolbar_group_before');
+        $snippet_index = 0; // Index of the snippets, Used in the js func b2evo_insert_snippet to get a snippet text:
+        foreach ($snippets as $snippet) {
+            echo '<input ' . get_field_attribs_as_string([
+                'type' => 'button',
+                'value' => $snippet['title'],
+                'data-func' => $params['js_prefix'] . 'b2evo_insert_snippet|' . $params['js_prefix'] . 'b2evoCanvas|' . $snippet_index,
+                'class' => $this->get_template('toolbar_button_class'),
+            ]) . '/>';
+            $snippet_index++;
+        }
+        echo $this->get_template('toolbar_group_after');
+        echo $this->get_template('toolbar_after');
 
-		return true;
-	}
+        return true;
+    }
 }
 ?>

@@ -4,7 +4,9 @@
  *
  * @package conf
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 $app_name = 'b2evolution';
@@ -34,7 +36,7 @@ $app_pro = false;
 /**
  * Long version string for checking differences
  */
-$app_version_long = $app_version.'-'.$app_date;
+$app_version_long = $app_version . '-' . $app_date;
 
 /**
  * This is used to check if the database is up to date.
@@ -50,18 +52,22 @@ $new_db_version = 16170;
  * Minimum PHP version required for b2evolution to function properly. It will contain each module own minimum PHP version as well.
  * @global array
  */
-$required_php_version = array( 'application' => '5.6' );
+$required_php_version = [
+    'application' => '5.6',
+];
 
 /**
  * Minimum MYSQL version required for b2evolution to function properly. It will contain each module own minimum MYSQL version as well.
  * @global array
  */
-$required_mysql_version = array( 'application' => '5.5.3' );
+$required_mysql_version = [
+    'application' => '5.5.3',
+];
 
 /**
  * Is displayed on the login screen:
  */
-$app_footer_text = '<a href="http://b2evolution.net/" title="visit b2evolution\'s website"><strong>b2evolution '.$app_version_long.'</strong></a>
+$app_footer_text = '<a href="http://b2evolution.net/" title="visit b2evolution\'s website"><strong>b2evolution ' . $app_version_long . '</strong></a>
 		&ndash;
 		<a href="http://b2evolution.net/about/gnu-gpl-license" class="nobr">GPL License</a>';
 
@@ -84,16 +90,15 @@ $online_help_links = true;
  * however only be used for large enough feature sets to make it worth the trouble. NO MICROMANAGING here.
  * Try commenting out the 'collections' module to revert to pretty much just evocore.
  */
-$modules = array(
-		'_core',
-		'collections',  // TODO: installer won't work without this module
-		'polls',
-		'files',
-		'sessions',
-		'messaging',
-		'maintenance',
-		// 'central_antispam',		// will also require $enable_blacklist_server_API = true;
-		'menus',
-		'templates',
-	);
-?>
+$modules = [
+    '_core',
+    'collections',  // TODO: installer won't work without this module
+    'polls',
+    'files',
+    'sessions',
+    'messaging',
+    'maintenance',
+    // 'central_antispam',		// will also require $enable_blacklist_server_API = true;
+    'menus',
+    'templates',
+];

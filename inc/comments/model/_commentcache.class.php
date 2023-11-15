@@ -13,9 +13,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache' );
+load_class('_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache');
 
 //load_class( 'comments/model/_comment.class.php', 'Comment' );
 
@@ -26,32 +28,28 @@ load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCac
  */
 class CommentCache extends DataObjectCache
 {
-	/**
-	 * Constructor
-	 *
-	 * @param string object type of elements in Cache
-	 * @param string Name of the DB table
-	 * @param string Prefix of fields in the table
-	 * @param string Name of the ID field (including prefix)
-	 */
-	function __construct( $objType = 'Comment', $dbtablename = 'T_comments', $dbprefix = 'comment_', $dbIDname = 'comment_ID' )
-	{
-		parent::__construct( $objType, false, $dbtablename, $dbprefix, $dbIDname );
-	}
+    /**
+     * Constructor
+     *
+     * @param string object type of elements in Cache
+     * @param string Name of the DB table
+     * @param string Prefix of fields in the table
+     * @param string Name of the ID field (including prefix)
+     */
+    public function __construct($objType = 'Comment', $dbtablename = 'T_comments', $dbprefix = 'comment_', $dbIDname = 'comment_ID')
+    {
+        parent::__construct($objType, false, $dbtablename, $dbprefix, $dbIDname);
+    }
 
+    /**
+     * Load the cache **extensively**
+     */
+    public function load_all()
+    {
+        if ($this->all_loaded) { // Already loaded
+            return false;
+        }
 
-	/**
-	 * Load the cache **extensively**
-	 */
-	function load_all()
-	{
-		if( $this->all_loaded )
-		{ // Already loaded
-			return false;
-		}
-
-		debug_die( 'Load all is not allowed for CommentCache!' );
-	}
+        debug_die('Load all is not allowed for CommentCache!');
+    }
 }
-
-?>

@@ -1,0 +1,171 @@
+// ======================================================================== /
+// Import the disp style
+// ======================================================================== /
+@import "assets/less/disp/_disp_front";
+@import "assets/less/disp/_disp_catdir";
+@import "assets/less/disp/_disp_posts";
+@import "assets/less/disp/_disp_single";
+@import "assets/less/disp/_disp_404";
+@import "assets/less/disp/_disp_mediaidx";
+@import "assets/less/disp/_disp_search";
+@import "assets/less/disp/_disp_postidx";
+@import "assets/less/disp/_disp_sitemap";
+@import "assets/less/disp/_disp_contact";
+@import "assets/less/disp/_disp_arcdir";
+@import "assets/less/disp/_disp_threads";
+@import "assets/less/disp/_disp_messages";
+@import "assets/less/disp/_disp_user";
+@import "assets/less/disp/_disp_profile";
+@import "assets/less/disp/_disp_login";
+@import "assets/less/disp/_disp_usercomments";
+
+// Title Content
+// ======================================================================== /
+.disp_arcdir,
+.disp_msgform,
+.disp_contacts,
+.disp_users,
+.disp_login,
+.disp_lostpassword,
+.disp_register,
+.disp_threads,
+.disp_tags,
+.disp_profile,
+.disp_avatar,
+.disp_pwdchange,
+.disp_userprefs,
+.disp_subs {
+
+	#content {
+		.title__content {
+			text-align: left;
+			padding: 0;
+			// margin-bottom: 0;
+			box-shadow: none;
+			background-color: transparent;
+		}
+	}
+
+}
+
+.disp_msgform {
+	#content {
+		.title__content {
+			padding-bottom: 30px;
+		}
+	}
+}
+
+// Style On Disp Profile
+// ======================================================================== /
+// Profile tabs on ?disp=profile
+ul.profile_tabs {
+	margin: 0 2ex 2ex;
+	position: relative;
+	top: 1px;
+}
+
+.profile_avatar {
+	float: right;
+	padding: 10px;
+	margin-left: 10px;
+}
+
+.disp_help,
+.disp_tags {
+
+	.main_content {
+		background-color: @w;
+		padding: 30px;
+		box-shadow: @box-shadow;
+
+		h2 {
+			margin-top: 0;
+		}
+	}
+
+	.tag_cloud {
+
+		a {
+			display: inline-block;
+			font-size: 1.3rem !important;
+			border-radius: 30px;
+			border: 1px solid @primary;
+			color: @primary;
+			padding: 10px 20px;
+			margin-bottom: 4px;
+
+			&:hover, &:focus, &:active {
+				background-color: @primary;
+				color: @w;
+				text-decoration: none;
+			}
+		}
+
+	}
+
+}
+
+
+// Form Text Input
+// ======================================================================== /
+.form_text_input, .form_textarea_input {
+	box-shadow: none;
+	border-radius: 2px;
+
+	&:focus {
+		border-color: @primary;
+	}
+}
+
+
+// SaveButton Style
+// ======================================================================== /
+.SaveButton {
+	font-size: 1.2rem;
+	text-transform: uppercase;
+	padding: 10px 25px;
+
+	border-radius: 30px;
+	background-color: transparent;
+
+	@media screen and ( max-width: @MX ) {
+		margin-bottom: 3px;
+	}
+
+	&.btn-primary {
+		color: @primary;
+		border: 2px solid @primary;
+
+		&:hover, &:active, &:focus {
+			background-color: @primary;
+			color: @w;
+		}
+	}
+
+	&.btn-info {
+		color: @btn_info;
+		border: 2px solid @btn_info;
+
+		&:hover, &:active, &:focus {
+			color: @w;
+			background-color: @btn_info;
+		}
+	}
+}
+
+
+// Result Panel
+// ======================================================================== /
+.results {
+
+	.table_scroll {
+
+		h1, h2, h3, h4, h5, h6 {
+			font-family: @font_heading;
+			font-weight: 700;
+		}
+
+	}
+
+}

@@ -11,24 +11,25 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // ------------------------- "404 Page" CONTAINER EMBEDDED HERE --------------------------
-widget_container( '404_page', array(
-	// The following params will be used as defaults for widgets included in this container:
-	'container_display_if_empty' => false, // If no widget, don't display container at all
-	// This will enclose each widget in a block:
-	'block_start' => '<div class="evo_widget error_404 $wi_class$">',
-	'block_end'   => '</div>',
-	// This will enclose the title of each widget:
-	'block_title_start' => '<h3>',
-	'block_title_end'   => '</h3>',
-	// Widget 'Search form':
-	'search_input_before'  => '<div class="input-group">',
-	'search_input_after'   => '',
-	'search_submit_before' => '<span class="input-group-btn">',
-	'search_submit_after'  => '</span></div>',
-) );
+widget_container('404_page', [
+    // The following params will be used as defaults for widgets included in this container:
+    'container_display_if_empty' => false, // If no widget, don't display container at all
+    // This will enclose each widget in a block:
+    'block_start' => '<div class="evo_widget error_404 $wi_class$">',
+    'block_end' => '</div>',
+    // This will enclose the title of each widget:
+    'block_title_start' => '<h3>',
+    'block_title_end' => '</h3>',
+    // Widget 'Search form':
+    'search_input_before' => '<div class="input-group">',
+    'search_input_after' => '',
+    'search_submit_before' => '<span class="input-group-btn">',
+    'search_submit_after' => '</span></div>',
+]);
 // ----------------------------- END OF "404 Page" CONTAINER -----------------------------
-?>

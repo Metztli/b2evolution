@@ -13,7 +13,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -28,9 +30,9 @@ load_funcs('sessions/model/_cookie.funcs.php');
 load_funcs('files/model/_file.funcs.php');
 
 // Load utf8 support functions
-load_funcs( '_ext/_portable_utf8.php' );
+load_funcs('_ext/_portable_utf8.php');
 
-load_funcs( '_ext/random/random.php' );
+load_funcs('_ext/random/random.php');
 
 
 /**
@@ -40,30 +42,25 @@ load_funcs( '_ext/random/random.php' );
  * @param array params
  * @return array[module_name][return value], or NULL if the method doesn't have any return value
  */
-function modules_call_method( $method_name, $params = NULL )
+function modules_call_method($method_name, $params = null)
 {
-	global $modules;
+    global $modules;
 
-	$result = NULL;
+    $result = null;
 
-	foreach( $modules as $module )
-	{
-		$Module = & $GLOBALS[$module.'_Module'];
-		if( $params == NULL )
-		{
-			$ret = $Module->{$method_name}();
-		}
-		else
-		{
-			$ret = $Module->{$method_name}( $params );
-		}
-		if( isset( $ret ) )
-		{
-			$result[$module] = $ret;
-		}
-	}
+    foreach ($modules as $module) {
+        $Module = &$GLOBALS[$module . '_Module'];
+        if ($params == null) {
+            $ret = $Module->{$method_name}();
+        } else {
+            $ret = $Module->{$method_name}($params);
+        }
+        if (isset($ret)) {
+            $result[$module] = $ret;
+        }
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -74,23 +71,21 @@ function modules_call_method( $method_name, $params = NULL )
  * @param array params
  * @return array[module_name][return value], or NULL if the method doesn't have any return value
  */
-function modules_call_method_reference_params( $method_name, & $params )
+function modules_call_method_reference_params($method_name, &$params)
 {
-	global $modules;
+    global $modules;
 
-	$result = NULL;
+    $result = null;
 
-	foreach( $modules as $module )
-	{
-		$Module = & $GLOBALS[$module.'_Module'];
-		$ret = $Module->{$method_name}( $params );
-		if( isset( $ret ) )
-		{
-			$result[$module] = $ret;
-		}
-	}
+    foreach ($modules as $module) {
+        $Module = &$GLOBALS[$module . '_Module'];
+        $ret = $Module->{$method_name}($params);
+        if (isset($ret)) {
+            $result[$module] = $ret;
+        }
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -105,51 +100,44 @@ function modules_call_method_reference_params( $method_name, & $params )
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-function load_db_schema( $inlcude_plugins = false )
+function load_db_schema($inlcude_plugins = false)
 {
-	global $schema_queries;
-	global $modules, $inc_path;
-	global $db_storage_charset, $DB;
+    global $schema_queries;
+    global $modules, $inc_path;
+    global $db_storage_charset, $DB;
 
-	if( empty( $db_storage_charset ) )
-	{ // If no specific charset has been requested for datstorage, use the one of the current connection (optimize for speed - no conversions)
-		$db_storage_charset = $DB->get_connection_charset();
-	}
+    if (empty($db_storage_charset)) { // If no specific charset has been requested for datstorage, use the one of the current connection (optimize for speed - no conversions)
+        $db_storage_charset = $DB->get_connection_charset();
+    }
 
-	// Load modules:
-	foreach( $modules as $module )
-	{
-		echo get_install_format_text_and_log( 'Loading module: <code>'.$module.'/model/_'.$module.'.install.php</code><br />', 'br' );
-		require_once $inc_path.$module.'/model/_'.$module.'.install.php';
-	}
+    // Load modules:
+    foreach ($modules as $module) {
+        echo get_install_format_text_and_log('Loading module: <code>' . $module . '/model/_' . $module . '.install.php</code><br />', 'br');
+        require_once $inc_path . $module . '/model/_' . $module . '.install.php';
+    }
 
-	if( $inlcude_plugins )
-	{ // Load all plugins table into the schema queries
-		global $Plugins;
+    if ($inlcude_plugins) { // Load all plugins table into the schema queries
+        global $Plugins;
 
-		if( empty( $Plugins ) )
-		{
-			load_class( 'plugins/model/_plugins.class.php', 'Plugins' );
-			$Plugins = new Plugins();
-		}
+        if (empty($Plugins)) {
+            load_class('plugins/model/_plugins.class.php', 'Plugins');
+            $Plugins = new Plugins();
+        }
 
-		$admin_Plugins = & get_Plugins_admin();
-		$admin_Plugins->restart();
-		while( $loop_Plugin = & $admin_Plugins->get_next() )
-		{ // loop through all installed plugins
-			$create_table_queries = $loop_Plugin->GetDbLayout();
-			foreach( $create_table_queries as $create_table_query )
-			{
-				if( ! preg_match( '|^\s*CREATE TABLE\s+(IF NOT EXISTS\s+)?([^\s(]+).*$|is', $create_table_query, $match) )
-				{ // Could not parse the CREATE TABLE command
-					continue;
-				}
-				$schema_queries[$match[2]] = array( 'Creating table for plugin', $create_table_query );
-				$DB->dbaliases[] = '#\b'.$match[2].'\b#';
-				$DB->dbreplaces[] = $match[2];
-			}
-		}
-	}
+        $admin_Plugins = &get_Plugins_admin();
+        $admin_Plugins->restart();
+        while ($loop_Plugin = &$admin_Plugins->get_next()) { // loop through all installed plugins
+            $create_table_queries = $loop_Plugin->GetDbLayout();
+            foreach ($create_table_queries as $create_table_query) {
+                if (! preg_match('|^\s*CREATE TABLE\s+(IF NOT EXISTS\s+)?([^\s(]+).*$|is', $create_table_query, $match)) { // Could not parse the CREATE TABLE command
+                    continue;
+                }
+                $schema_queries[$match[2]] = ['Creating table for plugin', $create_table_query];
+                $DB->dbaliases[] = '#\b' . $match[2] . '\b#';
+                $DB->dbreplaces[] = $match[2];
+            }
+        }
+    }
 }
 
 
@@ -159,36 +147,32 @@ function load_db_schema( $inlcude_plugins = false )
  *
  * @return DataObjectCache
  */
-function & get_Cache( $objectName )
+function &get_Cache($objectName)
 {
-	global $Plugins;
-	global $$objectName;
+    global $Plugins;
+    global $$objectName;
 
-	if( isset( $$objectName ) )
-	{	// Cache already exists:
-		return $$objectName;
-	}
+    if (isset($$objectName)) {	// Cache already exists:
+        return $$objectName;
+    }
 
-	$func_name = 'get_'.$objectName;
+    $func_name = 'get_' . $objectName;
 
-	if( function_exists($func_name) )
-	{
-		return $func_name();
-	}
-	else
-	{
-		debug_die( 'getCache(): Unknown Cache type get function:'.$func_name.'()' );
-	}
+    if (function_exists($func_name)) {
+        return $func_name();
+    } else {
+        debug_die('getCache(): Unknown Cache type get function:' . $func_name . '()');
+    }
 }
 
 
 /**
  * Load functions file
  */
-function load_funcs( $funcs_path )
+function load_funcs($funcs_path)
 {
-	global $inc_path;
-	require_once $inc_path.$funcs_path;
+    global $inc_path;
+    require_once $inc_path . $funcs_path;
 }
 
 
@@ -202,93 +186,92 @@ function load_funcs( $funcs_path )
  */
 function shutdown()
 {
-	/**
-	 * @var Hit
-	 */
-	global $Hit;
+    /**
+     * @var Hit
+     */
+    global $Hit;
 
-	/**
-	 * @var Session
-	 */
-	global $Session;
+    /**
+     * @var Session
+     */
+    global $Session;
 
-	global $Settings, $Debuglog, $DB, $Timer;
+    global $Settings, $Debuglog, $DB, $Timer;
 
-	// Try forking a background process and let the parent return as fast as possbile.
-	if( is_callable('pcntl_fork') && function_exists('posix_kill') && defined('STDIN') )
-	{
-		if( $pid = pcntl_fork() )
-			return; // Parent
+    // Try forking a background process and let the parent return as fast as possbile.
+    if (is_callable('pcntl_fork') && function_exists('posix_kill') && defined('STDIN')) {
+        if ($pid = pcntl_fork()) {
+            return;
+        } // Parent
 
-		function shutdown_kill()
-		{
-			posix_kill(posix_getpid(), SIGHUP);
-		}
+        function shutdown_kill()
+        {
+            posix_kill(posix_getpid(), SIGHUP);
+        }
 
-		if ( ob_get_level() )
-		{	// Discard the output buffer and close
-			ob_end_clean();
-		}
+        if (ob_get_level()) {	// Discard the output buffer and close
+            ob_end_clean();
+        }
 
-		fclose(STDIN);  // Close all of the standard
-		fclose(STDOUT); // file descriptors as we
-		fclose(STDERR); // are running as a daemon.
+        fclose(STDIN);  // Close all of the standard
+        fclose(STDOUT); // file descriptors as we
+        fclose(STDERR); // are running as a daemon.
 
-		register_shutdown_function('shutdown_kill');
+        register_shutdown_function('shutdown_kill');
 
-		if( posix_setsid() < 0 )
-			return;
+        if (posix_setsid() < 0) {
+            return;
+        }
 
-		if( $pid = pcntl_fork() )
-			return;     // Parent
+        if ($pid = pcntl_fork()) {
+            return;
+        }     // Parent
 
-		// Now running as a daemon. This process will even survive
-		// an apachectl stop.
-	}
+        // Now running as a daemon. This process will even survive
+        // an apachectl stop.
+    }
 
-	$Timer->resume('shutdown');
+    $Timer->resume('shutdown');
 
-	// echo '*** SHUTDOWN FUNC KICKING IN ***';
+    // echo '*** SHUTDOWN FUNC KICKING IN ***';
 
-	// fp> do we need special processing if we are in CLI mode?  probably earlier actually
-	// if( ! $is_cli )
+    // fp> do we need special processing if we are in CLI mode?  probably earlier actually
+    // if( ! $is_cli )
 
-	// Note: it might be useful at some point to do special processing if the script has been aborted or has timed out
-	// connection_aborted()
-	// connection_status()
+    // Note: it might be useful at some point to do special processing if the script has been aborted or has timed out
+    // connection_aborted()
+    // connection_status()
 
-	// Save the current HIT, but set delayed since the hit ID will not be required here:
-	$Hit->log( true );
+    // Save the current HIT, but set delayed since the hit ID will not be required here:
+    $Hit->log(true);
 
-	// Update the SESSION:
-	$Session->dbsave();
+    // Update the SESSION:
+    $Session->dbsave();
 
-	// Get updates here instead of slowing down normal display of the dashboard
-	load_funcs( 'dashboard/model/_dashboard.funcs.php' );
-	b2evonet_get_updates();
+    // Get updates here instead of slowing down normal display of the dashboard
+    load_funcs('dashboard/model/_dashboard.funcs.php');
+    b2evonet_get_updates();
 
-	// Auto pruning of old HITS, old SESSIONS and potentially MORE analytics data:
-	if( $Settings->get( 'auto_prune_stats_mode' ) == 'page' )
-	{ // Autopruning is requested
-		load_class( 'sessions/model/_hitlist.class.php', 'Hitlist' );
-		Hitlist::dbprune(); // will prune once per day, according to Settings
-	}
+    // Auto pruning of old HITS, old SESSIONS and potentially MORE analytics data:
+    if ($Settings->get('auto_prune_stats_mode') == 'page') { // Autopruning is requested
+        load_class('sessions/model/_hitlist.class.php', 'Hitlist');
+        Hitlist::dbprune(); // will prune once per day, according to Settings
+    }
 
-	// Calling debug_info() here will produce complete data but it will be after </html> hence invalid.
-	// Then again, it's for debug only, so it shouldn't matter that much.
-	debug_info();
+    // Calling debug_info() here will produce complete data but it will be after </html> hence invalid.
+    // Then again, it's for debug only, so it shouldn't matter that much.
+    debug_info();
 
-	// Update the SESSION again, at the very end:
-	// (e.g. "Debuglogs" may have been removed in debug_info())
-	$Session->dbsave();
+    // Update the SESSION again, at the very end:
+    // (e.g. "Debuglogs" may have been removed in debug_info())
+    $Session->dbsave();
 
-	while( $DB->transaction_nesting_level )
-	{	// Rollback all transactions which could not finished correctly by some unknown error,
-		// Used to avoid errors like "Lock wait timeout exceeded; try restarting transaction":
-		$DB->rollback();
-	}
+    while ($DB->transaction_nesting_level) {	// Rollback all transactions which could not finished correctly by some unknown error,
+        // Used to avoid errors like "Lock wait timeout exceeded; try restarting transaction":
+        $DB->rollback();
+    }
 
-	$Timer->pause('shutdown');
+    $Timer->pause('shutdown');
 }
 
 
@@ -312,105 +295,105 @@ function shutdown()
  * - xmlattr: use as an attribute: strips tags and escapes quotes
  * @return string formatted text
  */
-function format_to_output( $content, $format = 'htmlbody' )
+function format_to_output($content, $format = 'htmlbody')
 {
-	global $Plugins, $evo_charset;
+    global $Plugins, $evo_charset;
 
-	switch( $format )
-	{
-		case 'raw':
-			// do nothing!
-			break;
+    switch ($format) {
+        case 'raw':
+            // do nothing!
+            break;
 
-		case 'htmlbody':
-			// display in HTML page body: allow full HTML
-			$content = convert_chars($content, 'html');
-			break;
+        case 'htmlbody':
+            // display in HTML page body: allow full HTML
+            $content = convert_chars($content, 'html');
+            break;
 
-		case 'urlencoded':
-			// Encode string to be passed as part of an URL
-			$content = rawurlencode( $content );
-			break;
+        case 'urlencoded':
+            // Encode string to be passed as part of an URL
+            $content = rawurlencode($content);
+            break;
 
-		case 'entityencoded':
-			// Special mode for RSS 0.92: apply renders and allow full HTML but escape it
-			$content = convert_chars($content, 'html');
-			$content = htmlspecialchars( $content, ENT_QUOTES, $evo_charset );
-			break;
+        case 'entityencoded':
+            // Special mode for RSS 0.92: apply renders and allow full HTML but escape it
+            $content = convert_chars($content, 'html');
+            $content = htmlspecialchars($content, ENT_QUOTES, $evo_charset);
+            break;
 
-		case 'htmlfeed':
-			// For use in RSS <content:encoded><![CDATA[ ... ]]></content:encoded>
-			// allow full HTML + absolute URLs...
-			$content = make_rel_links_abs($content);
-			$content = convert_chars($content, 'html');
-			$content = str_replace(']]>', ']]&gt;', $content); // encode CDATA closing tag to prevent injection/breaking of the <![CDATA[ ... ]]>
-			break;
+        case 'htmlfeed':
+            // For use in RSS <content:encoded><![CDATA[ ... ]]></content:encoded>
+            // allow full HTML + absolute URLs...
+            $content = make_rel_links_abs($content);
+            $content = convert_chars($content, 'html');
+            $content = str_replace(']]>', ']]&gt;', $content); // encode CDATA closing tag to prevent injection/breaking of the <![CDATA[ ... ]]>
+            break;
 
-		case 'htmlhead':
-			// Strips out HTML (mainly for use in Title)
-			$content = strip_tags($content);
-			$content = convert_chars($content, 'html');
-			break;
+        case 'htmlhead':
+            // Strips out HTML (mainly for use in Title)
+            $content = strip_tags($content);
+            $content = convert_chars($content, 'html');
+            break;
 
-		case 'htmlattr':
-			// use as an attribute: strips tags and escapes quotes
-			// TODO: dh> why not just htmlspecialchars?fp> because an attribute can never contain a tag? dh> well, "onclick='return 1<2;'" would get stripped, too. I'm just saying: why mess with it, when we can just use htmlspecialchars.. fp>ok
-			$content = strip_tags($content);
-			$content = convert_chars($content, 'html');
-			$content = str_replace( array('"', "'"), array('&quot;', '&#039;'), $content );
-			break;
+        case 'htmlattr':
+            // use as an attribute: strips tags and escapes quotes
+            // TODO: dh> why not just htmlspecialchars?fp> because an attribute can never contain a tag? dh> well, "onclick='return 1<2;'" would get stripped, too. I'm just saying: why mess with it, when we can just use htmlspecialchars.. fp>ok
+            $content = strip_tags($content);
+            $content = convert_chars($content, 'html');
+            $content = str_replace(['"', "'"], ['&quot;', '&#039;'], $content);
+            break;
 
-		case 'htmlspecialchars':
-		case 'formvalue':
-			// Replace special chars to &amp;, &quot;, &#039;|&apos;, &lt; and &gt; :
-			// Handles & " ' < > to &amp; &quot; &apos; &lt; &gt;
-			$content = htmlspecialchars( $content, ENT_QUOTES | ENT_HTML5, $evo_charset );
-			break;
+        case 'htmlspecialchars':
+        case 'formvalue':
+            // Replace special chars to &amp;, &quot;, &#039;|&apos;, &lt; and &gt; :
+            // Handles & " ' < > to &amp; &quot; &apos; &lt; &gt;
+            $content = htmlspecialchars($content, ENT_QUOTES | ENT_HTML5, $evo_charset);
+            break;
 
-		case 'xml':
-			// use in an XML file: strip HTML tags
-			$content = strip_tags($content);
-			$content = convert_chars($content, 'xml');
-			break;
+        case 'xml':
+            // use in an XML file: strip HTML tags
+            $content = strip_tags($content);
+            $content = convert_chars($content, 'xml');
+            break;
 
-		case 'xmlattr':
-			// use as an attribute: strips tags and escapes quotes
-			$content = strip_tags($content);
-			$content = convert_chars($content, 'xml');
-			$content = str_replace( array('"', "'"), array('&quot;', '&#039;'), $content );
-			break;
+        case 'xmlattr':
+            // use as an attribute: strips tags and escapes quotes
+            $content = strip_tags($content);
+            $content = convert_chars($content, 'xml');
+            $content = str_replace(['"', "'"], ['&quot;', '&#039;'], $content);
+            break;
 
-		case 'text':
-			// use as plain-text, e.g. for ascii-mails
-			$content = strip_tags( $content );
-			$trans_tbl = get_html_translation_table( HTML_ENTITIES );
-			$trans_tbl = array_flip( $trans_tbl );
-			$content = strtr( $content, $trans_tbl );
-			$content = preg_replace( '/[ \t]+/', ' ', $content);
-			$content = trim($content);
-			break;
+        case 'text':
+            // use as plain-text, e.g. for ascii-mails
+            $content = strip_tags($content);
+            $trans_tbl = get_html_translation_table(HTML_ENTITIES);
+            $trans_tbl = array_flip($trans_tbl);
+            $content = strtr($content, $trans_tbl);
+            $content = preg_replace('/[ \t]+/', ' ', $content);
+            $content = trim($content);
+            break;
 
-		case 'syslog':
-			// Replace special chars to &amp;, &quot;, &#039;|&apos;, &lt; and &gt; :
-			// Handles & " ' < > to &amp; &quot; &apos; &lt; &gt;
-			$content = htmlspecialchars( $content, ENT_QUOTES | ENT_HTML5, $evo_charset );
-			$content = preg_replace( "/\[\[(.+?)]]/is", "<code>$1</code>", $content ); // Replaces [[...]] into <code>...</code>
-			break;
+        case 'syslog':
+            // Replace special chars to &amp;, &quot;, &#039;|&apos;, &lt; and &gt; :
+            // Handles & " ' < > to &amp; &quot; &apos; &lt; &gt;
+            $content = htmlspecialchars($content, ENT_QUOTES | ENT_HTML5, $evo_charset);
+            $content = preg_replace("/\[\[(.+?)]]/is", "<code>$1</code>", $content); // Replaces [[...]] into <code>...</code>
+            break;
 
-		default:
-			debug_die( 'Output format ['.$format.'] not supported.' );
-	}
+        default:
+            debug_die('Output format [' . $format . '] not supported.');
+    }
 
-	return $content;
+    return $content;
 }
 
 
 /*
  * autobrize(-)
  */
-function autobrize($content) {
-	$content = callback_on_non_matching_blocks( $content, '~<code>.+?</code>~is', 'autobrize_callback' );
-	return $content;
+function autobrize($content)
+{
+    $content = callback_on_non_matching_blocks($content, '~<code>.+?</code>~is', 'autobrize_callback');
+    return $content;
 }
 
 /**
@@ -419,12 +402,12 @@ function autobrize($content) {
  * @param string $content
  * @return string content with <br>'s added
  */
-function autobrize_callback( $content )
+function autobrize_callback($content)
 {
-	$content = preg_replace("/<br>\n/", "\n", $content);
-	$content = preg_replace("/<br \/>\n/", "\n", $content);
-	$content = preg_replace("/(\015\012)|(\015)|(\012)/", "<br />\n", $content);
-	return($content);
+    $content = preg_replace("/<br>\n/", "\n", $content);
+    $content = preg_replace("/<br \/>\n/", "\n", $content);
+    $content = preg_replace("/(\015\012)|(\015)|(\012)/", "<br />\n", $content);
+    return ($content);
 }
 
 /*
@@ -432,8 +415,8 @@ function autobrize_callback( $content )
  */
 function unautobrize($content)
 {
-	$content = callback_on_non_matching_blocks( $content, '~<code>.+?</code>~is', 'unautobrize_callback' );
-	return $content;
+    $content = callback_on_non_matching_blocks($content, '~<code>.+?</code>~is', 'unautobrize_callback');
+    return $content;
 }
 
 /**
@@ -442,11 +425,11 @@ function unautobrize($content)
  * @param string $content
  * @return string content with <br>'s removed
  */
-function unautobrize_callback( $content )
+function unautobrize_callback($content)
 {
-	$content = preg_replace("/<br>\n/", "\n", $content);   //for PHP versions before 4.0.5
-	$content = preg_replace("/<br \/>\n/", "\n", $content);
-	return($content);
+    $content = preg_replace("/<br>\n/", "\n", $content);   //for PHP versions before 4.0.5
+    $content = preg_replace("/<br \/>\n/", "\n", $content);
+    return ($content);
 }
 
 /**
@@ -456,9 +439,9 @@ function unautobrize_callback( $content )
  * @param integer How many digits shall the number have?
  * @return string The padded number.
  */
-function zeroise( $number, $threshold )
+function zeroise($number, $threshold)
 {
-	return str_pad( $number, $threshold, '0', STR_PAD_LEFT );
+    return str_pad($number, $threshold, '0', STR_PAD_LEFT);
 }
 
 
@@ -469,27 +452,27 @@ function zeroise( $number, $threshold )
  * @param int Maximum length
  * @return string
  */
-function excerpt( $str, $maxlen = 254, $tail = '&hellip;' )
+function excerpt($str, $maxlen = 254, $tail = '&hellip;')
 {
-	// Add spaces
-	$str = str_replace( array( '<p>', '<br', '</tr><tr', '</th><th', '</td><td' ), array( ' <p>', ' <br', '</tr> <tr', '</th> <th', '</td> <td' ), $str );
+    // Add spaces
+    $str = str_replace(['<p>', '<br', '</tr><tr', '</th><th', '</td><td'], [' <p>', ' <br', '</tr> <tr', '</th> <th', '</td> <td'], $str);
 
-	// Remove <code>
-	$str = preg_replace( '#<code>(.+)</code>#is', '', $str );
+    // Remove <code>
+    $str = preg_replace('#<code>(.+)</code>#is', '', $str);
 
-	// Strip tags:
-	$str = strip_tags( $str );
+    // Strip tags:
+    $str = strip_tags($str);
 
-	// Remove spaces:
-	$str = preg_replace( '/[ \t]+/', ' ', $str);
-	$str = trim( $str );
+    // Remove spaces:
+    $str = preg_replace('/[ \t]+/', ' ', $str);
+    $str = trim($str);
 
-	// Ger rid of all new lines and Display the html tags as source text:
-	$str = trim( preg_replace( '#[\r\n\t\s]+#', ' ', $str ) );
+    // Ger rid of all new lines and Display the html tags as source text:
+    $str = trim(preg_replace('#[\r\n\t\s]+#', ' ', $str));
 
-	$str = strmaxlen( $str, $maxlen, $tail, 'raw', true );
+    $str = strmaxlen($str, $maxlen, $tail, 'raw', true);
 
-	return $str;
+    return $str;
 }
 
 
@@ -501,27 +484,27 @@ function excerpt( $str, $maxlen = 254, $tail = '&hellip;' )
  * @param array Params
  * @return string
  */
-function excerpt_words( $str, $maxwords = 50, $params = array() )
+function excerpt_words($str, $maxwords = 50, $params = [])
 {
-	// Add spaces
-	$str = str_replace( array( '<p>', '<br' ), array( ' <p>', ' <br' ), $str );
+    // Add spaces
+    $str = str_replace(['<p>', '<br'], [' <p>', ' <br'], $str);
 
-	// Remove <code>
-	$str = preg_replace( '#<code>(.+)</code>#is', '', $str );
+    // Remove <code>
+    $str = preg_replace('#<code>(.+)</code>#is', '', $str);
 
-	// Strip tags:
-	$str = strip_tags( $str );
+    // Strip tags:
+    $str = strip_tags($str);
 
-	// Remove spaces:
-	$str = preg_replace( '/[ \t]+/', ' ', $str);
-	$str = trim( $str );
+    // Remove spaces:
+    $str = preg_replace('/[ \t]+/', ' ', $str);
+    $str = trim($str);
 
-	// Ger rid of all new lines and Display the html tags as source text:
-	$str = trim( preg_replace( '#[\r\n\t\s]+#', ' ', $str ) );
+    // Ger rid of all new lines and Display the html tags as source text:
+    $str = trim(preg_replace('#[\r\n\t\s]+#', ' ', $str));
 
-	$str = strmaxwords( $str, $maxwords, $params );
+    $str = strmaxwords($str, $maxwords, $params);
 
-	return $str;
+    return $str;
 }
 
 
@@ -542,74 +525,62 @@ function excerpt_words( $str, $maxwords = 50, $params = array() )
  *        (any word split at the end will get its head removed)
  * @return string
  */
-function strmaxlen( $str, $maxlen = 50, $tail = NULL, $format = 'raw', $cut_at_whitespace = false  )
+function strmaxlen($str, $maxlen = 50, $tail = null, $format = 'raw', $cut_at_whitespace = false)
 {
-	if( is_null($tail) )
-	{
-		$tail = '&hellip;';
-	}
+    if (is_null($tail)) {
+        $tail = '&hellip;';
+    }
 
-	$str = utf8_rtrim($str);
+    $str = utf8_rtrim($str);
 
-	if( utf8_strlen( $str ) > $maxlen )
-	{
-		// Replace all HTML entities by a single char. html_entity_decode for example
-		// would not handle &hellip;.
-		$tail_for_length = preg_replace('~&\w+?;~', '.', $tail);
-		$tail_length = utf8_strlen( html_entity_decode($tail_for_length) );
-		$len = $maxlen-$tail_length;
-		if( $len < 1 )
-		{ // special case; $tail length is >= $maxlen
-			$len = 0;
-		}
-		$str_cropped = utf8_substr( $str, 0, $len );
-		if( $format != 'raw' )
-		{ // if the format isn't raw we make sure that we do not cut in the middle of an HTML entity
-			$maxlen_entity = 7; # "&amp;" is 5, min 3!
-			$str_inspect = utf8_substr($str_cropped, 1-$maxlen_entity);
-			$pos_amp = utf8_strpos($str_inspect, '&');
-			if( $pos_amp !== false )
-			{ // there's an ampersand at the end of the cropped string
-				$look_until = $pos_amp;
-				$str_cropped_len = utf8_strlen($str_cropped);
-				if( $str_cropped_len < $maxlen_entity )
-				{ // we have to look at least for the length of an entity
-					$look_until += $maxlen_entity-$str_cropped_len;
-				}
-				if( strpos(utf8_substr($str, $len, $look_until), ';') !== false )
-				{
-					$str_cropped = utf8_substr( $str, 0, $len-utf8_strlen($str_inspect)+$pos_amp);
-				}
-			}
-		}
+    if (utf8_strlen($str) > $maxlen) {
+        // Replace all HTML entities by a single char. html_entity_decode for example
+        // would not handle &hellip;.
+        $tail_for_length = preg_replace('~&\w+?;~', '.', $tail);
+        $tail_length = utf8_strlen(html_entity_decode($tail_for_length));
+        $len = $maxlen - $tail_length;
+        if ($len < 1) { // special case; $tail length is >= $maxlen
+            $len = 0;
+        }
+        $str_cropped = utf8_substr($str, 0, $len);
+        if ($format != 'raw') { // if the format isn't raw we make sure that we do not cut in the middle of an HTML entity
+            $maxlen_entity = 7; # "&amp;" is 5, min 3!
+            $str_inspect = utf8_substr($str_cropped, 1 - $maxlen_entity);
+            $pos_amp = utf8_strpos($str_inspect, '&');
+            if ($pos_amp !== false) { // there's an ampersand at the end of the cropped string
+                $look_until = $pos_amp;
+                $str_cropped_len = utf8_strlen($str_cropped);
+                if ($str_cropped_len < $maxlen_entity) { // we have to look at least for the length of an entity
+                    $look_until += $maxlen_entity - $str_cropped_len;
+                }
+                if (strpos(utf8_substr($str, $len, $look_until), ';') !== false) {
+                    $str_cropped = utf8_substr($str, 0, $len - utf8_strlen($str_inspect) + $pos_amp);
+                }
+            }
+        }
 
-		if( $cut_at_whitespace )
-		{
-			// Get the first character being cut off. Note: we can't use $str[index] in case of utf8 strings!
-			$first_cut_off_char = utf8_substr( $str, utf8_strlen( $str_cropped ), 1 );
-			if( ! ctype_space( $first_cut_off_char ) )
-			{ // first character being cut off is not whitespace
-				// Get the chars as an array from the cropped string to be able to get chars by position
-				$str_cropped_chars = preg_split('//u',$str_cropped, -1, PREG_SPLIT_NO_EMPTY);
-				$i = utf8_strlen($str_cropped);
-				while( $i && isset( $str_cropped_chars[ --$i ] ) && ! ctype_space( $str_cropped_chars[ $i ] ) )
-				{}
-				if( $i )
-				{
-					$str_cropped = utf8_substr($str_cropped, 0, $i);
-				}
-			}
-		}
+        if ($cut_at_whitespace) {
+            // Get the first character being cut off. Note: we can't use $str[index] in case of utf8 strings!
+            $first_cut_off_char = utf8_substr($str, utf8_strlen($str_cropped), 1);
+            if (! ctype_space($first_cut_off_char)) { // first character being cut off is not whitespace
+                // Get the chars as an array from the cropped string to be able to get chars by position
+                $str_cropped_chars = preg_split('//u', $str_cropped, -1, PREG_SPLIT_NO_EMPTY);
+                $i = utf8_strlen($str_cropped);
+                while ($i && isset($str_cropped_chars[--$i]) && ! ctype_space($str_cropped_chars[$i])) {
+                }
+                if ($i) {
+                    $str_cropped = utf8_substr($str_cropped, 0, $i);
+                }
+            }
+        }
 
-		$str = format_to_output(utf8_rtrim($str_cropped), $format);
-		$str .= $tail;
+        $str = format_to_output(utf8_rtrim($str_cropped), $format);
+        $str .= $tail;
 
-		return $str;
-	}
-	else
-	{
-		return format_to_output($str, $format);
-	}
+        return $str;
+    } else {
+        return format_to_output($str, $format);
+    }
 }
 
 
@@ -621,82 +592,73 @@ function strmaxlen( $str, $maxlen = 50, $tail = NULL, $format = 'raw', $cut_at_w
  * @param mixed array Optional parameters
  * @return string
  */
-function strmaxwords( $str, $maxwords = 50, $params = array() )
+function strmaxwords($str, $maxwords = 50, $params = [])
 {
-	$params = array_merge( array(
-			'cutting_mark'    => '&hellip;',
-			'continued_link'  => '',
-			'continued_text'  => '&hellip;',
-			'continued_class' => '',
-			'always_continue' => false,
-		), $params );
+    $params = array_merge([
+        'cutting_mark' => '&hellip;',
+        'continued_link' => '',
+        'continued_text' => '&hellip;',
+        'continued_class' => '',
+        'always_continue' => false,
+    ], $params);
 
-	// STATE MACHINE:
-	$in_tag = false;
-	$have_seen_non_whitespace = false;
-	$end = strlen( $str );  // If we use utf8_strlen here(), we also need to access UTF chars below
-	for( $i = 0; $i < $end; $i++ )
-	{
-		switch( $char = $str[$i] )		// This is NOT UTF-8
-		{
-			case '<' :	// start of a tag
-				$in_tag = true;
-				break;
+    // STATE MACHINE:
+    $in_tag = false;
+    $have_seen_non_whitespace = false;
+    $end = strlen($str);  // If we use utf8_strlen here(), we also need to access UTF chars below
+    for ($i = 0; $i < $end; $i++) {
+        switch ($char = $str[$i]) {		// This is NOT UTF-8
+            case '<' :	// start of a tag
+                $in_tag = true;
+                break;
 
-			case '>' : // end of a tag
-				$in_tag = false;
-				break;
+            case '>' : // end of a tag
+                $in_tag = false;
+                break;
 
-			case ctype_space($char): // This is a whitespace char...
-				if( ! $in_tag )
-				{	// it's a word gap:
-					// Eat any additional whitespace:
-					while( isset($str[$i+1]) && ctype_space($str[$i+1]) )
-					{
-						$i++;
-					}
-					if( isset($str[$i+1]) && $have_seen_non_whitespace )
-					{ // only decrement words, if there's been at least one non-space char before.
-						--$maxwords;
-					}
-				}
-				// ignore white space in a tag...
-				break;
+            case ctype_space($char): // This is a whitespace char...
+                if (! $in_tag) {	// it's a word gap:
+                    // Eat any additional whitespace:
+                    while (isset($str[$i + 1]) && ctype_space($str[$i + 1])) {
+                        $i++;
+                    }
+                    if (isset($str[$i + 1]) && $have_seen_non_whitespace) { // only decrement words, if there's been at least one non-space char before.
+                        --$maxwords;
+                    }
+                }
+                // ignore white space in a tag...
+                break;
 
-			default:
-				$have_seen_non_whitespace = true;
-				break;
-		}
+            default:
+                $have_seen_non_whitespace = true;
+                break;
+        }
 
-		if( $maxwords < 1 )
-		{	// We have reached the cutting point:
-			break;
-		}
-	}
+        if ($maxwords < 1) {	// We have reached the cutting point:
+            break;
+        }
+    }
 
-	if( $maxwords < 1 )
-	{	// Cutting is necessary:
-		// restrict content to required number of words:
-		$str = utf8_substr( $str, 0, $i );
+    if ($maxwords < 1) {	// Cutting is necessary:
+        // restrict content to required number of words:
+        $str = utf8_substr($str, 0, $i);
 
-		// Add a cutting mark:
-		$str .= $params['cutting_mark'];
+        // Add a cutting mark:
+        $str .= $params['cutting_mark'];
 
-		// balance the tags out:
-		$str = balance_tags( $str );
-		// remove empty tags:
-		$str = preg_replace( '~<([\s]+?)[^>]*?></\1>~is', '', $str );
-	}
+        // balance the tags out:
+        $str = balance_tags($str);
+        // remove empty tags:
+        $str = preg_replace('~<([\s]+?)[^>]*?></\1>~is', '', $str);
+    }
 
-	if( $params['always_continue'] || $maxwords < 1 )
-	{ // we want a continued text if avoid_end_hellip is not set:
-		if( ! isset( $params['avoid_end_hellip'] ) )
-		{
-			$str .= ' <a href="'.$params['continued_link'].'" class="'.$params['continued_class'].'">'.$params['continued_text'].'</a>';
-		}
-	}
+    if ($params['always_continue'] || $maxwords < 1) { // we want a continued text if avoid_end_hellip is not set:
+        if (! isset($params['avoid_end_hellip'])) {
+            $str .= ' <a href="' . $params['continued_link'] . '" class="' . $params['continued_class'] . '">' . $params['continued_text'] . '</a>';
+        }
+    }
 
-	return $str;
+    return $str;
 }
 
 
@@ -709,86 +671,83 @@ function strmaxwords( $str, $maxwords = 50, $params = array() )
  * fplanque: simplified
  * sakichan: pregs instead of loop
  */
-function convert_chars( $content, $flag = 'html' )
+function convert_chars($content, $flag = 'html')
 {
-	global $b2_htmltrans, $evo_charset;
+    global $b2_htmltrans, $evo_charset;
 
-	/**
-	 * Translation of invalid Unicode references range to valid range.
-	 * These are Windows CP1252 specific characters.
-	 * They would look weird on non-Windows browsers.
-	 * If you've ever pasted text from MSWord, you'll understand.
-	 *
-	 * You should not have to change this.
-	 */
-	static $b2_htmltranswinuni = array(
-		'&#128;' => '&#8364;', // the Euro sign
-		'&#130;' => '&#8218;',
-		'&#131;' => '&#402;',
-		'&#132;' => '&#8222;',
-		'&#133;' => '&#8230;',
-		'&#134;' => '&#8224;',
-		'&#135;' => '&#8225;',
-		'&#136;' => '&#710;',
-		'&#137;' => '&#8240;',
-		'&#138;' => '&#352;',
-		'&#139;' => '&#8249;',
-		'&#140;' => '&#338;',
-		'&#142;' => '&#382;',
-		'&#145;' => '&#8216;',
-		'&#146;' => '&#8217;',
-		'&#147;' => '&#8220;',
-		'&#148;' => '&#8221;',
-		'&#149;' => '&#8226;',
-		'&#150;' => '&#8211;',
-		'&#151;' => '&#8212;',
-		'&#152;' => '&#732;',
-		'&#153;' => '&#8482;',
-		'&#154;' => '&#353;',
-		'&#155;' => '&#8250;',
-		'&#156;' => '&#339;',
-		'&#158;' => '&#382;',
-		'&#159;' => '&#376;'
-	);
+    /**
+     * Translation of invalid Unicode references range to valid range.
+     * These are Windows CP1252 specific characters.
+     * They would look weird on non-Windows browsers.
+     * If you've ever pasted text from MSWord, you'll understand.
+     *
+     * You should not have to change this.
+     */
+    static $b2_htmltranswinuni = [
+        '&#128;' => '&#8364;', // the Euro sign
+        '&#130;' => '&#8218;',
+        '&#131;' => '&#402;',
+        '&#132;' => '&#8222;',
+        '&#133;' => '&#8230;',
+        '&#134;' => '&#8224;',
+        '&#135;' => '&#8225;',
+        '&#136;' => '&#710;',
+        '&#137;' => '&#8240;',
+        '&#138;' => '&#352;',
+        '&#139;' => '&#8249;',
+        '&#140;' => '&#338;',
+        '&#142;' => '&#382;',
+        '&#145;' => '&#8216;',
+        '&#146;' => '&#8217;',
+        '&#147;' => '&#8220;',
+        '&#148;' => '&#8221;',
+        '&#149;' => '&#8226;',
+        '&#150;' => '&#8211;',
+        '&#151;' => '&#8212;',
+        '&#152;' => '&#732;',
+        '&#153;' => '&#8482;',
+        '&#154;' => '&#353;',
+        '&#155;' => '&#8250;',
+        '&#156;' => '&#339;',
+        '&#158;' => '&#382;',
+        '&#159;' => '&#376;',
+    ];
 
-	// Convert highbyte non ASCII/UTF-8 chars to urefs:
-	if( ! in_array(strtolower($evo_charset), array( 'utf8', 'utf-8', 'gb2312', 'windows-1251') ) )
-	{ // This is a single byte charset
-		// fp> why do we actually bother doing this:?
-		$content = preg_replace_callback(
-			'/[\x80-\xff]/',
-			'_convert_chars_callback',
-			$content);
-	}
+    // Convert highbyte non ASCII/UTF-8 chars to urefs:
+    if (! in_array(strtolower($evo_charset), ['utf8', 'utf-8', 'gb2312', 'windows-1251'])) { // This is a single byte charset
+        // fp> why do we actually bother doing this:?
+        $content = preg_replace_callback(
+            '/[\x80-\xff]/',
+            '_convert_chars_callback',
+            $content
+        );
+    }
 
-	// Convert Windows CP1252 => Unicode (valid HTML)
-	// TODO: should this go to input conversions instead (?)
-	$content = strtr( $content, $b2_htmltranswinuni );
+    // Convert Windows CP1252 => Unicode (valid HTML)
+    // TODO: should this go to input conversions instead (?)
+    $content = strtr($content, $b2_htmltranswinuni);
 
-	if( $flag == 'html' )
-	{ // we can use entities
-		// Convert & chars that are not used in an entity
-		$content = preg_replace('/&(?![#A-Za-z0-9]{2,20};)/', '&amp;', $content);
-	}
-	else
-	{ // unicode, xml...
-		// Convert & chars that are not used in an entity
-		$content = preg_replace('/&(?![#A-Za-z0-9]{2,20};)/', '&#38;', $content);
+    if ($flag == 'html') { // we can use entities
+        // Convert & chars that are not used in an entity
+        $content = preg_replace('/&(?![#A-Za-z0-9]{2,20};)/', '&amp;', $content);
+    } else { // unicode, xml...
+        // Convert & chars that are not used in an entity
+        $content = preg_replace('/&(?![#A-Za-z0-9]{2,20};)/', '&#38;', $content);
 
-		// Convert HTML entities to urefs:
-		$content = strtr($content, $b2_htmltrans);
-	}
+        // Convert HTML entities to urefs:
+        $content = strtr($content, $b2_htmltrans);
+    }
 
-	return( $content );
+    return ($content);
 }
 
 
 /**
  * Callback for preg_replace_callback in convert_chars()
  */
-function _convert_chars_callback( $matches )
+function _convert_chars_callback($matches)
 {
-	return "&#".ord( $matches[0] ).";";
+    return "&#" . ord($matches[0]) . ";";
 }
 
 
@@ -798,14 +757,13 @@ function _convert_chars_callback( $matches )
  * @param string
  * @return int
  */
-function evo_bytes( $string )
+function evo_bytes($string)
 {
-	$fo = ini_get('mbstring.func_overload');
-	if( $fo && $fo & 2 && function_exists('mb_strlen') )
-	{ // overloading of strlen is enabled
-		return mb_strlen( $string, 'ASCII' );
-	}
-	return strlen($string);
+    $fo = ini_get('mbstring.func_overload');
+    if ($fo && $fo & 2 && function_exists('mb_strlen')) { // overloading of strlen is enabled
+        return mb_strlen($string, 'ASCII');
+    }
+    return strlen($string);
 }
 
 
@@ -821,16 +779,15 @@ function evo_bytes( $string )
  * @param string
  * @return string
  */
-function evo_strtolower( $string )
+function evo_strtolower($string)
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( $current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strtolower') )
-	{
-		return mb_strtolower( $string, $current_charset );
-	}
+    if ($current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strtolower')) {
+        return mb_strtolower($string, $current_charset);
+    }
 
-	return strtolower($string);
+    return strtolower($string);
 }
 
 
@@ -842,16 +799,15 @@ function evo_strtolower( $string )
  * @param string
  * @return string
  */
-function evo_strlen( $string )
+function evo_strlen($string)
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( $current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strlen') )
-	{
-		return mb_strlen( $string, $current_charset );
-	}
+    if ($current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strlen')) {
+        return mb_strlen($string, $current_charset);
+    }
 
-	return strlen($string);
+    return strlen($string);
 }
 
 /**
@@ -863,16 +819,15 @@ function evo_strlen( $string )
  * @param string
  * @return int
  */
-function evo_strpos( $string , $needle , $offset = null )
+function evo_strpos($string, $needle, $offset = null)
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( $current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strpos') )
-	{
-		return mb_strpos( $string, $needle, $offset ,$current_charset );
-	}
+    if ($current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_strpos')) {
+        return mb_strpos($string, $needle, $offset, $current_charset);
+    }
 
-	return strpos( $string , $needle , $offset );
+    return strpos($string, $needle, $offset);
 }
 
 
@@ -886,25 +841,22 @@ function evo_strpos( $string , $needle , $offset = null )
  * @param int string length
  * @return string
  */
-function evo_substr( $string, $start = 0, $length = '#' )
+function evo_substr($string, $start = 0, $length = '#')
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( ! $length )
-	{ // make mb_substr and substr behave consistently (mb_substr returns string for length=0)
-		return '';
-	}
-	if( $length == '#' )
-	{
-		$length = utf8_strlen($string);
-	}
+    if (! $length) { // make mb_substr and substr behave consistently (mb_substr returns string for length=0)
+        return '';
+    }
+    if ($length == '#') {
+        $length = utf8_strlen($string);
+    }
 
-	if( $current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_substr') )
-	{
-		return mb_substr( $string, $start, $length, $current_charset );
-	}
+    if ($current_charset != 'iso-8859-1' && $current_charset != '' && function_exists('mb_substr')) {
+        return mb_substr($string, $start, $length, $current_charset);
+    }
 
-	return substr( $string, $start, $length );
+    return substr($string, $start, $length);
 }
 
 
@@ -928,53 +880,48 @@ function evo_substr( $string, $start = 0, $length = '#' )
  * @param array Of additional ("static") params to $callback.
  * @return string
  */
-function callback_on_non_matching_blocks( $text, $pattern, $callback, $params = array() )
+function callback_on_non_matching_blocks($text, $pattern, $callback, $params = [])
 {
-	global $evo_non_matching_blocks;
+    global $evo_non_matching_blocks;
 
-	if( preg_match_all( $pattern, $text, $matches, PREG_OFFSET_CAPTURE | PREG_PATTERN_ORDER ) )
-	{	// $pattern matches, call the callback method on full text except of matching blocks
+    if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE | PREG_PATTERN_ORDER)) {	// $pattern matches, call the callback method on full text except of matching blocks
+        // Create an unique string in order to replace all matching blocks temporarily
+        $unique_replacement = md5(time() + rand());
 
-		// Create an unique string in order to replace all matching blocks temporarily
-		$unique_replacement = md5( time() + rand() );
+        if (! isset($evo_non_matching_blocks)) {	// Init cache array once:
+            $evo_non_matching_blocks = [];
+        }
+        // Use level in order to don't mix from other recursive calls:
+        $level = count($evo_non_matching_blocks);
+        $evo_non_matching_blocks[$level] = [];
 
-		if( ! isset( $evo_non_matching_blocks ) )
-		{	// Init cache array once:
-			$evo_non_matching_blocks = array();
-		}
-		// Use level in order to don't mix from other recursive calls:
-		$level = count( $evo_non_matching_blocks );
-		$evo_non_matching_blocks[ $level ] = array();
+        foreach ($matches[0] as $l => $l_matching) {	// Build arrays with a source code of the matching blocks and with temporary replacement
+            if (substr($l_matching[0], 1, 1) == '[') {	// Exception for match out short tags,
+                // We should not replace a char(usually a space) before short tag like [image:123]:
+                $l_matching[0] = substr($l_matching[0], 1);
+            }
+            $evo_non_matching_blocks[$level]['?' . $l . $unique_replacement . $l . '?'] = $l_matching[0];
+        }
 
-		foreach( $matches[0] as $l => $l_matching )
-		{	// Build arrays with a source code of the matching blocks and with temporary replacement
-			if( substr( $l_matching[0], 1, 1 ) == '[' )
-			{	// Exception for match out short tags,
-				// We should not replace a char(usually a space) before short tag like [image:123]:
-				$l_matching[0] = substr( $l_matching[0], 1 );
-			}
-			$evo_non_matching_blocks[ $level ][ '?'.$l.$unique_replacement.$l.'?' ] = $l_matching[0];
-		}
+        // Replace all matching blocks with temporary text like '?X219a33da9c1b8f4e335bffc015df8c96X?'
+        // where X is index of match block in array $matches[0]
+        // It is used to avoid any changes in the matching blocks
+        $text = str_replace($evo_non_matching_blocks[$level], array_keys($evo_non_matching_blocks[$level]), $text);
 
-		// Replace all matching blocks with temporary text like '?X219a33da9c1b8f4e335bffc015df8c96X?'
-		// where X is index of match block in array $matches[0]
-		// It is used to avoid any changes in the matching blocks
-		$text = str_replace( $evo_non_matching_blocks[ $level ], array_keys( $evo_non_matching_blocks[ $level ] ), $text );
+        // Callback:
+        $callback_params = $params;
+        array_unshift($callback_params, $text);
+        $text = call_user_func_array($callback, $callback_params);
 
-		// Callback:
-		$callback_params = $params;
-		array_unshift( $callback_params, $text );
-		$text = call_user_func_array( $callback, $callback_params );
+        // Revert a source code of the matching blocks in content
+        $text = str_replace(array_keys($evo_non_matching_blocks[$level]), $evo_non_matching_blocks[$level], $text);
 
-		// Revert a source code of the matching blocks in content
-		$text = str_replace( array_keys( $evo_non_matching_blocks[ $level ] ), $evo_non_matching_blocks[ $level ], $text );
+        return $text;
+    }
 
-		return $text;
-	}
-
-	$callback_params = $params;
-	array_unshift( $callback_params, $text );
-	return call_user_func_array( $callback, $callback_params );
+    $callback_params = $params;
+    array_unshift($callback_params, $text);
+    return call_user_func_array($callback, $callback_params);
 }
 
 
@@ -984,44 +931,36 @@ function callback_on_non_matching_blocks( $text, $pattern, $callback, $params = 
  * @param array Matches
  * @return array Matches
  */
-function fix_non_matching_blocks( $matches )
+function fix_non_matching_blocks($matches)
 {
-	global $evo_non_matching_blocks;
+    global $evo_non_matching_blocks;
 
-	if( ! is_array( $matches ) )
-	{	// This function works only with array of matches
-		return $matches;
-	}
+    if (! is_array($matches)) {	// This function works only with array of matches
+        return $matches;
+    }
 
-	if( ! isset( $evo_non_matching_blocks ) ||
-	    ! is_array( $evo_non_matching_blocks ) )
-	{	// Nothing to fix, Return source param value:
-		return $matches;
-	}
+    if (! isset($evo_non_matching_blocks) ||
+        ! is_array($evo_non_matching_blocks)) {	// Nothing to fix, Return source param value:
+        return $matches;
+    }
 
-	$level = count( $evo_non_matching_blocks ) - 1;
+    $level = count($evo_non_matching_blocks) - 1;
 
-	if( empty( $evo_non_matching_blocks[ $level ] ) )
-	{	// Nothing to fix, Return source param value:
-		return $matches;
-	}
+    if (empty($evo_non_matching_blocks[$level])) {	// Nothing to fix, Return source param value:
+        return $matches;
+    }
 
-	foreach( $matches as $m => $match )
-	{
-		if( is_array( $match ) )
-		{	// Fix recursively:
-			foreach( $match as $s => $sub_match )
-			{
-				$matches[ $m ][ $s ] = str_replace( array_keys( $evo_non_matching_blocks[ $level ] ), $evo_non_matching_blocks[ $level ], $sub_match );
-			}
-		}
-		else
-		{	// Revert back to original values from temp strings:
-			$matches[ $m ] = str_replace( array_keys( $evo_non_matching_blocks[ $level ] ), $evo_non_matching_blocks[ $level ], $match );
-		}
-	}
+    foreach ($matches as $m => $match) {
+        if (is_array($match)) {	// Fix recursively:
+            foreach ($match as $s => $sub_match) {
+                $matches[$m][$s] = str_replace(array_keys($evo_non_matching_blocks[$level]), $evo_non_matching_blocks[$level], $sub_match);
+            }
+        } else {	// Revert back to original values from temp strings:
+            $matches[$m] = str_replace(array_keys($evo_non_matching_blocks[$level]), $evo_non_matching_blocks[$level], $match);
+        }
+    }
 
-	return $matches;
+    return $matches;
 }
 
 
@@ -1033,21 +972,21 @@ function fix_non_matching_blocks( $matches )
  * @param array Array of all matches in multi-dimensional array
  * @return integer|boolean Number of full pattern matches (which might be zero), or FALSE if an error occurred.
  */
-function preg_match_outcode( $search, $content, & $matches )
+function preg_match_outcode($search, $content, &$matches)
 {
-	if( stristr( $content, '<code' ) !== false || stristr( $content, '<pre' ) !== false || strstr( $content, '`' ) !== false )
-	{	// Call preg_match_all() on everything outside code/pre and markdown codeblocks:
-		$result = callback_on_non_matching_blocks( $content,
-			'~(`|<(code|pre)[^>]*>).*?(\1|</\2>)~is',
-			'preg_match_outcode_callback', array( $search, & $matches ) );
-		// Revert codeblocks back if they are located inside search regexp:
-		$matches = fix_non_matching_blocks( $matches );
-		return $result;
-	}
-	else
-	{	// No code/pre blocks, search in the whole thing:
-		return preg_match_all( $search, $content, $matches );
-	}
+    if (stristr($content, '<code') !== false || stristr($content, '<pre') !== false || strstr($content, '`') !== false) {	// Call preg_match_all() on everything outside code/pre and markdown codeblocks:
+        $result = callback_on_non_matching_blocks(
+            $content,
+            '~(`|<(code|pre)[^>]*>).*?(\1|</\2>)~is',
+            'preg_match_outcode_callback',
+            [$search, &$matches]
+        );
+        // Revert codeblocks back if they are located inside search regexp:
+        $matches = fix_non_matching_blocks($matches);
+        return $result;
+    } else {	// No code/pre blocks, search in the whole thing:
+        return preg_match_all($search, $content, $matches);
+    }
 }
 
 
@@ -1059,9 +998,9 @@ function preg_match_outcode( $search, $content, & $matches )
  * @param array Array of all matches in multi-dimensional array
  * @return integer|boolean Number of full pattern matches (which might be zero), or FALSE if an error occurred.
  */
-function preg_match_outcode_callback( $content, $search, & $matches )
+function preg_match_outcode_callback($content, $search, &$matches)
 {
-	return preg_match_all( $search, $content, $matches );
+    return preg_match_all($search, $content, $matches);
 }
 
 
@@ -1077,9 +1016,9 @@ function preg_match_outcode_callback( $content, $search, & $matches )
  * @param string Type of callback function: 'preg' -> preg_replace(), 'preg_callback' -> preg_replace_callback(), 'str' -> str_replace() (@see replace_content())
  * @return string Replaced content
  */
-function replace_content_outcode( $search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg' )
+function replace_content_outcode($search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg')
 {
-	return replace_outside_code_tags( $search, $replace, $content, $replace_function_callback, $replace_function_type );
+    return replace_outside_code_tags($search, $replace, $content, $replace_function_callback, $replace_function_type);
 }
 
 
@@ -1093,27 +1032,26 @@ function replace_content_outcode( $search, $replace, $content, $replace_function
  * @param string Type of callback function: 'preg' -> preg_replace(), 'preg_callback' -> preg_replace_callback(), 'str' -> str_replace() (@see replace_content())
  * @return string Replaced content
  */
-function replace_outside_code_tags( $search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg' )
+function replace_outside_code_tags($search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg')
 {
-	if( ! empty( $search ) )
-	{
-		if( stristr( $content, '<code' ) !== false ||
-		    stristr( $content, '<pre' ) !== false ||
-		    strstr( $content, '`' ) !== false )
-		{	// Call replace_content() on everything outside code/pre, and markdown codeblocks:
-			$content = callback_on_non_matching_blocks( $content,
-				'~(`.*?`|'
-				.'<code[^>]*>.*?</code>|'
-				.'<pre[^>]*>.*?</pre>)~is',
-				$replace_function_callback, array( $search, $replace, $replace_function_type ) );
-		}
-		else
-		{	// No code/pre blocks, replace on the whole thing
-			$content = call_user_func( $replace_function_callback, $content, $search, $replace, $replace_function_type );
-		}
-	}
+    if (! empty($search)) {
+        if (stristr($content, '<code') !== false ||
+            stristr($content, '<pre') !== false ||
+            strstr($content, '`') !== false) {	// Call replace_content() on everything outside code/pre, and markdown codeblocks:
+            $content = callback_on_non_matching_blocks(
+                $content,
+                '~(`.*?`|'
+                . '<code[^>]*>.*?</code>|'
+                . '<pre[^>]*>.*?</pre>)~is',
+                $replace_function_callback,
+                [$search, $replace, $replace_function_type]
+            );
+        } else {	// No code/pre blocks, replace on the whole thing
+            $content = call_user_func($replace_function_callback, $content, $search, $replace, $replace_function_type);
+        }
+    }
 
-	return $content;
+    return $content;
 }
 
 
@@ -1130,9 +1068,9 @@ function replace_outside_code_tags( $search, $replace, $content, $replace_functi
  * @param string Type of callback function: 'preg' -> preg_replace(), 'preg_callback' -> preg_replace_callback(), 'str' -> str_replace() (@see replace_content())
  * @return string Replaced content
  */
-function replace_content_outcode_shorttags( $search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg' )
+function replace_content_outcode_shorttags($search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg')
 {
-	return replace_outside_code_and_short_tags( $search, $replace, $content, $replace_function_callback, $replace_function_type );
+    return replace_outside_code_and_short_tags($search, $replace, $content, $replace_function_callback, $replace_function_type);
 }
 
 
@@ -1146,29 +1084,28 @@ function replace_content_outcode_shorttags( $search, $replace, $content, $replac
  * @param string Type of callback function: 'preg' -> preg_replace(), 'preg_callback' -> preg_replace_callback(), 'str' -> str_replace() (@see replace_content())
  * @return string Replaced content
  */
-function replace_outside_code_and_short_tags( $search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg' )
+function replace_outside_code_and_short_tags($search, $replace, $content, $replace_function_callback = 'replace_content', $replace_function_type = 'preg')
 {
-	if( ! empty( $search ) )
-	{
-		if( stristr( $content, '<code' ) !== false ||
-		    stristr( $content, '<pre' ) !== false ||
-		    strstr( $content, '`' ) !== false ||
-		    preg_match( '/\[[a-z]+:[^\]`]+\]/i', $content ) )
-		{	// Call replace_content() on everything outside code/pre, markdown codeblocks and short tags:
-			$content = callback_on_non_matching_blocks( $content,
-				'~(`.*?`|'
-				.'<code[^>]*>.*?</code>|'
-				.'<pre[^>]*>.*?</pre>|'
-				.'[^\[]\[[a-z]+:[^\]`]+\])~is',
-				$replace_function_callback, array( $search, $replace, $replace_function_type ) );
-		}
-		else
-		{	// No code/pre blocks, replace on the whole thing
-			$content = call_user_func( $replace_function_callback, $content, $search, $replace, $replace_function_type );
-		}
-	}
+    if (! empty($search)) {
+        if (stristr($content, '<code') !== false ||
+            stristr($content, '<pre') !== false ||
+            strstr($content, '`') !== false ||
+            preg_match('/\[[a-z]+:[^\]`]+\]/i', $content)) {	// Call replace_content() on everything outside code/pre, markdown codeblocks and short tags:
+            $content = callback_on_non_matching_blocks(
+                $content,
+                '~(`.*?`|'
+                . '<code[^>]*>.*?</code>|'
+                . '<pre[^>]*>.*?</pre>|'
+                . '[^\[]\[[a-z]+:[^\]`]+\])~is',
+                $replace_function_callback,
+                [$search, $replace, $replace_function_type]
+            );
+        } else {	// No code/pre blocks, replace on the whole thing
+            $content = call_user_func($replace_function_callback, $content, $search, $replace, $replace_function_type);
+        }
+    }
 
-	return $content;
+    return $content;
 }
 
 
@@ -1182,45 +1119,38 @@ function replace_outside_code_and_short_tags( $search, $replace, $content, $repl
  * @param string The maximum possible replacements for each pattern in each subject string. Defaults to -1 (no limit).
  * @return string Replaced content
  */
-function replace_content( $content, $search, $replace, $type = 'preg', $limit = -1 )
+function replace_content($content, $search, $replace, $type = 'preg', $limit = -1)
 {
-	if( $limit == 0 )
-	{	// Strange request to nothing replace, Return original content:
-		return $content;
-	}
+    if ($limit == 0) {	// Strange request to nothing replace, Return original content:
+        return $content;
+    }
 
-	switch( $type )
-	{
-		case 'str':
-			if( $limit == -1 )
-			{	// Unlimited replace:
-				return str_replace( $search, $replace, $content );
-			}
-			else
-			{	// Limited replace:
-				$pos = strpos( $content, $search );
-				if( $pos !== false )
-				{	// Do the limited replacements:
-					for( $p = 0; $p < $limit; $p++ )
-					{
-						if( $pos === false )
-						{	// Stop searching:
-							break;
-						}
-						$content = substr_replace( $content, $replace, $pos, strlen( $search ) );
-						// Go to next searched substring:
-						$pos = strpos( $content, $search, $pos + strlen( $replace ) );
-					}
-				}
-				return $content;
-			}
+    switch ($type) {
+        case 'str':
+            if ($limit == -1) {	// Unlimited replace:
+                return str_replace($search, $replace, $content);
+            } else {	// Limited replace:
+                $pos = strpos($content, $search);
+                if ($pos !== false) {	// Do the limited replacements:
+                    for ($p = 0; $p < $limit; $p++) {
+                        if ($pos === false) {	// Stop searching:
+                            break;
+                        }
+                        $content = substr_replace($content, $replace, $pos, strlen($search));
+                        // Go to next searched substring:
+                        $pos = strpos($content, $search, $pos + strlen($replace));
+                    }
+                }
+                return $content;
+            }
 
-		case 'preg_callback':
-			return preg_replace_callback( $search, $replace, $content, $limit );
+            // no break
+        case 'preg_callback':
+            return preg_replace_callback($search, $replace, $content, $limit);
 
-		default: // 'preg'
-			return preg_replace( $search, $replace, $content, $limit );
-	}
+        default: // 'preg'
+            return preg_replace($search, $replace, $content, $limit);
+    }
 }
 
 
@@ -1232,37 +1162,37 @@ function replace_content( $content, $search, $replace, $type = 'preg', $limit = 
  * @param array|string Replace callback
  * @return string Replaced content
  */
-function replace_content_callback( $content, $search, $replace_callback )
+function replace_content_callback($content, $search, $replace_callback)
 {
-	global $evo_replace_outside_code_tags_callback;
+    global $evo_replace_outside_code_tags_callback;
 
-	// Store here the requested callback function in order to use pre-processor function fix_replace_content_callback() before we call the original requested callback function:
-	$evo_replace_outside_code_tags_callback = $replace_callback;
+    // Store here the requested callback function in order to use pre-processor function fix_replace_content_callback() before we call the original requested callback function:
+    $evo_replace_outside_code_tags_callback = $replace_callback;
 
-	return preg_replace_callback( $search, 'fix_replace_content_callback', $content );
+    return preg_replace_callback($search, 'fix_replace_content_callback', $content);
 }
 
 
 /**
  * Replace non matching blocks from temp strings like '?X219a33da9c1b8f4e335bffc015df8c96X?' back to original string like '<code>$some_var = "some value";</code>'
  *
- * @param Array Matches
+ * @param array Matches
  * @return mixed
  */
-function fix_replace_content_callback( $m )
+function fix_replace_content_callback($m)
 {
-	global $evo_replace_outside_code_tags_callback;
+    global $evo_replace_outside_code_tags_callback;
 
-	// Replace non matching blocks from temp strings like '?X219a33da9c1b8f4e335bffc015df8c96X?' back to original string like '<code>$some_var = "some value";</code>'
-	$m = fix_non_matching_blocks( $m );
+    // Replace non matching blocks from temp strings like '?X219a33da9c1b8f4e335bffc015df8c96X?' back to original string like '<code>$some_var = "some value";</code>'
+    $m = fix_non_matching_blocks($m);
 
-	// Call real function with fixed blocks in matches:
-	$result = call_user_func_array( $evo_replace_outside_code_tags_callback, array( $m ) );
+    // Call real function with fixed blocks in matches:
+    $result = call_user_func_array($evo_replace_outside_code_tags_callback, [$m]);
 
-	// Clear temp var:
-	unset( $evo_replace_outside_code_tags_callback );
+    // Clear temp var:
+    unset($evo_replace_outside_code_tags_callback);
 
-	return $result;
+    return $result;
 }
 
 
@@ -1274,76 +1204,59 @@ function fix_replace_content_callback( $m )
  * @param boolean TRUE - parenthesized expression of separator will be captured and returned as well
  * @return array The result of explode() function
  */
-function split_outcode( $separators, $content, $capture_separator = false )
+function split_outcode($separators, $content, $capture_separator = false)
 {
-	// Check if the separators exists in content
-	if( ! is_array( $separators ) )
-	{ // Convert string to array with one element
-		$separators = array( $separators );
-	}
-	$separators_exists = false;
-	if( is_array( $separators ) )
-	{ // Find in array
-		foreach( $separators as $separator )
-		{
-			if( strpos( $content, $separator ) !== false )
-			{ // Separator is found
-				$separators_exists = true;
-				break;
-			}
-		}
-	}
+    // Check if the separators exists in content
+    if (! is_array($separators)) { // Convert string to array with one element
+        $separators = [$separators];
+    }
+    $separators_exists = false;
+    if (is_array($separators)) { // Find in array
+        foreach ($separators as $separator) {
+            if (strpos($content, $separator) !== false) { // Separator is found
+                $separators_exists = true;
+                break;
+            }
+        }
+    }
 
-	if( $separators_exists )
-	{ // There are separators in content, Split the content:
+    if ($separators_exists) { // There are separators in content, Split the content:
+        // Initialize temp values for replace the separators
+        if ($capture_separator) {
+            $rplc_separators = [];
+            foreach ($separators as $s => $separator) {
+                $rplc_separators[] = '#separator' . $s . '=' . md5(rand()) . '#';
+            }
+        } else {
+            $rplc_separators = '#separator=' . md5(rand()) . '#';
+        }
+        // Replace the content separators with temp value
+        if (strpos($content, '<code') !== false || strpos($content, '<pre') !== false) { // Call replace_separators_callback() on everything outside code/pre:
+            $content = callback_on_non_matching_blocks(
+                $content,
+                '~<(code|pre)[^>]*>.*?</\1>~is',
+                'replace_content',
+                [$separators, $rplc_separators, 'str']
+            );
+        } else { // No code/pre blocks, replace on the whole thing
+            $content = str_replace($separators, $rplc_separators, $content);
+        }
 
-		// Initialize temp values for replace the separators
-		if( $capture_separator )
-		{
-			$rplc_separators = array();
-			foreach( $separators as $s => $separator )
-			{
-				$rplc_separators[] = '#separator'.$s.'='.md5( rand() ).'#';
-			}
-		}
-		else
-		{
-			$rplc_separators = '#separator='.md5( rand() ).'#';
-		}
-		// Replace the content separators with temp value
-		if( strpos( $content, '<code' ) !== false || strpos( $content, '<pre' ) !== false )
-		{ // Call replace_separators_callback() on everything outside code/pre:
-			$content = callback_on_non_matching_blocks( $content,
-				'~<(code|pre)[^>]*>.*?</\1>~is',
-				'replace_content', array( $separators, $rplc_separators, 'str' ) );
-		}
-		else
-		{ // No code/pre blocks, replace on the whole thing
-			$content = str_replace( $separators, $rplc_separators, $content );
-		}
-
-		if( $capture_separator )
-		{ // Save the separators
-			$split_regexp = '~('.implode( '|', $rplc_separators ).')~s';
-			$content_parts = preg_split( $split_regexp, $content, -1, PREG_SPLIT_DELIM_CAPTURE );
-			foreach( $content_parts as $c => $content_part )
-			{
-				if( ( $s = array_search( $content_part, $rplc_separators ) ) !== false )
-				{ // Replace original separator back
-					$content_parts[ $c ] = $separators[ $s ];
-				}
-			}
-			return $content_parts;
-		}
-		else
-		{ // Return only splitted content(without separators)
-			return explode( $rplc_separators, $content );
-		}
-	}
-	else
-	{ // No separators in content, Return whole content as one element of array
-		return array( $content );
-	}
+        if ($capture_separator) { // Save the separators
+            $split_regexp = '~(' . implode('|', $rplc_separators) . ')~s';
+            $content_parts = preg_split($split_regexp, $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+            foreach ($content_parts as $c => $content_part) {
+                if (($s = array_search($content_part, $rplc_separators)) !== false) { // Replace original separator back
+                    $content_parts[$c] = $separators[$s];
+                }
+            }
+            return $content_parts;
+        } else { // Return only splitted content(without separators)
+            return explode($rplc_separators, $content);
+        }
+    } else { // No separators in content, Return whole content as one element of array
+        return [$content];
+    }
 }
 
 
@@ -1356,60 +1269,55 @@ function split_outcode( $separators, $content, $capture_separator = false )
  * @param array Params
  * @return string Content
  */
-function move_short_tags( $content, $pattern = NULL, $callback = NULL, $params = array() )
+function move_short_tags($content, $pattern = null, $callback = null, $params = [])
 {
-	$params = array_merge( array(
-			'check_code_block' => true,
-		), $params );
+    $params = array_merge([
+        'check_code_block' => true,
+    ], $params);
 
-	if( isset( $params['check_code_block'] ) && $params['check_code_block'] && ( ( stristr( $content, '<code' ) !== false ) || ( stristr( $content, '<pre' ) !== false ) ) )
-	{	// Call $this->render_collection_data() on everything outside code/pre:
-		$params['check_code_block'] = false;
-		$content = callback_on_non_matching_blocks( $content,
-			'~<(code|pre)[^>]*>.*?</\1>~is',
-			'move_short_tags', array( $pattern, $callback, $params ) );
-		return $content;
-	}
+    if (isset($params['check_code_block']) && $params['check_code_block'] && ((stristr($content, '<code') !== false) || (stristr($content, '<pre') !== false))) {	// Call $this->render_collection_data() on everything outside code/pre:
+        $params['check_code_block'] = false;
+        $content = callback_on_non_matching_blocks(
+            $content,
+            '~<(code|pre)[^>]*>.*?</\1>~is',
+            'move_short_tags',
+            [$pattern, $callback, $params]
+        );
+        return $content;
+    }
 
-	// Get individual paragraphs:
-	preg_match_all( '#(<p[\s*|>])?.*?<(/p|br\s?/?)>#i', $content, $paragraphs );
+    // Get individual paragraphs:
+    preg_match_all('#(<p[\s*|>])?.*?<(/p|br\s?/?)>#i', $content, $paragraphs);
 
-	if( is_null( $pattern ) )
-	{	// Default pattern:
-		$pattern = '#\[(image|video|audio|include|cblock|/?div|(parent:|item:[^:\]]+:)?(subscribe|emailcapture|compare|fields)):[^\]]+\]#i';
-	}
+    if (is_null($pattern)) {	// Default pattern:
+        $pattern = '#\[(image|video|audio|include|cblock|/?div|(parent:|item:[^:\]]+:)?(subscribe|emailcapture|compare|fields)):[^\]]+\]#i';
+    }
 
-	foreach( $paragraphs[0] as $i => $current_paragraph )
-	{
-		if( $callback )
-		{
-			$new_paragraph = call_user_func( $callback, $pattern, $current_paragraph );
-		}
-		else
-		{
-			// get short tags in each paragraph
-			preg_match_all( $pattern, $current_paragraph, $matches );
-			$new_paragraph = $current_paragraph;
+    foreach ($paragraphs[0] as $i => $current_paragraph) {
+        if ($callback) {
+            $new_paragraph = call_user_func($callback, $pattern, $current_paragraph);
+        } else {
+            // get short tags in each paragraph
+            preg_match_all($pattern, $current_paragraph, $matches);
+            $new_paragraph = $current_paragraph;
 
-			if( $matches[0] )
-			{
-				$new_paragraph = str_replace( $matches[0], '', $current_paragraph );
+            if ($matches[0]) {
+                $new_paragraph = str_replace($matches[0], '', $current_paragraph);
 
-				// convert &nbsp; to space
-				$x = str_replace( "\xC2\xA0", ' ', $new_paragraph );
+                // convert &nbsp; to space
+                $x = str_replace("\xC2\xA0", ' ', $new_paragraph);
 
-				if( preg_match( '#^(<p[\s*|>])?\s*<(/p|br\s?/?)>$#i', $x ) === 1 )
-				{	// Remove paragraph the if moving out the short tag will result to an empty paragraph:
-					$new_paragraph = '';
-				}
+                if (preg_match('#^(<p[\s*|>])?\s*<(/p|br\s?/?)>$#i', $x) === 1) {	// Remove paragraph the if moving out the short tag will result to an empty paragraph:
+                    $new_paragraph = '';
+                }
 
-				$new_paragraph = implode( '', $matches[0] ).$new_paragraph;
-			}
-		}
-		$content = str_replace( $current_paragraph, $new_paragraph, $content );
-	}
+                $new_paragraph = implode('', $matches[0]) . $new_paragraph;
+            }
+        }
+        $content = str_replace($current_paragraph, $new_paragraph, $content);
+    }
 
-	return $content;
+    return $content;
 }
 
 
@@ -1432,192 +1340,157 @@ function move_short_tags( $content, $pattern = NULL, $callback = NULL, $params =
  * @param boolean TRUE to exclude links from header tags like h1, h2, etc.
  * @return string
  */
-function make_clickable( $text, $moredelim = '&amp;', $callback = 'make_clickable_callback', $additional_attrs = '', $exclude_headers = false )
+function make_clickable($text, $moredelim = '&amp;', $callback = 'make_clickable_callback', $additional_attrs = '', $exclude_headers = false)
 {
-	$r = '';
-	$inside_bracket_short_tag = false;
-	$inside_tag = false;
-	$in_a_tag = false;
-	$in_code_tag = false;
-	$in_tag_quote = false;
-	$in_header_tag = false;
-	$from_pos = 0;
-	$i = 0;
-	$n = strlen($text);
+    $r = '';
+    $inside_bracket_short_tag = false;
+    $inside_tag = false;
+    $in_a_tag = false;
+    $in_code_tag = false;
+    $in_tag_quote = false;
+    $in_header_tag = false;
+    $from_pos = 0;
+    $i = 0;
+    $n = strlen($text);
 
-	// Not using callback_on_non_matching_blocks(), because it requires
-	// wellformed HTML and the implementation below should be
-	// faster and less memory intensive (tested for some example content)
-	while( $i < $n )
-	{	// Go through each char in string... (we will fast forward from tag to tag)
-		if( $inside_bracket_short_tag )
-		{	// State: We're currently inside bracket short tag like [image:], [emailcapture:], [fields:], [compare:] and etc.:
-			if( $text[ $i ] == ']' )
-			{	// End of bracket short tag:
-				$inside_bracket_short_tag = false;
-				$r .= substr( $text, $from_pos, $i - $from_pos + 1 );
-				$from_pos = $i + 1;
-			}
-		}
-		elseif( $inside_tag )
-		{	// State: We're currently inside some tag:
-			switch( $text[$i] )
-			{
-				case '>':
-					if( $in_tag_quote )
-					{ // This is in a quoted string so it doesn't really matter...
-						break;
-					}
-					// end of tag:
-					$inside_tag = false;
-					$r .= substr($text, $from_pos, $i-$from_pos+1);
-					$from_pos = $i+1;
-					// $r .= '}';
-					break;
+    // Not using callback_on_non_matching_blocks(), because it requires
+    // wellformed HTML and the implementation below should be
+    // faster and less memory intensive (tested for some example content)
+    while ($i < $n) {	// Go through each char in string... (we will fast forward from tag to tag)
+        if ($inside_bracket_short_tag) {	// State: We're currently inside bracket short tag like [image:], [emailcapture:], [fields:], [compare:] and etc.:
+            if ($text[$i] == ']') {	// End of bracket short tag:
+                $inside_bracket_short_tag = false;
+                $r .= substr($text, $from_pos, $i - $from_pos + 1);
+                $from_pos = $i + 1;
+            }
+        } elseif ($inside_tag) {	// State: We're currently inside some tag:
+            switch ($text[$i]) {
+                case '>':
+                    if ($in_tag_quote) { // This is in a quoted string so it doesn't really matter...
+                        break;
+                    }
+                    // end of tag:
+                    $inside_tag = false;
+                    $r .= substr($text, $from_pos, $i - $from_pos + 1);
+                    $from_pos = $i + 1;
+                    // $r .= '}';
+                    break;
 
-				case '"':
-				case '\'':
-					// This is the beginning or the end of a quoted string:
-					if( ! $in_tag_quote )
-					{
-						$in_tag_quote = $text[$i];
-					}
-					elseif( $in_tag_quote == $text[$i] )
-					{
-						$in_tag_quote = false;
-					}
-					break;
-			}
-		}
-		elseif( $in_a_tag )
-		{	// In a link but no longer inside <a>...</a> tag or any other embedded tag like <strong> or whatever
-			switch( $text[$i] )
-			{
-				case '<':
-					if( strtolower(substr($text, $i+1, 3)) == '/a>' )
-					{	// Ok, this is the end tag of the link:
-						// $r .= substr($text, $from_pos, $i-$from_pos+4);
-						// $from_pos = $i+4;
-						$i += 4;
-						// pre_dump( 'END A TAG: '.substr($text, $from_pos, $i-$from_pos) );
-						$r .= substr($text, $from_pos, $i-$from_pos);
-						$from_pos = $i;
-						$in_a_tag = false;
-						$in_tag_quote = false;
-						$in_header_tag = false;
-					}
-					break;
-			}
-		}
-		elseif( $in_code_tag )
-		{	// In a code but no longer inside <code>...</code> tag or any other embedded tag like <strong> or whatever
-			switch( $text[$i] )
-			{
-				case '<':
-					if( strtolower(substr($text, $i+1, 5)) == '/code' )
-					{	// Ok, this is the end tag of the code:
-						// $r .= substr($text, $from_pos, $i-$from_pos+4);
-						// $from_pos = $i+4;
-						$i += 7;
-						// pre_dump( 'END A TAG: '.substr($text, $from_pos, $i-$from_pos) );
-						$r .= substr($text, $from_pos, $i-$from_pos);
-						$from_pos = $i;
-						$in_code_tag = false;
-						$in_tag_quote = false;
-						$in_header_tag = false;
-					}
-					break;
-			}
-		}
-		elseif( $in_header_tag )
-		{	// In a code but no longer inside <h#>...</h#> tags or any other embedded tag like <strong> or whatever
-			switch( $text[$i] )
-			{
-				case '<':
-					if( strtolower( substr( $text, $i+1, 3 ) ) == '/'.$in_header_tag )
-					{	// Ok, this is the end tag of the header:
-						$i += 5;
-						$r .= substr( $text, $from_pos, $i - $from_pos );
-						$from_pos = $i;
-						$in_code_tag = false;
-						$in_tag_quote = false;
-						$in_header_tag = false;
-					}
-					break;
-			}
-		}
-		else
-		{ // State: we're not currently in any tag:
-			// Find next tag opening:
-			if( ( $b = strpos( $text, '[', $i ) ) !== false &&
-			    $b < strpos( $text, '<', $i ) )
-			{	// Check if a bracket '[]' short tag is really opening but not after html tag:
-				// (we are finding here short tags like [image:], [emailcapture:], [fields:], [compare:] and etc., see full list in the Item->render_inline_tags())
-				$start_b = $b;
-				$b++;
-				$short_tag_name = '';
-				while( isset( $text[ $b ] ) && $text[ $b ] != ':' && $text[ $b ] != ']' )
-				{	// Get short tag name between chars '[' and ( ':' or ']' ):
-					$short_tag_name .= $text[ $b ];
-					$b++;
-				}
-				// We are inside bracket short tag if its name contains only letters:
-				$inside_bracket_short_tag = preg_match( '/^[a-z]+$/', $short_tag_name );
-				if( $inside_bracket_short_tag )
-				{	// Set index to call user func below between two inline short tags:
-					$i = $start_b;
-				}
-			}
+                case '"':
+                case '\'':
+                    // This is the beginning or the end of a quoted string:
+                    if (! $in_tag_quote) {
+                        $in_tag_quote = $text[$i];
+                    } elseif ($in_tag_quote == $text[$i]) {
+                        $in_tag_quote = false;
+                    }
+                    break;
+            }
+        } elseif ($in_a_tag) {	// In a link but no longer inside <a>...</a> tag or any other embedded tag like <strong> or whatever
+            switch ($text[$i]) {
+                case '<':
+                    if (strtolower(substr($text, $i + 1, 3)) == '/a>') {	// Ok, this is the end tag of the link:
+                        // $r .= substr($text, $from_pos, $i-$from_pos+4);
+                        // $from_pos = $i+4;
+                        $i += 4;
+                        // pre_dump( 'END A TAG: '.substr($text, $from_pos, $i-$from_pos) );
+                        $r .= substr($text, $from_pos, $i - $from_pos);
+                        $from_pos = $i;
+                        $in_a_tag = false;
+                        $in_tag_quote = false;
+                        $in_header_tag = false;
+                    }
+                    break;
+            }
+        } elseif ($in_code_tag) {	// In a code but no longer inside <code>...</code> tag or any other embedded tag like <strong> or whatever
+            switch ($text[$i]) {
+                case '<':
+                    if (strtolower(substr($text, $i + 1, 5)) == '/code') {	// Ok, this is the end tag of the code:
+                        // $r .= substr($text, $from_pos, $i-$from_pos+4);
+                        // $from_pos = $i+4;
+                        $i += 7;
+                        // pre_dump( 'END A TAG: '.substr($text, $from_pos, $i-$from_pos) );
+                        $r .= substr($text, $from_pos, $i - $from_pos);
+                        $from_pos = $i;
+                        $in_code_tag = false;
+                        $in_tag_quote = false;
+                        $in_header_tag = false;
+                    }
+                    break;
+            }
+        } elseif ($in_header_tag) {	// In a code but no longer inside <h#>...</h#> tags or any other embedded tag like <strong> or whatever
+            switch ($text[$i]) {
+                case '<':
+                    if (strtolower(substr($text, $i + 1, 3)) == '/' . $in_header_tag) {	// Ok, this is the end tag of the header:
+                        $i += 5;
+                        $r .= substr($text, $from_pos, $i - $from_pos);
+                        $from_pos = $i;
+                        $in_code_tag = false;
+                        $in_tag_quote = false;
+                        $in_header_tag = false;
+                    }
+                    break;
+            }
+        } else { // State: we're not currently in any tag:
+            // Find next tag opening:
+            if (($b = strpos($text, '[', $i)) !== false &&
+                $b < strpos($text, '<', $i)) {	// Check if a bracket '[]' short tag is really opening but not after html tag:
+                // (we are finding here short tags like [image:], [emailcapture:], [fields:], [compare:] and etc., see full list in the Item->render_inline_tags())
+                $start_b = $b;
+                $b++;
+                $short_tag_name = '';
+                while (isset($text[$b]) && $text[$b] != ':' && $text[$b] != ']') {	// Get short tag name between chars '[' and ( ':' or ']' ):
+                    $short_tag_name .= $text[$b];
+                    $b++;
+                }
+                // We are inside bracket short tag if its name contains only letters:
+                $inside_bracket_short_tag = preg_match('/^[a-z]+$/', $short_tag_name);
+                if ($inside_bracket_short_tag) {	// Set index to call user func below between two inline short tags:
+                    $i = $start_b;
+                }
+            }
 
-			if( ! $inside_bracket_short_tag )
-			{	// Try to find opening HTML tag only if bracket short tag is not opened currently:
-				$i = strpos($text, '<', $i);
-				if( $i === false )
-				{ // No more opening tags:
-					break;
-				}
+            if (! $inside_bracket_short_tag) {	// Try to find opening HTML tag only if bracket short tag is not opened currently:
+                $i = strpos($text, '<', $i);
+                if ($i === false) { // No more opening tags:
+                    break;
+                }
 
-				$inside_tag = true;
-				$in_tag_quote = false;
-				// s$r .= '{'.$text[$i+1];
+                $inside_tag = true;
+                $in_tag_quote = false;
+                // s$r .= '{'.$text[$i+1];
 
-				if( ($text[$i+1] == 'a' || $text[$i+1] == 'A') && ctype_space($text[$i+2]) )
-				{ // opening "A" tag
-					$in_a_tag = true;
-				}
+                if (($text[$i + 1] == 'a' || $text[$i + 1] == 'A') && ctype_space($text[$i + 2])) { // opening "A" tag
+                    $in_a_tag = true;
+                }
 
-				if( ( substr( $text, $i+1, 4 ) == 'code') )
-				{ // opening "code" tag
-					$in_code_tag = true;
-				}
+                if ((substr($text, $i + 1, 4) == 'code')) { // opening "code" tag
+                    $in_code_tag = true;
+                }
 
-				if( $exclude_headers && preg_match( '/^h[1-6]$/', substr( $text, $i+1, 2 ), $h_match ) )
-				{	// opening "h1" - "h6" tags:
-					$in_header_tag = $h_match[0];
-				}
-			}
+                if ($exclude_headers && preg_match('/^h[1-6]$/', substr($text, $i + 1, 2), $h_match)) {	// opening "h1" - "h6" tags:
+                    $in_header_tag = $h_match[0];
+                }
+            }
 
-			// Make the text before the opening < clickable:
-			$r .= call_user_func_array( $callback, array( substr( $text, $from_pos, $i-$from_pos ), $moredelim, $additional_attrs ) );
-			$from_pos = $i;
+            // Make the text before the opening < clickable:
+            $r .= call_user_func_array($callback, [substr($text, $from_pos, $i - $from_pos), $moredelim, $additional_attrs]);
+            $from_pos = $i;
 
-			// $i += 2;
-		}
+            // $i += 2;
+        }
 
-		$i++;
-	}
+        $i++;
+    }
 
-	// the remaining part:
-	if( $in_a_tag )
-	{ // may happen for invalid html:
-		$r .= substr($text, $from_pos);
-	}
-	else
-	{	// Make remplacements in the remaining part:
-		$r .= call_user_func_array( $callback, array( substr( $text, $from_pos ), $moredelim, $additional_attrs ) );
-	}
+    // the remaining part:
+    if ($in_a_tag) { // may happen for invalid html:
+        $r .= substr($text, $from_pos);
+    } else {	// Make remplacements in the remaining part:
+        $r .= call_user_func_array($callback, [substr($text, $from_pos), $moredelim, $additional_attrs]);
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -1636,36 +1509,36 @@ function make_clickable( $text, $moredelim = '&amp;', $callback = 'make_clickabl
  * @param string Additional attributes for tag <a>
  * @return string The clickable text.
  */
-function make_clickable_callback( $text, $moredelim = '&amp;', $additional_attrs = '' )
+function make_clickable_callback($text, $moredelim = '&amp;', $additional_attrs = '')
 {
-	if( !empty( $additional_attrs ) )
-	{
-		$additional_attrs = ' '.trim( $additional_attrs );
-	}
+    if (! empty($additional_attrs)) {
+        $additional_attrs = ' ' . trim($additional_attrs);
+    }
 
-	// Add style class to break long urls:
-	$additional_attrs = stripos( $additional_attrs, ' class="' ) === false
-		? $additional_attrs.' class="linebreak"'
-		: preg_replace( '/ class="([^"]*)"/i', ' class="$1 linebreak"', $additional_attrs );
+    // Add style class to break long urls:
+    $additional_attrs = stripos($additional_attrs, ' class="') === false
+        ? $additional_attrs . ' class="linebreak"'
+        : preg_replace('/ class="([^"]*)"/i', ' class="$1 linebreak"', $additional_attrs);
 
-	$pattern_domain = '([\p{L}0-9\-]+\.[\p{L}0-9\-.\~]+)'; // a domain name (not very strict)
-	$text = preg_replace(
-		/* Tblue> I removed the double quotes from the first RegExp because
-				  it made URLs in tag attributes clickable.
-				  See http://forums.b2evolution.net/viewtopic.php?p=92073 */
-		array( '#(^|[\s>\(]|\[url=)(https?|mailto)://([^"<>{}\s]+[^".,:;!\?<>{}\s\]\)])#i',
-			'#(^|[\s>\(]|\[url=)aim:([^",<\s\]\)]+)#i',
-			'#(^|[\s>\(]|\[url=)icq:(\d+)#i',
-			'#(^|[\s>\(]|\[url=)www\.'.$pattern_domain.'([^"<>{}\s]*[^".,:;!\?\s\]\)])#i',
-			'#(^|[\s>\(]|\[url=)([a-z0-9\-_.]+?)@'.$pattern_domain.'([^".,:;!\?&<\s\]\)]+)#i', ),
-		array( '$1<a href="$2://$3"'.$additional_attrs.'>$2://$3</a>',
-			'$1<a href="aim:goim?screenname=$2$3'.$moredelim.'message='.rawurlencode(T_('Hello')).'"'.$additional_attrs.'>$2$3</a>',
-			'$1<a href="http://wwp.icq.com/scripts/search.dll?to=$2"'.$additional_attrs.'>$2</a>',
-			'$1<a href="http://www.$2$3$4"'.$additional_attrs.'>www.$2$3$4</a>',
-			'$1<a href="mailto:$2@$3$4"'.$additional_attrs.'>$2@$3$4</a>', ),
-		$text );
+    $pattern_domain = '([\p{L}0-9\-]+\.[\p{L}0-9\-.\~]+)'; // a domain name (not very strict)
+    $text = preg_replace(
+        /* Tblue> I removed the double quotes from the first RegExp because
+                  it made URLs in tag attributes clickable.
+                  See http://forums.b2evolution.net/viewtopic.php?p=92073 */
+        ['#(^|[\s>\(]|\[url=)(https?|mailto)://([^"<>{}\s]+[^".,:;!\?<>{}\s\]\)])#i',
+            '#(^|[\s>\(]|\[url=)aim:([^",<\s\]\)]+)#i',
+            '#(^|[\s>\(]|\[url=)icq:(\d+)#i',
+            '#(^|[\s>\(]|\[url=)www\.' . $pattern_domain . '([^"<>{}\s]*[^".,:;!\?\s\]\)])#i',
+            '#(^|[\s>\(]|\[url=)([a-z0-9\-_.]+?)@' . $pattern_domain . '([^".,:;!\?&<\s\]\)]+)#i', ],
+        ['$1<a href="$2://$3"' . $additional_attrs . '>$2://$3</a>',
+            '$1<a href="aim:goim?screenname=$2$3' . $moredelim . 'message=' . rawurlencode(T_('Hello')) . '"' . $additional_attrs . '>$2$3</a>',
+            '$1<a href="http://wwp.icq.com/scripts/search.dll?to=$2"' . $additional_attrs . '>$2</a>',
+            '$1<a href="http://www.$2$3$4"' . $additional_attrs . '>www.$2$3$4</a>',
+            '$1<a href="mailto:$2@$3$4"' . $additional_attrs . '>$2@$3$4</a>', ],
+        $text
+    );
 
-	return $text;
+    return $text;
 }
 
 
@@ -1677,17 +1550,14 @@ function make_clickable_callback( $text, $moredelim = '&amp;', $additional_attrs
  * @param integer UNIX timestamp
  * @return string Date formatted as "Y-m-d H:i:s"
  */
-function date2mysql( $ts )
+function date2mysql($ts)
 {
-	if( $ts > 0 )
-	{	// Allow only positive timestamp value:
-		return date( 'Y-m-d H:i:s', $ts );
-	}
-	else
-	{	// If timestamp is wrong(NULL or FALSE or negative value) use this mimimum date instead of default 1970-01-01 00:00:00,
-		// because with negative timezone like -2:00 it may returns 1969-12-31 22:00:00 which creates MySQL error "Incorrect datetime value".
-		return '2000-01-01 00:00:00';
-	}
+    if ($ts > 0) {	// Allow only positive timestamp value:
+        return date('Y-m-d H:i:s', $ts);
+    } else {	// If timestamp is wrong(NULL or FALSE or negative value) use this mimimum date instead of default 1970-01-01 00:00:00,
+        // because with negative timezone like -2:00 it may returns 1969-12-31 22:00:00 which creates MySQL error "Incorrect datetime value".
+        return '2000-01-01 00:00:00';
+    }
 }
 
 /**
@@ -1697,16 +1567,17 @@ function date2mysql( $ts )
  * @param boolean true to use GM time
  * @return integer UNIX timestamp
  */
-function mysql2timestamp( $m, $useGM = false )
+function mysql2timestamp($m, $useGM = false)
 {
-	$func = $useGM ? 'gmmktime' : 'mktime';
-	return $func(
-		intval( substr( $m, 11, 2 ) ),  // hour
-		intval( substr( $m, 14, 2 ) ),  // minute
-		intval( substr( $m, 17, 2 ) ),  // second
-		intval( substr( $m, 5, 2 ) ),   // month
-		intval( substr( $m, 8, 2 ) ),   // day
-		intval( substr( $m, 0, 4 ) ) ); // year
+    $func = $useGM ? 'gmmktime' : 'mktime';
+    return $func(
+        intval(substr($m, 11, 2)),  // hour
+        intval(substr($m, 14, 2)),  // minute
+        intval(substr($m, 17, 2)),  // second
+        intval(substr($m, 5, 2)),   // month
+        intval(substr($m, 8, 2)),   // day
+        intval(substr($m, 0, 4))
+    ); // year
 }
 
 /**
@@ -1716,10 +1587,10 @@ function mysql2timestamp( $m, $useGM = false )
  * @param boolean true to use GM time
  * @return integer UNIX timestamp
  */
-function mysql2datestamp( $m, $useGM = false )
+function mysql2datestamp($m, $useGM = false)
 {
-	$func = $useGM ? 'gmmktime' : 'mktime';
-	return $func( 0, 0, 0, substr($m,5,2), substr($m,8,2), substr($m,0,4) );
+    $func = $useGM ? 'gmmktime' : 'mktime';
+    return $func(0, 0, 0, substr($m, 5, 2), substr($m, 8, 2), substr($m, 0, 4));
 }
 
 /**
@@ -1727,37 +1598,35 @@ function mysql2datestamp( $m, $useGM = false )
  *
  * @param string MYSQL date YYYY-MM-DD HH:MM:SS
  */
-function mysql2localedate( $mysqlstring )
+function mysql2localedate($mysqlstring)
 {
-	return mysql2date( locale_datefmt(), $mysqlstring );
+    return mysql2date(locale_datefmt(), $mysqlstring);
 }
 
-function mysql2localetime( $mysqlstring )
+function mysql2localetime($mysqlstring)
 {
-	return mysql2date( locale_timefmt(), $mysqlstring );
+    return mysql2date(locale_timefmt(), $mysqlstring);
 }
 
-function mysql2localedatetime( $mysqlstring )
+function mysql2localedatetime($mysqlstring)
 {
-	return mysql2date( locale_datefmt().' '.locale_timefmt(), $mysqlstring );
+    return mysql2date(locale_datefmt() . ' ' . locale_timefmt(), $mysqlstring);
 }
 
-function mysql2localedatetime_spans( $mysqlstring, $datefmt = NULL, $timefmt = NULL )
+function mysql2localedatetime_spans($mysqlstring, $datefmt = null, $timefmt = null)
 {
-	if( is_null( $datefmt ) )
-	{
-		$datefmt = locale_datefmt();
-	}
-	if( is_null( $timefmt ) )
-	{
-		$timefmt = locale_timefmt();
-	}
+    if (is_null($datefmt)) {
+        $datefmt = locale_datefmt();
+    }
+    if (is_null($timefmt)) {
+        $timefmt = locale_timefmt();
+    }
 
-	return '<span class="date">'
-					.mysql2date( $datefmt, $mysqlstring )
-					.'</span> <span class="time">'
-					.mysql2date( $timefmt, $mysqlstring )
-					.'</span>';
+    return '<span class="date">'
+                    . mysql2date($datefmt, $mysqlstring)
+                    . '</span> <span class="time">'
+                    . mysql2date($timefmt, $mysqlstring)
+                    . '</span>';
 }
 
 
@@ -1768,16 +1637,17 @@ function mysql2localedatetime_spans( $mysqlstring, $datefmt = NULL, $timefmt = N
  * @param string MYSQL date YYYY-MM-DD HH:MM:SS
  * @param boolean true to use GM time
  */
-function mysql2date( $dateformatstring, $mysqlstring, $useGM = false )
+function mysql2date($dateformatstring, $mysqlstring, $useGM = false)
 {
-	$m = $mysqlstring;
-	if( empty($m) || ($m == '0000-00-00 00:00:00' ) )
-		return false;
+    $m = $mysqlstring;
+    if (empty($m) || ($m == '0000-00-00 00:00:00')) {
+        return false;
+    }
 
-	// Get a timestamp:
-	$unixtimestamp = mysql2timestamp( $m );
+    // Get a timestamp:
+    $unixtimestamp = mysql2timestamp($m);
 
-	return date_i18n( $dateformatstring, $unixtimestamp, $useGM );
+    return date_i18n($dateformatstring, $unixtimestamp, $useGM);
 }
 
 
@@ -1789,71 +1659,66 @@ function mysql2date( $dateformatstring, $mysqlstring, $useGM = false )
  * @param integer UNIX timestamp
  * @param boolean true to use GM time
  */
-function date_i18n( $dateformatstring, $unixtimestamp, $useGM = false )
+function date_i18n($dateformatstring, $unixtimestamp, $useGM = false)
 {
-	global $month, $month_abbrev, $weekday, $weekday_abbrev, $weekday_letter;
-	global $localtimenow, $time_difference;
+    global $month, $month_abbrev, $weekday, $weekday_abbrev, $weekday_letter;
+    global $localtimenow, $time_difference;
 
-	if( $dateformatstring == 'isoZ' )
-	{ // full ISO 8601 format
-		$dateformatstring = 'Y-m-d\TH:i:s\Z';
-	}
+    if ($dateformatstring == 'isoZ') { // full ISO 8601 format
+        $dateformatstring = 'Y-m-d\TH:i:s\Z';
+    }
 
-	if( $useGM )
-	{ // We want a Greenwich Meridian time:
-		// TODO: dh> what's the point of the substraction? UNIX timestamp should contain no time_difference in the first place?! Otherwise it should be substracted for !$useGM, too.
-		// TODO: dh> Why does $useGM do not get the special symbols handling?
-		$r = gmdate($dateformatstring, ($unixtimestamp - $time_difference));
-	}
-	else
-	{ // We want default timezone time:
+    if ($useGM) { // We want a Greenwich Meridian time:
+        // TODO: dh> what's the point of the substraction? UNIX timestamp should contain no time_difference in the first place?! Otherwise it should be substracted for !$useGM, too.
+        // TODO: dh> Why does $useGM do not get the special symbols handling?
+        $r = gmdate($dateformatstring, ($unixtimestamp - $time_difference));
+    } else { // We want default timezone time:
+        /*
+        Special symbols:
+            'b': wether it's today (1) or not (0)
+            'l': weekday
+            'D': weekday abbrev
+            'e': weekday letter
+            'F': month
+            'M': month abbrev
+        */
 
-		/*
-		Special symbols:
-			'b': wether it's today (1) or not (0)
-			'l': weekday
-			'D': weekday abbrev
-			'e': weekday letter
-			'F': month
-			'M': month abbrev
-		*/
+        #echo $dateformatstring, '<br />';
 
-		#echo $dateformatstring, '<br />';
+        // protect special symbols, that date() would need proper locale set for
+        $protected_dateformatstring = preg_replace('/(?<!\\\)([blDeFM])/', '@@@\\\$1@@@', $dateformatstring);
 
-		// protect special symbols, that date() would need proper locale set for
-		$protected_dateformatstring = preg_replace( '/(?<!\\\)([blDeFM])/', '@@@\\\$1@@@', $dateformatstring );
+        #echo $protected_dateformatstring, '<br />';
 
-		#echo $protected_dateformatstring, '<br />';
+        $r = date($protected_dateformatstring, $unixtimestamp);
 
-		$r = date( $protected_dateformatstring, $unixtimestamp );
+        if ($protected_dateformatstring != $dateformatstring) { // we had special symbols, replace them
+            $istoday = (date('Ymd', $unixtimestamp) == date('Ymd', $localtimenow)) ? '1' : '0';
+            $datemonth = date('m', $unixtimestamp);
+            $dateweekday = date('w', $unixtimestamp);
 
-		if( $protected_dateformatstring != $dateformatstring )
-		{ // we had special symbols, replace them
+            // replace special symbols
+            $r = str_replace(
+                [
+                    '@@@b@@@',
+                    '@@@l@@@',
+                    '@@@D@@@',
+                    '@@@e@@@',
+                    '@@@F@@@',
+                    '@@@M@@@',
+                ],
+                [$istoday,
+                    trim(T_($weekday[$dateweekday])),
+                    trim(T_($weekday_abbrev[$dateweekday])),
+                    trim(T_($weekday_letter[$dateweekday])),
+                    trim(T_($month[$datemonth])),
+                    trim(T_($month_abbrev[$datemonth]))],
+                $r
+            );
+        }
+    }
 
-			$istoday = ( date('Ymd',$unixtimestamp) == date('Ymd',$localtimenow) ) ? '1' : '0';
-			$datemonth = date('m', $unixtimestamp);
-			$dateweekday = date('w', $unixtimestamp);
-
-			// replace special symbols
-			$r = str_replace( array(
-						'@@@b@@@',
-						'@@@l@@@',
-						'@@@D@@@',
-						'@@@e@@@',
-						'@@@F@@@',
-						'@@@M@@@',
-						),
-					array( $istoday,
-						trim(T_($weekday[$dateweekday])),
-						trim(T_($weekday_abbrev[$dateweekday])),
-						trim(T_($weekday_letter[$dateweekday])),
-						trim(T_($month[$datemonth])),
-						trim(T_($month_abbrev[$datemonth])) ),
-					$r );
-		}
-	}
-
-	return $r;
+    return $r;
 }
 
 
@@ -1864,28 +1729,34 @@ function date_i18n( $dateformatstring, $unixtimestamp, $useGM = false )
  * @param integer days
  * @return integer timestamp
  */
-function date_add_days( $timestamp, $days )
+function date_add_days($timestamp, $days)
 {
-	return mktime( date('H',$timestamp), date('m',$timestamp), date('s',$timestamp),
-								date('m',$timestamp), date('d',$timestamp)+$days, date('Y',$timestamp)  );
+    return mktime(
+        date('H', $timestamp),
+        date('m', $timestamp),
+        date('s', $timestamp),
+        date('m', $timestamp),
+        date('d', $timestamp) + $days,
+        date('Y', $timestamp)
+    );
 }
 
 /**
  * Format dates into a string in a way similar to sprintf()
  */
-function date_sprintf( $string, $timestamp )
+function date_sprintf($string, $timestamp)
 {
-	global $date_sprintf_timestamp;
-	$date_sprintf_timestamp = $timestamp;
+    global $date_sprintf_timestamp;
+    $date_sprintf_timestamp = $timestamp;
 
-	return preg_replace_callback( '/%\{(.*?)\}/', 'date_sprintf_callback', $string );
+    return preg_replace_callback('/%\{(.*?)\}/', 'date_sprintf_callback', $string);
 }
 
-function date_sprintf_callback( $matches )
+function date_sprintf_callback($matches)
 {
-	global $date_sprintf_timestamp;
+    global $date_sprintf_timestamp;
 
-	return date_i18n( $matches[1], $date_sprintf_timestamp );
+    return date_i18n($matches[1], $date_sprintf_timestamp);
 }
 
 
@@ -1895,34 +1766,25 @@ function date_sprintf_callback( $matches )
  * @param integer Timestamp
  * @return string Name of date (Today, Yesterday, x days ago, x months ago, x years ago)
  */
-function date_ago( $timestamp )
+function date_ago($timestamp)
 {
-	global $servertimenow;
+    global $servertimenow;
 
-	$days = floor( ( $servertimenow - $timestamp ) / 86400 );
-	$months = ceil( $days / 31 );
+    $days = floor(($servertimenow - $timestamp) / 86400);
+    $months = ceil($days / 31);
 
-	if( $days < 1 )
-	{	// Today
-		return T_('Today');
-	}
-	elseif( $days == 1 )
-	{	// Yesterday
-		return T_('Yesterday');
-	}
-	elseif( $days > 1 && $days <= 31 )
-	{	// Days
-		return sprintf( T_('%s days ago'), $days );
-	}
-	elseif( $days > 31 && $months <= 12 )
-	{	// Months
-		return sprintf( $months == 1 ? T_('%s month ago') : T_('%s months ago'), $months );
-	}
-	else
-	{	// Years
-		$years = floor( $months / 12 );
-		return sprintf( $years == 1 ? T_('%s year ago') : T_('%s years ago'), $years );
-	}
+    if ($days < 1) {	// Today
+        return T_('Today');
+    } elseif ($days == 1) {	// Yesterday
+        return T_('Yesterday');
+    } elseif ($days > 1 && $days <= 31) {	// Days
+        return sprintf(T_('%s days ago'), $days);
+    } elseif ($days > 31 && $months <= 12) {	// Months
+        return sprintf($months == 1 ? T_('%s month ago') : T_('%s months ago'), $months);
+    } else {	// Years
+        $years = floor($months / 12);
+        return sprintf($years == 1 ? T_('%s year ago') : T_('%s years ago'), $years);
+    }
 }
 
 
@@ -1933,44 +1795,36 @@ function date_ago( $timestamp )
  * @param boolean TRUE to use short format(only first letter of period name)
  * @return string Readable time period
  */
-function seconds_to_period( $seconds, $short_format = false )
+function seconds_to_period($seconds, $short_format = false)
 {
-	$periods = array(
-		array( 31536000, T_('1 year'),   T_('%s years'),   /* TRANS: Short for "1year" */  T_('%sy') ), // 365 days
-		array( 2592000,  T_('1 month'),  T_('%s months'),  /* TRANS: Short for "1month" */ T_('%sm') ), // 30 days
-		array( 86400,    T_('1 day'),    T_('%s days'),    /* TRANS: Short for "1day" */   T_('%sd') ),
-		array( 3600,     T_('1 hour'),   T_('%s hours'),   /* TRANS: Short for "1hour" */  T_('%sh') ),
-		array( 60,       T_('1 minute'), T_('%s minutes'), /* TRANS: Short for "1minute" */T_('%smn') ),
-		array( 1,        T_('1 second'), T_('%s seconds'), /* TRANS: Short for "1second" */T_('%ss') ),
-	);
+    $periods = [
+        [31536000, T_('1 year'),   T_('%s years'),   /* TRANS: Short for "1year" */ T_('%sy')], // 365 days
+        [2592000,  T_('1 month'),  T_('%s months'),  /* TRANS: Short for "1month" */ T_('%sm')], // 30 days
+        [86400,    T_('1 day'),    T_('%s days'),    /* TRANS: Short for "1day" */ T_('%sd')],
+        [3600,     T_('1 hour'),   T_('%s hours'),   /* TRANS: Short for "1hour" */ T_('%sh')],
+        [60,       T_('1 minute'), T_('%s minutes'), /* TRANS: Short for "1minute" */ T_('%smn')],
+        [1,        T_('1 second'), T_('%s seconds'), /* TRANS: Short for "1second" */ T_('%ss')],
+    ];
 
-	foreach( $periods as $p_info )
-	{
-		$period_value = intval( $seconds / $p_info[0] * 10 ) /10;
-		if( $period_value >= 1 )
-		{ // Stop on this period
-			if( $short_format )
-			{	// Use short format:
-				$period_text = sprintf( $p_info[3], $period_value );
-			}
-			elseif( $period_value == 1 )
-			{ // One unit of period
-				$period_text = $p_info[1];
-			}
-			else
-			{ // Two and more units of period
-				$period_text = sprintf( $p_info[2], $period_value );
-			}
-			break;
-		}
-	}
+    foreach ($periods as $p_info) {
+        $period_value = intval($seconds / $p_info[0] * 10) / 10;
+        if ($period_value >= 1) { // Stop on this period
+            if ($short_format) {	// Use short format:
+                $period_text = sprintf($p_info[3], $period_value);
+            } elseif ($period_value == 1) { // One unit of period
+                $period_text = $p_info[1];
+            } else { // Two and more units of period
+                $period_text = sprintf($p_info[2], $period_value);
+            }
+            break;
+        }
+    }
 
-	if( !isset( $period_text ) )
-	{ // 0 seconds
-		$period_text = $short_format ? sprintf( T_('%ss'), 0 ) : sprintf( T_('%s seconds'), 0 );
-	}
+    if (! isset($period_text)) { // 0 seconds
+        $period_text = $short_format ? sprintf(T_('%ss'), 0) : sprintf(T_('%s seconds'), 0);
+    }
 
-	return $period_text;
+    return $period_text;
 }
 
 
@@ -1980,9 +1834,9 @@ function seconds_to_period( $seconds, $short_format = false )
  * @param string date and time in ISO 8601 format {@link http://en.wikipedia.org/wiki/ISO_8601}.
  * @return string date and time in MySQL DateTime format Y-m-d H:i:s.
  */
-function iso8601_to_datetime( $iso_date )
+function iso8601_to_datetime($iso_date)
 {
-	return preg_replace('#([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(Z|[\+|\-][0-9]{2,4}){0,1}#', '$1-$2-$3 $4:$5:$6', $iso_date);
+    return preg_replace('#([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(Z|[\+|\-][0-9]{2,4}){0,1}#', '$1-$2-$3 $4:$5:$6', $iso_date);
 }
 
 
@@ -1992,49 +1846,45 @@ function iso8601_to_datetime( $iso_date )
  * @param string date and time in MySQL DateTime format Y-m-d H:i:s
  * @return string date and time in ISO 8601 format {@link http://en.wikipedia.org/wiki/ISO_8601}.
  */
-function datetime_to_iso8601( $datetime, $useGM = false )
+function datetime_to_iso8601($datetime, $useGM = false)
 {
-	$iso_date = mysql2date('U', $datetime);
+    $iso_date = mysql2date('U', $datetime);
 
-	if( $useGM )
-	{
-		$iso_date = gmdate('Ymd', $iso_date).'T'.gmdate('H:i:s', $iso_date);
-	}
-	else
-	{
-		$iso_date = date('Ymd', $iso_date).'T'.date('H:i:s', $iso_date);
-	}
+    if ($useGM) {
+        $iso_date = gmdate('Ymd', $iso_date) . 'T' . gmdate('H:i:s', $iso_date);
+    } else {
+        $iso_date = date('Ymd', $iso_date) . 'T' . date('H:i:s', $iso_date);
+    }
 
-	return $iso_date;
+    return $iso_date;
 }
 
 
 /**
- *
  * @param integer year
  * @param integer month (0-53)
  * @param integer 0 for sunday, 1 for monday
  */
-function get_start_date_for_week( $year, $week, $startofweek )
+function get_start_date_for_week($year, $week, $startofweek)
 {
-	$new_years_date = mktime( 0, 0, 0, 1, 1, $year );
-	$weekday = date('w', $new_years_date);
-	// echo '<br> 1st day is a: '.$weekday;
+    $new_years_date = mktime(0, 0, 0, 1, 1, $year);
+    $weekday = date('w', $new_years_date);
+    // echo '<br> 1st day is a: '.$weekday;
 
-	// How many days until start of week:
-	$days_to_new_week = (7 - $weekday + $startofweek) % 7;
-	// echo '<br> days to new week: '.$days_to_new_week;
+    // How many days until start of week:
+    $days_to_new_week = (7 - $weekday + $startofweek) % 7;
+    // echo '<br> days to new week: '.$days_to_new_week;
 
-	// We now add the required number of days to find the 1st sunday/monday in the year:
-	//$first_week_start_date = $new_years_date + $days_to_new_week * 86400;
-	//echo '<br> 1st week starts on '.date( 'Y-m-d H:i:s', $first_week_start_date );
+    // We now add the required number of days to find the 1st sunday/monday in the year:
+    //$first_week_start_date = $new_years_date + $days_to_new_week * 86400;
+    //echo '<br> 1st week starts on '.date( 'Y-m-d H:i:s', $first_week_start_date );
 
-	// We add the number of requested weeks:
-	// This will fail when passing to Daylight Savings Time: $date = $first_week_start_date + (($week-1) * 604800);
-	$date = mktime( 0, 0, 0, 1, $days_to_new_week + 1 + ($week-1) * 7, $year );
-	// echo '<br> week '.$week.' starts on '.date( 'Y-m-d H:i:s', $date );
+    // We add the number of requested weeks:
+    // This will fail when passing to Daylight Savings Time: $date = $first_week_start_date + (($week-1) * 604800);
+    $date = mktime(0, 0, 0, 1, $days_to_new_week + 1 + ($week - 1) * 7, $year);
+    // echo '<br> week '.$week.' starts on '.date( 'Y-m-d H:i:s', $date );
 
-	return $date;
+    return $date;
 }
 
 
@@ -2047,21 +1897,20 @@ function get_start_date_for_week( $year, $week, $startofweek )
  * @param date
  * @param integer 0 for Sunday, 1 for Monday
  */
-function get_weekstartend( $date, $startOfWeek )
+function get_weekstartend($date, $startOfWeek)
 {
-	while( date('w', $date) <> $startOfWeek )
-	{
-		// echo '<br />'.date('Y-m-d H:i:s w', $date).' - '.$startOfWeek;
-		// mktime is needed so calculations work for DST enabling. Example: March 30th 2008, start of week 0 sunday
-		$date = mktime( 0, 0, 0, date('m',$date), date('d',$date)-1, date('Y',$date) );
-	}
-	// echo '<br />'.date('Y-m-d H:i:s w', $date).' = '.$startOfWeek;
-	$week['start'] = $date;
-	$week['end']   = $date + 604800; // 7 days
+    while (date('w', $date) <> $startOfWeek) {
+        // echo '<br />'.date('Y-m-d H:i:s w', $date).' - '.$startOfWeek;
+        // mktime is needed so calculations work for DST enabling. Example: March 30th 2008, start of week 0 sunday
+        $date = mktime(0, 0, 0, date('m', $date), date('d', $date) - 1, date('Y', $date));
+    }
+    // echo '<br />'.date('Y-m-d H:i:s w', $date).' = '.$startOfWeek;
+    $week['start'] = $date;
+    $week['end'] = $date + 604800; // 7 days
 
-	// pre_dump( 'weekstartend: ', date( 'Y-m-d', $week['start'] ), date( 'Y-m-d', $week['end'] ) );
+    // pre_dump( 'weekstartend: ', date( 'Y-m-d', $week['start'] ), date( 'Y-m-d', $week['end'] ) );
 
-	return( $week );
+    return ($week);
 }
 
 
@@ -2074,7 +1923,7 @@ function get_weekstartend( $date, $startOfWeek )
  */
 function remove_seconds($timestamp, $format = 'Y-m-d H:i')
 {
-	return date($format, floor($timestamp/60)*60);
+    return date($format, floor($timestamp / 60) * 60);
 }
 
 
@@ -2084,37 +1933,37 @@ function remove_seconds($timestamp, $format = 'Y-m-d H:i')
  * @param integer duration in seconds
  * @return array of [ years, months, days, hours, minutes, seconds ]
  */
-function get_duration_fields( $duration )
+function get_duration_fields($duration)
 {
-	$result = array();
+    $result = [];
 
-	$year_seconds = 31536000; // 1 year
-	$years = floor( $duration / $year_seconds );
-	$duration = $duration - $years * $year_seconds;
-	$result[ 'years' ] = $years;
+    $year_seconds = 31536000; // 1 year
+    $years = floor($duration / $year_seconds);
+    $duration = $duration - $years * $year_seconds;
+    $result['years'] = $years;
 
-	$month_seconds = 2592000; // 1 month
-	$months = floor( $duration / $month_seconds );
-	$duration = $duration - $months * $month_seconds;
-	$result[ 'months' ] = $months;
+    $month_seconds = 2592000; // 1 month
+    $months = floor($duration / $month_seconds);
+    $duration = $duration - $months * $month_seconds;
+    $result['months'] = $months;
 
-	$day_seconds = 86400; // 1 day
-	$days = floor( $duration / $day_seconds );
-	$duration = $duration - $days * $day_seconds;
-	$result[ 'days' ] = $days;
+    $day_seconds = 86400; // 1 day
+    $days = floor($duration / $day_seconds);
+    $duration = $duration - $days * $day_seconds;
+    $result['days'] = $days;
 
-	$hour_seconds = 3600; // 1 hour
-	$hours = floor( $duration / $hour_seconds );
-	$duration = $duration - $hours * $hour_seconds;
-	$result[ 'hours' ] = $hours;
+    $hour_seconds = 3600; // 1 hour
+    $hours = floor($duration / $hour_seconds);
+    $duration = $duration - $hours * $hour_seconds;
+    $result['hours'] = $hours;
 
-	$minute_seconds = 60; // 1 minute
-	$minutes = floor( $duration / $minute_seconds );
-	$duration = $duration - $minutes * $minute_seconds;
-	$result[ 'minutes' ] = $minutes;
+    $minute_seconds = 60; // 1 minute
+    $minutes = floor($duration / $minute_seconds);
+    $duration = $duration - $minutes * $minute_seconds;
+    $result['minutes'] = $minutes;
 
-	$result[ 'seconds' ] = $duration;
-	return $result;
+    $result['seconds'] = $duration;
+    return $result;
 }
 
 
@@ -2125,81 +1974,59 @@ function get_duration_fields( $duration )
  * @param array Titles
  * @return string Duration title
  */
-function get_duration_title( $duration, $titles = array() )
+function get_duration_title($duration, $titles = [])
 {
-	$titles = array_merge( array(
-		'year'   => T_('Last %d years'),
-		'month'  => T_('Last %d months'),
-		'day'    => T_('Last %d days'),
-		'hour'   => T_('Last %d hours'),
-		'minute' => T_('Last %d minutes'),
-		'second' => T_('Last %d seconds'),
-		), $titles );
+    $titles = array_merge([
+        'year' => T_('Last %d years'),
+        'month' => T_('Last %d months'),
+        'day' => T_('Last %d days'),
+        'hour' => T_('Last %d hours'),
+        'minute' => T_('Last %d minutes'),
+        'second' => T_('Last %d seconds'),
+    ], $titles);
 
-	$delay_fields = get_duration_fields( $duration );
+    $delay_fields = get_duration_fields($duration);
 
-	if( ! empty( $delay_fields[ 'years' ] ) )
-	{ // Years
-		return sprintf( $titles['year'], $delay_fields[ 'years' ] );
-	}
-	elseif( ! empty( $delay_fields[ 'months' ] ) )
-	{ // Months
-		return sprintf( $titles['month'], $delay_fields[ 'months' ] );
-	}
-	elseif( ! empty( $delay_fields[ 'days' ] ) )
-	{ // Days
-		return sprintf( $titles['day'], $delay_fields[ 'days' ] );
-	}
-	elseif( ! empty( $delay_fields[ 'hours' ] ) )
-	{ // Hours
-		return sprintf( $titles['hour'], $delay_fields[ 'hours' ] );
-	}
-	elseif( ! empty( $delay_fields[ 'minutes' ] ) )
-	{ // Minutes
-		return sprintf( $titles['minute'], $delay_fields[ 'minutes' ] );
-	}
-	else
-	{ // Seconds
-		return sprintf( $titles['second'], $delay_fields[ 'seconds' ] );
-	}
+    if (! empty($delay_fields['years'])) { // Years
+        return sprintf($titles['year'], $delay_fields['years']);
+    } elseif (! empty($delay_fields['months'])) { // Months
+        return sprintf($titles['month'], $delay_fields['months']);
+    } elseif (! empty($delay_fields['days'])) { // Days
+        return sprintf($titles['day'], $delay_fields['days']);
+    } elseif (! empty($delay_fields['hours'])) { // Hours
+        return sprintf($titles['hour'], $delay_fields['hours']);
+    } elseif (! empty($delay_fields['minutes'])) { // Minutes
+        return sprintf($titles['minute'], $delay_fields['minutes']);
+    } else { // Seconds
+        return sprintf($titles['second'], $delay_fields['seconds']);
+    }
 }
 
-function get_lastseen_date( $date, $view = 'exact_date', $cheat = 0 )
+function get_lastseen_date($date, $view = 'exact_date', $cheat = 0)
 {
-	$result = mysql2localedate( $date );
+    $result = mysql2localedate($date);
 
-	if( $view == 'blurred_date' )
-	{
-		$result = (int)( ( ( time() - strtotime( $date ) ) / 86400 ) - $cheat);
+    if ($view == 'blurred_date') {
+        $result = (int) (((time() - strtotime($date)) / 86400) - $cheat);
 
-		if( $result < 0 )
-		{
-			$result = 0;
-		}
+        if ($result < 0) {
+            $result = 0;
+        }
 
-		if( $result < 3 )
-		{
-			$result = T_('less than 3 days ago');
-		}
-		elseif( $result < 7 )
-		{
-			$result = T_('less than a week ago');
-		}
-		elseif( $result < 30 )
-		{
-			$result = T_('less than a month ago');
-		}
-		elseif( $result < 90 )
-		{
-			$result = T_('less than 3 months ago');
-		}
-		else
-		{
-			$result = T_('more than 3 months ago');
-		}
-	}
+        if ($result < 3) {
+            $result = T_('less than 3 days ago');
+        } elseif ($result < 7) {
+            $result = T_('less than a week ago');
+        } elseif ($result < 30) {
+            $result = T_('less than a month ago');
+        } elseif ($result < 90) {
+            $result = T_('less than 3 months ago');
+        } else {
+            $result = T_('more than 3 months ago');
+        }
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -2212,46 +2039,40 @@ function get_lastseen_date( $date, $view = 'exact_date', $cheat = 0 )
  * @param custom error message
  * @return boolean true if OK
  */
-function param_validate( $variable, $validator, $required = false, $custom_msg = NULL )
+function param_validate($variable, $validator, $required = false, $custom_msg = null)
 {
-	/* Tblue> Note: is_callable() does not check whether a function is
-	 *        disabled (http://www.php.net/manual/en/function.is-callable.php#79151).
-	 */
-	if( ! is_callable( $validator ) )
-	{
-		debug_die( 'Validator function '.$validator.'() is not callable!' );
-	}
+    /* Tblue> Note: is_callable() does not check whether a function is
+     *        disabled (http://www.php.net/manual/en/function.is-callable.php#79151).
+     */
+    if (! is_callable($validator)) {
+        debug_die('Validator function ' . $validator . '() is not callable!');
+    }
 
-	if( ! isset( $GLOBALS[$variable] ) )
-	{	// Variable not set, we cannot handle this using the validator function...
-		if( $required )
-		{	// Add error:
-			param_check_not_empty( $variable, $custom_msg );
-			return false;
-		}
+    if (! isset($GLOBALS[$variable])) {	// Variable not set, we cannot handle this using the validator function...
+        if ($required) {	// Add error:
+            param_check_not_empty($variable, $custom_msg);
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	if( $GLOBALS[$variable] === '' && ! $required )
-	{	// Variable is empty or not set. That's fine since it isn't required:
-		return true;
-	}
+    if ($GLOBALS[$variable] === '' && ! $required) {	// Variable is empty or not set. That's fine since it isn't required:
+        return true;
+    }
 
-	$msg = $validator( $GLOBALS[$variable] );
+    $msg = $validator($GLOBALS[$variable]);
 
-	if( !empty( $msg ) )
-	{
-		if( !empty( $custom_msg ) )
-		{
-			$msg = $custom_msg;
-		}
+    if (! empty($msg)) {
+        if (! empty($custom_msg)) {
+            $msg = $custom_msg;
+        }
 
-		param_error( $variable, $msg );
-		return false;
-	}
+        param_error($variable, $msg);
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -2261,9 +2082,9 @@ function param_validate( $variable, $validator, $required = false, $custom_msg =
  * @param string decimal to check
  * @return boolean true if OK
  */
-function is_decimal( $decimal )
+function is_decimal($decimal)
 {
-	return preg_match( '#^[0-9]*(\.[0-9]+)?$#', $decimal );
+    return preg_match('#^[0-9]*(\.[0-9]+)?$#', $decimal);
 }
 
 
@@ -2273,9 +2094,9 @@ function is_decimal( $decimal )
  * @param string number to check
  * @return boolean true if OK
  */
-function is_number( $number )
+function is_number($number)
 {
-	return preg_match( '#^[0-9]+$#', $number );
+    return preg_match('#^[0-9]+$#', $number);
 }
 
 
@@ -2295,19 +2116,18 @@ function is_number( $number )
  *
  * @return bool|array Either true/false or the match (see {@link $return_match})
  */
-function is_email( $email, $format = 'simple', $return_match = false )
+function is_email($email, $format = 'simple', $return_match = false)
 {
-	#$chars = "/^([a-z0-9_]|\\-|\\.)+@(([a-z0-9_]|\\-)+\\.)+[a-z]{2,4}\$/i";
+    #$chars = "/^([a-z0-9_]|\\-|\\.)+@(([a-z0-9_]|\\-)+\\.)+[a-z]{2,4}\$/i";
 
-	switch( $format )
-	{
-		case 'rfc':
-		case 'rfc2822':
-			/**
-			 * Regexp pattern converted from: http://www.regexlib.com/REDetails.aspx?regexp_id=711
-			 * Extended to allow escaped quotes.
-			 */
-			$pattern_email = '/^
+    switch ($format) {
+        case 'rfc':
+        case 'rfc2822':
+            /**
+             * Regexp pattern converted from: http://www.regexlib.com/REDetails.aspx?regexp_id=711
+             * Extended to allow escaped quotes.
+             */
+            $pattern_email = '/^
 				(
 					(?>[a-zA-Z\d!\#$%&\'*+\-\/=?^_`{|}~]+\x20*
 						|"( \\\" | (?=[\x01-\x7f])[^"\\\] | \\[\x01-\x7f] )*"\x20*)* # Name
@@ -2329,31 +2149,25 @@ function is_email( $email, $format = 'simple', $return_match = false )
 				)
 				(?(3)>) # match ">" if it was there
 				$/x';
-			break;
+            break;
 
-		case 'simple':
-		default:
-			// '/^\S+@[^\.\s]\S*\.[a-z]{2,}$/i'
-			$pattern_email = '~^(([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,}))$~i';
-			break;
-	}
+        case 'simple':
+        default:
+            // '/^\S+@[^\.\s]\S*\.[a-z]{2,}$/i'
+            $pattern_email = '~^(([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,}))$~i';
+            break;
+    }
 
-	if( strpos( $email, '@' ) !== false && strpos( $email, '.' ) !== false )
-	{
-		if( $return_match )
-		{
-			preg_match( $pattern_email, $email, $match );
-			return $match;
-		}
-		else
-		{
-			return (bool)preg_match( $pattern_email, $email );
-		}
-	}
-	else
-	{
-		return $return_match ? array() : false;
-	}
+    if (strpos($email, '@') !== false && strpos($email, '.') !== false) {
+        if ($return_match) {
+            preg_match($pattern_email, $email, $match);
+            return $match;
+        } else {
+            return (bool) preg_match($pattern_email, $email);
+        }
+    } else {
+        return $return_match ? [] : false;
+    }
 }
 
 
@@ -2363,9 +2177,9 @@ function is_email( $email, $format = 'simple', $return_match = false )
  * @param string phone number to check
  * @return boolean true if OK
  */
-function is_phone( $phone )
+function is_phone($phone)
 {
-	return preg_match( '|^\+?[\-*#/(). 0-9]+$|', $phone );
+    return preg_match('|^\+?[\-*#/(). 0-9]+$|', $phone);
 }
 
 
@@ -2375,14 +2189,13 @@ function is_phone( $phone )
  * @param string url to check
  * @return boolean true if OK
  */
-function is_url( $url )
+function is_url($url)
 {
-	if( validate_url( $url, 'posting', false ) )
-	{
-		return false;
-	}
+    if (validate_url($url, 'posting', false)) {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -2392,9 +2205,9 @@ function is_url( $url )
  * @param string word to check
  * @return boolean true if OK
  */
-function is_word( $word )
+function is_word($word)
 {
-	return preg_match( '#^[A-Za-z]+$#', $word );
+    return preg_match('#^[A-Za-z]+$#', $word);
 }
 
 
@@ -2404,56 +2217,50 @@ function is_word( $word )
  * @param string login
  * @return boolean|string TRUE if OK, FALSE if error, special error cases: 'usr', 'long'
  */
-function is_valid_login( $login, $force_strict_logins = false )
+function is_valid_login($login, $force_strict_logins = false)
 {
-	global $Settings;
+    global $Settings;
 
-	$strict_logins = isset( $Settings ) ? $Settings->get('strict_logins') : 1;
+    $strict_logins = isset($Settings) ? $Settings->get('strict_logins') : 1;
 
-	// NOTE: in some places usernames are typed in by other users (messaging) or admins.
-	// Having cryptic logins with hard to type letters is a PITA.
+    // NOTE: in some places usernames are typed in by other users (messaging) or admins.
+    // Having cryptic logins with hard to type letters is a PITA.
 
-	// Step 1
-	// Forbid the following characters in logins
-	if( preg_match( '~[\'"><@&\s]~', $login ) )
-	{	// WARNING: allowing ' or " or > or < will open security issues!
-		// NOTE: allowing @ will make some "average" users use their email address (not good for their spam health)
-		// NOTE: we do not allow whitespace in logins
-		return false;
-	}
+    // Step 1
+    // Forbid the following characters in logins
+    if (preg_match('~[\'"><@&\s]~', $login)) {	// WARNING: allowing ' or " or > or < will open security issues!
+        // NOTE: allowing @ will make some "average" users use their email address (not good for their spam health)
+        // NOTE: we do not allow whitespace in logins
+        return false;
+    }
 
-	// Step 2
-	if( ($strict_logins || $force_strict_logins) && ! preg_match( '~^[A-Za-z0-9_.\-]+$~', $login ) )
-	{	// WARNING: allowing special chars like latin 1 accented chars ( \xDF-\xF6\xF8-\xFF ) will create issues with
-		// user media directory names (tested on Max OS X) -- Do no allow any of this until we have a clean & safe media dir name generator.
+    // Step 2
+    if (($strict_logins || $force_strict_logins) && ! preg_match('~^[A-Za-z0-9_.\-]+$~', $login)) {	// WARNING: allowing special chars like latin 1 accented chars ( \xDF-\xF6\xF8-\xFF ) will create issues with
+        // user media directory names (tested on Max OS X) -- Do no allow any of this until we have a clean & safe media dir name generator.
 
-		// fp> TODO: check why a dash '-' prevents renaming the fileroot
-		return false;
-	}
-	elseif( ! $strict_logins )
-	{	// We allow any character that is not explicitly forbidden in Step 1
-		// Enforce additional limitations
-		$login = preg_replace( '|%([a-fA-F0-9][a-fA-F0-9])|', '', $login ); // Kill octets
-		$login = preg_replace( '/&.+?;/', '', $login ); // Kill entities
-	}
+        // fp> TODO: check why a dash '-' prevents renaming the fileroot
+        return false;
+    } elseif (! $strict_logins) {	// We allow any character that is not explicitly forbidden in Step 1
+        // Enforce additional limitations
+        $login = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $login); // Kill octets
+        $login = preg_replace('/&.+?;/', '', $login); // Kill entities
+    }
 
-	// Step 3
-	// Special case, the login is valid however we forbid it's usage.
-	// param_check_valid_login() will display a special error message in this case.
-	if( preg_match( '~^usr_~', $login ) )
-	{	// Logins cannot start with 'usr_', this prefix is reserved for system use
-		// We create user media directories for users with non-ASCII logins in format /media/users/usr_55/, where 55 is user ID
-		return 'usr';
-	}
+    // Step 3
+    // Special case, the login is valid however we forbid it's usage.
+    // param_check_valid_login() will display a special error message in this case.
+    if (preg_match('~^usr_~', $login)) {	// Logins cannot start with 'usr_', this prefix is reserved for system use
+        // We create user media directories for users with non-ASCII logins in format /media/users/usr_55/, where 55 is user ID
+        return 'usr';
+    }
 
-	// Step 4
-	// To avoid MySQL erro on insert long data
-	if( utf8_strlen( $login ) > 20 )
-	{	// Don't allow long login:
-		return 'long';
-	}
+    // Step 4
+    // To avoid MySQL erro on insert long data
+    if (utf8_strlen($login) > 20) {	// Don't allow long login:
+        return 'long';
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -2464,9 +2271,9 @@ function is_valid_login( $login, $force_strict_logins = false )
  * @param string color to check
  * @return boolean true if OK
  */
-function is_color( $color )
+function is_color($color)
 {
-	return preg_match( '~^(#([a-f0-9]{3}){1,2}|rgba\(\d{1,3},\d{1,3},\d{1,3},(1|0(\.\d{1,2})?)\))$~i', $color );
+    return preg_match('~^(#([a-f0-9]{3}){1,2}|rgba\(\d{1,3},\d{1,3},\d{1,3},(1|0(\.\d{1,2})?)\))$~i', $color);
 }
 
 
@@ -2476,17 +2283,17 @@ function is_color( $color )
  * @param string login
  * @return boolean true if OK
  */
-function user_exists( $login )
+function user_exists($login)
 {
-	global $DB;
+    global $DB;
 
-	$SQL = new SQL( 'Get a count of users with login '.$login );
-	$SQL->SELECT( 'COUNT(*)' );
-	$SQL->FROM( 'T_users' );
-	$SQL->WHERE( 'user_login = '.$DB->quote( $login ) );
+    $SQL = new SQL('Get a count of users with login ' . $login);
+    $SQL->SELECT('COUNT(*)');
+    $SQL->FROM('T_users');
+    $SQL->WHERE('user_login = ' . $DB->quote($login));
 
-	$var = $DB->get_var( $SQL );
-	return $var > 0 ? true : false; // PHP4 compatibility
+    $var = $DB->get_var($SQL);
+    return $var > 0 ? true : false; // PHP4 compatibility
 }
 
 
@@ -2495,7 +2302,7 @@ function user_exists( $login )
  */
 function is_windows()
 {
-	return ( strtoupper(substr(PHP_OS,0,3)) == 'WIN' );
+    return (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
 }
 
 
@@ -2505,16 +2312,15 @@ function is_windows()
  * @param string content
  * @return array all <a../a> part from the given content
  */
-function get_atags( $content )
+function get_atags($content)
 {
-	$tags = array();
+    $tags = [];
 
-	if( preg_match_all( '#(<a[^>]+>(.*?)</a>|&lt;a.+&gt;(.*?)&lt;/a&gt;)#i', $content, $result ) )
-	{
-		$tags = $result[0];
-	}
+    if (preg_match_all('#(<a[^>]+>(.*?)</a>|&lt;a.+&gt;(.*?)&lt;/a&gt;)#i', $content, $result)) {
+        $tags = $result[0];
+    }
 
-	return $tags;
+    return $tags;
 }
 
 
@@ -2526,31 +2332,32 @@ function get_atags( $content )
  * @param integer Number of tags to add the class to
  * @return string HTML content with the added class
  */
-function add_tag_class( $content, $class, $limit = 1 )
+function add_tag_class($content, $class, $limit = 1)
 {
-	global $add_class;
-	$add_class = $class;
+    global $add_class;
+    $add_class = $class;
 
-	$content = preg_replace_callback( '/<[^\/].*?>/i', 'callback_add_tag_class',
-		$content, $limit );
+    $content = preg_replace_callback(
+        '/<[^\/].*?>/i',
+        'callback_add_tag_class',
+        $content,
+        $limit
+    );
 
-	unset( $add_class );
+    unset($add_class);
 
-	return $content;
+    return $content;
 }
-function callback_add_tag_class( $matches )
+function callback_add_tag_class($matches)
 {
-	global $add_class;
-	// Check if class attribute is already defined
-	if( preg_match( '/\sclass\s*=/i', $matches[0] ) )
-	{ // Insert class
-		//$content = preg_replace( '/(<.*)(class\s*=\s*")(.*)"/i', '$1$2$3 '.$class.'"', $content, $limit );
-		return preg_replace( '/(<[a-zA-z_:]\s*?.*?\s*?class=")(.*?)(".*?>)/i', '$1$2 '.$add_class.'$3', $matches[0] );
-	}
-	else
-	{
-		return preg_replace( '/>/i', ' class="'.$add_class.'"$1>', $matches[0] );
-	}
+    global $add_class;
+    // Check if class attribute is already defined
+    if (preg_match('/\sclass\s*=/i', $matches[0])) { // Insert class
+        //$content = preg_replace( '/(<.*)(class\s*=\s*")(.*)"/i', '$1$2$3 '.$class.'"', $content, $limit );
+        return preg_replace('/(<[a-zA-z_:]\s*?.*?\s*?class=")(.*?)(".*?>)/i', '$1$2 ' . $add_class . '$3', $matches[0]);
+    } else {
+        return preg_replace('/>/i', ' class="' . $add_class . '"$1>', $matches[0]);
+    }
 }
 
 
@@ -2560,13 +2367,13 @@ function callback_add_tag_class( $matches )
  * @param string content
  * @return array all <img../img> part from the given content
  */
-function get_imgtags( $content )
+function get_imgtags($content)
 {
-	$tag = 'img';
-	$regexp = '{<'.$tag.'[^>]*[ (</'.$tag.'>) | (/>) ]}';
+    $tag = 'img';
+    $regexp = '{<' . $tag . '[^>]*[ (</' . $tag . '>) | (/>) ]}';
 
-	preg_match_all( $regexp, $content, $result );
-	return $result[0];
+    preg_match_all($regexp, $content, $result);
+    return $result[0];
 }
 
 
@@ -2576,27 +2383,24 @@ function get_imgtags( $content )
  * @param string content
  * @return array all url from content
  */
-function get_urls( $content )
+function get_urls($content)
 {
-	$regexp = '^(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2,4}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,;=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,;*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,;*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)?^';
+    $regexp = '^(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2,4}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,;=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,;*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,;*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,;*:=]|%[a-f\d]{2})*)?^';
 
-	preg_match_all( $regexp, $content, $result );
-	return $result[0];
+    preg_match_all($regexp, $content, $result);
+    return $result[0];
 }
 
 
 function xmlrpc_getposttitle($content)
 {
-	global $post_default_title;
-	if (preg_match('/<title>(.+?)<\/title>/is', $content, $matchtitle))
-	{
-		$post_title = $matchtitle[1];
-	}
-	else
-	{
-		$post_title = $post_default_title;
-	}
-	return($post_title);
+    global $post_default_title;
+    if (preg_match('/<title>(.+?)<\/title>/is', $content, $matchtitle)) {
+        $post_title = $matchtitle[1];
+    } else {
+        $post_title = $post_default_title;
+    }
+    return ($post_title);
 }
 
 
@@ -2607,12 +2411,11 @@ function xmlrpc_getposttitle($content)
  */
 function xmlrpc_getpostcategory($content)
 {
-	if (preg_match('/<category>([0-9]+?)<\/category>/is', $content, $matchcat))
-	{
-		return $matchcat[1];
-	}
+    if (preg_match('/<category>([0-9]+?)<\/category>/is', $content, $matchcat)) {
+        return $matchcat[1];
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -2626,18 +2429,16 @@ function xmlrpc_getpostcategory($content)
  */
 function xmlrpc_getpostcategories($content)
 {
-	$cats = array();
+    $cats = [];
 
-	if( preg_match('~<category>(\d+\s*(,\s*\d*)*)</category>~i', $content, $match) )
-	{
-		$cats = preg_split('~\s*,\s*~', $match[1], -1, PREG_SPLIT_NO_EMPTY);
-		foreach( $cats as $k => $v )
-		{
-			$cats[$k] = (int)$v;
-		}
-	}
+    if (preg_match('~<category>(\d+\s*(,\s*\d*)*)</category>~i', $content, $match)) {
+        $cats = preg_split('~\s*,\s*~', $match[1], -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($cats as $k => $v) {
+            $cats[$k] = (int) $v;
+        }
+    }
 
-	return $cats;
+    return $cats;
 }
 
 
@@ -2646,10 +2447,10 @@ function xmlrpc_getpostcategories($content)
  */
 function xmlrpc_removepostdata($content)
 {
-	$content = preg_replace('/<title>(.*?)<\/title>/si', '', $content);
-	$content = preg_replace('/<category>(.*?)<\/category>/si', '', $content);
-	$content = trim($content);
-	return($content);
+    $content = preg_replace('/<title>(.*?)<\/title>/si', '', $content);
+    $content = preg_replace('/<category>(.*?)<\/category>/si', '', $content);
+    $content = trim($content);
+    return ($content);
 }
 
 
@@ -2660,55 +2461,51 @@ function xmlrpc_removepostdata($content)
  * @param boolean true to echo
  * @param mixed File resource or == '' for no file logging.
  */
-function xmlrpc_displayresult( $result, $display = true, $log = '' )
+function xmlrpc_displayresult($result, $display = true, $log = '')
 {
-	if( ! $result )
-	{ // We got no response:
-		if( $display ) echo T_('No response!')."<br />\n";
-		return false;
-	}
+    if (! $result) { // We got no response:
+        if ($display) {
+            echo T_('No response!') . "<br />\n";
+        }
+        return false;
+    }
 
-	if( $result->faultCode() )
-	{ // We got a remote error:
-		if( $display ) echo T_('Remote error'), ': ', $result->faultString(), ' (', $result->faultCode(), ")<br />\n";
-		debug_fwrite($log, $result->faultCode().' -- '.$result->faultString());
-		return false;
-	}
+    if ($result->faultCode()) { // We got a remote error:
+        if ($display) {
+            echo T_('Remote error'), ': ', $result->faultString(), ' (', $result->faultCode(), ")<br />\n";
+        }
+        debug_fwrite($log, $result->faultCode() . ' -- ' . $result->faultString());
+        return false;
+    }
 
-	// We'll display the response:
-	$val = $result->value();
-	$value = xmlrpc_decode_recurse($result->value());
+    // We'll display the response:
+    $val = $result->value();
+    $value = xmlrpc_decode_recurse($result->value());
 
-	if( is_array($value) )
-	{
-		$out = '';
-		foreach($value as $l_value)
-		{
-			if( is_array( $l_value ) )
-			{
-				$out .= ' [';
-				foreach( $l_value as $lv_key => $lv_val )
-				{
-					$out .= $lv_key.' => '.( is_array( $lv_val ) ? '{'.implode( '; ', $lv_val ).'}' : $lv_val ).'; ';
-				}
-				$out .= '] ';
-			}
-			else
-			{
-				$out .= ' ['.$l_value.'] ';
-			}
-		}
-	}
-	else
-	{
-		$out = $value;
-	}
+    if (is_array($value)) {
+        $out = '';
+        foreach ($value as $l_value) {
+            if (is_array($l_value)) {
+                $out .= ' [';
+                foreach ($l_value as $lv_key => $lv_val) {
+                    $out .= $lv_key . ' => ' . (is_array($lv_val) ? '{' . implode('; ', $lv_val) . '}' : $lv_val) . '; ';
+                }
+                $out .= '] ';
+            } else {
+                $out .= ' [' . $l_value . '] ';
+            }
+        }
+    } else {
+        $out = $value;
+    }
 
-	debug_fwrite($log, $out);
+    debug_fwrite($log, $out);
 
-	if( $display ) echo T_('Response').': '.$out."<br />\n";
+    if ($display) {
+        echo T_('Response') . ': ' . $out . "<br />\n";
+    }
 
-	return $value;
+    return $value;
 }
 
 
@@ -2719,73 +2516,64 @@ function xmlrpc_displayresult( $result, $display = true, $log = '' )
  * @param Log object to add messages to
  * @return boolean true = success, false = error
  */
-function xmlrpc_logresult( $result, & $message_Log, $log_payload = true )
+function xmlrpc_logresult($result, &$message_Log, $log_payload = true)
 {
-	if( ! $result )
-	{ // We got no response:
-		$message_Log->add( T_('No response!'), 'error' );
-		return false;
-	}
+    if (! $result) { // We got no response:
+        $message_Log->add(T_('No response!'), 'error');
+        return false;
+    }
 
-	if( $result->faultCode() )
-	{ // We got a remote error:
-		$message_Log->add( T_('Remote error').': '.$result->faultString().' ('.$result->faultCode().')', 'error' );
-		return false;
-	}
+    if ($result->faultCode()) { // We got a remote error:
+        $message_Log->add(T_('Remote error') . ': ' . $result->faultString() . ' (' . $result->faultCode() . ')', 'error');
+        return false;
+    }
 
-	if( $log_payload )
-	{
-		// We got a response:
-		$value = xmlrpc_decode_recurse($result->value());
+    if ($log_payload) {
+        // We got a response:
+        $value = xmlrpc_decode_recurse($result->value());
 
-		if( is_array($value) )
-		{
-			$out = '';
-			foreach($value as $l_value)
-			{
-				$out .= ' ['.var_export($l_value, true).'] ';
-			}
-		}
-		else
-		{
-			$out = $value;
-		}
+        if (is_array($value)) {
+            $out = '';
+            foreach ($value as $l_value) {
+                $out .= ' [' . var_export($l_value, true) . '] ';
+            }
+        } else {
+            $out = $value;
+        }
 
-		$message_Log->add( T_('Response').': '.$out, 'success' );
-	}
+        $message_Log->add(T_('Response') . ': ' . $out, 'success');
+    }
 
-	return true;
+    return true;
 }
 
 
 
-function debug_fopen($filename, $mode) {
-	global $debug;
-	if ($debug == 1 && ( !empty($filename) ) )
-	{
-		$fp = fopen($filename, $mode);
-		return $fp;
-	} else {
-		return false;
-	}
+function debug_fopen($filename, $mode)
+{
+    global $debug;
+    if ($debug == 1 && (! empty($filename))) {
+        $fp = fopen($filename, $mode);
+        return $fp;
+    } else {
+        return false;
+    }
 }
 
 function debug_fwrite($fp, $string)
 {
-	global $debug;
-	if( $debug && $fp )
-	{
-		fwrite($fp, $string);
-	}
+    global $debug;
+    if ($debug && $fp) {
+        fwrite($fp, $string);
+    }
 }
 
 function debug_fclose($fp)
 {
-	global $debug;
-	if( $debug && $fp )
-	{
-		fclose($fp);
-	}
+    global $debug;
+    if ($debug && $fp) {
+        fclose($fp);
+    }
 }
 
 
@@ -2793,82 +2581,69 @@ function debug_fclose($fp)
 /**
  * Wrap pre tag around {@link var_dump()} for better debugging.
  *
- * @param $var__var__var__var__,... mixed variable(s) to dump
  * @return true
  */
-function pre_dump( $var__var__var__var__ )
+function pre_dump($var__var__var__var__)
 {
-	global $is_cli;
+    global $is_cli;
 
-	#echo 'pre_dump(): '.debug_get_backtrace(); // see where a pre_dump() comes from
+    #echo 'pre_dump(): '.debug_get_backtrace(); // see where a pre_dump() comes from
 
-	$func_num_args = func_num_args();
-	$count = 0;
+    $func_num_args = func_num_args();
+    $count = 0;
 
-	if( ! empty($is_cli) )
-	{ // CLI, no encoding of special chars:
-		$count = 0;
-		foreach( func_get_args() as $lvar )
-		{
-			var_dump($lvar);
+    if (! empty($is_cli)) { // CLI, no encoding of special chars:
+        $count = 0;
+        foreach (func_get_args() as $lvar) {
+            var_dump($lvar);
 
-			$count++;
-			if( $count < $func_num_args )
-			{ // Put newline between arguments
-				echo "\n";
-			}
-		}
-	}
-	elseif( function_exists('xdebug_var_dump') )
-	{ // xdebug already does fancy displaying:
+            $count++;
+            if ($count < $func_num_args) { // Put newline between arguments
+                echo "\n";
+            }
+        }
+    } elseif (function_exists('xdebug_var_dump')) { // xdebug already does fancy displaying:
+        // no limits:
+        $old_var_display_max_children = @ini_set('xdebug.var_display_max_children', -1); // default: 128
+        $old_var_display_max_data = @ini_set('xdebug.var_display_max_data', -1); // max string length; default: 512
+        $old_var_display_max_depth = @ini_set('xdebug.var_display_max_depth', -1); // default: 3
 
-		// no limits:
-		$old_var_display_max_children = @ini_set('xdebug.var_display_max_children', -1); // default: 128
-		$old_var_display_max_data = @ini_set('xdebug.var_display_max_data', -1); // max string length; default: 512
-		$old_var_display_max_depth = @ini_set('xdebug.var_display_max_depth', -1); // default: 3
+        echo "\n<div style=\"padding:1ex;border:1px solid #00f;\">\n";
+        foreach (func_get_args() as $lvar) {
+            xdebug_var_dump($lvar);
 
-		echo "\n<div style=\"padding:1ex;border:1px solid #00f;\">\n";
-		foreach( func_get_args() as $lvar )
-		{
-			xdebug_var_dump($lvar);
+            $count++;
+            if ($count < $func_num_args) { // Put HR between arguments
+                echo "<hr />\n";
+            }
+        }
+        echo '</div>';
 
-			$count++;
-			if( $count < $func_num_args )
-			{ // Put HR between arguments
-				echo "<hr />\n";
-			}
-		}
-		echo '</div>';
+        // restore xdebug settings:
+        @ini_set('xdebug.var_display_max_children', $old_var_display_max_children);
+        @ini_set('xdebug.var_display_max_data', $old_var_display_max_data);
+        @ini_set('xdebug.var_display_max_depth', $old_var_display_max_depth);
+    } else {
+        $orig_html_errors = @ini_set('html_errors', 0); // e.g. xdebug would use fancy html, if this is on; we catch (and use) xdebug explicitly above, but just in case
 
-		// restore xdebug settings:
-		@ini_set('xdebug.var_display_max_children', $old_var_display_max_children);
-		@ini_set('xdebug.var_display_max_data', $old_var_display_max_data);
-		@ini_set('xdebug.var_display_max_depth', $old_var_display_max_depth);
-	}
-	else
-	{
-		$orig_html_errors = @ini_set('html_errors', 0); // e.g. xdebug would use fancy html, if this is on; we catch (and use) xdebug explicitly above, but just in case
+        echo "\n<pre style=\"padding:1ex;border:1px solid #00f;overflow:auto\">\n";
+        foreach (func_get_args() as $lvar) {
+            ob_start();
+            var_dump($lvar); // includes "\n"; do not use var_export() because it does not detect recursion by design
+            $buffer = ob_get_contents();
+            ob_end_clean();
+            echo htmlspecialchars($buffer);
 
-		echo "\n<pre style=\"padding:1ex;border:1px solid #00f;overflow:auto\">\n";
-		foreach( func_get_args() as $lvar )
-		{
-			ob_start();
-			var_dump($lvar); // includes "\n"; do not use var_export() because it does not detect recursion by design
-			$buffer = ob_get_contents();
-			ob_end_clean();
-			echo htmlspecialchars($buffer);
-
-			$count++;
-			if( $count < $func_num_args )
-			{ // Put HR between arguments
-				echo "<hr />\n";
-			}
-		}
-		echo "</pre>\n";
-		@ini_set('html_errors', $orig_html_errors);
-	}
-	evo_flush();
-	return true;
+            $count++;
+            if ($count < $func_num_args) { // Put HR between arguments
+                echo "<hr />\n";
+            }
+        }
+        echo "</pre>\n";
+        @ini_set('html_errors', $orig_html_errors);
+    }
+    evo_flush();
+    return true;
 }
 
 
@@ -2879,7 +2654,7 @@ function pre_dump( $var__var__var__var__ )
  *
  * @todo dh> Add support for $is_cli = true (e.g. in case of MySQL error)
  *
- * @param integer|NULL Get the last x entries from the stack (after $ignore_from is applied). Anything non-numeric means "all".
+ * @param integer|null Get the last x entries from the stack (after $ignore_from is applied). Anything non-numeric means "all".
  * @param array After a key/value pair matches a stack entry, this and the rest is ignored.
  *              For example, array('class' => 'DB') would exclude everything after the stack
  *              "enters" class DB and everything that got called afterwards.
@@ -2887,188 +2662,157 @@ function pre_dump( $var__var__var__var__ )
  * @param integer Number of stack entries to include, after $ignore_from matches.
  * @return string HTML table
  */
-function debug_get_backtrace( $limit_to_last = NULL, $ignore_from = array( 'function' => 'debug_get_backtrace' ), $offset_ignore_from = 0 )
+function debug_get_backtrace($limit_to_last = null, $ignore_from = [
+    'function' => 'debug_get_backtrace',
+], $offset_ignore_from = 0)
 {
-	if( ! function_exists( 'debug_backtrace' ) ) // PHP 4.3.0
-	{
-		return 'Function debug_backtrace() is not available!';
-	}
+    if (! function_exists('debug_backtrace')) { // PHP 4.3.0
+        return 'Function debug_backtrace() is not available!';
+    }
 
-	$r = '';
+    $r = '';
 
-	$backtrace = debug_backtrace();
-	$count_ignored = 0; // remember how many have been ignored
-	$limited = false;   // remember if we have limited to $limit_to_last
+    $backtrace = debug_backtrace();
+    $count_ignored = 0; // remember how many have been ignored
+    $limited = false;   // remember if we have limited to $limit_to_last
 
-	if( $ignore_from )
-	{	// we want to ignore from a certain point
-		$trace_length = 0;
-		$break_because_of_offset = false;
+    if ($ignore_from) {	// we want to ignore from a certain point
+        $trace_length = 0;
+        $break_because_of_offset = false;
 
-		for( $i = count($backtrace); $i > 0; $i-- )
-		{	// Search the backtrace from behind (first call).
-			$l_stack = & $backtrace[$i-1];
+        for ($i = count($backtrace); $i > 0; $i--) {	// Search the backtrace from behind (first call).
+            $l_stack = &$backtrace[$i - 1];
 
-			if( $break_because_of_offset && $offset_ignore_from < 1 )
-			{ // we've respected the offset, but need to break now
-				break; // ignore from here
-			}
+            if ($break_because_of_offset && $offset_ignore_from < 1) { // we've respected the offset, but need to break now
+                break; // ignore from here
+            }
 
-			foreach( $ignore_from as $l_ignore_key => $l_ignore_value )
-			{	// Check if we want to ignore from here
-				if( is_array($l_ignore_value) )
-				{	// It's an array - all must match
-					foreach( $l_ignore_value as $l_ignore_mult_key => $l_ignore_mult_val )
-					{
-						if( !isset($l_stack[$l_ignore_mult_key]) /* not set with this stack entry */
-							|| strcasecmp($l_stack[$l_ignore_mult_key], $l_ignore_mult_val) /* not this value (case-insensitive) */ )
-						{
-							continue 2; // next ignore setting, because not all match.
-						}
-					}
-					if( $offset_ignore_from-- > 0 )
-					{
-						$break_because_of_offset = true;
-						break;
-					}
-					break 2; // ignore from here
-				}
-				elseif( isset($l_stack[$l_ignore_key])
-					&& !strcasecmp($l_stack[$l_ignore_key], $l_ignore_value) /* is equal case-insensitive */ )
-				{
-					if( $offset_ignore_from-- > 0 )
-					{
-						$break_because_of_offset = true;
-						break;
-					}
-					break 2; // ignore from here
-				}
-			}
-			$trace_length++;
-		}
+            foreach ($ignore_from as $l_ignore_key => $l_ignore_value) {	// Check if we want to ignore from here
+                if (is_array($l_ignore_value)) {	// It's an array - all must match
+                    foreach ($l_ignore_value as $l_ignore_mult_key => $l_ignore_mult_val) {
+                        if (! isset($l_stack[$l_ignore_mult_key]) /* not set with this stack entry */
+                            || strcasecmp($l_stack[$l_ignore_mult_key], $l_ignore_mult_val) /* not this value (case-insensitive) */) {
+                            continue 2; // next ignore setting, because not all match.
+                        }
+                    }
+                    if ($offset_ignore_from-- > 0) {
+                        $break_because_of_offset = true;
+                        break;
+                    }
+                    break 2; // ignore from here
+                } elseif (isset($l_stack[$l_ignore_key])
+                    && ! strcasecmp($l_stack[$l_ignore_key], $l_ignore_value) /* is equal case-insensitive */) {
+                    if ($offset_ignore_from-- > 0) {
+                        $break_because_of_offset = true;
+                        break;
+                    }
+                    break 2; // ignore from here
+                }
+            }
+            $trace_length++;
+        }
 
-		$count_ignored = count($backtrace) - $trace_length;
+        $count_ignored = count($backtrace) - $trace_length;
 
-		$backtrace = array_slice( $backtrace, 0-$trace_length ); // cut off ignored ones
-	}
+        $backtrace = array_slice($backtrace, 0 - $trace_length); // cut off ignored ones
+    }
 
-	$count_backtrace = count($backtrace);
-	if( is_numeric($limit_to_last) && $limit_to_last < $count_backtrace )
-	{	// we want to limit to a maximum number
-		$limited = true;
-		$backtrace = array_slice( $backtrace, 0, $limit_to_last );
-		$count_backtrace = $limit_to_last;
-	}
+    $count_backtrace = count($backtrace);
+    if (is_numeric($limit_to_last) && $limit_to_last < $count_backtrace) {	// we want to limit to a maximum number
+        $limited = true;
+        $backtrace = array_slice($backtrace, 0, $limit_to_last);
+        $count_backtrace = $limit_to_last;
+    }
 
-	$r .= '<div style="padding:1ex; margin-bottom:1ex; text-align:left; color:#000; background-color:#ddf;">
-					<h3>Backtrace:</h3>'."\n";
-	if( $count_backtrace )
-	{
-		$r .= '<ol style="font-family:monospace;">';
+    $r .= '<div style="padding:1ex; margin-bottom:1ex; text-align:left; color:#000; background-color:#ddf;">
+					<h3>Backtrace:</h3>' . "\n";
+    if ($count_backtrace) {
+        $r .= '<ol style="font-family:monospace;">';
 
-		$i = 0;
-		foreach( $backtrace as $l_trace )
-		{
-			if( ++$i == $count_backtrace )
-			{
-				$r .= '<li style="padding:0.5ex 0;">';
-			}
-			else
-			{
-				$r .= '<li style="padding:0.5ex 0; border-bottom:1px solid #77d;">';
-			}
-			$args = array();
-			if( isset($l_trace['args']) && is_array( $l_trace['args'] ) )
-			{	// Prepare args:
-				foreach( $l_trace['args'] as $l_arg )
-				{
-					$l_arg_type = gettype($l_arg);
-					switch( $l_arg_type )
-					{
-						case 'integer':
-						case 'double':
-							$args[] = $l_arg;
-							break;
-						case 'string':
-							$args[] = '"'.strmaxlen(str_replace("\n", '\n', $l_arg), 255, NULL, 'htmlspecialchars').'"';
-							break;
-						case 'array':
-							$args[] = 'Array('.count($l_arg).')';
-							break;
-						case 'object':
-							$args[] = 'Object('.get_class($l_arg).')';
-							break;
-						case 'resource':
-							$args[] = htmlspecialchars((string)$l_arg);
-							break;
-						case 'boolean':
-							$args[] = $l_arg ? 'true' : 'false';
-							break;
-						default:
-							$args[] = $l_arg_type;
-					}
-				}
-			}
+        $i = 0;
+        foreach ($backtrace as $l_trace) {
+            if (++$i == $count_backtrace) {
+                $r .= '<li style="padding:0.5ex 0;">';
+            } else {
+                $r .= '<li style="padding:0.5ex 0; border-bottom:1px solid #77d;">';
+            }
+            $args = [];
+            if (isset($l_trace['args']) && is_array($l_trace['args'])) {	// Prepare args:
+                foreach ($l_trace['args'] as $l_arg) {
+                    $l_arg_type = gettype($l_arg);
+                    switch ($l_arg_type) {
+                        case 'integer':
+                        case 'double':
+                            $args[] = $l_arg;
+                            break;
+                        case 'string':
+                            $args[] = '"' . strmaxlen(str_replace("\n", '\n', $l_arg), 255, null, 'htmlspecialchars') . '"';
+                            break;
+                        case 'array':
+                            $args[] = 'Array(' . count($l_arg) . ')';
+                            break;
+                        case 'object':
+                            $args[] = 'Object(' . get_class($l_arg) . ')';
+                            break;
+                        case 'resource':
+                            $args[] = htmlspecialchars((string) $l_arg);
+                            break;
+                        case 'boolean':
+                            $args[] = $l_arg ? 'true' : 'false';
+                            break;
+                        default:
+                            $args[] = $l_arg_type;
+                    }
+                }
+            }
 
-			$call = "<strong>\n";
-			if( isset($l_trace['class']) )
-			{
-				$call .= htmlspecialchars($l_trace['class']);
-			}
-			if( isset($l_trace['type']) )
-			{
-				$call .= htmlspecialchars($l_trace['type']);
-			}
-			$call .= htmlspecialchars($l_trace['function'])."( </strong>\n";
-			if( $args )
-			{
-				$call .= ' '.implode( ', ', $args ).' ';
-			}
-			$call .='<strong>)</strong>';
+            $call = "<strong>\n";
+            if (isset($l_trace['class'])) {
+                $call .= htmlspecialchars($l_trace['class']);
+            }
+            if (isset($l_trace['type'])) {
+                $call .= htmlspecialchars($l_trace['type']);
+            }
+            $call .= htmlspecialchars($l_trace['function']) . "( </strong>\n";
+            if ($args) {
+                $call .= ' ' . implode(', ', $args) . ' ';
+            }
+            $call .= '<strong>)</strong>';
 
-			$r .= $call."<br />\n";
+            $r .= $call . "<br />\n";
 
-			$r .= '<strong>';
-			if( isset($l_trace['file']) )
-			{
-				$r .= "File: </strong> ".$l_trace['file'];
-			}
-			else
-			{
-				$r .= '[runtime created function]</strong>';
-			}
-			if( isset($l_trace['line']) )
-			{
-				$r .= ' on line '.$l_trace['line'];
-			}
+            $r .= '<strong>';
+            if (isset($l_trace['file'])) {
+                $r .= "File: </strong> " . $l_trace['file'];
+            } else {
+                $r .= '[runtime created function]</strong>';
+            }
+            if (isset($l_trace['line'])) {
+                $r .= ' on line ' . $l_trace['line'];
+            }
 
-			$r .= "</li>\n";
-		}
-		$r .= '</ol>';
-	}
-	else
-	{
-		$r .= '<p>No backtrace available.</p>';
-	}
+            $r .= "</li>\n";
+        }
+        $r .= '</ol>';
+    } else {
+        $r .= '<p>No backtrace available.</p>';
+    }
 
-	// Extra notes, might be to much, but explains why we stopped at some point. Feel free to comment it out or remove it.
-	$notes = array();
-	if( $count_ignored )
-	{
-		$notes[] = 'Ignored last: '.$count_ignored;
-	}
-	if( $limited )
-	{
-		$notes[] = 'Limited to'.( $count_ignored ? ' remaining' : '' ).': '.$limit_to_last;
-	}
-	if( $notes )
-	{
-		$r .= '<p class="small">'.implode( ' - ', $notes ).'</p>';
-	}
+    // Extra notes, might be to much, but explains why we stopped at some point. Feel free to comment it out or remove it.
+    $notes = [];
+    if ($count_ignored) {
+        $notes[] = 'Ignored last: ' . $count_ignored;
+    }
+    if ($limited) {
+        $notes[] = 'Limited to' . ($count_ignored ? ' remaining' : '') . ': ' . $limit_to_last;
+    }
+    if ($notes) {
+        $r .= '<p class="small">' . implode(' - ', $notes) . '</p>';
+    }
 
-	$r .= "</div>\n";
+    $r .= "</div>\n";
 
-	return $r;
+    return $r;
 }
 
 
@@ -3086,180 +2830,150 @@ function debug_get_backtrace( $limit_to_last = NULL, $ignore_from = array( 'func
  *        - "status" (Default: '500 Internal Server Error')
  *        - "debug_info" - Use this info instead of $additional_info when debug is ON
  */
-function debug_die( $additional_info = '', $params = array() )
+function debug_die($additional_info = '', $params = [])
 {
-	global $debug, $baseurl;
-	global $log_app_errors, $app_name, $is_cli, $display_errors_on_production, $is_api_request, $is_cron_job_executing;
+    global $debug, $baseurl;
+    global $log_app_errors, $app_name, $is_cli, $display_errors_on_production, $is_api_request, $is_cron_job_executing;
 
-	$params = array_merge( array(
-		'status'     => '500 Internal Server Error',
-		'debug_info' => '',
-		), $params );
+    $params = array_merge([
+        'status' => '500 Internal Server Error',
+        'debug_info' => '',
+    ], $params);
 
-	if( $debug && ! empty( $params['debug_info'] ) )
-	{ // Display 'debug_info' when debug is ON
-		$additional_info = $params['debug_info'];
-	}
+    if ($debug && ! empty($params['debug_info'])) { // Display 'debug_info' when debug is ON
+        $additional_info = $params['debug_info'];
+    }
 
-	// Send the predefined cookies:
-	evo_sendcookies();
+    // Send the predefined cookies:
+    evo_sendcookies();
 
-	if( $is_api_request )
-	{	// REST API or XMLRPC request:
+    if ($is_api_request) {	// REST API or XMLRPC request:
+        // Set JSON content type:
+        headers_content_mightcache('application/json', 0, '#', false); // Do NOT cache error messages! (Users would not see they fixed them)
+        header_http_response($params['status']);
 
-		// Set JSON content type:
-		headers_content_mightcache( 'application/json', 0, '#', false ); // Do NOT cache error messages! (Users would not see they fixed them)
-		header_http_response( $params['status'] );
+        echo json_encode([
+            'error_status' => $params['status'],
+            'error_info' => $additional_info,
+        ]);
 
-		echo json_encode( array(
-				'error_status' => $params['status'],
-				'error_info'   => $additional_info,
-			) );
+        die(1); // Error code 1. Note: This will still call the shutdown function.
+    } elseif ($is_cron_job_executing) {	// If debug die has been called during cron job executing:
+        $cron_job_error = '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">'
+                . '<h3>Additional information about this error:</h3>'
+                . $additional_info
+            . '</div>'
+            . debug_get_backtrace();
+        throw new Exception(str_replace("\n", '', $cron_job_error));
+    } elseif ($is_cli) { // Command line interface, e.g. in cron_exec.php:
+        echo '== ' . T_('An unexpected error has occurred!') . " ==\n";
+        echo T_('If this error persists, please report it to the administrator.') . "\n";
+        if ($debug || $display_errors_on_production) { // Display additional info only in debug mode or when it was explicitly set by display_errors_on_production setting because it can reveal system info to hackers and greatly facilitate exploits
+            echo T_('Additional information about this error:') . "\n";
+            echo strip_tags($additional_info) . "\n\n";
+        }
+    } else {
+        // Attempt to output an error header (will not work if the output buffer has already flushed once):
+        // This should help preventing indexing robots from indexing the error :P
+        if (! headers_sent()) {
+            load_funcs('_core/_template.funcs.php');
+            headers_content_mightcache('text/html', 0, '#', false);  // Do NOT cache error messages! (Users would not see they fixed them)
+            $status_header = $_SERVER['SERVER_PROTOCOL'] . ' ' . $params['status'];
+            header($status_header);
+        }
 
-		die(1); // Error code 1. Note: This will still call the shutdown function.
-	}
-	elseif( $is_cron_job_executing )
-	{	// If debug die has been called during cron job executing:
-		$cron_job_error = '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">'
-				.'<h3>Additional information about this error:</h3>'
-				.$additional_info
-			.'</div>'
-			.debug_get_backtrace();
-		throw new Exception( str_replace( "\n", '', $cron_job_error ) );
-	}
-	elseif( $is_cli )
-	{ // Command line interface, e.g. in cron_exec.php:
-		echo '== '.T_('An unexpected error has occurred!')." ==\n";
-		echo T_('If this error persists, please report it to the administrator.')."\n";
-		if( $debug || $display_errors_on_production )
-		{ // Display additional info only in debug mode or when it was explicitly set by display_errors_on_production setting because it can reveal system info to hackers and greatly facilitate exploits
-			echo T_('Additional information about this error:')."\n";
-			echo strip_tags( $additional_info )."\n\n";
-		}
-	}
-	else
-	{
-		// Attempt to output an error header (will not work if the output buffer has already flushed once):
-		// This should help preventing indexing robots from indexing the error :P
-		if( ! headers_sent() )
-		{
-			load_funcs('_core/_template.funcs.php');
-			headers_content_mightcache( 'text/html', 0, '#', false );  // Do NOT cache error messages! (Users would not see they fixed them)
-			$status_header = $_SERVER['SERVER_PROTOCOL'].' '.$params['status'];
-			header($status_header);
-		}
+        $too_many_connections = false;
+        if (! empty($additional_info)) {	//Handling of "Too many connections":
+            $find_token = 'Too many connections';
 
-		$too_many_connections = false;
-		if( ! empty( $additional_info ) )
-		{	//Handling of "Too many connections":
-			$find_token = 'Too many connections';
+            if (preg_match("/{$find_token}/i", $additional_info)) {
+                load_funcs('skins/_skin.funcs.php');
+                $too_many_connections = true;
+                require skin_fallback_path('too_many_connections.main.php', 6);
+                http_response_code(503);
+            }
+        }
 
-			if( preg_match( "/{$find_token}/i", $additional_info ) ) 
-			{
-				load_funcs( 'skins/_skin.funcs.php' );
-				$too_many_connections = true;
-				require skin_fallback_path( 'too_many_connections.main.php', 6 );
-				http_response_code( 503 );
-			}
-		}
+        if (! $too_many_connections) {
+            echo '<div style="background-color: #fdd; padding: 1ex; margin-bottom: 1ex;">';
+            echo '<h3 style="color:#f00;">' . T_('An unexpected error has occurred!') . '</h3>';
+            echo '<p>' . T_('If this error persists, please report it to the administrator.') . '</p>';
+            echo '<p><a href="' . $baseurl . '">' . T_('Go back to home page') . '</a></p>';
+            echo '</div>';
 
-		if( ! $too_many_connections )
-		{
-			echo '<div style="background-color: #fdd; padding: 1ex; margin-bottom: 1ex;">';
-			echo '<h3 style="color:#f00;">'.T_('An unexpected error has occurred!').'</h3>';
-			echo '<p>'.T_('If this error persists, please report it to the administrator.').'</p>';
-			echo '<p><a href="'.$baseurl.'">'.T_('Go back to home page').'</a></p>';
-			echo '</div>';
+            if (! empty($additional_info)) {
+                echo '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">';
+                if ($debug || $display_errors_on_production) { // Display additional info only in debug mode or when it was explicitly set by display_errors_on_production setting because it can reveal system info to hackers and greatly facilitate exploits
+                    echo '<h3>' . T_('Additional information about this error:') . '</h3>';
+                    echo $additional_info;
+                } else {
+                    echo '<p><i>Enable debugging to get additional information about this error.</i></p>' . get_manual_link('debugging', 'How to enable debug mode?');
+                }
+                echo '</div>';
 
-			if( ! empty( $additional_info ) )
-			{
-				echo '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">';
-				if( $debug || $display_errors_on_production )
-				{ // Display additional info only in debug mode or when it was explicitly set by display_errors_on_production setting because it can reveal system info to hackers and greatly facilitate exploits
-					echo '<h3>'.T_('Additional information about this error:').'</h3>';
-					echo $additional_info;
-				}
-				else
-				{
-					echo '<p><i>Enable debugging to get additional information about this error.</i></p>' . get_manual_link('debugging','How to enable debug mode?');
-				}
-				echo '</div>';
+                // Append the error text to AJAX log if it is AJAX request
+                ajax_log_add($additional_info, 'error');
+                ajax_log_display();
+            }
+        }
+    }
 
-				// Append the error text to AJAX log if it is AJAX request
-				ajax_log_add( $additional_info, 'error' );
-				ajax_log_display();
-			}
-		}
-	}
+    if ($log_app_errors > 1 || $debug) { // Prepare backtrace
+        $backtrace = debug_get_backtrace();
 
-	if( $log_app_errors > 1 || $debug )
-	{ // Prepare backtrace
-		$backtrace = debug_get_backtrace();
+        if ($log_app_errors > 1 || $is_cli) {
+            $backtrace_cli = trim(strip_tags($backtrace));
+        }
+    }
 
-		if( $log_app_errors > 1 || $is_cli )
-		{
-			$backtrace_cli = trim(strip_tags($backtrace));
-		}
-	}
+    if ($log_app_errors) { // Log error through PHP's logging facilities:
+        $log_message = $app_name . ' error: ';
+        if (! empty($additional_info)) {
+            $log_message .= trim(strip_tags($additional_info));
+        } else {
+            $log_message .= 'No info specified in debug_die()';
+        }
 
-	if( $log_app_errors )
-	{ // Log error through PHP's logging facilities:
-		$log_message = $app_name.' error: ';
-		if( ! empty($additional_info) )
-		{
-			$log_message .= trim( strip_tags($additional_info) );
-		}
-		else
-		{
-			$log_message .= 'No info specified in debug_die()';
-		}
+        // Get file and line info:
+        $file = 'Unknown';
+        $line = 'Unknown';
+        if (function_exists('debug_backtrace') /* PHP 4.3 */) { // get the file and line
+            foreach (debug_backtrace() as $v) {
+                if (isset($v['function']) && $v['function'] == 'debug_die') {
+                    $file = isset($v['file']) ? $v['file'] : 'Unknown';
+                    $line = isset($v['line']) ? $v['line'] : 'Unknown';
+                    break;
+                }
+            }
+        }
+        $log_message .= ' in ' . $file . ' at line ' . $line;
 
-		// Get file and line info:
-		$file = 'Unknown';
-		$line = 'Unknown';
-		if( function_exists('debug_backtrace') /* PHP 4.3 */ )
-		{ // get the file and line
-			foreach( debug_backtrace() as $v )
-			{
-				if( isset($v['function']) && $v['function'] == 'debug_die' )
-				{
-					$file = isset($v['file']) ? $v['file'] : 'Unknown';
-					$line = isset($v['line']) ? $v['line'] : 'Unknown';
-					break;
-				}
-			}
-		}
-		$log_message .= ' in '.$file.' at line '.$line;
+        if ($log_app_errors > 1) { // Append backtrace:
+            // indent after newlines:
+            $backtrace_cli = preg_replace('~(\S)(\n)(\S)~', '$1  $2$3', $backtrace_cli);
+            $log_message .= "\nBacktrace:\n" . $backtrace_cli;
+        }
+        $log_message .= "\nREQUEST_URI:  " . (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '-');
+        $log_message .= "\nHTTP_REFERER: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-');
 
-		if( $log_app_errors > 1 )
-		{ // Append backtrace:
-			// indent after newlines:
-			$backtrace_cli = preg_replace( '~(\S)(\n)(\S)~', '$1  $2$3', $backtrace_cli );
-			$log_message .= "\nBacktrace:\n".$backtrace_cli;
-		}
-		$log_message .= "\nREQUEST_URI:  ".( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '-' );
-		$log_message .= "\nHTTP_REFERER: ".( isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-' );
+        error_log(str_replace("\n", ' / ', $log_message), 0 /* PHP's system logger */);
+    }
 
-		error_log( str_replace("\n", ' / ', $log_message), 0 /* PHP's system logger */ );
-	}
+    // DEBUG OUTPUT:
+    if ($debug) {
+        if ($is_cli) {
+            echo $backtrace_cli;
+        } else {
+            echo $backtrace;
+        }
+    }
 
+    // EXIT:
+    if (! $is_cli) { // Attempt to keep the html valid (but it doesn't really matter anyway)
+        echo '</body></html>';
+    }
 
-	// DEBUG OUTPUT:
-	if( $debug )
-	{
-		if( $is_cli )
-			echo $backtrace_cli;
-		else
-			echo $backtrace;
-	}
-
-	// EXIT:
-	if( ! $is_cli )
-	{ // Attempt to keep the html valid (but it doesn't really matter anyway)
-		echo '</body></html>';
-	}
-
-	die(1);	// Error code 1. Note: This will still call the shutdown function.
+    die(1);	// Error code 1. Note: This will still call the shutdown function.
 }
 
 
@@ -3271,88 +2985,78 @@ function debug_die( $additional_info = '', $params = array() )
  * @param string Message to output (HTML/TEXT)
  * @param string Output format: 'html', 'text'
  */
-function bad_request_die( $additional_info = '', $error_code = '400 Bad Request', $format = 'html' )
+function bad_request_die($additional_info = '', $error_code = '400 Bad Request', $format = 'html')
 {
-	global $debug, $baseurl, $is_api_request;
+    global $debug, $baseurl, $is_api_request;
 
-	// Send the predefined cookies:
-	evo_sendcookies();
+    // Send the predefined cookies:
+    evo_sendcookies();
 
-	if( $is_api_request )
-	{	// REST API or XMLRPC request:
+    if ($is_api_request) {	// REST API or XMLRPC request:
+        // Set JSON content type:
+        headers_content_mightcache('application/json', 0, '#', false); // Do NOT cache error messages! (Users would not see they fixed them)
+        header_http_response($error_code);
 
-		// Set JSON content type:
-		headers_content_mightcache( 'application/json', 0, '#', false ); // Do NOT cache error messages! (Users would not see they fixed them)
-		header_http_response( $error_code );
+        echo json_encode([
+            'error_status' => $error_code,
+            'error_info' => $additional_info,
+        ]);
 
-		echo json_encode( array(
-				'error_status' => $error_code,
-				'error_info'   => $additional_info,
-			) );
+        die(2); // Error code 2. Note: this will still call the shutdown function.
+    }
 
-		die(2); // Error code 2. Note: this will still call the shutdown function.
-	}
+    // Attempt to output an error header (will not work if the output buffer has already flushed once):
+    // This should help preventing indexing robots from indexing the error :P
+    if (! headers_sent()) {
+        load_funcs('_core/_template.funcs.php');
+        headers_content_mightcache('text/html', 0, '#', false);		// Do NOT cache error messages! (Users would not see they fixed them)
+        header_http_response($error_code);
+    }
 
-	// Attempt to output an error header (will not work if the output buffer has already flushed once):
-	// This should help preventing indexing robots from indexing the error :P
-	if( ! headers_sent() )
-	{
-		load_funcs('_core/_template.funcs.php');
-		headers_content_mightcache( 'text/html', 0, '#', false );		// Do NOT cache error messages! (Users would not see they fixed them)
-		header_http_response( $error_code );
-	}
+    if ($format == 'text') {	// Display error message in TEXT format:
+        echo $additional_info;
+        // Display AJAX Log if it was initialized:
+        ajax_log_display();
+        die(2); // Error code 2. Note: this will still call the shutdown function.
+    }
+    // else display error message in HTML format:
 
-	if( $format == 'text' )
-	{	// Display error message in TEXT format:
-		echo $additional_info;
-		// Display AJAX Log if it was initialized:
-		ajax_log_display();
-		die(2); // Error code 2. Note: this will still call the shutdown function.
-	}
-	// else display error message in HTML format:
+    if (! function_exists('T_')) {	// Load locale funcs to initialize function "T_" because it is used below:
+        load_funcs('locales/_locale.funcs.php');
+    }
 
-	if( ! function_exists( 'T_' ) )
-	{	// Load locale funcs to initialize function "T_" because it is used below:
-		load_funcs( 'locales/_locale.funcs.php' );
-	}
+    echo '<div style="background-color: #fdd; padding: 1ex; margin-bottom: 1ex;">';
+    echo '<h3 style="color:#f00;">' . T_('Bad Request!') . '</h3>';
+    echo '<p>' . T_('The parameters of your request are invalid.') . '</p>';
+    echo '<p>' . T_('If you have obtained this error by clicking on a link INSIDE of this site, please report the bad link to the administrator.') . '</p>';
+    echo '<p><a href="' . $baseurl . '">' . T_('Go back to home page') . '</a></p>';
+    echo '</div>';
 
-	echo '<div style="background-color: #fdd; padding: 1ex; margin-bottom: 1ex;">';
-	echo '<h3 style="color:#f00;">'.T_('Bad Request!').'</h3>';
-	echo '<p>'.T_('The parameters of your request are invalid.').'</p>';
-	echo '<p>'.T_('If you have obtained this error by clicking on a link INSIDE of this site, please report the bad link to the administrator.').'</p>';
-	echo '<p><a href="'.$baseurl.'">'.T_('Go back to home page').'</a></p>';
-	echo '</div>';
+    if (! empty($additional_info)) {
+        echo '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">';
+        if ($debug) {	// Display additional info only in debug mode because it can reveal system info to hackers and greatly facilitate exploits
+            echo '<h3>' . T_('Additional information about this error:') . '</h3>';
+            echo $additional_info;
+        } else {
+            echo '<p><i>Enable debugging to get additional information about this error.</i></p>' . get_manual_link('debugging', 'How to enable debug mode?');
+        }
+        echo '</div>';
 
-	if( !empty( $additional_info ) )
-	{
-		echo '<div style="background-color: #ddd; padding: 1ex; margin-bottom: 1ex;">';
-		if( $debug )
-		{	// Display additional info only in debug mode because it can reveal system info to hackers and greatly facilitate exploits
-			echo '<h3>'.T_('Additional information about this error:').'</h3>';
-			echo $additional_info;
-		}
-		else
-		{
-			echo '<p><i>Enable debugging to get additional information about this error.</i></p>' . get_manual_link('debugging','How to enable debug mode?');
-		}
-		echo '</div>';
+        // Append the error text to AJAX log if it is AJAX request
+        ajax_log_add($additional_info, 'error');
+    }
 
-		// Append the error text to AJAX log if it is AJAX request
-		ajax_log_add( $additional_info, 'error' );
-	}
+    if ($debug) {
+        echo debug_get_backtrace();
+    }
 
-	if( $debug )
-	{
-		echo debug_get_backtrace();
-	}
+    // Attempt to keep the html valid (but it doesn't really matter anyway)
+    echo '</body></html>';
 
-	// Attempt to keep the html valid (but it doesn't really matter anyway)
-	echo '</body></html>';
+    // Display AJAX Log if it was initialized:
+    ajax_log_display();
 
-	// Display AJAX Log if it was initialized:
-	ajax_log_display();
-
-	die(2); // Error code 2. Note: this will still call the shutdown function.
+    die(2); // Error code 2. Note: this will still call the shutdown function.
 }
 
 
@@ -3362,491 +3066,452 @@ function bad_request_die( $additional_info = '', $error_code = '400 Bad Request'
  * @param boolean true to force output regardless of {@link $debug}
  * @param boolean true to force clean output (without HTML) regardless of {@link $is_cli}
  */
-function debug_info( $force = false, $force_clean = false )
+function debug_info($force = false, $force_clean = false)
 {
-	global $debug, $debug_done, $debug_jslog, $debug_jslog_done, $Debuglog, $DB, $obhandler_debug, $Timer, $ReqHost, $ReqPath, $is_cli;
-	global $cache_imgsize, $cache_File;
-	global $Session;
-	global $db_config, $tableprefix, $http_response_code, $disp, $disp_detail, $robots_index, $robots_follow, $content_type_header;
-	/**
-	 * @var Hit
-	 */
-	global $Hit;
-
-	// Detect content-type
-	$content_type = NULL;
-	foreach(headers_list() as $header)
-	{
-		if( stripos($header, 'content-type:') !== false )
-		{ // content type sent
-			# "Content-Type:text/html;charset=utf-8" => "text/html"
-			$content_type = explode( ':', $header, 2 );
-			$content_type = explode( ';', array_pop( $content_type ) );
-			$content_type = trim( array_shift( $content_type ) );
-			break;
-		}
-	}
-
-	// ---- Print AJAX Log
-	if( empty( $debug_jslog_done ) && ( $debug || $debug_jslog ) && $content_type == 'text/html' )
-	{	// Display debug jslog once
-		global $rsc_url, $app_version_long;
-
-		$relative_to = ( is_admin_page() ? 'rsc_url' : 'blog' );
-
-		require_js_defer( '#jqueryUI#', $relative_to, true );
-		require_css( '#jqueryUI_css#', $relative_to, NULL, NULL, '#', true );
-		require_js_defer( 'debug_jslog.js', $relative_to, true );
-		require_js_defer( 'ext:jquery/cookie/jquery.cookie.min.js', $relative_to, true );
-
-		$jslog_style_cookies = param_cookie( 'jslog_style', 'string' );
-		$jslog_styles = array();
-		if( !empty( $jslog_style_cookies ) )
-		{	// Get styles only from cookies
-			$jslog_style_cookies = explode( ';', $jslog_style_cookies );
-			foreach( $jslog_style_cookies as $jsc => $style )
-			{
-				if( strpos( $style, 'height' ) !== false /*|| ( strpos( $style, 'display' ) !== false && !$debug_jslog )*/ )
-				{	// Unset the height param from defined styles ( and the display param if jslog is disabled )
-					unset( $jslog_style_cookies[$jsc] );
-				}
-			}
-			$jslog_styles[] = implode( ';', $jslog_style_cookies );
-		}
-		else
-		{
-			if( !is_logged_in() )
-			{	// Align top when evobar is hidden
-				$jslog_styles[] = 'top:0';
-			}
-			if( $debug_jslog )
-			{	// Display the jslog
-				$jslog_styles[] = 'display:block';
-			}
-		}
-		$jslog_styles = count( $jslog_styles ) > 0 ? ' style="'.implode( ';', $jslog_styles ).'"' : '';
-
-		$close_url = url_add_param( $_SERVER['REQUEST_URI'], 'jslog' );
-		echo '<div id="debug_ajax_info" class="debug"'.$jslog_styles.'>';
-		echo '<div class="jslog_titlebar">'.
-				'AJAX Debug log'.get_manual_link('ajax_debug_log').
-				action_icon( T_('Close'), 'close', $close_url, NULL, NULL, NULL, array( 'class' => 'jslog_switcher' ) ).
-			'</div>';
-		echo '<div id="jslog_container"></div>';
-		echo '<div class="jslog_statusbar">'.
-				'<a href="'.$_SERVER['REQUEST_URI'].'#" class="jslog_clear">'.T_('Clear').'</a>'.
-			'</div>';
-		echo '</div>';
-
-		// Make sure debug jslog output only happens once:
-		$debug_jslog_done = true;
-	}
-	// ----
-
-	// clean output:
-	$clean = $is_cli || $force_clean;
-
-	if( ! $force )
-	{
-		if( ! empty( $debug_done ) )
-		{ // Already displayed!
-			return;
-		}
-
-		if( empty( $debug ) || // No debug output desired:
-		    ( $debug < 2 && $content_type != 'text/html' ) ) // Do not display, if no content-type header has been sent or it's != "text/html" (debug > 1 skips this)
-		{
-			global $evo_last_handled_error;
-			if( ! empty( $evo_last_handled_error ) )
-			{ // If script has been stoppped by some error
-				// Display a message when debug is OFF and error has occured
-				$debug_off_title = 'An unexpected error has occured!';
-				$debug_off_msg1 = 'We apologize for the inconvenience.';
-				$debug_off_msg2 = 'This error has been automatically reported and we will work to resolve it as fast as possible.';
-				if( $clean )
-				{ // CLI mode
-					echo '*** '.$debug_off_title.' ***'."\n\n"
-						.$debug_off_msg1."\n"
-						.$debug_off_msg2;
-				}
-				else
-				{ // View from browser
-					echo '<div style="margin:1em auto;padding:10px;background:#FEFFFF;border:2px solid #F00;border-radius:6px;text-align:center;">'
-							.'<h2 style="margin:0;color:#F00;">'.$debug_off_title.'</h2>'
-							.'<p>'.$debug_off_msg1.'</p>'
-							.'<p style="margin-bottom:0">'.$debug_off_msg2.'</p>'
-						.'</div>';
-				}
-			}
-			return;
-		}
-	}
-	//Make sure debug output only happens once:
-	$debug_done = true;
-
-	$printf_format = '| %-45s | %-5s | %-7s | %-5s |';
-	$table_headerlen = 73;
-	/* This calculates the number of dashes to print e. g. on the top and
-	 * bottom of the table and after the header, making the table look
-	 * better (looks like the tables of the mysql command line client).
-	 * Normally, the value won't change, so it's hardcoded above. If you
-	 * change the printf() format above, this might be useful.
-	preg_match_all( '#\d+#', $printf_format, $table_headerlen );
-	$table_headerlen = array_sum( $table_headerlen[0] ) +
-									strlen( preg_replace( '#[^ \|]+#', '',
-												$printf_format ) ) - 2;
-	*/
-
-	$ReqHostPathQuery = $ReqHost.$ReqPath.( empty( $_SERVER['QUERY_STRING'] ) ? '' : '?'.$_SERVER['QUERY_STRING'] );
-
-	echo "\n\n\n";
-	if( ! $clean )
-	{
-		echo '<div class="debug" id="debug_info">';
-	}
-
-	// FULL DEBUG INFO(s) FROM PREVIOUS SESSION(s), after REDIRECT(s):
-	$get_redirected_debuginfo_from_sess_ID = param( 'get_redirected_debuginfo_from_sess_ID', 'integer' );
-	if( ! empty( $get_redirected_debuginfo_from_sess_ID ) )
-	 {	// Get Session by ID for debug info from redirected page:
-		// (This is used for redirect from different domain)
-		$debug_info_Session = new Session( $get_redirected_debuginfo_from_sess_ID );
-	}
-	elseif( isset( $Session ) )
-	{	// Use current Session for debug info from redirected page:
-		$debug_info_Session = $Session;
-	}
-
-	if( isset( $debug_info_Session ) && ! empty( $debug_info_Session->ID ) )
-	{	// Get debug info from redirected page:
-		$sess_debug_infos = $debug_info_Session->get( 'debug_infos' );
-	}
-
-	if( ! empty( $sess_debug_infos ) )
-	{	// Display debug info from redirected page:
-		$count_sess_debug_infos = count( $sess_debug_infos );
-		if( $count_sess_debug_infos > 1 )
-		{	// Links to those Debuglogs:
-			if( $clean )
-			{	// kind of useless, but anyway...
-				echo "\n".'There are '.$count_sess_debug_infos.' debug infos from redirected pages.'."\n";
-			}
-			else
-			{
-				echo '<p>There are '.$count_sess_debug_infos.' debug infos from redirected pages: ';
-				for( $i = 1; $i <= $count_sess_debug_infos; $i++ )
-				{
-					echo '<a href="'.$ReqHostPathQuery.'#debug_sess_debug_info_'.$i.'">#'.$i.'</a> ';
-				}
-				echo '</p>';
-			}
-		}
-
-		foreach( $sess_debug_infos as $k => $sess_debug_info )
-		{
-			if( $clean )
-			{
-				echo "\n".'== Debug messages from redirected page (#'.( $k + 1 ).') =='."\n"
-					.'See below for the Debuglog from the current request.'."\n";
-				echo gzdecode( $sess_debug_info );
-			}
-			else
-			{
-				echo '<div class="debug_session">';
-				echo '<h3 id="debug_sess_debug_info_'.( $k + 1 ).'" style="color:#f00">Debug messages from redirected page (#'.( $k + 1 ).')</h3>'
-					// link to real Debuglog:
-					.'<p><a href="'.$ReqHostPathQuery.'#debug_current">See below for the debug from the current request.</a></p>';
-				$sess_debug_info = gzdecode( $sess_debug_info );
-				// Fix all anchors to proper work with SESSION debug info and do NOT mix with current debug info where same achors are used but without number suffix ($k + 1):
-				$anchors_regexp = '(evo_debug_queries|debug_info_cat_[^"]+)';
-				$sess_debug_info = preg_replace( '/id="'.$anchors_regexp.'"/', 'id="$1_'.( $k + 1 ).'"', $sess_debug_info );
-				echo preg_replace( '/href="([^#"]*)#'.$anchors_regexp.'"/', 'href="'.$ReqHostPathQuery.'#$2_'.( $k + 1 ).'"', $sess_debug_info );
-				echo '</div>';
-			}
-		}
-
-		if( ! $clean )
-		{	// Anchor to scrolldown to current debug:
-			echo '<a id="debug_current"></a>';
-		}
-
-		// link to first sess_debug_infos:
-		if( $clean )
-		{
-			echo 'See above for the debug info(s) from before the redirect.'."\n";
-		}
-		else
-		{
-			echo '<p><a href="'.$ReqHostPathQuery.'#debug_sess_debug_info_1">See above for the debug info(s) from before the redirect.</a></p>';
-		}
-
-		// Delete logs since they have been displayed...
-		// EXCEPT if we are redirecting, because in this case we won't see these logs in a browser (only in request debug tools)
-		// So in that case we want them to move over to the next page...
-		if( $http_response_code < 300 || $http_response_code >= 400 )
-		{	// This is NOT a 3xx redirect, assume debuglogs have been seen & delete them:
-			$debug_info_Session->delete( 'debug_infos' );
-		}
-
-		echo "\n\n\n";
-	}
-	// END OF DEBUG FROM PREVIOUS SESSIONS, after REDIRECT(s).
-
-	$debug_info_title = empty( $count_sess_debug_infos ) ? 'Debug info' : 'Debug info from Current page';
-	echo ( $clean ? '*** '.$debug_info_title.' ***'."\n\n" : '<h2>'.$debug_info_title.'</h2>' );
-
-	if( !$obhandler_debug )
-	{ // don't display changing items when we want to test obhandler
-
-		// ---------------------------
-
-		echo '<div class="log_container"><div>';
-
-		echo 'HTTP Response code: '.$http_response_code;
-		echo $clean ? "\n" : '<br />';
-
-		echo '$content_type_header: '.$content_type_header;
-		echo $clean ? "\n" : '<br />';
-
-		echo '$disp: '.$disp.' -- detail: '.$disp_detail;
-		echo $clean ? "\n" : '<br />';
-
-		echo '$robots_index: '.$robots_index;
-		echo $clean ? "\n" : '<br />';
-
-		echo '$robots_follow: '.$robots_follow;
-		echo $clean ? "\n" : '<br />';
-
-		echo '</div></div>';
-	}
-
-	if( !$obhandler_debug )
-	{ // don't display changing items when we want to test obhandler
-
-		// ================================== DB Summary ================================
-		if( isset($DB) )
-		{
-			echo '<div class="log_container"><div>';
-			echo $DB->num_queries.' SQL queries executed in '.$Timer->get_duration( 'SQL QUERIES' )." seconds\n";
-			if( ! $clean )
-			{
-				echo ' &nbsp; <a href="'.$ReqHostPathQuery.'#evo_debug_queries">scroll down to details</a><p>';
-			}
-			echo '</div></div>';
-		}
-
-		// ========================== Timer table ================================
-		$time_page = $Timer->get_duration( 'total' );
-		$timer_rows = array();
-		foreach( $Timer->get_categories() as $l_cat )
-		{
-			if( $l_cat == 'sql_query' )
-			{
-				continue;
-			}
-			$timer_rows[ $l_cat ] = $Timer->get_duration( $l_cat );
-		}
-		// Don't sort to see orginal order of creation
-		// arsort( $timer_rows );
-		// ksort( $timer_rows );
-
-		// Remove "total", it will get output as the last one:
-		$total_time = $timer_rows['total'];
-		unset($timer_rows['total']);
-
-		$percent_total = $time_page > 0 ? number_format( 100/$time_page * $total_time, 2 ) : '0';
-
-		if( $clean )
-		{
-			echo '== Timers =='."\n\n";
-			echo '+'.str_repeat( '-', $table_headerlen ).'+'."\n";
-			printf( $printf_format."\n", 'Category', 'Time', '%', 'Count' );
-			echo '+'.str_repeat( '-', $table_headerlen ).'+'."\n";
-		}
-		else
-		{
-			echo '<table class="debug_timer"><thead>'
-				.'<tr><td colspan="4" class="center">Timers</td></tr>' // dh> TODO: should be TH. Workaround so that tablesorter does not pick it up. Feedback from author requested.
-				.'<tr><th>Category</th><th>Time</th><th>%</th><th>Count</th></tr>'
-				.'</thead>';
-
-			// Output "total":
-			echo "\n<tfoot><tr>"
-				.'<td>total</td>'
-				.'<td class="right red">'.$total_time.'</td>'
-				.'<td class="right">'.$percent_total.'%</td>'
-				.'<td class="right">'.$Timer->get_count('total').'</td></tr></tfoot>';
-
-			echo '<tbody>';
-		}
-
-		$table_rows_collapse = array();
-		foreach( $timer_rows as $l_cat => $l_time )
-		{
-			$percent_l_cat = $time_page > 0 ? number_format( 100/$time_page * $l_time, 2 ) : '0';
-
-			if( $clean )
-			{
-				$row = sprintf( $printf_format, $l_cat, $l_time, $percent_l_cat.'%', $Timer->get_count( $l_cat ) );
-			}
-			else
-			{
-				$row = "\n<tr>"
-					.'<td>'.$l_cat.'</td>'
-					.'<td class="right">'.$l_time.'</td>'
-					.'<td class="right">'.$percent_l_cat.'%</td>'
-					.'<td class="right">'.$Timer->get_count( $l_cat ).'</td></tr>';
-			}
-
-			// Maybe ignore this row later, but not for clean display.
-			if( ! $clean && ( $percent_l_cat < 1  ) )
-			{	// Hide everything that tool less tahn 5% of the time
-				$table_rows_collapse[] = $row;
-			}
-			else
-			{
-				echo $row."\n";
-			}
-		}
-		$count_collapse = count($table_rows_collapse);
-		// Collapse ignored rows, allowing to expand them with Javascript:
-		if( $count_collapse > 5 )
-		{
-			echo '<tr><td colspan="4" class="center">';
-			echo '<a href="" onclick="jQuery(this).closest(\'tbody\').next().toggle(); return false;">+ '.$count_collapse.' queries &lt; 1%</a> </td></tr>';
-			echo '</tbody>';
-			echo '<tbody style="display:none">';
-		}
-		echo implode( "\n", $table_rows_collapse )."\n";
-
-		if ( $clean )
-		{ // "total" (done in tfoot for html above)
-			echo sprintf( $printf_format, 'total', $total_time, $percent_total.'%', $Timer->get_count('total') );
-			echo '+'.str_repeat( '-', $table_headerlen ).'+'."\n\n";
-		}
-		else
-		{
-			echo "\n</tbody></table>";
-
-			// add jquery.tablesorter to the "Debug info" table.
-			$relative_to = ( is_admin_page() ? 'rsc_url' : 'blog' );
-			require_js_defer( 'ext:jquery/tablesorter/jquery.tablesorter.min.js', $relative_to, true );
-			require_js_defer( 'src/evo_init_debug_timer.js', $relative_to, true );
-		}
-
-
-		// ================================ Opcode caching ================================
-		echo '<div class="log_container"><div>';
-		echo 'Opcode cache: '.get_active_opcode_cache();
-		echo $clean ? "\n" : '<p>';
-
-		// ================================ User caching ================================
-		echo 'User cache: '.get_active_user_cache();
-		echo $clean ? "\n" : '<p>';
-		echo '</div></div>';
-
-
-		// ================================ Memory Usage ================================
-		echo '<div class="log_container"><div>';
-
-		foreach( array( // note: 8MB is default for memory_limit and is reported as 8388608 bytes
-			'memory_get_usage' => array( 'display' => 'Memory usage', 'high' => 8000000 ),
-			'memory_get_peak_usage' => array( 'display' => 'Memory peak usage', 'high' => 8000000 ) ) as $l_func => $l_var )
-		{
-			if( function_exists( $l_func ) )
-			{
-				$_usage = $l_func();
-
-				if( $_usage > $l_var['high'] )
-				{
-					echo $clean ? '[!!] ' : '<span style="color:red; font-weight:bold">';
-				}
-
-				echo $l_var['display'].': '.bytesreadable( $_usage, ! $clean );
-
-				if( ! $clean && $_usage > $l_var['high'] )
-				{
-					echo '</span>';
-				}
-				echo $clean ? "\n" : '<br />';
-			}
-		}
-
-		echo 'Len of serialized $cache_imgsize: '.strlen(serialize($cache_imgsize));
-		echo $clean ? "\n" : '<br />';
-		echo 'Len of serialized $cache_File: '.strlen(serialize($cache_File));
-		echo $clean ? "\n" : '<br />';
-
-		echo '</div></div>';
-	}
-
-
-	// CURRENT DEBUGLOG (with list of categories at top):
-	$log_categories = array( 'error', 'note', 'all' ); // Categories to output (in that order)
-	$log_container_head = $clean ? ( "\n".'== Debug messages =='."\n" ) : '<h3 id="debug_debuglog">Debug messages</h3>';
-
-	if ( ! $clean )
-	{
-		$log_cats = array_keys($Debuglog->get_messages( $log_categories )); // the real list (with all replaced and only existing ones)
-		$log_head_links = array();
-		foreach( $log_cats as $l_cat )
-		{
-			$log_head_links[] .= '<a href="'.$ReqHostPathQuery.'#debug_info_cat_'.str_replace( ' ', '_', $l_cat ).'">'.$l_cat.'</a>';
-		}
-		$log_container_head .= implode( ' | ', $log_head_links );
-
-		echo format_to_output(
-			$Debuglog->display( array(
-					'container' => array( 'string' => $log_container_head, 'template' => false ),
-					'all' => array( 'string' => '<h4 id="debug_info_cat_%s">%s:</h4>', 'template' => false ) ),
-				'', false, $log_categories ),
-			'htmlbody' );
-
-		echo '<h3 id="evo_debug_queries">DB</h3>';
-	}
-	else
-	{
-		echo format_to_output(
-			$Debuglog->display( array(
-					'container' => array( 'string' => $log_container_head, 'template' => false ),
-					'all' => array( 'string' => '= %s ='."\n\n", 'template' => false ) ),
-				'', false, $log_categories, '', 'raw', false ),
-			'raw' );
-
-		echo "\n".'== DB =='."\n\n";
-	}
-
-	if($db_config)
-	{
-		if ( ! $clean )
-		{
-			echo '<pre>';
-		}
-
-		echo 'Config DB Username: '.$db_config['user']."\n".
-			'Config DB Database: '.$db_config['name']."\n".
-			 'Config DB Host: '.(isset($db_config['host']) ? $db_config['host'] : 'unset (localhost)')."\n".
-			 'Config DB tables prefix: '.$tableprefix."\n".
-			 'Config DB connection charset: '.$db_config['connection_charset']."\n";
-
-		echo $clean ? "\n" : '</pre>';
-	}
-
-	if( !isset($DB) )
-	{
-		echo 'No DB object.'.( $clean ? "\n" : '' );
-	}
-	else
-	{
-		echo '<pre>Current DB charset: '.$DB->get_connection_charset()."</pre>\n";
-
-		$DB->dump_queries( ! $clean );
-	}
-
-	if ( ! $clean )
-	{
-		echo '</div>';
-	}
+    global $debug, $debug_done, $debug_jslog, $debug_jslog_done, $Debuglog, $DB, $obhandler_debug, $Timer, $ReqHost, $ReqPath, $is_cli;
+    global $cache_imgsize, $cache_File;
+    global $Session;
+    global $db_config, $tableprefix, $http_response_code, $disp, $disp_detail, $robots_index, $robots_follow, $content_type_header;
+    /**
+     * @var Hit
+     */
+    global $Hit;
+
+    // Detect content-type
+    $content_type = null;
+    foreach (headers_list() as $header) {
+        if (stripos($header, 'content-type:') !== false) { // content type sent
+            # "Content-Type:text/html;charset=utf-8" => "text/html"
+            $content_type = explode(':', $header, 2);
+            $content_type = explode(';', array_pop($content_type));
+            $content_type = trim(array_shift($content_type));
+            break;
+        }
+    }
+
+    // ---- Print AJAX Log
+    if (empty($debug_jslog_done) && ($debug || $debug_jslog) && $content_type == 'text/html') {	// Display debug jslog once
+        global $rsc_url, $app_version_long;
+
+        $relative_to = (is_admin_page() ? 'rsc_url' : 'blog');
+
+        require_js_defer('#jqueryUI#', $relative_to, true);
+        require_css('#jqueryUI_css#', $relative_to, null, null, '#', true);
+        require_js_defer('debug_jslog.js', $relative_to, true);
+        require_js_defer('ext:jquery/cookie/jquery.cookie.min.js', $relative_to, true);
+
+        $jslog_style_cookies = param_cookie('jslog_style', 'string');
+        $jslog_styles = [];
+        if (! empty($jslog_style_cookies)) {	// Get styles only from cookies
+            $jslog_style_cookies = explode(';', $jslog_style_cookies);
+            foreach ($jslog_style_cookies as $jsc => $style) {
+                if (strpos($style, 'height') !== false /*|| ( strpos( $style, 'display' ) !== false && !$debug_jslog )*/) {	// Unset the height param from defined styles ( and the display param if jslog is disabled )
+                    unset($jslog_style_cookies[$jsc]);
+                }
+            }
+            $jslog_styles[] = implode(';', $jslog_style_cookies);
+        } else {
+            if (! is_logged_in()) {	// Align top when evobar is hidden
+                $jslog_styles[] = 'top:0';
+            }
+            if ($debug_jslog) {	// Display the jslog
+                $jslog_styles[] = 'display:block';
+            }
+        }
+        $jslog_styles = count($jslog_styles) > 0 ? ' style="' . implode(';', $jslog_styles) . '"' : '';
+
+        $close_url = url_add_param($_SERVER['REQUEST_URI'], 'jslog');
+        echo '<div id="debug_ajax_info" class="debug"' . $jslog_styles . '>';
+        echo '<div class="jslog_titlebar">' .
+                'AJAX Debug log' . get_manual_link('ajax_debug_log') .
+                action_icon(T_('Close'), 'close', $close_url, null, null, null, [
+                    'class' => 'jslog_switcher',
+                ]) .
+            '</div>';
+        echo '<div id="jslog_container"></div>';
+        echo '<div class="jslog_statusbar">' .
+                '<a href="' . $_SERVER['REQUEST_URI'] . '#" class="jslog_clear">' . T_('Clear') . '</a>' .
+            '</div>';
+        echo '</div>';
+
+        // Make sure debug jslog output only happens once:
+        $debug_jslog_done = true;
+    }
+    // ----
+
+    // clean output:
+    $clean = $is_cli || $force_clean;
+
+    if (! $force) {
+        if (! empty($debug_done)) { // Already displayed!
+            return;
+        }
+
+        if (empty($debug) || // No debug output desired:
+            ($debug < 2 && $content_type != 'text/html')) { // Do not display, if no content-type header has been sent or it's != "text/html" (debug > 1 skips this)
+            global $evo_last_handled_error;
+            if (! empty($evo_last_handled_error)) { // If script has been stoppped by some error
+                // Display a message when debug is OFF and error has occured
+                $debug_off_title = 'An unexpected error has occured!';
+                $debug_off_msg1 = 'We apologize for the inconvenience.';
+                $debug_off_msg2 = 'This error has been automatically reported and we will work to resolve it as fast as possible.';
+                if ($clean) { // CLI mode
+                    echo '*** ' . $debug_off_title . ' ***' . "\n\n"
+                        . $debug_off_msg1 . "\n"
+                        . $debug_off_msg2;
+                } else { // View from browser
+                    echo '<div style="margin:1em auto;padding:10px;background:#FEFFFF;border:2px solid #F00;border-radius:6px;text-align:center;">'
+                            . '<h2 style="margin:0;color:#F00;">' . $debug_off_title . '</h2>'
+                            . '<p>' . $debug_off_msg1 . '</p>'
+                            . '<p style="margin-bottom:0">' . $debug_off_msg2 . '</p>'
+                        . '</div>';
+                }
+            }
+            return;
+        }
+    }
+    //Make sure debug output only happens once:
+    $debug_done = true;
+
+    $printf_format = '| %-45s | %-5s | %-7s | %-5s |';
+    $table_headerlen = 73;
+    /* This calculates the number of dashes to print e. g. on the top and
+     * bottom of the table and after the header, making the table look
+     * better (looks like the tables of the mysql command line client).
+     * Normally, the value won't change, so it's hardcoded above. If you
+     * change the printf() format above, this might be useful.
+    preg_match_all( '#\d+#', $printf_format, $table_headerlen );
+    $table_headerlen = array_sum( $table_headerlen[0] ) +
+                                    strlen( preg_replace( '#[^ \|]+#', '',
+                                                $printf_format ) ) - 2;
+    */
+
+    $ReqHostPathQuery = $ReqHost . $ReqPath . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+    echo "\n\n\n";
+    if (! $clean) {
+        echo '<div class="debug" id="debug_info">';
+    }
+
+    // FULL DEBUG INFO(s) FROM PREVIOUS SESSION(s), after REDIRECT(s):
+    $get_redirected_debuginfo_from_sess_ID = param('get_redirected_debuginfo_from_sess_ID', 'integer');
+    if (! empty($get_redirected_debuginfo_from_sess_ID)) {	// Get Session by ID for debug info from redirected page:
+        // (This is used for redirect from different domain)
+        $debug_info_Session = new Session($get_redirected_debuginfo_from_sess_ID);
+    } elseif (isset($Session)) {	// Use current Session for debug info from redirected page:
+        $debug_info_Session = $Session;
+    }
+
+    if (isset($debug_info_Session) && ! empty($debug_info_Session->ID)) {	// Get debug info from redirected page:
+        $sess_debug_infos = $debug_info_Session->get('debug_infos');
+    }
+
+    if (! empty($sess_debug_infos)) {	// Display debug info from redirected page:
+        $count_sess_debug_infos = count($sess_debug_infos);
+        if ($count_sess_debug_infos > 1) {	// Links to those Debuglogs:
+            if ($clean) {	// kind of useless, but anyway...
+                echo "\n" . 'There are ' . $count_sess_debug_infos . ' debug infos from redirected pages.' . "\n";
+            } else {
+                echo '<p>There are ' . $count_sess_debug_infos . ' debug infos from redirected pages: ';
+                for ($i = 1; $i <= $count_sess_debug_infos; $i++) {
+                    echo '<a href="' . $ReqHostPathQuery . '#debug_sess_debug_info_' . $i . '">#' . $i . '</a> ';
+                }
+                echo '</p>';
+            }
+        }
+
+        foreach ($sess_debug_infos as $k => $sess_debug_info) {
+            if ($clean) {
+                echo "\n" . '== Debug messages from redirected page (#' . ($k + 1) . ') ==' . "\n"
+                    . 'See below for the Debuglog from the current request.' . "\n";
+                echo gzdecode($sess_debug_info);
+            } else {
+                echo '<div class="debug_session">';
+                echo '<h3 id="debug_sess_debug_info_' . ($k + 1) . '" style="color:#f00">Debug messages from redirected page (#' . ($k + 1) . ')</h3>'
+                    // link to real Debuglog:
+                    . '<p><a href="' . $ReqHostPathQuery . '#debug_current">See below for the debug from the current request.</a></p>';
+                $sess_debug_info = gzdecode($sess_debug_info);
+                // Fix all anchors to proper work with SESSION debug info and do NOT mix with current debug info where same achors are used but without number suffix ($k + 1):
+                $anchors_regexp = '(evo_debug_queries|debug_info_cat_[^"]+)';
+                $sess_debug_info = preg_replace('/id="' . $anchors_regexp . '"/', 'id="$1_' . ($k + 1) . '"', $sess_debug_info);
+                echo preg_replace('/href="([^#"]*)#' . $anchors_regexp . '"/', 'href="' . $ReqHostPathQuery . '#$2_' . ($k + 1) . '"', $sess_debug_info);
+                echo '</div>';
+            }
+        }
+
+        if (! $clean) {	// Anchor to scrolldown to current debug:
+            echo '<a id="debug_current"></a>';
+        }
+
+        // link to first sess_debug_infos:
+        if ($clean) {
+            echo 'See above for the debug info(s) from before the redirect.' . "\n";
+        } else {
+            echo '<p><a href="' . $ReqHostPathQuery . '#debug_sess_debug_info_1">See above for the debug info(s) from before the redirect.</a></p>';
+        }
+
+        // Delete logs since they have been displayed...
+        // EXCEPT if we are redirecting, because in this case we won't see these logs in a browser (only in request debug tools)
+        // So in that case we want them to move over to the next page...
+        if ($http_response_code < 300 || $http_response_code >= 400) {	// This is NOT a 3xx redirect, assume debuglogs have been seen & delete them:
+            $debug_info_Session->delete('debug_infos');
+        }
+
+        echo "\n\n\n";
+    }
+    // END OF DEBUG FROM PREVIOUS SESSIONS, after REDIRECT(s).
+
+    $debug_info_title = empty($count_sess_debug_infos) ? 'Debug info' : 'Debug info from Current page';
+    echo($clean ? '*** ' . $debug_info_title . ' ***' . "\n\n" : '<h2>' . $debug_info_title . '</h2>');
+
+    if (! $obhandler_debug) { // don't display changing items when we want to test obhandler
+        // ---------------------------
+
+        echo '<div class="log_container"><div>';
+
+        echo 'HTTP Response code: ' . $http_response_code;
+        echo $clean ? "\n" : '<br />';
+
+        echo '$content_type_header: ' . $content_type_header;
+        echo $clean ? "\n" : '<br />';
+
+        echo '$disp: ' . $disp . ' -- detail: ' . $disp_detail;
+        echo $clean ? "\n" : '<br />';
+
+        echo '$robots_index: ' . $robots_index;
+        echo $clean ? "\n" : '<br />';
+
+        echo '$robots_follow: ' . $robots_follow;
+        echo $clean ? "\n" : '<br />';
+
+        echo '</div></div>';
+    }
+
+    if (! $obhandler_debug) { // don't display changing items when we want to test obhandler
+        // ================================== DB Summary ================================
+        if (isset($DB)) {
+            echo '<div class="log_container"><div>';
+            echo $DB->num_queries . ' SQL queries executed in ' . $Timer->get_duration('SQL QUERIES') . " seconds\n";
+            if (! $clean) {
+                echo ' &nbsp; <a href="' . $ReqHostPathQuery . '#evo_debug_queries">scroll down to details</a><p>';
+            }
+            echo '</div></div>';
+        }
+
+        // ========================== Timer table ================================
+        $time_page = $Timer->get_duration('total');
+        $timer_rows = [];
+        foreach ($Timer->get_categories() as $l_cat) {
+            if ($l_cat == 'sql_query') {
+                continue;
+            }
+            $timer_rows[$l_cat] = $Timer->get_duration($l_cat);
+        }
+        // Don't sort to see orginal order of creation
+        // arsort( $timer_rows );
+        // ksort( $timer_rows );
+
+        // Remove "total", it will get output as the last one:
+        $total_time = $timer_rows['total'];
+        unset($timer_rows['total']);
+
+        $percent_total = $time_page > 0 ? number_format(100 / $time_page * $total_time, 2) : '0';
+
+        if ($clean) {
+            echo '== Timers ==' . "\n\n";
+            echo '+' . str_repeat('-', $table_headerlen) . '+' . "\n";
+            printf($printf_format . "\n", 'Category', 'Time', '%', 'Count');
+            echo '+' . str_repeat('-', $table_headerlen) . '+' . "\n";
+        } else {
+            echo '<table class="debug_timer"><thead>'
+                . '<tr><td colspan="4" class="center">Timers</td></tr>' // dh> TODO: should be TH. Workaround so that tablesorter does not pick it up. Feedback from author requested.
+                . '<tr><th>Category</th><th>Time</th><th>%</th><th>Count</th></tr>'
+                . '</thead>';
+
+            // Output "total":
+            echo "\n<tfoot><tr>"
+                . '<td>total</td>'
+                . '<td class="right red">' . $total_time . '</td>'
+                . '<td class="right">' . $percent_total . '%</td>'
+                . '<td class="right">' . $Timer->get_count('total') . '</td></tr></tfoot>';
+
+            echo '<tbody>';
+        }
+
+        $table_rows_collapse = [];
+        foreach ($timer_rows as $l_cat => $l_time) {
+            $percent_l_cat = $time_page > 0 ? number_format(100 / $time_page * $l_time, 2) : '0';
+
+            if ($clean) {
+                $row = sprintf($printf_format, $l_cat, $l_time, $percent_l_cat . '%', $Timer->get_count($l_cat));
+            } else {
+                $row = "\n<tr>"
+                    . '<td>' . $l_cat . '</td>'
+                    . '<td class="right">' . $l_time . '</td>'
+                    . '<td class="right">' . $percent_l_cat . '%</td>'
+                    . '<td class="right">' . $Timer->get_count($l_cat) . '</td></tr>';
+            }
+
+            // Maybe ignore this row later, but not for clean display.
+            if (! $clean && ($percent_l_cat < 1)) {	// Hide everything that tool less tahn 5% of the time
+                $table_rows_collapse[] = $row;
+            } else {
+                echo $row . "\n";
+            }
+        }
+        $count_collapse = count($table_rows_collapse);
+        // Collapse ignored rows, allowing to expand them with Javascript:
+        if ($count_collapse > 5) {
+            echo '<tr><td colspan="4" class="center">';
+            echo '<a href="" onclick="jQuery(this).closest(\'tbody\').next().toggle(); return false;">+ ' . $count_collapse . ' queries &lt; 1%</a> </td></tr>';
+            echo '</tbody>';
+            echo '<tbody style="display:none">';
+        }
+        echo implode("\n", $table_rows_collapse) . "\n";
+
+        if ($clean) { // "total" (done in tfoot for html above)
+            echo sprintf($printf_format, 'total', $total_time, $percent_total . '%', $Timer->get_count('total'));
+            echo '+' . str_repeat('-', $table_headerlen) . '+' . "\n\n";
+        } else {
+            echo "\n</tbody></table>";
+
+            // add jquery.tablesorter to the "Debug info" table.
+            $relative_to = (is_admin_page() ? 'rsc_url' : 'blog');
+            require_js_defer('ext:jquery/tablesorter/jquery.tablesorter.min.js', $relative_to, true);
+            require_js_defer('src/evo_init_debug_timer.js', $relative_to, true);
+        }
+
+        // ================================ Opcode caching ================================
+        echo '<div class="log_container"><div>';
+        echo 'Opcode cache: ' . get_active_opcode_cache();
+        echo $clean ? "\n" : '<p>';
+
+        // ================================ User caching ================================
+        echo 'User cache: ' . get_active_user_cache();
+        echo $clean ? "\n" : '<p>';
+        echo '</div></div>';
+
+        // ================================ Memory Usage ================================
+        echo '<div class="log_container"><div>';
+
+        foreach ([
+            // note: 8MB is default for memory_limit and is reported as 8388608 bytes
+            'memory_get_usage' => [
+                'display' => 'Memory usage',
+                'high' => 8000000,
+            ],
+            'memory_get_peak_usage' => [
+                'display' => 'Memory peak usage',
+                'high' => 8000000,
+            ],
+        ] as $l_func => $l_var) {
+            if (function_exists($l_func)) {
+                $_usage = $l_func();
+
+                if ($_usage > $l_var['high']) {
+                    echo $clean ? '[!!] ' : '<span style="color:red; font-weight:bold">';
+                }
+
+                echo $l_var['display'] . ': ' . bytesreadable($_usage, ! $clean);
+
+                if (! $clean && $_usage > $l_var['high']) {
+                    echo '</span>';
+                }
+                echo $clean ? "\n" : '<br />';
+            }
+        }
+
+        echo 'Len of serialized $cache_imgsize: ' . strlen(serialize($cache_imgsize));
+        echo $clean ? "\n" : '<br />';
+        echo 'Len of serialized $cache_File: ' . strlen(serialize($cache_File));
+        echo $clean ? "\n" : '<br />';
+
+        echo '</div></div>';
+    }
+
+    // CURRENT DEBUGLOG (with list of categories at top):
+    $log_categories = ['error', 'note', 'all']; // Categories to output (in that order)
+    $log_container_head = $clean ? ("\n" . '== Debug messages ==' . "\n") : '<h3 id="debug_debuglog">Debug messages</h3>';
+
+    if (! $clean) {
+        $log_cats = array_keys($Debuglog->get_messages($log_categories)); // the real list (with all replaced and only existing ones)
+        $log_head_links = [];
+        foreach ($log_cats as $l_cat) {
+            $log_head_links[] .= '<a href="' . $ReqHostPathQuery . '#debug_info_cat_' . str_replace(' ', '_', $l_cat) . '">' . $l_cat . '</a>';
+        }
+        $log_container_head .= implode(' | ', $log_head_links);
+
+        echo format_to_output(
+            $Debuglog->display(
+                [
+                    'container' => [
+                        'string' => $log_container_head,
+                        'template' => false,
+                    ],
+                    'all' => [
+                        'string' => '<h4 id="debug_info_cat_%s">%s:</h4>',
+                        'template' => false,
+                    ],
+                ],
+                '',
+                false,
+                $log_categories
+            ),
+            'htmlbody'
+        );
+
+        echo '<h3 id="evo_debug_queries">DB</h3>';
+    } else {
+        echo format_to_output(
+            $Debuglog->display(
+                [
+                    'container' => [
+                        'string' => $log_container_head,
+                        'template' => false,
+                    ],
+                    'all' => [
+                        'string' => '= %s =' . "\n\n",
+                        'template' => false,
+                    ],
+                ],
+                '',
+                false,
+                $log_categories,
+                '',
+                'raw',
+                false
+            ),
+            'raw'
+        );
+
+        echo "\n" . '== DB ==' . "\n\n";
+    }
+
+    if ($db_config) {
+        if (! $clean) {
+            echo '<pre>';
+        }
+
+        echo 'Config DB Username: ' . $db_config['user'] . "\n" .
+            'Config DB Database: ' . $db_config['name'] . "\n" .
+             'Config DB Host: ' . (isset($db_config['host']) ? $db_config['host'] : 'unset (localhost)') . "\n" .
+             'Config DB tables prefix: ' . $tableprefix . "\n" .
+             'Config DB connection charset: ' . $db_config['connection_charset'] . "\n";
+
+        echo $clean ? "\n" : '</pre>';
+    }
+
+    if (! isset($DB)) {
+        echo 'No DB object.' . ($clean ? "\n" : '');
+    } else {
+        echo '<pre>Current DB charset: ' . $DB->get_connection_charset() . "</pre>\n";
+
+        $DB->dump_queries(! $clean);
+    }
+
+    if (! $clean) {
+        echo '</div>';
+    }
 }
 
 
@@ -3858,23 +3523,22 @@ function debug_info( $force = false, $force_clean = false )
  * @param string Syslog origin type: 'core', 'plugin'
  * @param integer Syslog origin ID
  */
-function exit_blocked_request( $block_type, $log_message, $syslog_origin_type = 'core', $syslog_origin_ID = NULL )
+function exit_blocked_request($block_type, $log_message, $syslog_origin_type = 'core', $syslog_origin_ID = null)
 {
-	global $debug;
+    global $debug;
 
-	// Write system log for the request:
-	syslog_insert( $log_message, 'warning', NULL, NULL, $syslog_origin_type, $syslog_origin_ID );
+    // Write system log for the request:
+    syslog_insert($log_message, 'warning', null, null, $syslog_origin_type, $syslog_origin_ID);
 
-	// Print out this text to inform an user:
-	echo 'This request has been blocked.';
+    // Print out this text to inform an user:
+    echo 'This request has been blocked.';
 
-	if( $debug )
-	{ // Display additional info on debug mode:
-		echo ' ('.$block_type.')';
-	}
+    if ($debug) { // Display additional info on debug mode:
+        echo ' (' . $block_type . ')';
+    }
 
-	// EXIT:
-	exit( 0 );
+    // EXIT:
+    exit(0);
 }
 
 
@@ -3884,46 +3548,45 @@ function exit_blocked_request( $block_type, $log_message, $syslog_origin_type = 
  */
 function check_post_max_size_exceeded()
 {
-	global $Messages;
+    global $Messages;
 
-	if( ( $_SERVER['REQUEST_METHOD'] == 'POST' ) && empty( $_POST ) && empty( $_FILES ) && ( $_SERVER['CONTENT_LENGTH'] > 0 ) )
-	{
-		// Check post max size ini setting
-		$post_max_size = ini_get( 'post_max_size' );
+    if (($_SERVER['REQUEST_METHOD'] == 'POST') && empty($_POST) && empty($_FILES) && ($_SERVER['CONTENT_LENGTH'] > 0)) {
+        // Check post max size ini setting
+        $post_max_size = ini_get('post_max_size');
 
-		// Convert post_max_size value to bytes
-		switch ( substr( $post_max_size, -1 ) )
-		{
-			case 'G':
-				$post_max_size = $post_max_size * 1024;
-			case 'M':
-				$post_max_size = $post_max_size * 1024;
-			case 'K':
-				$post_max_size = $post_max_size * 1024;
-		}
+        // Convert post_max_size value to bytes
+        switch (substr($post_max_size, -1)) {
+            case 'G':
+                $post_max_size = $post_max_size * 1024;
+                // no break
+            case 'M':
+                $post_max_size = $post_max_size * 1024;
+                // no break
+            case 'K':
+                $post_max_size = $post_max_size * 1024;
+        }
 
-		// Add error message and redirect back to the referer url
-		$Messages->add( sprintf( T_('You have sent too much data (too many large files?) for the server to process (%s sent / %s maximum). Please try again by sending less data/files at a time.'), bytesreadable( $_SERVER['CONTENT_LENGTH'] ), bytesreadable( $post_max_size ) ) );
-		header_redirect( $_SERVER['HTTP_REFERER'] );
-		exit(0); // Already exited here
-	}
+        // Add error message and redirect back to the referer url
+        $Messages->add(sprintf(T_('You have sent too much data (too many large files?) for the server to process (%s sent / %s maximum). Please try again by sending less data/files at a time.'), bytesreadable($_SERVER['CONTENT_LENGTH']), bytesreadable($post_max_size)));
+        header_redirect($_SERVER['HTTP_REFERER']);
+        exit(0); // Already exited here
+    }
 }
 
 
 /**
  * Prevent email header injection.
  */
-function mail_sanitize_header_string( $header_str, $close_brace = false )
+function mail_sanitize_header_string($header_str, $close_brace = false)
 {
-	// Prevent injection! (remove everything after (and including) \n or \r)
-	$header_str = preg_replace( '~(\r|\n).*$~s', '', trim($header_str) );
+    // Prevent injection! (remove everything after (and including) \n or \r)
+    $header_str = preg_replace('~(\r|\n).*$~s', '', trim($header_str));
 
-	if( $close_brace && strpos( $header_str, '<' ) !== false && strpos( $header_str, '>' ) === false )
-	{ // We have probably stripped the '>' at the end!
-		$header_str .= '>';
-	}
+    if ($close_brace && strpos($header_str, '<') !== false && strpos($header_str, '>') === false) { // We have probably stripped the '>' at the end!
+        $header_str .= '>';
+    }
 
-	return $header_str;
+    return $header_str;
 }
 
 /**
@@ -3932,36 +3595,32 @@ function mail_sanitize_header_string( $header_str, $close_brace = false )
  * @param string
  * @param string 'Q' for Quoted printable, 'B' for base64
  */
-function mail_encode_header_string( $header_str, $mode = 'Q' )
+function mail_encode_header_string($header_str, $mode = 'Q')
 {
-	global $evo_charset;
+    global $evo_charset;
 
-	/* mbstring way  (did not work for Alex RU)
-	if( function_exists('mb_encode_mimeheader') )
-	{ // encode subject
-		$orig = mb_internal_encoding();
-		mb_internal_encoding('utf-8');
-		$r = mb_encode_mimeheader( $header_str, 'utf-8', $mode );
-		mb_internal_encoding($orig);
-		return $r;
-	}
-	*/
+    /* mbstring way  (did not work for Alex RU)
+    if( function_exists('mb_encode_mimeheader') )
+    { // encode subject
+        $orig = mb_internal_encoding();
+        mb_internal_encoding('utf-8');
+        $r = mb_encode_mimeheader( $header_str, 'utf-8', $mode );
+        mb_internal_encoding($orig);
+        return $r;
+    }
+    */
 
-	if( preg_match( '~[^a-z0-9!*+\-/ ]~i', $header_str ) )
-	{ // If the string actually needs some encoding
-		if( $mode == 'Q' )
-		{ // Quoted printable is best for reading with old/text terminal mail reading/debugging stuff:
-			$header_str = preg_replace_callback( '#[^a-z0-9!*+\-/ ]#i', 'mail_encode_header_string_callback', $header_str );
-			$header_str = str_replace( ' ', '_', $header_str );
-			$header_str = '=?'.$evo_charset.'?Q?'.$header_str.'?=';
-		}
-		else
-		{ // Base 64 -- Alex RU way:
-			$header_str = '=?'.$evo_charset.'?B?'.base64_encode( $header_str ).'?=';
-		}
-	}
+    if (preg_match('~[^a-z0-9!*+\-/ ]~i', $header_str)) { // If the string actually needs some encoding
+        if ($mode == 'Q') { // Quoted printable is best for reading with old/text terminal mail reading/debugging stuff:
+            $header_str = preg_replace_callback('#[^a-z0-9!*+\-/ ]#i', 'mail_encode_header_string_callback', $header_str);
+            $header_str = str_replace(' ', '_', $header_str);
+            $header_str = '=?' . $evo_charset . '?Q?' . $header_str . '?=';
+        } else { // Base 64 -- Alex RU way:
+            $header_str = '=?' . $evo_charset . '?B?' . base64_encode($header_str) . '?=';
+        }
+    }
 
-	return $header_str;
+    return $header_str;
 }
 
 
@@ -3971,9 +3630,9 @@ function mail_encode_header_string( $header_str, $mode = 'Q' )
  * @param array Matches
  * @return string
  */
-function mail_encode_header_string_callback( $matches )
+function mail_encode_header_string_callback($matches)
 {
-	return sprintf( '=%02x', ord( stripslashes( $matches[0] ) ) );
+    return sprintf('=%02x', ord(stripslashes($matches[0])));
 }
 
 
@@ -3984,37 +3643,31 @@ function mail_encode_header_string_callback( $matches )
  * @param string Setting ( email | name )
  * @return string Setting's value
  */
-function user_get_notification_sender( $user_ID, $setting )
+function user_get_notification_sender($user_ID, $setting)
 {
-	global $Settings;
+    global $Settings;
 
-	$setting_name = 'notification_sender_'.$setting;
+    $setting_name = 'notification_sender_' . $setting;
 
-	if( empty( $user_ID ) )
-	{	// Get value from general settings
-		return $Settings->get( $setting_name );
-	}
+    if (empty($user_ID)) {	// Get value from general settings
+        return $Settings->get($setting_name);
+    }
 
-	$UserCache = & get_UserCache();
-	if( $User = & $UserCache->get_by_ID( $user_ID ) )
-	{
-		if( $User->check_status( 'is_validated' ) )
-		{	// User is Activated or Autoactivated or Manually activated
-			global $UserSettings;
-			if( $UserSettings->get( $setting_name, $user_ID ) == '' )
-			{	// The user's setting is not defined yet
-				// Update the user's setting from general setting
-				$UserSettings->set( $setting_name, $Settings->get( $setting_name ), $user_ID );
-				$UserSettings->dbupdate();
-			}
-			else
-			{	// User has a defined setting; Use this
-				return $UserSettings->get( $setting_name, $user_ID );
-			}
-		}
-	}
+    $UserCache = &get_UserCache();
+    if ($User = &$UserCache->get_by_ID($user_ID)) {
+        if ($User->check_status('is_validated')) {	// User is Activated or Autoactivated or Manually activated
+            global $UserSettings;
+            if ($UserSettings->get($setting_name, $user_ID) == '') {	// The user's setting is not defined yet
+                // Update the user's setting from general setting
+                $UserSettings->set($setting_name, $Settings->get($setting_name), $user_ID);
+                $UserSettings->dbupdate();
+            } else {	// User has a defined setting; Use this
+                return $UserSettings->get($setting_name, $user_ID);
+            }
+        }
+    }
 
-	return $Settings->get( $setting_name );
+    return $Settings->get($setting_name);
 }
 
 
@@ -4025,16 +3678,15 @@ function user_get_notification_sender( $user_ID, $setting )
  */
 function get_cron_job_emails_limit()
 {
-	global $executing_cron_task_key;
+    global $executing_cron_task_key;
 
-	if( isset( $executing_cron_task_key ) )
-	{	// If any cron job is really executing now:
-		global $Settings;
-		return intval( $Settings->get( 'cjob_maxemail_'.$executing_cron_task_key ) );
-	}
+    if (isset($executing_cron_task_key)) {	// If any cron job is really executing now:
+        global $Settings;
+        return intval($Settings->get('cjob_maxemail_' . $executing_cron_task_key));
+    }
 
-	// No currently executing cron job:
-	return 0;
+    // No currently executing cron job:
+    return 0;
 }
 
 
@@ -4051,29 +3703,26 @@ function get_cron_job_emails_limit()
  */
 function check_cron_job_emails_limit()
 {
-	// Get max number of emails for current cron job:
-	$current_cron_job_emails_limit = get_cron_job_emails_limit();
+    // Get max number of emails for current cron job:
+    $current_cron_job_emails_limit = get_cron_job_emails_limit();
 
-	if( $current_cron_job_emails_limit > 0 )
-	{	// If current cron job has a limit for sending of emails:
-		global $executing_cron_task_emails_count;
-		if( $executing_cron_task_emails_count >= $current_cron_job_emails_limit )
-		{	// The limit was reached:
-			global $executing_cron_task_emails_reached, $mail_log_message;
-			$mail_log_message = 'Stopping execution because max number of emails ('.$current_cron_job_emails_limit.') has been sent.';
-			if( empty( $executing_cron_task_emails_reached ) )
-			{	// Append warning to cron log only if max emails is not reached yet:
-				cron_log_append( $mail_log_message."\n", 'warning' );
-				// Set flag to don't show the above warning twice:
-				$executing_cron_task_emails_reached = true;
-			}
-			// Stop current job execution:
-			return false;
-		}
-	}
+    if ($current_cron_job_emails_limit > 0) {	// If current cron job has a limit for sending of emails:
+        global $executing_cron_task_emails_count;
+        if ($executing_cron_task_emails_count >= $current_cron_job_emails_limit) {	// The limit was reached:
+            global $executing_cron_task_emails_reached, $mail_log_message;
+            $mail_log_message = 'Stopping execution because max number of emails (' . $current_cron_job_emails_limit . ') has been sent.';
+            if (empty($executing_cron_task_emails_reached)) {	// Append warning to cron log only if max emails is not reached yet:
+                cron_log_append($mail_log_message . "\n", 'warning');
+                // Set flag to don't show the above warning twice:
+                $executing_cron_task_emails_reached = true;
+            }
+            // Stop current job execution:
+            return false;
+        }
+    }
 
-	// Allow to continue current cron job execution:
-	return true;
+    // Allow to continue current cron job execution:
+    return true;
 }
 
 
@@ -4084,16 +3733,13 @@ function check_cron_job_emails_limit()
  */
 function get_send_mail_error()
 {
-	global $Settings;
+    global $Settings;
 
-	if( $Settings->get( 'email_service' ) == 'smtp' && ! $Settings->get( 'force_email_sending' ) )
-	{	// Only SMTP is used:
-		return T_('Recipient email address does not seem to work.');
-	}
-	else
-	{	// PHP "mail" function is used by default or it was forced after failed SMTP sending:
-		return T_('Possible reason: the PHP mail() function may have been disabled on the server.');
-	}
+    if ($Settings->get('email_service') == 'smtp' && ! $Settings->get('force_email_sending')) {	// Only SMTP is used:
+        return T_('Recipient email address does not seem to work.');
+    } else {	// PHP "mail" function is used by default or it was forced after failed SMTP sending:
+        return T_('Possible reason: the PHP mail() function may have been disabled on the server.');
+    }
 }
 
 
@@ -4121,219 +3767,191 @@ function get_send_mail_error()
  * @param integer Automation ID
  * @return boolean True if mail could be sent (not necessarily delivered!), false if not - (return value of {@link mail()})
  */
-function send_mail( $to, $to_name, $subject, $message, $from = NULL, $from_name = NULL, $headers = array(), $user_ID = NULL, $email_campaign_ID = NULL, $automation_ID = NULL )
+function send_mail($to, $to_name, $subject, $message, $from = null, $from_name = null, $headers = [], $user_ID = null, $email_campaign_ID = null, $automation_ID = null)
 {
-	global $servertimenow, $email_send_simulate_only, $email_send_allow_php_mail;
+    global $servertimenow, $email_send_simulate_only, $email_send_allow_php_mail;
 
-	/**
-	 * @var string|NULL This global var stores a last mail log message
-	 */
-	global $mail_log_message;
-	$mail_log_message = NULL;
+    /**
+     * @var string|null This global var stores a last mail log message
+     */
+    global $mail_log_message;
+    $mail_log_message = null;
 
-	global $debug, $app_name, $app_version, $current_locale, $current_charset, $evo_charset, $locales, $Debuglog, $Settings, $demo_mode, $mail_log_insert_ID;
+    global $debug, $app_name, $app_version, $current_locale, $current_charset, $evo_charset, $locales, $Debuglog, $Settings, $demo_mode, $mail_log_insert_ID;
 
-	$message_data = $message;
-	if( is_array( $message_data ) && isset( $message_data['full'] ) )
-	{ // If content is multipart
-		$message = $message_data['full'];
-	}
-	elseif( is_string( $message_data ) )
-	{ // Convert $message_data to array
-		$message_data = array( 'full' => $message );
-	}
+    $message_data = $message;
+    if (is_array($message_data) && isset($message_data['full'])) { // If content is multipart
+        $message = $message_data['full'];
+    } elseif (is_string($message_data)) { // Convert $message_data to array
+        $message_data = [
+            'full' => $message,
+        ];
+    }
 
-	// Replace secret content in the mail logs message body
-	$message = preg_replace( '~\$secret_content_start\$.*\$secret_content_end\$~', '***secret-content-removed***', $message );
-	// Remove secret content marks from the message
-	$message_data = str_replace( array( '$secret_content_start$', '$secret_content_end$' ), '', $message_data );
+    // Replace secret content in the mail logs message body
+    $message = preg_replace('~\$secret_content_start\$.*\$secret_content_end\$~', '***secret-content-removed***', $message);
+    // Remove secret content marks from the message
+    $message_data = str_replace(['$secret_content_start$', '$secret_content_end$'], '', $message_data);
 
-	// Memorize email address
-	$to_email_address = $to;
+    // Memorize email address
+    $to_email_address = $to;
 
-	$NL = "\r\n";
+    $NL = "\r\n";
 
-	if( $demo_mode )
-	{ // Debug mode restriction: Sending email in demo mode is not allowed
-		return false;
-	}
+    if ($demo_mode) { // Debug mode restriction: Sending email in demo mode is not allowed
+        return false;
+    }
 
-	if( !is_array( $headers ) )
-	{ // Make sure $headers is an array
-		$headers = array( $headers );
-	}
+    if (! is_array($headers)) { // Make sure $headers is an array
+        $headers = [$headers];
+    }
 
-	if( empty( $from ) )
-	{
-		$from = user_get_notification_sender( $user_ID, 'email' );
-	}
+    if (empty($from)) {
+        $from = user_get_notification_sender($user_ID, 'email');
+    }
 
-	if( empty( $from_name ) )
-	{
-		$from_name = user_get_notification_sender( $user_ID, 'name' );
-	}
+    if (empty($from_name)) {
+        $from_name = user_get_notification_sender($user_ID, 'name');
+    }
 
-	// Pass these data for SMTP mailer
-	$message_data['to_email'] = $to;
-	$message_data['to_name'] = empty( $to_name ) ? NULL : $to_name;
-	$message_data['from_email'] = $from;
-	$message_data['from_name'] = empty( $from_name ) ? NULL : $from_name;
+    // Pass these data for SMTP mailer
+    $message_data['to_email'] = $to;
+    $message_data['to_name'] = empty($to_name) ? null : $to_name;
+    $message_data['from_email'] = $from;
+    $message_data['from_name'] = empty($from_name) ? null : $from_name;
 
-	$return_path = $Settings->get( 'notification_return_path' );
+    $return_path = $Settings->get('notification_return_path');
 
-	// Add real name into $from...
-	if( ! is_windows() )
-	{	// fplanque: Windows XP, Apache 1.3, PHP 4.4, MS SMTP : will not accept "nice" addresses.
-		if( !empty( $to_name ) )
-		{
-			$to = '"'.mail_encode_header_string($to_name).'" <'.$to.'>';
-		}
-		if( !empty( $from_name ) )
-		{
-			$from = '"'.mail_encode_header_string($from_name).'" <'.$from.'>';
-		}
-	}
+    // Add real name into $from...
+    if (! is_windows()) {	// fplanque: Windows XP, Apache 1.3, PHP 4.4, MS SMTP : will not accept "nice" addresses.
+        if (! empty($to_name)) {
+            $to = '"' . mail_encode_header_string($to_name) . '" <' . $to . '>';
+        }
+        if (! empty($from_name)) {
+            $from = '"' . mail_encode_header_string($from_name) . '" <' . $from . '>';
+        }
+    }
 
-	$from = mail_sanitize_header_string( $from, true );
-	// From has to go into headers
-	$headers['From'] = $from;
-	if( !empty( $return_path ) )
-	{	// Set a return path
-		$headers['Return-Path'] = $return_path;
-	}
+    $from = mail_sanitize_header_string($from, true);
+    // From has to go into headers
+    $headers['From'] = $from;
+    if (! empty($return_path)) {	// Set a return path
+        $headers['Return-Path'] = $return_path;
+    }
 
-	// echo 'sending email to: ['.htmlspecialchars($to).'] from ['.htmlspecialchars($from).']';
+    // echo 'sending email to: ['.htmlspecialchars($to).'] from ['.htmlspecialchars($from).']';
 
-	$clear_subject = $subject;
-	$subject = mail_encode_header_string($subject);
+    $clear_subject = $subject;
+    $subject = mail_encode_header_string($subject);
 
-	$message = str_replace( array( "\r\n", "\r" ), $NL, $message );
+    $message = str_replace(["\r\n", "\r"], $NL, $message);
 
-	if( !isset( $headers['Content-Type'] ) )
-	{	// Specify charset and content-type of email
-		$headers['Content-Type'] = 'text/plain; charset='.$current_charset;
-	}
-	$headers['MIME-Version'] = '1.0';
+    if (! isset($headers['Content-Type'])) {	// Specify charset and content-type of email
+        $headers['Content-Type'] = 'text/plain; charset=' . $current_charset;
+    }
+    $headers['MIME-Version'] = '1.0';
 
-	$headers['Date'] = gmdate( 'r', $servertimenow );
+    $headers['Date'] = gmdate('r', $servertimenow);
 
-	// ADDITIONAL HEADERS:
-	$headers['X-Mailer'] = $app_name.' '.$app_version.' - PHP/'.phpversion();
-	$ip_list = implode( ',', get_ip_list() );
-	if( !empty( $ip_list ) )
-	{ // Add X-Remote_Addr param only if its value is not empty
-		$headers['X-Remote-Addr'] = $ip_list;
-	}
+    // ADDITIONAL HEADERS:
+    $headers['X-Mailer'] = $app_name . ' ' . $app_version . ' - PHP/' . phpversion();
+    $ip_list = implode(',', get_ip_list());
+    if (! empty($ip_list)) { // Add X-Remote_Addr param only if its value is not empty
+        $headers['X-Remote-Addr'] = $ip_list;
+    }
 
-	// COMPACT HEADERS:
-	$headerstring = get_mail_headers( $headers, $NL );
+    // COMPACT HEADERS:
+    $headerstring = get_mail_headers($headers, $NL);
 
-	// Create initial email log with empty message
-	$email_key = generate_random_key();
-	mail_log( $user_ID, $to_email_address, $clear_subject, NULL, $headerstring, 'ready_to_send', $email_key, $email_campaign_ID, $automation_ID );
+    // Create initial email log with empty message
+    $email_key = generate_random_key();
+    mail_log($user_ID, $to_email_address, $clear_subject, null, $headerstring, 'ready_to_send', $email_key, $email_campaign_ID, $automation_ID);
 
-	// Replace tracking code placeholders
-	$message = str_replace( array( '$email_key$', '$mail_log_ID$' ), array( $email_key, $mail_log_insert_ID ), $message );
-	$message_data = str_replace( array( '$email_key$', '$mail_log_ID$' ), array( $email_key, $mail_log_insert_ID ), $message_data );
+    // Replace tracking code placeholders
+    $message = str_replace(['$email_key$', '$mail_log_ID$'], [$email_key, $mail_log_insert_ID], $message);
+    $message_data = str_replace(['$email_key$', '$mail_log_ID$'], [$email_key, $mail_log_insert_ID], $message_data);
 
-	// Set an additional parameter for the return path:
-	switch( $Settings->get( 'sendmail_params' ) )
-	{
-		case 'return':
-			$sendmail_params = '-r $return-address$';
-			break;
-		case 'from':
-			$sendmail_params = '-f $return-address$';
-			break;
-		case 'custom':
-			$sendmail_params = $Settings->get( 'sendmail_params_custom' );
-			break;
-	}
-	if( ! empty( $sendmail_params ) )
-	{
-		$additional_parameters = str_replace(
-			array( '$from-address$', '$return-address$' ),
-			array( $message_data['from_email'], ( empty( $return_path ) ? $message_data['from_email'] : $return_path ) ),
-			$sendmail_params );
-	}
-	else
-	{
-		$additional_parameters = '';
-	}
+    // Set an additional parameter for the return path:
+    switch ($Settings->get('sendmail_params')) {
+        case 'return':
+            $sendmail_params = '-r $return-address$';
+            break;
+        case 'from':
+            $sendmail_params = '-f $return-address$';
+            break;
+        case 'custom':
+            $sendmail_params = $Settings->get('sendmail_params_custom');
+            break;
+    }
+    if (! empty($sendmail_params)) {
+        $additional_parameters = str_replace(
+            ['$from-address$', '$return-address$'],
+            [$message_data['from_email'], (empty($return_path) ? $message_data['from_email'] : $return_path)],
+            $sendmail_params
+        );
+    } else {
+        $additional_parameters = '';
+    }
 
-	// Remove email key markers from message that will be sent to actual email
-	$message_data = str_replace( array( '$email_key_start$', '$email_key_end$' ), '', $message_data );
+    // Remove email key markers from message that will be sent to actual email
+    $message_data = str_replace(['$email_key_start$', '$email_key_end$'], '', $message_data);
 
-	if( mail_is_blocked( $to_email_address ) )
-	{ // Check if the email address is blocked
-		$mail_log_message = 'Sending mail to "'.$to_email_address.'" FAILED, because this email is marked with spam or permanent errors.';
-		$Debuglog->add( htmlspecialchars( $mail_log_message ), 'error' );
+    if (mail_is_blocked($to_email_address)) { // Check if the email address is blocked
+        $mail_log_message = 'Sending mail to "' . $to_email_address . '" FAILED, because this email is marked with spam or permanent errors.';
+        $Debuglog->add(htmlspecialchars($mail_log_message), 'error');
 
-		update_mail_log( $mail_log_insert_ID, 'blocked', $message );
+        update_mail_log($mail_log_insert_ID, 'blocked', $message);
 
-		return false;
-	}
+        return false;
+    }
 
-	// Simulate email sending when:
-	//  - this is forced by config
-	//  - php mail sending is disabled by config and SMTP sending is not enabled
-	$simulate_email_sending = $email_send_simulate_only || ( ! $email_send_allow_php_mail && ! $Settings->get( 'smtp_enabled' ) );
+    // Simulate email sending when:
+    //  - this is forced by config
+    //  - php mail sending is disabled by config and SMTP sending is not enabled
+    $simulate_email_sending = $email_send_simulate_only || (! $email_send_allow_php_mail && ! $Settings->get('smtp_enabled'));
 
-	if( $simulate_email_sending )
-	{	// The email sending is turned on simulation mode, Don't send a real message:
-		$send_mail_result = true;
-	}
-	else
-	{	// Send email message on real mode:
-		try
-		{	// Try to send:
-			$send_mail_result = evo_mail( $to, $subject, $message_data, $headers, $additional_parameters );
-		}
-		catch( Exception $ex )
-		{	// Unexpected error:
-			$send_mail_result = false;
-			// Log the caught error:
-			$mail_log_message = $ex->getMessage();
-			// Insert a returned email's data into DB:
-			load_funcs( 'cron/model/_decode_returned_emails.funcs.php' );
-			$content = dre_limit_by_terminators( $mail_log_message );
-			$email_data = dre_get_email_data( $content, $mail_log_message, 'Empty headers' );
-			if( empty( $email_data['address'] ) )
-			{	// Use current email address if no email address is detected in the error message:
-				$email_data['address'] = $to_email_address;
-			}
-			dre_insert_returned_email( $email_data );
-		}
-	}
+    if ($simulate_email_sending) {	// The email sending is turned on simulation mode, Don't send a real message:
+        $send_mail_result = true;
+    } else {	// Send email message on real mode:
+        try {	// Try to send:
+            $send_mail_result = evo_mail($to, $subject, $message_data, $headers, $additional_parameters);
+        } catch (Exception $ex) {	// Unexpected error:
+            $send_mail_result = false;
+            // Log the caught error:
+            $mail_log_message = $ex->getMessage();
+            // Insert a returned email's data into DB:
+            load_funcs('cron/model/_decode_returned_emails.funcs.php');
+            $content = dre_limit_by_terminators($mail_log_message);
+            $email_data = dre_get_email_data($content, $mail_log_message, 'Empty headers');
+            if (empty($email_data['address'])) {	// Use current email address if no email address is detected in the error message:
+                $email_data['address'] = $to_email_address;
+            }
+            dre_insert_returned_email($email_data);
+        }
+    }
 
-	if( get_cron_job_emails_limit() > 0 )
-	{	// Increase global counter if currently executing cron jobs has a limit for mail sending:
-		global $executing_cron_task_emails_count;
-		$executing_cron_task_emails_count++;
-	}
+    if (get_cron_job_emails_limit() > 0) {	// Increase global counter if currently executing cron jobs has a limit for mail sending:
+        global $executing_cron_task_emails_count;
+        $executing_cron_task_emails_count++;
+    }
 
+    if (! $send_mail_result) {	// The message has not been sent successfully
+        $mail_log_message = 'Sending mail from "' . $from . '" to "' . $to . '", Subject "' . $subject . '" FAILED' . ($mail_log_message === null ? '' : ', Error: ' . $mail_log_message) . '.';
+        update_mail_log($mail_log_insert_ID, 'error', $message);
+        if ($debug > 1) { // We agree to die for debugging...
+            debug_die(htmlspecialchars($mail_log_message));
+        } else { // Soft debugging only....
+            $Debuglog->add(htmlspecialchars($mail_log_message), 'error');
+            return false;
+        }
+    }
 
-	if( ! $send_mail_result )
-	{	// The message has not been sent successfully
-		$mail_log_message = 'Sending mail from "'.$from.'" to "'.$to.'", Subject "'.$subject.'" FAILED'.( $mail_log_message === NULL ? '' : ', Error: '.$mail_log_message ).'.';
-		update_mail_log( $mail_log_insert_ID, 'error', $message );
-		if( $debug > 1 )
-		{ // We agree to die for debugging...
-			debug_die( htmlspecialchars( $mail_log_message ) );
-		}
-		else
-		{ // Soft debugging only....
-			$Debuglog->add( htmlspecialchars( $mail_log_message ), 'error' );
-			return false;
-		}
-	}
+    $mail_log_message = 'Sent mail from "' . $from . '" to "' . $to . '", Subject "' . $subject . '".';
+    $Debuglog->add(htmlspecialchars($mail_log_message));
 
-	$mail_log_message = 'Sent mail from "'.$from.'" to "'.$to.'", Subject "'.$subject.'".';
-	$Debuglog->add( htmlspecialchars( $mail_log_message ) );
+    update_mail_log($mail_log_insert_ID, ($simulate_email_sending ? 'simulated' : 'ok'), $message);
 
-	update_mail_log( $mail_log_insert_ID, ( $simulate_email_sending ? 'simulated' : 'ok' ), $message );
-
-	return true;
+    return true;
 }
 
 
@@ -4350,167 +3968,157 @@ function send_mail( $to, $to_name, $subject, $message, $from = NULL, $from_name 
  * @param string Use this param if you want use different email address instead of $User->email
  * @return boolean True if mail could be sent (not necessarily delivered!), false if not - (return value of {@link mail()})
  */
-function send_mail_to_User( $user_ID, $subject, $template_name, $template_params = array(), $force_on_non_activated = false, $headers = array(), $force_email_address = '' )
+function send_mail_to_User($user_ID, $subject, $template_name, $template_params = [], $force_on_non_activated = false, $headers = [], $force_email_address = '')
 {
-	global $UserSettings, $Settings, $current_charset;
+    global $UserSettings, $Settings, $current_charset;
 
-	/**
-	 * @var string|NULL This global var stores a last mail log message
-	 */
-	global $mail_log_message;
-	$mail_log_message = NULL;
+    /**
+     * @var string|null This global var stores a last mail log message
+     */
+    global $mail_log_message;
+    $mail_log_message = null;
 
-	$UserCache = & get_UserCache();
-	if( $User = $UserCache->get_by_ID( $user_ID ) )
-	{
-		if( !$User->check_status( 'can_receive_any_message' ) )
-		{ // user status doesn't allow to receive nor emails nor private messages
-			$mail_log_message = 'Sending mail to User #'.$User->ID.'('.$User->get( 'login' ).') is FAILED, because user status "'.$User->get( 'status' ).'" doesn\'t allow to receive any message.';
-			return false;
-		}
+    $UserCache = &get_UserCache();
+    if ($User = $UserCache->get_by_ID($user_ID)) {
+        if (! $User->check_status('can_receive_any_message')) { // user status doesn't allow to receive nor emails nor private messages
+            $mail_log_message = 'Sending mail to User #' . $User->ID . '(' . $User->get('login') . ') is FAILED, because user status "' . $User->get('status') . '" doesn\'t allow to receive any message.';
+            return false;
+        }
 
-		if( !( $User->check_status( 'is_validated' ) || $force_on_non_activated ) )
-		{ // user is not activated and non activated users should not receive emails, unless force_on_non_activated is turned on
-			$mail_log_message = 'Sending mail to User #'.$User->ID.'('.$User->get( 'login' ).') is FAILED, because user is not validated with status "'.$User->get( 'status' ).'".';
-			return false;
-		}
+        if (! ($User->check_status('is_validated') || $force_on_non_activated)) { // user is not activated and non activated users should not receive emails, unless force_on_non_activated is turned on
+            $mail_log_message = 'Sending mail to User #' . $User->ID . '(' . $User->get('login') . ') is FAILED, because user is not validated with status "' . $User->get('status') . '".';
+            return false;
+        }
 
-		// Check if a new email to User with the corrensponding email type is allowed
-		switch( $template_name )
-		{
-			case 'account_activate':
-			case 'account_delete_warning':
-				if( $Settings->get( 'validation_process' ) == 'easy' && !$template_params['is_reminder'] )
-				{ // this is not a notification email
-					break;
-				}
-			// Check a day notification limit for user settings "Notify me by email whenever":
-			case 'private_message_new':
-				// 'notify_messages' - "I receive a private message."
-			case 'private_messages_unread_reminder':
-				// 'notify_unread_messages' - "I have unread private messages for more than X seconds."(X = $Settings->get( 'unread_message_reminder_threshold' ))
-			case 'comment_new':
-				// 'notify_comment_mentioned' - "I have been mentioned on a comment.",
-				// 'notify_published_comments' - "a comment is published on one of my posts.",
-				// 'notify_comment_moderation' - "a comment is posted and I have permissions to moderate it.",
-				// 'notify_edit_cmt_moderation' - "a comment is modified and I have permissions to moderate it.",
-				// 'notify_meta_comment_mentioned' - "I have been mentioned on an internal comment.",
-				// 'notify_meta_comments' - "an internal comment is posted.".
-			case 'comment_spam':
-				// 'notify_spam_cmt_moderation' - "a comment is reported as spam and I have permissions to moderate it."
-			case 'comments_unmoderated_reminder':
-				// 'send_cmt_moderation_reminder' - "comments are awaiting moderation for more than X seconds."(X = $Settings->get( 'comment_moderation_reminder_threshold' ))
-			case 'post_new':
-				// 'notify_post_mentioned' - "I have been mentioned on a post.",
-				// 'notify_post_moderation' - "a post is created and I have permissions to moderate it."
-				// 'notify_edit_pst_moderation' - "someone proposed a change on a post and I have permissions to moderate it."
-			case 'post_proposed_change':
-				// 'notify_post_proposed' - "someone proposed a change on a post and I have permissions to moderate it."
-			case 'post_assignment':
-				// 'notify_post_assignment' - "a post was assigned to me."
-			case 'posts_unmoderated_reminder':
-				// 'send_pst_moderation_reminder' - "posts are awaiting moderation for more than X seconds."(X = $Settings->get( 'post_moderation_reminder_threshold' ))
-			case 'posts_stale_alert':
-				// 'send_pst_stale_alert' - "there are stale posts and I have permission to moderate them."
-			case 'account_activate':
-			case 'account_delete_warning':
-				// 'send_activation_reminder' - "my account was deactivated or is not activated for more than X seconds."(X - $Settings->get( 'activate_account_reminder_threshold' ))
-			case 'account_inactive':
-				// 'send_inactive_reminder' - "my account has been inactive for more than X months."(X - $Settings->get( 'inactive_account_reminder_threshold' ))
-			case 'account_new':
-				// 'notify_new_user_registration' - "a new user has registered."
-			case 'account_activated':
-				// 'notify_activated_account' - "an account was activated."
-			case 'account_closed':
-				// 'notify_closed_account' - "an account was closed."
-			case 'account_reported':
-				// 'notify_reported_account' - "an account was reported."
-			case 'account_changed':
-				// 'notify_changed_account' - "an account was changed."
-			case 'scheduled_task_error_report':
-				// 'notify_cronjob_error' - "a scheduled task ends with an error or timeout."
-			case 'list_new_subscriber':
-				// 'notify_list_new_subscriber' - "one of my Lists gets a new subscriber."
-			case 'list_lost_subscriber':
-				// 'notify_list_lost_subscriber' - "one of my Lists loses a subscriber."
-			case 'automation_owner_notification':
-				// 'notify_automation_owner' - "one of my automations wants to notify me."
-				$email_limit_setting = 'notification_email_limit';
-				$email_counter_setting = 'last_notification_email';
-				if( !check_allow_new_email( $email_limit_setting, $email_counter_setting, $User->ID ) )
-				{ // more notification email is not allowed today
-					$mail_log_message = 'Sending mail to User #'.$User->ID.'('.$User->get( 'login' ).') is FAILED, because user is already limited to receive more notifications for TODAY.';
-					return false;
-				}
-				break;
-			case 'newsletter':
-				// this is a newsletter email
-				$email_limit_setting = 'newsletter_limit';
-				$email_counter_setting = 'last_newsletter';
-				if( !check_allow_new_email( $email_limit_setting, $email_counter_setting, $User->ID ) )
-				{ // more newsletter email is not allowed today
-					$mail_log_message = 'Sending mail to User #'.$User->ID.'('.$User->get( 'login' ).') is FAILED, because user is already limited to receive more newsletters for TODAY.';
-					return false;
-				}
-				break;
-			case 'newsletter_test':
-				// this is a newsletter email, used to send test email by current admin
-				$template_name = 'newsletter';
-				break;
-		}
+        // Check if a new email to User with the corrensponding email type is allowed
+        switch ($template_name) {
+            case 'account_activate':
+            case 'account_delete_warning':
+                if ($Settings->get('validation_process') == 'easy' && ! $template_params['is_reminder']) { // this is not a notification email
+                    break;
+                }
+                // Check a day notification limit for user settings "Notify me by email whenever":
+                // no break
+            case 'private_message_new':
+                // 'notify_messages' - "I receive a private message."
+            case 'private_messages_unread_reminder':
+                // 'notify_unread_messages' - "I have unread private messages for more than X seconds."(X = $Settings->get( 'unread_message_reminder_threshold' ))
+            case 'comment_new':
+                // 'notify_comment_mentioned' - "I have been mentioned on a comment.",
+                // 'notify_published_comments' - "a comment is published on one of my posts.",
+                // 'notify_comment_moderation' - "a comment is posted and I have permissions to moderate it.",
+                // 'notify_edit_cmt_moderation' - "a comment is modified and I have permissions to moderate it.",
+                // 'notify_meta_comment_mentioned' - "I have been mentioned on an internal comment.",
+                // 'notify_meta_comments' - "an internal comment is posted.".
+            case 'comment_spam':
+                // 'notify_spam_cmt_moderation' - "a comment is reported as spam and I have permissions to moderate it."
+            case 'comments_unmoderated_reminder':
+                // 'send_cmt_moderation_reminder' - "comments are awaiting moderation for more than X seconds."(X = $Settings->get( 'comment_moderation_reminder_threshold' ))
+            case 'post_new':
+                // 'notify_post_mentioned' - "I have been mentioned on a post.",
+                // 'notify_post_moderation' - "a post is created and I have permissions to moderate it."
+                // 'notify_edit_pst_moderation' - "someone proposed a change on a post and I have permissions to moderate it."
+            case 'post_proposed_change':
+                // 'notify_post_proposed' - "someone proposed a change on a post and I have permissions to moderate it."
+            case 'post_assignment':
+                // 'notify_post_assignment' - "a post was assigned to me."
+            case 'posts_unmoderated_reminder':
+                // 'send_pst_moderation_reminder' - "posts are awaiting moderation for more than X seconds."(X = $Settings->get( 'post_moderation_reminder_threshold' ))
+            case 'posts_stale_alert':
+                // 'send_pst_stale_alert' - "there are stale posts and I have permission to moderate them."
+            case 'account_activate':
+            case 'account_delete_warning':
+                // 'send_activation_reminder' - "my account was deactivated or is not activated for more than X seconds."(X - $Settings->get( 'activate_account_reminder_threshold' ))
+            case 'account_inactive':
+                // 'send_inactive_reminder' - "my account has been inactive for more than X months."(X - $Settings->get( 'inactive_account_reminder_threshold' ))
+            case 'account_new':
+                // 'notify_new_user_registration' - "a new user has registered."
+            case 'account_activated':
+                // 'notify_activated_account' - "an account was activated."
+            case 'account_closed':
+                // 'notify_closed_account' - "an account was closed."
+            case 'account_reported':
+                // 'notify_reported_account' - "an account was reported."
+            case 'account_changed':
+                // 'notify_changed_account' - "an account was changed."
+            case 'scheduled_task_error_report':
+                // 'notify_cronjob_error' - "a scheduled task ends with an error or timeout."
+            case 'list_new_subscriber':
+                // 'notify_list_new_subscriber' - "one of my Lists gets a new subscriber."
+            case 'list_lost_subscriber':
+                // 'notify_list_lost_subscriber' - "one of my Lists loses a subscriber."
+            case 'automation_owner_notification':
+                // 'notify_automation_owner' - "one of my automations wants to notify me."
+                $email_limit_setting = 'notification_email_limit';
+                $email_counter_setting = 'last_notification_email';
+                if (! check_allow_new_email($email_limit_setting, $email_counter_setting, $User->ID)) { // more notification email is not allowed today
+                    $mail_log_message = 'Sending mail to User #' . $User->ID . '(' . $User->get('login') . ') is FAILED, because user is already limited to receive more notifications for TODAY.';
+                    return false;
+                }
+                break;
+            case 'newsletter':
+                // this is a newsletter email
+                $email_limit_setting = 'newsletter_limit';
+                $email_counter_setting = 'last_newsletter';
+                if (! check_allow_new_email($email_limit_setting, $email_counter_setting, $User->ID)) { // more newsletter email is not allowed today
+                    $mail_log_message = 'Sending mail to User #' . $User->ID . '(' . $User->get('login') . ') is FAILED, because user is already limited to receive more newsletters for TODAY.';
+                    return false;
+                }
+                break;
+            case 'newsletter_test':
+                // this is a newsletter email, used to send test email by current admin
+                $template_name = 'newsletter';
+                break;
+        }
 
-		// Update notification sender's info from General settings
-		$User->update_sender();
+        // Update notification sender's info from General settings
+        $User->update_sender();
 
-		switch( $UserSettings->get( 'email_format', $User->ID ) )
-		{	// Set Content-Type from user's setting "Email format"
-			case 'auto':
-				$template_params['boundary'] = 'b2evo-'.md5( rand() );
-				$headers['Content-Type'] = 'multipart/mixed; boundary="'.$template_params['boundary'].'"';
-				break;
-			case 'html':
-				$headers['Content-Type'] = 'text/html; charset='.$current_charset;
-				break;
-			case 'text':
-				$headers['Content-Type'] = 'text/plain; charset='.$current_charset;
-				break;
-		}
+        switch ($UserSettings->get('email_format', $User->ID)) {	// Set Content-Type from user's setting "Email format"
+            case 'auto':
+                $template_params['boundary'] = 'b2evo-' . md5(rand());
+                $headers['Content-Type'] = 'multipart/mixed; boundary="' . $template_params['boundary'] . '"';
+                break;
+            case 'html':
+                $headers['Content-Type'] = 'text/html; charset=' . $current_charset;
+                break;
+            case 'text':
+                $headers['Content-Type'] = 'text/plain; charset=' . $current_charset;
+                break;
+        }
 
-		if( ! isset( $template_params['recipient_User'] ) )
-		{ // Set recipient User, it should be defined for each template because of email footer
-			$template_params['recipient_User'] = $User;
-		}
+        if (! isset($template_params['recipient_User'])) { // Set recipient User, it should be defined for each template because of email footer
+            $template_params['recipient_User'] = $User;
+        }
 
-		// Pass all email headers to template because they may be used there, e.g. in email footer template:
-		$template_params['email_headers'] = $headers;
+        // Pass all email headers to template because they may be used there, e.g. in email footer template:
+        $template_params['email_headers'] = $headers;
 
-		// Get a message text from template file
-		$message = mail_template( $template_name, $UserSettings->get( 'email_format', $User->ID ), $template_params, $User );
+        // Get a message text from template file
+        $message = mail_template($template_name, $UserSettings->get('email_format', $User->ID), $template_params, $User);
 
-		// Autoinsert user's data
-		$subject = mail_autoinsert_user_data( $subject, $User, 'text', NULL, NULL, $template_params );
+        // Autoinsert user's data
+        $subject = mail_autoinsert_user_data($subject, $User, 'text', null, null, $template_params);
 
-		// erhsatingin > moved to mail_template()
-		//$message = mail_autoinsert_user_data( $message, $User );
+        // erhsatingin > moved to mail_template()
+        //$message = mail_autoinsert_user_data( $message, $User );
 
-		$to_email = !empty( $force_email_address ) ? $force_email_address : $User->email;
+        $to_email = ! empty($force_email_address) ? $force_email_address : $User->email;
 
-		// Params for email log:
-		$email_campaign_ID = empty( $template_params['ecmp_ID'] ) ? NULL : $template_params['ecmp_ID'];
-		$automation_ID = empty( $template_params['autm_ID'] ) ? NULL : $template_params['autm_ID'];
+        // Params for email log:
+        $email_campaign_ID = empty($template_params['ecmp_ID']) ? null : $template_params['ecmp_ID'];
+        $automation_ID = empty($template_params['autm_ID']) ? null : $template_params['autm_ID'];
 
-		if( send_mail( $to_email, NULL, $subject, $message, NULL, NULL, $headers, $user_ID, $email_campaign_ID, $automation_ID ) )
-		{ // email was sent, update last email settings;
-			if( isset( $email_limit_setting, $email_counter_setting ) )
-			{ // User Settings(email counters) need to be updated
-				update_user_email_counter( $email_limit_setting, $email_counter_setting, $user_ID );
-			}
-			return true;
-		}
-	}
+        if (send_mail($to_email, null, $subject, $message, null, null, $headers, $user_ID, $email_campaign_ID, $automation_ID)) { // email was sent, update last email settings;
+            if (isset($email_limit_setting, $email_counter_setting)) { // User Settings(email counters) need to be updated
+                update_user_email_counter($email_limit_setting, $email_counter_setting, $user_ID);
+            }
+            return true;
+        }
+    }
 
-	// No user or email could not be sent
-	return false;
+    // No user or email could not be sent
+    return false;
 }
 
 
@@ -4527,56 +4135,51 @@ function send_mail_to_User( $user_ID, $subject, $template_name, $template_params
  * @param string Use this param if you want use different email address instead of $User->email
  * @return boolean True if mail could be sent (not necessarily delivered!), false if not - (return value of {@link mail()})
  */
-function send_mail_to_anonymous_user( $user_email, $user_name, $subject, $template_name, $template_params = array(), $force_on_non_activated = false, $headers = array(), $force_email_address = '' )
+function send_mail_to_anonymous_user($user_email, $user_name, $subject, $template_name, $template_params = [], $force_on_non_activated = false, $headers = [], $force_email_address = '')
 {
-	/**
-	 * @var string|NULL This global var stores a last mail log message
-	 */
-	global $mail_log_message;
-	$mail_log_message = NULL;
+    /**
+     * @var string|null This global var stores a last mail log message
+     */
+    global $mail_log_message;
+    $mail_log_message = null;
 
-	// Check if a new email to anonymous user with the corrensponding email type is allowed:
-	switch( $template_name )
-	{
-		case 'comment_new':
-			// Notify anonymous user of replies:
-			if( isset( $template_params['comment_ID'] ) && ! check_allow_new_anon_email( $template_params['comment_ID'] ) )
-			{	// more notification email is not allowed today:
-				$mail_log_message = 'Sending mail to anonymous user #'.$user_email.'('.$user_name.') is FAILED, because user is already limited to receive more notifications for TODAY.';
-				return false;
-			}
-			break;
-	}
+    // Check if a new email to anonymous user with the corrensponding email type is allowed:
+    switch ($template_name) {
+        case 'comment_new':
+            // Notify anonymous user of replies:
+            if (isset($template_params['comment_ID']) && ! check_allow_new_anon_email($template_params['comment_ID'])) {	// more notification email is not allowed today:
+                $mail_log_message = 'Sending mail to anonymous user #' . $user_email . '(' . $user_name . ') is FAILED, because user is already limited to receive more notifications for TODAY.';
+                return false;
+            }
+            break;
+    }
 
-	$template_params['boundary'] = 'b2evo-'.md5( rand() );
-	$headers['Content-Type'] = 'multipart/mixed; boundary="'.$template_params['boundary'].'"';
+    $template_params['boundary'] = 'b2evo-' . md5(rand());
+    $headers['Content-Type'] = 'multipart/mixed; boundary="' . $template_params['boundary'] . '"';
 
-	if( ! isset( $template_params['anonymous_recipient_name'] ) )
-	{	// Set recipient User, it should be defined for each template because of email footer:
-		$template_params['anonymous_recipient_name'] = $user_name;
-	}
+    if (! isset($template_params['anonymous_recipient_name'])) {	// Set recipient User, it should be defined for each template because of email footer:
+        $template_params['anonymous_recipient_name'] = $user_name;
+    }
 
-	// Get a message text from template file:
-	$message = mail_template( $template_name, 'auto', $template_params );
+    // Get a message text from template file:
+    $message = mail_template($template_name, 'auto', $template_params);
 
-	// Autoinsert user's data:
-	$subject = mail_autoinsert_user_data( $subject, NULL, 'text', $user_email, $user_name, $template_params );
+    // Autoinsert user's data:
+    $subject = mail_autoinsert_user_data($subject, null, 'text', $user_email, $user_name, $template_params);
 
-	// Params for email log:
-	$email_campaign_ID = empty( $template_params['ecmp_ID'] ) ? NULL : $template_params['ecmp_ID'];
-	$automation_ID = empty( $template_params['autm_ID'] ) ? NULL : $template_params['autm_ID'];
+    // Params for email log:
+    $email_campaign_ID = empty($template_params['ecmp_ID']) ? null : $template_params['ecmp_ID'];
+    $automation_ID = empty($template_params['autm_ID']) ? null : $template_params['autm_ID'];
 
-	if( send_mail( $user_email, $user_name, $subject, $message, NULL, NULL, $headers, NULL, $email_campaign_ID, $automation_ID ) )
-	{	// Email was sent:
-		if( isset( $template_params['comment_ID'] ) )
-		{	// Anonymous user settings(email counters) need to be updated:
-			update_anon_user_email_counter( $template_params['comment_ID'] );
-		}
-		return true;
-	}
+    if (send_mail($user_email, $user_name, $subject, $message, null, null, $headers, null, $email_campaign_ID, $automation_ID)) {	// Email was sent:
+        if (isset($template_params['comment_ID'])) {	// Anonymous user settings(email counters) need to be updated:
+            update_anon_user_email_counter($template_params['comment_ID']);
+        }
+        return true;
+    }
 
-	// No user or email could not be sent:
-	return false;
+    // No user or email could not be sent:
+    return false;
 }
 
 
@@ -4590,82 +4193,71 @@ function send_mail_to_anonymous_user( $user_email, $user_name, $subject, $templa
  * @param string Name of anonymous user
  * @param array Email template params
  * @return string Text
-*/
-function mail_autoinsert_user_data( $text, $User = NULL, $format = 'text', $user_email = NULL, $user_name = NULL, $params = array() )
+ */
+function mail_autoinsert_user_data($text, $User = null, $format = 'text', $user_email = null, $user_name = null, $params = [])
 {
-	if( ! $User && ! ( $user_email || $user_email ) )
-	{	// No user data:
-		return $text;
-	}
+    if (! $User && ! ($user_email || $user_email)) {	// No user data:
+        return $text;
+    }
 
-	if( $User )
-	{	// Get data of registered User:
-		global $UserSettings;
+    if ($User) {	// Get data of registered User:
+        global $UserSettings;
 
-		if( $format == 'html' )
-		{
-			$username = $User->get_colored_login( array(
-					'mask'        => '$avatar$ $login$',
-					'login_text'  => 'name',
-					'use_style'   => true,
-					'extra_class' => 'normal_weight',
-					'protocol'    => 'http:',
-				) );
+        if ($format == 'html') {
+            $username = $User->get_colored_login([
+                'mask' => '$avatar$ $login$',
+                'login_text' => 'name',
+                'use_style' => true,
+                'extra_class' => 'normal_weight',
+                'protocol' => 'http:',
+            ]);
 
-			$user_login = $User->get_colored_login( array(
-					'mask'        => '$avatar$ $login$',
-					'use_style'   => true,
-					'protocol'    => 'http:',
-				) );
-		}
-		else
-		{
-			$username = $User->get_username();
-			$user_login = $User->login;
-		}
+            $user_login = $User->get_colored_login([
+                'mask' => '$avatar$ $login$',
+                'use_style' => true,
+                'protocol' => 'http:',
+            ]);
+        } else {
+            $username = $User->get_username();
+            $user_login = $User->login;
+        }
 
-		$firstname = $User->get( 'firstname' );
-		$lastname = $User->get( 'lastname' );
-		$firstname_and_login = empty( $firstname ) ? $user_login : $firstname.' ('.$user_login.')';
-		$firstname_or_login = empty( $firstname ) ? $user_login : $firstname;
-		$user_email = $User->email;
-		$user_ID = $User->ID;
-		$unsubscribe_key = '$secret_content_start$'.md5( $User->ID.$User->unsubscribe_key ).'$secret_content_end$';
-		if( isset( $params['template_mode'] ) && $params['template_mode'] == 'preview' )
-		{	// Don't use real value of reminder key on preview email template, e.g. on review message of email campaign:
-			$reminder_key = '$reminder_key$';
-		}
-		else
-		{	// Use real value of reminder key:
-			$reminder_key = $UserSettings->get( 'last_activation_reminder_key', $user_ID );
-			if( empty( $reminder_key ) && strpos( $text, '$reminder_key$' ) !== false )
-			{	// If reminder key was not generated yet we need create it in order user can active account even if did request the activation email yet:
-				$reminder_key = generate_random_key( 32 );
-				$UserSettings->set( 'last_activation_reminder_key', $reminder_key, $user_ID );
-				$UserSettings->dbupdate();
-			}
-		}
-		$newsletter_ID = isset( $params['enlt_ID'] ) ? $params['enlt_ID'] : '';
-	}
-	else
-	{	// Get data of anonymous user:
-		$username = $user_name;
-		$user_login = $user_name;
-		$firstname = $user_name;
-		$lastname = $user_name;
-		$firstname_and_login = $user_name;
-		$firstname_or_login = $user_name;
-		$user_email = $user_email;
-		$user_ID = '';
-		$unsubscribe_key = '';
-		$reminder_key = '';
-		$newsletter_ID = '';
-	}
+        $firstname = $User->get('firstname');
+        $lastname = $User->get('lastname');
+        $firstname_and_login = empty($firstname) ? $user_login : $firstname . ' (' . $user_login . ')';
+        $firstname_or_login = empty($firstname) ? $user_login : $firstname;
+        $user_email = $User->email;
+        $user_ID = $User->ID;
+        $unsubscribe_key = '$secret_content_start$' . md5($User->ID . $User->unsubscribe_key) . '$secret_content_end$';
+        if (isset($params['template_mode']) && $params['template_mode'] == 'preview') {	// Don't use real value of reminder key on preview email template, e.g. on review message of email campaign:
+            $reminder_key = '$reminder_key$';
+        } else {	// Use real value of reminder key:
+            $reminder_key = $UserSettings->get('last_activation_reminder_key', $user_ID);
+            if (empty($reminder_key) && strpos($text, '$reminder_key$') !== false) {	// If reminder key was not generated yet we need create it in order user can active account even if did request the activation email yet:
+                $reminder_key = generate_random_key(32);
+                $UserSettings->set('last_activation_reminder_key', $reminder_key, $user_ID);
+                $UserSettings->dbupdate();
+            }
+        }
+        $newsletter_ID = isset($params['enlt_ID']) ? $params['enlt_ID'] : '';
+    } else {	// Get data of anonymous user:
+        $username = $user_name;
+        $user_login = $user_name;
+        $firstname = $user_name;
+        $lastname = $user_name;
+        $firstname_and_login = $user_name;
+        $firstname_or_login = $user_name;
+        $user_email = $user_email;
+        $user_ID = '';
+        $unsubscribe_key = '';
+        $reminder_key = '';
+        $newsletter_ID = '';
+    }
 
-	$rpls_from = array( '$login$', '$username$', '$firstname$', '$lastname$', '$firstname_and_login$', '$firstname_or_login$', '$email$', '$user_ID$', '$unsubscribe_key$', '$reminder_key$', '$newsletter_ID$' );
-	$rpls_to = array( $user_login, $username, $firstname, $lastname, $firstname_and_login, $firstname_or_login, $user_email, $user_ID, $unsubscribe_key, $reminder_key, $newsletter_ID );
+    $rpls_from = ['$login$', '$username$', '$firstname$', '$lastname$', '$firstname_and_login$', '$firstname_or_login$', '$email$', '$user_ID$', '$unsubscribe_key$', '$reminder_key$', '$newsletter_ID$'];
+    $rpls_to = [$user_login, $username, $firstname, $lastname, $firstname_and_login, $firstname_or_login, $user_email, $user_ID, $unsubscribe_key, $reminder_key, $newsletter_ID];
 
-	return str_replace( $rpls_from, $rpls_to, $text );
+    return str_replace($rpls_from, $rpls_to, $text);
 }
 
 
@@ -4678,149 +4270,131 @@ function mail_autoinsert_user_data( $text, $User = NULL, $format = 'text', $user
  * @param object User
  * @return string|array Mail message OR Array of the email contents when message is multipart content
  */
-function mail_template( $template_name, $format = 'auto', $params = array(), $User = NULL )
+function mail_template($template_name, $format = 'auto', $params = [], $User = null)
 {
-	global $current_charset;
-	global $track_email_image_load, $track_email_click_html, $track_email_click_plain_text;
+    global $current_charset;
+    global $track_email_image_load, $track_email_click_html, $track_email_click_plain_text;
 
-	$params = array_merge( array(
-			'add_email_tracking' => true,
-			'template_parts' => array(
-					'header' => NULL,
-					'footer' => NULL
-				),
-			'default_template_tag' => NULL
-		), $params );
+    $params = array_merge([
+        'add_email_tracking' => true,
+        'template_parts' => [
+            'header' => null,
+            'footer' => null,
+        ],
+        'default_template_tag' => null,
+    ], $params);
 
-	// Set this param to know current template name inside code of email templates like header and footer:
-	$params['template_name'] = $template_name;
+    // Set this param to know current template name inside code of email templates like header and footer:
+    $params['template_name'] = $template_name;
 
-	if( !empty( $params['locale'] ) )
-	{ // Switch to locale for current email template
-		locale_temp_switch( $params['locale'] );
-	}
+    if (! empty($params['locale'])) { // Switch to locale for current email template
+        locale_temp_switch($params['locale']);
+    }
 
-	// Set extension of template
-	$template_exts = array();
-	switch( $format )
-	{
-		case 'auto':
-			// $template_exts['non-mime'] = '.txt.php'; // The area that is ignored by MIME-compliant clients
-			$template_exts['text'] = '.txt.php';
-			$template_exts['html'] = '.html.php';
-			$boundary = $params['boundary'];
-			$boundary_alt = 'b2evo-alt-'.md5( rand() );
-			$template_headers = array(
-					'text' => 'Content-Type: text/plain; charset='.$current_charset,
-					'html' => 'Content-Type: text/html; charset='.$current_charset,
-				);
-			// Store all contents in this array for multipart message
-			$template_contents = array(
-					'charset' => $current_charset, // Charset for email message
-					'full' => '', // Full content with html and plain
-					'html' => '', // HTML
-					'text' => '', // Plain text
-				);
-			break;
+    // Set extension of template
+    $template_exts = [];
+    switch ($format) {
+        case 'auto':
+            // $template_exts['non-mime'] = '.txt.php'; // The area that is ignored by MIME-compliant clients
+            $template_exts['text'] = '.txt.php';
+            $template_exts['html'] = '.html.php';
+            $boundary = $params['boundary'];
+            $boundary_alt = 'b2evo-alt-' . md5(rand());
+            $template_headers = [
+                'text' => 'Content-Type: text/plain; charset=' . $current_charset,
+                'html' => 'Content-Type: text/html; charset=' . $current_charset,
+            ];
+            // Store all contents in this array for multipart message
+            $template_contents = [
+                'charset' => $current_charset, // Charset for email message
+                'full' => '', // Full content with html and plain
+                'html' => '', // HTML
+                'text' => '', // Plain text
+            ];
+            break;
 
-		case 'html':
-			$template_exts['html'] = '.html.php';
-			break;
+        case 'html':
+            $template_exts['html'] = '.html.php';
+            break;
 
-		case 'text':
-			$template_exts['text'] = '.txt.php';
-			break;
-	}
+        case 'text':
+            $template_exts['text'] = '.txt.php';
+            break;
+    }
 
-	$template_message = '';
+    $template_message = '';
 
-	if( isset( $boundary, $boundary_alt ) )
-	{ // Start new boundary content
-		$template_message .= "\n".'--'.$boundary."\n";
-		$template_message .= 'Content-Type: multipart/alternative; boundary="'.$boundary_alt.'"'."\n\n";
-	}
+    if (isset($boundary, $boundary_alt)) { // Start new boundary content
+        $template_message .= "\n" . '--' . $boundary . "\n";
+        $template_message .= 'Content-Type: multipart/alternative; boundary="' . $boundary_alt . '"' . "\n\n";
+    }
 
-	foreach( $template_exts as $format => $ext )
-	{
-		$formated_message = '';
+    foreach ($template_exts as $format => $ext) {
+        $formated_message = '';
 
-		if( isset( $boundary, $boundary_alt ) && $format != 'non-mime' )
-		{ // Start new boundary alt content
-			$template_message .= "\n".'--'.$boundary_alt."\n";
-		}
+        if (isset($boundary, $boundary_alt) && $format != 'non-mime') { // Start new boundary alt content
+            $template_message .= "\n" . '--' . $boundary_alt . "\n";
+        }
 
-		if( isset( $template_headers[ $format ] ) )
-		{ // Header data for each content
-			$template_message .= $template_headers[ $format ]."\n\n";
-		}
+        if (isset($template_headers[$format])) { // Header data for each content
+            $template_message .= $template_headers[$format] . "\n\n";
+        }
 
-		// Get mail template
-		ob_start();
-		emailskin_include( $template_name.$ext, $params );
-		$formated_message .= ob_get_clean();
+        // Get mail template
+        ob_start();
+        emailskin_include($template_name . $ext, $params);
+        $formated_message .= ob_get_clean();
 
-		if( ! empty( $User ) )
-		{ // Replace $login$ with gender colored link + icon in HTML format, and with simple login text in PLAIN TEXT format
-			$formated_message = mail_autoinsert_user_data( $formated_message, $User, $format, NULL, NULL, $params );
-		}
-		elseif( ! empty( $params['anonymous_recipient_name'] ) )
-		{	// Replace anonymous name:
-			$formated_message = str_replace( '$name$', $params['anonymous_recipient_name'], $formated_message );
-			if( ! empty( $params['anonymous_unsubscribe_key'] ) )
-			{	// Replace anonymous unsubscribe key:
-				$formated_message = str_replace( '$unsubscribe_key$', $params['anonymous_unsubscribe_key'], $formated_message );
-			}
-		}
+        if (! empty($User)) { // Replace $login$ with gender colored link + icon in HTML format, and with simple login text in PLAIN TEXT format
+            $formated_message = mail_autoinsert_user_data($formated_message, $User, $format, null, null, $params);
+        } elseif (! empty($params['anonymous_recipient_name'])) {	// Replace anonymous name:
+            $formated_message = str_replace('$name$', $params['anonymous_recipient_name'], $formated_message);
+            if (! empty($params['anonymous_unsubscribe_key'])) {	// Replace anonymous unsubscribe key:
+                $formated_message = str_replace('$unsubscribe_key$', $params['anonymous_unsubscribe_key'], $formated_message);
+            }
+        }
 
-		if( $params['add_email_tracking'] )
-		{
-			$tracking_params = array(
-					'content_type' => $format,
-					'image_load' => isset( $track_email_image_load ) ? $track_email_image_load : true,
-					'link_click_html' => isset( $track_email_click_html ) ? $track_email_click_html : true ,
-					'link_click_text' => isset( $track_email_click_plain_text ) ? $track_email_click_plain_text : true,
-					'template_parts' => $params['template_parts'],
-					'default_template_tag' => $params['default_template_tag']
-				);
-			$formated_message = add_email_tracking( $formated_message, '$mail_log_ID$', '$email_key$', $tracking_params );
-		}
+        if ($params['add_email_tracking']) {
+            $tracking_params = [
+                'content_type' => $format,
+                'image_load' => isset($track_email_image_load) ? $track_email_image_load : true,
+                'link_click_html' => isset($track_email_click_html) ? $track_email_click_html : true,
+                'link_click_text' => isset($track_email_click_plain_text) ? $track_email_click_plain_text : true,
+                'template_parts' => $params['template_parts'],
+                'default_template_tag' => $params['default_template_tag'],
+            ];
+            $formated_message = add_email_tracking($formated_message, '$mail_log_ID$', '$email_key$', $tracking_params);
+        }
 
-		// Remove template parts markers
-		$template_part_markers = array();
-		foreach( $params['template_parts'] as $part => $row )
-		{
-			$template_part_markers[] = '$template-content-'.$part.'-start$';
-			$template_part_markers[] = '$template-content-'.$part.'-end$';
-		}
-		$formated_message = str_replace( $template_part_markers, '', $formated_message  );
-		$template_message .= $formated_message;
+        // Remove template parts markers
+        $template_part_markers = [];
+        foreach ($params['template_parts'] as $part => $row) {
+            $template_part_markers[] = '$template-content-' . $part . '-start$';
+            $template_part_markers[] = '$template-content-' . $part . '-end$';
+        }
+        $formated_message = str_replace($template_part_markers, '', $formated_message);
+        $template_message .= $formated_message;
 
-		if( isset( $template_contents ) )
-		{ // Multipart content
-			$template_contents[ $format ] = $formated_message;
-		}
-	}
+        if (isset($template_contents)) { // Multipart content
+            $template_contents[$format] = $formated_message;
+        }
+    }
 
-	if( isset( $boundary, $boundary_alt ) )
-	{ // End all boundary contents
-		$template_message .= "\n".'--'.$boundary_alt.'--'."\n";
-		$template_message .= "\n".'--'.$boundary.'--'."\n";
-	}
+    if (isset($boundary, $boundary_alt)) { // End all boundary contents
+        $template_message .= "\n" . '--' . $boundary_alt . '--' . "\n";
+        $template_message .= "\n" . '--' . $boundary . '--' . "\n";
+    }
 
-	if( !empty( $params['locale'] ) )
-	{ // Restore previous locale
-		locale_restore_previous();
-	}
+    if (! empty($params['locale'])) { // Restore previous locale
+        locale_restore_previous();
+    }
 
-	if( isset( $template_contents ) )
-	{ // Return array for multipart content
-		$template_contents['full'] = $template_message;
-		return $template_contents;
-	}
-	else
-	{ // Return string if email message contains one content (html or text)
-		return $template_message;
-	}
+    if (isset($template_contents)) { // Return array for multipart content
+        $template_contents['full'] = $template_message;
+        return $template_contents;
+    } else { // Return string if email message contains one content (html or text)
+        return $template_message;
+    }
 }
 
 
@@ -4830,58 +4404,51 @@ function mail_template( $template_name, $format = 'auto', $params = array(), $Us
  * @param string Template name
  * @param array Params
  */
-function emailskin_include( $template_name, $params = array(), $template_part = NULL )
+function emailskin_include($template_name, $params = [], $template_part = null)
 {
-	global $emailskins_path, $rsc_url;
+    global $emailskins_path, $rsc_url;
 
-	/**
-	* @var Log
-	*/
-	global $Debuglog;
-	global $Timer;
+    /**
+     * @var Log
+     */
+    global $Debuglog;
+    global $Timer;
 
-	$timer_name = 'emailskin_include('.$template_name.')';
-	$Timer->resume( $timer_name );
+    $timer_name = 'emailskin_include(' . $template_name . ')';
+    $Timer->resume($timer_name);
 
-	$is_customized = false;
+    $is_customized = false;
 
-	// Try to include custom template firstly
-	$template_path = $emailskins_path.'custom/'.$template_name;
-	if( file_exists( $template_path ) )
-	{ // Include custom template file if it exists
-		$Debuglog->add( 'emailskin_include: '.rel_path_to_base( $template_path ), 'skins' );
-		if( ! empty( $template_part ) )
-		{
-			echo '$template-content-'.$template_part.'-start$';
-		}
-		require $template_path;
-		if( ! empty( $template_part ) )
-		{
-			echo '$template-content-'.$template_part.'-end$';
-		}
-		// This template is customized, Don't include standard template
-		$is_customized = true;
-	}
+    // Try to include custom template firstly
+    $template_path = $emailskins_path . 'custom/' . $template_name;
+    if (file_exists($template_path)) { // Include custom template file if it exists
+        $Debuglog->add('emailskin_include: ' . rel_path_to_base($template_path), 'skins');
+        if (! empty($template_part)) {
+            echo '$template-content-' . $template_part . '-start$';
+        }
+        require $template_path;
+        if (! empty($template_part)) {
+            echo '$template-content-' . $template_part . '-end$';
+        }
+        // This template is customized, Don't include standard template
+        $is_customized = true;
+    }
 
-	if( !$is_customized )
-	{ // Try to include standard template only if custom template doesn't exist
-		$template_path = $emailskins_path.$template_name;
-		if( file_exists( $template_path ) )
-		{ // Include standard template file if it exists
-			$Debuglog->add( 'emailskin_include: '.rel_path_to_base( $template_path ), 'skins' );
-			if( ! empty( $template_part ) )
-			{
-				echo '$template-content-'.$template_part.'-start$';
-			}
-			require $template_path;
-			if( ! empty( $template_part ) )
-			{
-				echo '$template-content-'.$template_part.'-end$';
-			}
-		}
-	}
+    if (! $is_customized) { // Try to include standard template only if custom template doesn't exist
+        $template_path = $emailskins_path . $template_name;
+        if (file_exists($template_path)) { // Include standard template file if it exists
+            $Debuglog->add('emailskin_include: ' . rel_path_to_base($template_path), 'skins');
+            if (! empty($template_part)) {
+                echo '$template-content-' . $template_part . '-start$';
+            }
+            require $template_path;
+            if (! empty($template_part)) {
+                echo '$template-content-' . $template_part . '-end$';
+            }
+        }
+    }
 
-	$Timer->pause( $timer_name );
+    $Timer->pause($timer_name);
 }
 
 
@@ -4892,57 +4459,46 @@ function emailskin_include( $template_name, $params = array(), $template_part = 
  * @param boolean TRUE to return string as ' style="css_properties"' otherwise only 'css_properties'
  * @return string
  */
-function emailskin_style( $class, $set_attr_name = true )
+function emailskin_style($class, $set_attr_name = true)
 {
-	global $emailskins_styles;
+    global $emailskins_styles;
 
-	if( ! is_array( $emailskins_styles ) )
-	{ // Load email styles only first time
-		global $emailskins_path;
-		require_once $emailskins_path.'_email_style.php';
+    if (! is_array($emailskins_styles)) { // Load email styles only first time
+        global $emailskins_path;
+        require_once $emailskins_path . '_email_style.php';
 
-		foreach( $emailskins_styles as $classes => $styles )
-		{
-			if( strpos( $classes, ',' ) !== false )
-			{ // This style is used for several classes
-				unset( $emailskins_styles[ $classes ] );
-				$classes = explode( ',', $classes );
-				foreach( $classes as $class_name )
-				{
-					$class_name = trim( $class_name );
-					if( isset( $emailskins_styles[ $class_name ] ) )
-					{
-						$emailskins_styles[ $class_name ] .= $styles;
-					}
-					else
-					{
-						$emailskins_styles[ $class_name ] = $styles;
-					}
-				}
-			}
-		}
-	}
+        foreach ($emailskins_styles as $classes => $styles) {
+            if (strpos($classes, ',') !== false) { // This style is used for several classes
+                unset($emailskins_styles[$classes]);
+                $classes = explode(',', $classes);
+                foreach ($classes as $class_name) {
+                    $class_name = trim($class_name);
+                    if (isset($emailskins_styles[$class_name])) {
+                        $emailskins_styles[$class_name] .= $styles;
+                    } else {
+                        $emailskins_styles[$class_name] = $styles;
+                    }
+                }
+            }
+        }
+    }
 
-	if( strpos( $class, '+' ) !== false )
-	{ // Several classes should be applied this
-		$classes = explode( '+', $class );
-		$style = '';
-		foreach( $classes as $c => $class )
-		{
-			$style .= emailskin_style( $class, false );
-		}
+    if (strpos($class, '+') !== false) { // Several classes should be applied this
+        $classes = explode('+', $class);
+        $style = '';
+        foreach ($classes as $c => $class) {
+            $style .= emailskin_style($class, false);
+        }
 
-		return empty( $style ) ? '' : ( $set_attr_name ? ' style="'.$style.'"' : $style );
-	}
-	elseif( isset( $emailskins_styles[ $class ] ) )
-	{ // One class
-		$style = trim( str_replace( array( "\r", "\n", "\t" ), '', $emailskins_styles[ $class ] ) );
-		$style = str_replace( ': ', ':', $style );
+        return empty($style) ? '' : ($set_attr_name ? ' style="' . $style . '"' : $style);
+    } elseif (isset($emailskins_styles[$class])) { // One class
+        $style = trim(str_replace(["\r", "\n", "\t"], '', $emailskins_styles[$class]));
+        $style = str_replace(': ', ':', $style);
 
-		return $set_attr_name ? ' style="'.$style.'"' : $style;
-	}
+        return $set_attr_name ? ' style="' . $style . '"' : $style;
+    }
 
-	return '';
+    return '';
 }
 
 
@@ -4955,26 +4511,20 @@ function emailskin_style( $class, $set_attr_name = true )
  * @param string printf-pattern to use, if $var is numeric and > 1 (%s gets replaced by $var)
  * @param string printf-pattern to use if $var evaluates to false (%s gets replaced by $var)
  */
-function disp_cond( $var, $disp_one, $disp_more = NULL, $disp_none = NULL )
+function disp_cond($var, $disp_one, $disp_more = null, $disp_none = null)
 {
-	if( is_numeric($var) && $var > 1 )
-	{
-		printf( ( $disp_more === NULL ? $disp_one : $disp_more ), $var );
-		return true;
-	}
-	elseif( $var )
-	{
-		printf( $disp_one, $var );
-		return true;
-	}
-	else
-	{
-		if( $disp_none !== NULL )
-		{
-			printf( $disp_none, $var );
-			return false;
-		}
-	}
+    if (is_numeric($var) && $var > 1) {
+        printf(($disp_more === null ? $disp_one : $disp_more), $var);
+        return true;
+    } elseif ($var) {
+        printf($disp_one, $var);
+        return true;
+    } else {
+        if ($disp_none !== null) {
+            printf($disp_none, $var);
+            return false;
+        }
+    }
 }
 
 
@@ -4997,134 +4547,104 @@ function disp_cond( $var, $disp_one, $disp_more = NULL, $disp_none = NULL )
  * @param array Attributes for the icon
  * @return string The generated action icon link.
  */
-function action_icon( $title, $icon, $url, $word = NULL, $icon_weight = NULL, $word_weight = NULL, $link_attribs = array(), $icon_attribs = array() )
+function action_icon($title, $icon, $url, $word = null, $icon_weight = null, $word_weight = null, $link_attribs = [], $icon_attribs = [])
 {
-	global $UserSettings;
+    global $UserSettings;
 
-	$link_attribs['href'] = $url;
-	$link_attribs['title'] = $title;
+    $link_attribs['href'] = $url;
+    $link_attribs['title'] = $title;
 
-	if( is_null($icon_weight) )
-	{
-		$icon_weight = 4;
-	}
-	if( is_null($word_weight) )
-	{
-		$word_weight = 1;
-	}
+    if (is_null($icon_weight)) {
+        $icon_weight = 4;
+    }
+    if (is_null($word_weight)) {
+        $word_weight = 1;
+    }
 
-	if( ! isset($link_attribs['class']) )
-	{
-		$link_attribs['class'] = 'action_icon';
-	}
+    if (! isset($link_attribs['class'])) {
+        $link_attribs['class'] = 'action_icon';
+    }
 
-	if( get_icon( $icon, 'rollover' ) )
-	{
-		if( empty($link_attribs['class']) )
-		{
-			$link_attribs['class'] = 'rollover';
-		}
-		else
-		{
-			$link_attribs['class'] .= ' rollover';
-		}
+    if (get_icon($icon, 'rollover')) {
+        if (empty($link_attribs['class'])) {
+            $link_attribs['class'] = 'rollover';
+        } else {
+            $link_attribs['class'] .= ' rollover';
+        }
 
-		if( get_icon( $icon, 'sprite' ) )
-		{ // Set class "rollover_sprite" If image uses sprite
-			$link_attribs['class'] .= '_sprite';
-		}
-	}
-	//$link_attribs['class'] .= $icon != '' ? ' '.$icon : ' noicon';
+        if (get_icon($icon, 'sprite')) { // Set class "rollover_sprite" If image uses sprite
+            $link_attribs['class'] .= '_sprite';
+        }
+    }
+    //$link_attribs['class'] .= $icon != '' ? ' '.$icon : ' noicon';
 
-	// "use_js_popup": open link in a JS popup
-	// TODO: this needs to be rewritten with jQuery instead
-	if( false && ! empty($link_attribs['use_js_popup']) )
-	{
-		$popup_js = 'var win = new PopupWindow(); win.setUrl( \''.$link_attribs['href'].'\' ); win.setSize(  ); ';
+    // "use_js_popup": open link in a JS popup
+    // TODO: this needs to be rewritten with jQuery instead
+    if (false && ! empty($link_attribs['use_js_popup'])) {
+        $popup_js = 'var win = new PopupWindow(); win.setUrl( \'' . $link_attribs['href'] . '\' ); win.setSize(  ); ';
 
-		if( isset($link_attribs['use_js_size']) )
-		{
-			if( ! empty($link_attribs['use_js_size']) )
-			{
-				$popup_size = $link_attribs['use_js_size'];
-			}
-		}
-		else
-		{
-			$popup_size = '500, 400';
-		}
-		if( isset($popup_size) )
-		{
-			$popup_js .= 'win.setSize( '.$popup_size.' ); ';
-		}
-		$popup_js .= 'win.showPopup(\''.$link_attribs['id'].'\'); return false;';
+        if (isset($link_attribs['use_js_size'])) {
+            if (! empty($link_attribs['use_js_size'])) {
+                $popup_size = $link_attribs['use_js_size'];
+            }
+        } else {
+            $popup_size = '500, 400';
+        }
+        if (isset($popup_size)) {
+            $popup_js .= 'win.setSize( ' . $popup_size . ' ); ';
+        }
+        $popup_js .= 'win.showPopup(\'' . $link_attribs['id'] . '\'); return false;';
 
-		if( empty( $link_attribs['onclick'] ) )
-		{
-			$link_attribs['onclick'] = $popup_js;
-		}
-		else
-		{
-			$link_attribs['onclick'] .= $popup_js;
-		}
-		unset($link_attribs['use_js_popup']);
-		unset($link_attribs['use_js_size']);
-	}
+        if (empty($link_attribs['onclick'])) {
+            $link_attribs['onclick'] = $popup_js;
+        } else {
+            $link_attribs['onclick'] .= $popup_js;
+        }
+        unset($link_attribs['use_js_popup']);
+        unset($link_attribs['use_js_size']);
+    }
 
-	$display_icon = empty( $UserSettings ) ? false : ($icon_weight >= $UserSettings->get('action_icon_threshold'));
-	$display_word = empty( $UserSettings ) ? false : ($word_weight >= $UserSettings->get('action_word_threshold'));
+    $display_icon = empty($UserSettings) ? false : ($icon_weight >= $UserSettings->get('action_icon_threshold'));
+    $display_word = empty($UserSettings) ? false : ($word_weight >= $UserSettings->get('action_word_threshold'));
 
-	$a_body = '';
+    $a_body = '';
 
-	if( $display_icon || ! $display_word )
-	{	// We MUST display an action icon in order to make the user happy:
-		// OR we default to icon because the user doesn't want the word either!!
+    if ($display_icon || ! $display_word) {	// We MUST display an action icon in order to make the user happy:
+        // OR we default to icon because the user doesn't want the word either!!
 
-		$icon_attribs = array_merge( array(
-				'title' => false, // No need to set attribute "ttile" for icon because parent <a> already has it
-			), $icon_attribs );
+        $icon_attribs = array_merge([
+            'title' => false, // No need to set attribute "ttile" for icon because parent <a> already has it
+        ], $icon_attribs);
 
-		if( $icon_s = get_icon( $icon, 'imgtag', $icon_attribs, true ) )
-		{
-			$a_body .= $icon_s;
-		}
-		else
-		{ // fallback to word
-			$display_word = true;
-		}
-	}
+        if ($icon_s = get_icon($icon, 'imgtag', $icon_attribs, true)) {
+            $a_body .= $icon_s;
+        } else { // fallback to word
+            $display_word = true;
+        }
+    }
 
-	if( $display_word )
-	{	// We MUST display an action word in order to make the user happy:
+    if ($display_word) {	// We MUST display an action word in order to make the user happy:
+        if ($display_icon) { // We already have an icon, display a SHORT word:
+            if (! empty($word)) {	// We have provided a short word:
+                $a_body .= $word;
+            } else {	// We fall back to alt:
+                $a_body .= get_icon($icon, 'legend');
+            }
+        } else {	// No icon display, let's display a LONG word/text:
+            $a_body .= trim($title, ' .!');
+        }
 
-		if( $display_icon )
-		{ // We already have an icon, display a SHORT word:
-			if( !empty($word) )
-			{	// We have provided a short word:
-				$a_body .= $word;
-			}
-			else
-			{	// We fall back to alt:
-				$a_body .= get_icon( $icon, 'legend' );
-			}
-		}
-		else
-		{	// No icon display, let's display a LONG word/text:
-			$a_body .= trim( $title, ' .!' );
-		}
+        // Add class "hoverlink" for icon with text
+        $link_attribs['class'] .= ' hoverlink';
+    }
 
-		// Add class "hoverlink" for icon with text
-		$link_attribs['class'] .= ' hoverlink';
-	}
+    // Format title attribute because it may contains the unexpected chars from translatable strings:
+    if (isset($link_attribs['title'])) {
+        $link_attribs['title'] = format_to_output($link_attribs['title'], 'htmlattr');
+    }
 
-	// Format title attribute because it may contains the unexpected chars from translatable strings:
-	if( isset( $link_attribs['title'] ) )
-	{
-		$link_attribs['title'] = format_to_output( $link_attribs['title'], 'htmlattr' );
-	}
-
-	// NOTE: We do not use format_to_output with get_field_attribs_as_string() here, because it interferes with the Results class (eval() fails on entitied quotes..) (blueyed)
-	return '<a'.get_field_attribs_as_string( $link_attribs, false ).'>'.$a_body.'</a>';
+    // NOTE: We do not use format_to_output with get_field_attribs_as_string() here, because it interferes with the Results class (eval() fails on entitied quotes..) (blueyed)
+    return '<a' . get_field_attribs_as_string($link_attribs, false) . '>' . $a_body . '</a>';
 }
 
 
@@ -5143,515 +4663,415 @@ function action_icon( $title, $icon, $url, $word = NULL, $icon_weight = NULL, $w
  * @param boolean true to include this icon into the legend at the bottom of the page (works for 'imgtag' only)
  * @return mixed False on failure, string on success.
  */
-function get_icon( $iconKey, $what = 'imgtag', $params = NULL, $include_in_legend = false )
+function get_icon($iconKey, $what = 'imgtag', $params = null, $include_in_legend = false)
 {
-	global $admin_subdir, $Debuglog, $use_strict;
-	global $conf_path;
-	global $rsc_path, $rsc_uri;
-
-	if( ! function_exists('get_icon_info') )
-	{
-		require_once $conf_path.'_icons.php';
-	}
-
-	$icon = get_icon_info($iconKey);
-	if( ! $icon )
-	{
-		$Debuglog->add('No image defined for '.var_export( $iconKey, true ).'!', 'icons');
-		return false;
-	}
-
-	if( !isset( $icon['file'] ) && $what != 'imgtag' )
-	{
-		$icon['file'] = 'icons/icons_sprite.png';
-	}
-
-	switch( $what )
-	{
-		case 'rollover':
-			if( isset( $icon['rollover'] ) )
-			{ // Image has rollover available
-				global $b2evo_icons_type;
-
-				if( isset( $b2evo_icons_type ) && ( ! empty( $icon['glyph'] ) || ! empty( $icon['fa'] ) ) )
-				{ // Glyph and font-awesome icons don't have rollover effect
-					return false;
-				}
-				return $icon['rollover'];
-			}
-			return false;
-			/* BREAK */
-
-
-		case 'file':
-			return $rsc_path.$icon['file'];
-			/* BREAK */
-
-
-		case 'alt':
-			if( isset( $icon['alt'] ) )
-			{ // alt tag from $map_iconfiles
-				return $icon['alt'];
-			}
-			else
-			{ // fallback to $iconKey as alt-tag
-				return $iconKey;
-			}
-			/* BREAK */
-
-
-		case 'legend':
-			if( isset( $icon['legend'] ) )
-			{ // legend tag from $map_iconfiles
-				return $icon['legend'];
-			}
-			else
-			if( isset( $icon['alt'] ) )
-			{ // alt tag from $map_iconfiles
-				return $icon['alt'];
-			}
-			else
-			{ // fallback to $iconKey as alt-tag
-				return $iconKey;
-			}
-			/* BREAK */
-
-
-		case 'class':
-			if( isset($icon['class']) )
-			{
-				return $icon['class'];
-			}
-			else
-			{
-				return '';
-			}
-			/* BREAK */
-
-		case 'url':
-			return $rsc_uri.$icon['file'];
-			/* BREAK */
-
-		case 'size':
-			if( !isset( $icon['size'] ) )
-			{
-				$Debuglog->add( 'No iconsize for ['.$iconKey.']', 'icons' );
-
-				$icon['size'] = imgsize( $rsc_path.$icon['file'] );
-			}
-
-			switch( $params['size'] )
-			{
-				case 'width':
-					return $icon['size'][0];
-
-				case 'height':
-					return $icon['size'][1];
-
-				case 'widthxheight':
-					return $icon['size'][0].'x'.$icon['size'][1];
-
-				case 'width':
-					return $icon['size'][0];
-
-				case 'string':
-					return 'width="'.$icon['size'][0].'" height="'.$icon['size'][1].'"';
-
-				default:
-					return $icon['size'];
-			}
-			/* BREAK */
-
-
-		case 'xy':
-			if( isset( $icon['xy'] ) )
-			{ // Return data for style property "background-position"
-				return "-".$icon['xy'][0]."px -".$icon['xy'][1]."px";
-			}
-			return false;
-
-
-		case 'sprite':
-			if( isset( $icon['xy'] ) )
-			{	// Image uses spite file
-				return true;
-			}
-			return false;
-			/* BREAK */
-
-
-		case 'imgtag':
-			global $b2evo_icons_type;
-
-			if( isset( $b2evo_icons_type ) )
-			{ // Specific icons type is defined
-				$current_icons_type = $b2evo_icons_type;
-				if( $current_icons_type == 'fontawesome-glyphicons' )
-				{ // Use fontawesome icons as a priority over the glyphicons
-					$current_icons_type = isset( $icon['fa'] ) ? 'fontawesome' : 'glyphicons';
-				}
-				switch( $current_icons_type )
-				{
-					case 'glyphicons':
-						// Use glyph icons of bootstrap
-						$icon_class_prefix = 'glyphicon glyphicon-';
-						$icon_param_name = 'glyph';
-						$icon_content = '&nbsp;';
-						break;
-
-					case 'fontawesome':
-						// Use the icons from http://fortawesome.github.io/Font-Awesome/icons/
-						$icon_class_prefix = 'fa fa-';
-						$icon_param_name = 'fa';
-						$icon_content = '';
-						break;
-				}
-			}
-
-			if( isset( $icon_class_prefix ) && ! empty( $icon[ $icon_param_name ] ) )
-			{ // Use glyph or fa icon if it is defined in icons config
-				if( isset( $params['class'] ) )
-				{ // Get class from params
-					$params['class'] = $icon_class_prefix.$icon[ $icon_param_name ].' '.$params['class'];
-				}
-				else
-				{ // Set default class
-					$params['class'] = $icon_class_prefix.$icon[ $icon_param_name ];
-				}
-
-				$styles = array();
-				if( isset( $params['color'] ) )
-				{	// Set color from params:
-					$styles[] = 'color:'.$params['color'];
-					unset( $params['color'] );
-				}
-				elseif( isset( $icon['color-'.$icon_param_name] ) )
-				{ // Set a color for icon only for current type
-					if( $icon['color-'.$icon_param_name] != 'default' )
-					{
-						$styles[] = 'color:'.$icon['color-'.$icon_param_name];
-					}
-				}
-				elseif( isset( $icon['color'] ) )
-				{ // Set a color for icon for all types
-					if( $icon['color'] != 'default' )
-					{
-						$styles[] = 'color:'.$icon['color'];
-					}
-				}
-				if( isset( $icon['color-over'] ) )
-				{ // Set a color for mouse over event
-					$params['data-color'] = $icon['color-over'];
-				}
-				if( isset( $icon['toggle-'.$icon_param_name] ) )
-				{ // Set a color for mouse over event
-					$params['data-toggle'] = $icon['toggle-'.$icon_param_name];
-				}
-
-				if( ! isset( $params['title'] ) )
-				{ // Use 'alt' for 'title'
-					if( isset( $params['alt'] ) )
-					{
-						$params['title'] = $params['alt'];
-						unset( $params['alt'] );
-					}
-					else if( ! isset( $params['alt'] ) && isset( $icon['alt'] ) )
-					{
-						$params['title'] = $icon['alt'];
-					}
-				}
-
-				if( isset( $params['title'] ) && $params['title'] === false )
-				{	// Disable title:
-					unset( $params['title'] );
-				}
-
-				// Format title and alt attributes because they may contain the unexpected chars from translatable strings:
-				if( isset( $params['title'] ) )
-				{
-					// Use 'htmlspecialchars' format instead of 'htmlattr' because html tags should not be stripped e.g. in bootsrap tooltips:
-					$params['title'] = format_to_output( $params['title'], 'htmlspecialchars' );
-				}
-				if( isset( $params['alt'] ) )
-				{
-					$params['alt'] = format_to_output( $params['alt'], 'htmlattr' );
-				}
-
-				if( isset( $icon['size-'.$icon_param_name] ) )
-				{ // Set a size for icon only for current type
-					if( isset( $icon['size-'.$icon_param_name][0] ) )
-					{ // Width
-						$styles['width'] = 'width:'.$icon['size-'.$icon_param_name][0].'px';
-					}
-					if( isset( $icon['size-'.$icon_param_name][1] ) )
-					{ // Height
-						$styles['height'] = 'height:'.$icon['size-'.$icon_param_name][1].'px';
-					}
-				}
-
-				if( isset( $params['style'] ) )
-				{ // Keep styles from params
-					$styles[] = $params['style'];
-				}
-				if( ! empty( $styles ) )
-				{ // Init attribute 'style'
-					$params['style'] = implode( ';', $styles );
-				}
-
-				// Add all the attributes:
-				$params = get_field_attribs_as_string( $params, false );
-
-				$r = '<span'.$params.'>'.$icon_content.'</span>';
-			}
-			elseif( ! isset( $icon['file'] ) )
-			{ // Use span tag with sprite instead of img
-				$styles = array();
-
-				if( isset( $params['xy'] ) )
-				{ // Get background position from params
-					$styles[] = "background-position: ".$params['xy'][0]."px ".$params['xy'][1]."px";
-					unset( $params['xy'] );
-				}
-				else if( isset( $icon['xy'] ) )
-				{ // Set background position in the icons_sprite.png
-					$styles[] = "background-position: -".$icon['xy'][0]."px -".$icon['xy'][1]."px";
-				}
-
-				if( isset( $params['size'] ) )
-				{ // Get sizes from params
-					$icon['size'] = $params['size'];
-					unset( $params['size'] );
-				}
-				if( isset( $icon['size'] ) )
-				{ // Set width & height
-					if( $icon['size'][0] != 16 )
-					{
-						$styles[] = "width: ".$icon['size'][0]."px";
-					}
-					if( $icon['size'][1] != 16 )
-					{
-						$styles[] = "height: ".$icon['size'][1]."px; line-height: ".$icon['size'][1]."px";
-					}
-				}
-
-				if( isset( $params['style'] ) )
-				{ // Get styles from params
-					$styles[] = $params['style'];
-				}
-				if( count( $styles ) > 0 )
-				{
-					$params['style'] = implode( '; ', $styles);
-				}
-
-				if( ! isset( $params['title'] ) )
-				{	// Use 'alt' for 'title'
-					if( isset( $params['alt'] ) )
-					{
-						$params['title'] = $params['alt'];
-						unset( $params['alt'] );
-					}
-					else if( ! isset( $params['alt'] ) && isset( $icon['alt'] ) )
-					{
-						$params['title'] = $icon['alt'];
-					}
-				}
-
-				if( isset( $params['title'] ) && $params['title'] === false )
-				{	// Disable title:
-					unset( $params['title'] );
-				}
-
-				// Format title and alt attributes because they may contain the unexpected chars from translatable strings:
-				if( isset( $params['title'] ) )
-				{
-					$params['title'] = format_to_output( $params['title'], 'htmlattr' );
-				}
-				if( isset( $params['alt'] ) )
-				{
-					$params['alt'] = format_to_output( $params['alt'], 'htmlattr' );
-				}
-
-				if( isset( $params['class'] ) )
-				{	// Get class from params
-					$params['class'] = 'icon '.$params['class'];
-				}
-				else
-				{	// Set default class
-					$params['class'] = 'icon';
-				}
-
-				// Add all the attributes:
-				$params = get_field_attribs_as_string( $params, false );
-
-				$r = '<span'.$params.'>&nbsp;</span>';
-			}
-			else
-			{ // Use img tag
-				$r = '<img src="'.$rsc_uri.$icon['file'].'" ';
-
-				if( !$use_strict )
-				{	// Include non CSS fallbacks - transitional only:
-					$r .= 'border="0" align="top" ';
-				}
-
-				// Include class (will default to "icon"):
-				if( ! isset( $params['class'] ) )
-				{
-					if( isset($icon['class']) )
-					{	// This icon has a class
-						$params['class'] = $icon['class'];
-					}
-					else
-					{
-						$params['class'] = '';
-					}
-				}
-
-				// Include size (optional):
-				if( isset( $icon['size'] ) )
-				{
-					$r .= 'width="'.$icon['size'][0].'" height="'.$icon['size'][1].'" ';
-				}
-
-				// Include alt (XHTML mandatory):
-				if( ! isset( $params['alt'] ) )
-				{
-					if( isset( $icon['alt'] ) )
-					{ // alt-tag from $map_iconfiles
-						$params['alt'] = $icon['alt'];
-					}
-					else
-					{ // $iconKey as alt-tag
-						$params['alt'] = $iconKey;
-					}
-				}
-
-				// Format alt attribute because it may contains the unexpected chars from translatable strings:
-				if( isset( $params['alt'] ) )
-				{
-					$params['alt'] = format_to_output( $params['alt'], 'htmlattr' );
-				}
-
-				// Add all the attributes:
-				$r .= get_field_attribs_as_string( $params, false );
-
-				// Close tag:
-				$r .= '/>';
-
-
-				if( $include_in_legend && ( $IconLegend = & get_IconLegend() ) )
-				{ // This icon should be included into the legend:
-					$IconLegend->add_icon( $iconKey );
-				}
-			}
-			return $r;
-			/* BREAK */
-
-		case 'noimg':
-			global $b2evo_icons_type;
-
-			if( isset( $b2evo_icons_type ) )
-			{ // Specific icons type is defined
-				$current_icons_type = $b2evo_icons_type;
-				if( $current_icons_type == 'fontawesome-glyphicons' )
-				{ // Use fontawesome icons as a priority over the glyphicons
-					$current_icons_type = isset( $icon['fa'] ) ? 'fontawesome' : 'glyphicons';
-				}
-				switch( $current_icons_type )
-				{
-					case 'glyphicons':
-						// Use glyph icons of bootstrap
-						$icon_param_name = 'glyph';
-						break;
-
-					case 'fontawesome':
-						// Use the icons from http://fortawesome.github.io/Font-Awesome/icons/
-						$icon_param_name = 'fa';
-						break;
-				}
-			}
-
-			$styles = array();
-			if( isset( $icon_param_name ) && ! empty( $icon[ $icon_param_name ] ) )
-			{ // Use glyph or fa icon if it is defined in icons config
-				if( isset( $icon['size-'.$icon_param_name] ) )
-				{ // Set a size for icon only for current type
-					if( isset( $icon['size-'.$icon_param_name][0] ) )
-					{ // Width
-						$styles['width'] = 'width:'.$icon['size-'.$icon_param_name][0].'px';
-					}
-					if( isset( $icon['size-'.$icon_param_name][1] ) )
-					{ // Height
-						$styles['width'] = 'height:'.$icon['size-'.$icon_param_name][1].'px';
-					}
-					if( isset( $icon['size'] ) )
-					{ // Unset size for sprite icon
-						unset( $icon['size'] );
-					}
-				}
-			}
-
-			// Include size (optional):
-			if( isset( $icon['size'] ) )
-			{
-				$params['size'] = $icon['size'];
-			}
-			$styles[] = 'margin:0 2px';
-
-			if( isset( $params['style'] ) )
-			{ // Keep styles from params
-				$styles[] = $params['style'];
-			}
-			if( ! empty( $styles ) )
-			{ // Init attribute 'style'
-				$params['style'] = implode( ';', $styles );
-			}
-
-			return get_icon( 'pixel', 'imgtag', $params );
-			/* BREAK */
-			/*
-			$blank_icon = get_icon_info('pixel');
-
-			$r = '<img src="'.$rsc_uri.$blank_icon['file'].'" ';
-
-			// TODO: dh> add this only for !$use_strict, like above?
-			// Include non CSS fallbacks (needed by bozos... and basic skin):
-			$r .= 'border="0" align="top" ';
-
-			// Include class (will default to "noicon"):
-			if( ! isset( $params['class'] ) )
-			{
-				if( isset($icon['class']) )
-				{	// This icon has a class
-					$params['class'] = $icon['class'];
-				}
-				else
-				{
-					$params['class'] = 'no_icon';
-				}
-			}
-
-			// Include size (optional):
-			if( isset( $icon['size'] ) )
-			{
-				$r .= 'width="'.$icon['size'][0].'" height="'.$icon['size'][1].'" ';
-			}
-
-			// Include alt (XHTML mandatory):
-			if( ! isset( $params['alt'] ) )
-			{
-				$params['alt'] = '';
-			}
-
-			// Add all the attributes:
-			$r .= get_field_attribs_as_string( $params, false );
-
-			// Close tag:
-			$r .= '/>';
-
-			return $r;*/
-			/* BREAK */
-	}
+    global $admin_subdir, $Debuglog, $use_strict;
+    global $conf_path;
+    global $rsc_path, $rsc_uri;
+
+    if (! function_exists('get_icon_info')) {
+        require_once $conf_path . '_icons.php';
+    }
+
+    $icon = get_icon_info($iconKey);
+    if (! $icon) {
+        $Debuglog->add('No image defined for ' . var_export($iconKey, true) . '!', 'icons');
+        return false;
+    }
+
+    if (! isset($icon['file']) && $what != 'imgtag') {
+        $icon['file'] = 'icons/icons_sprite.png';
+    }
+
+    switch ($what) {
+        case 'rollover':
+            if (isset($icon['rollover'])) { // Image has rollover available
+                global $b2evo_icons_type;
+
+                if (isset($b2evo_icons_type) && (! empty($icon['glyph']) || ! empty($icon['fa']))) { // Glyph and font-awesome icons don't have rollover effect
+                    return false;
+                }
+                return $icon['rollover'];
+            }
+            return false;
+            /* BREAK */
+
+        case 'file':
+            return $rsc_path . $icon['file'];
+            /* BREAK */
+
+        case 'alt':
+            if (isset($icon['alt'])) { // alt tag from $map_iconfiles
+                return $icon['alt'];
+            } else { // fallback to $iconKey as alt-tag
+                return $iconKey;
+            }
+            /* BREAK */
+
+            // no break
+        case 'legend':
+            if (isset($icon['legend'])) { // legend tag from $map_iconfiles
+                return $icon['legend'];
+            } elseif (isset($icon['alt'])) { // alt tag from $map_iconfiles
+                return $icon['alt'];
+            } else { // fallback to $iconKey as alt-tag
+                return $iconKey;
+            }
+            /* BREAK */
+
+            // no break
+        case 'class':
+            if (isset($icon['class'])) {
+                return $icon['class'];
+            } else {
+                return '';
+            }
+            /* BREAK */
+
+            // no break
+        case 'url':
+            return $rsc_uri . $icon['file'];
+            /* BREAK */
+
+        case 'size':
+            if (! isset($icon['size'])) {
+                $Debuglog->add('No iconsize for [' . $iconKey . ']', 'icons');
+
+                $icon['size'] = imgsize($rsc_path . $icon['file']);
+            }
+
+            switch ($params['size']) {
+                case 'width':
+                    return $icon['size'][0];
+
+                case 'height':
+                    return $icon['size'][1];
+
+                case 'widthxheight':
+                    return $icon['size'][0] . 'x' . $icon['size'][1];
+
+                case 'width':
+                    return $icon['size'][0];
+
+                case 'string':
+                    return 'width="' . $icon['size'][0] . '" height="' . $icon['size'][1] . '"';
+
+                default:
+                    return $icon['size'];
+            }
+            /* BREAK */
+
+            // no break
+        case 'xy':
+            if (isset($icon['xy'])) { // Return data for style property "background-position"
+                return "-" . $icon['xy'][0] . "px -" . $icon['xy'][1] . "px";
+            }
+            return false;
+
+        case 'sprite':
+            if (isset($icon['xy'])) {	// Image uses spite file
+                return true;
+            }
+            return false;
+            /* BREAK */
+
+        case 'imgtag':
+            global $b2evo_icons_type;
+
+            if (isset($b2evo_icons_type)) { // Specific icons type is defined
+                $current_icons_type = $b2evo_icons_type;
+                if ($current_icons_type == 'fontawesome-glyphicons') { // Use fontawesome icons as a priority over the glyphicons
+                    $current_icons_type = isset($icon['fa']) ? 'fontawesome' : 'glyphicons';
+                }
+                switch ($current_icons_type) {
+                    case 'glyphicons':
+                        // Use glyph icons of bootstrap
+                        $icon_class_prefix = 'glyphicon glyphicon-';
+                        $icon_param_name = 'glyph';
+                        $icon_content = '&nbsp;';
+                        break;
+
+                    case 'fontawesome':
+                        // Use the icons from http://fortawesome.github.io/Font-Awesome/icons/
+                        $icon_class_prefix = 'fa fa-';
+                        $icon_param_name = 'fa';
+                        $icon_content = '';
+                        break;
+                }
+            }
+
+            if (isset($icon_class_prefix) && ! empty($icon[$icon_param_name])) { // Use glyph or fa icon if it is defined in icons config
+                if (isset($params['class'])) { // Get class from params
+                    $params['class'] = $icon_class_prefix . $icon[$icon_param_name] . ' ' . $params['class'];
+                } else { // Set default class
+                    $params['class'] = $icon_class_prefix . $icon[$icon_param_name];
+                }
+
+                $styles = [];
+                if (isset($params['color'])) {	// Set color from params:
+                    $styles[] = 'color:' . $params['color'];
+                    unset($params['color']);
+                } elseif (isset($icon['color-' . $icon_param_name])) { // Set a color for icon only for current type
+                    if ($icon['color-' . $icon_param_name] != 'default') {
+                        $styles[] = 'color:' . $icon['color-' . $icon_param_name];
+                    }
+                } elseif (isset($icon['color'])) { // Set a color for icon for all types
+                    if ($icon['color'] != 'default') {
+                        $styles[] = 'color:' . $icon['color'];
+                    }
+                }
+                if (isset($icon['color-over'])) { // Set a color for mouse over event
+                    $params['data-color'] = $icon['color-over'];
+                }
+                if (isset($icon['toggle-' . $icon_param_name])) { // Set a color for mouse over event
+                    $params['data-toggle'] = $icon['toggle-' . $icon_param_name];
+                }
+
+                if (! isset($params['title'])) { // Use 'alt' for 'title'
+                    if (isset($params['alt'])) {
+                        $params['title'] = $params['alt'];
+                        unset($params['alt']);
+                    } elseif (! isset($params['alt']) && isset($icon['alt'])) {
+                        $params['title'] = $icon['alt'];
+                    }
+                }
+
+                if (isset($params['title']) && $params['title'] === false) {	// Disable title:
+                    unset($params['title']);
+                }
+
+                // Format title and alt attributes because they may contain the unexpected chars from translatable strings:
+                if (isset($params['title'])) {
+                    // Use 'htmlspecialchars' format instead of 'htmlattr' because html tags should not be stripped e.g. in bootsrap tooltips:
+                    $params['title'] = format_to_output($params['title'], 'htmlspecialchars');
+                }
+                if (isset($params['alt'])) {
+                    $params['alt'] = format_to_output($params['alt'], 'htmlattr');
+                }
+
+                if (isset($icon['size-' . $icon_param_name])) { // Set a size for icon only for current type
+                    if (isset($icon['size-' . $icon_param_name][0])) { // Width
+                        $styles['width'] = 'width:' . $icon['size-' . $icon_param_name][0] . 'px';
+                    }
+                    if (isset($icon['size-' . $icon_param_name][1])) { // Height
+                        $styles['height'] = 'height:' . $icon['size-' . $icon_param_name][1] . 'px';
+                    }
+                }
+
+                if (isset($params['style'])) { // Keep styles from params
+                    $styles[] = $params['style'];
+                }
+                if (! empty($styles)) { // Init attribute 'style'
+                    $params['style'] = implode(';', $styles);
+                }
+
+                // Add all the attributes:
+                $params = get_field_attribs_as_string($params, false);
+
+                $r = '<span' . $params . '>' . $icon_content . '</span>';
+            } elseif (! isset($icon['file'])) { // Use span tag with sprite instead of img
+                $styles = [];
+
+                if (isset($params['xy'])) { // Get background position from params
+                    $styles[] = "background-position: " . $params['xy'][0] . "px " . $params['xy'][1] . "px";
+                    unset($params['xy']);
+                } elseif (isset($icon['xy'])) { // Set background position in the icons_sprite.png
+                    $styles[] = "background-position: -" . $icon['xy'][0] . "px -" . $icon['xy'][1] . "px";
+                }
+
+                if (isset($params['size'])) { // Get sizes from params
+                    $icon['size'] = $params['size'];
+                    unset($params['size']);
+                }
+                if (isset($icon['size'])) { // Set width & height
+                    if ($icon['size'][0] != 16) {
+                        $styles[] = "width: " . $icon['size'][0] . "px";
+                    }
+                    if ($icon['size'][1] != 16) {
+                        $styles[] = "height: " . $icon['size'][1] . "px; line-height: " . $icon['size'][1] . "px";
+                    }
+                }
+
+                if (isset($params['style'])) { // Get styles from params
+                    $styles[] = $params['style'];
+                }
+                if (count($styles) > 0) {
+                    $params['style'] = implode('; ', $styles);
+                }
+
+                if (! isset($params['title'])) {	// Use 'alt' for 'title'
+                    if (isset($params['alt'])) {
+                        $params['title'] = $params['alt'];
+                        unset($params['alt']);
+                    } elseif (! isset($params['alt']) && isset($icon['alt'])) {
+                        $params['title'] = $icon['alt'];
+                    }
+                }
+
+                if (isset($params['title']) && $params['title'] === false) {	// Disable title:
+                    unset($params['title']);
+                }
+
+                // Format title and alt attributes because they may contain the unexpected chars from translatable strings:
+                if (isset($params['title'])) {
+                    $params['title'] = format_to_output($params['title'], 'htmlattr');
+                }
+                if (isset($params['alt'])) {
+                    $params['alt'] = format_to_output($params['alt'], 'htmlattr');
+                }
+
+                if (isset($params['class'])) {	// Get class from params
+                    $params['class'] = 'icon ' . $params['class'];
+                } else {	// Set default class
+                    $params['class'] = 'icon';
+                }
+
+                // Add all the attributes:
+                $params = get_field_attribs_as_string($params, false);
+
+                $r = '<span' . $params . '>&nbsp;</span>';
+            } else { // Use img tag
+                $r = '<img src="' . $rsc_uri . $icon['file'] . '" ';
+
+                if (! $use_strict) {	// Include non CSS fallbacks - transitional only:
+                    $r .= 'border="0" align="top" ';
+                }
+
+                // Include class (will default to "icon"):
+                if (! isset($params['class'])) {
+                    if (isset($icon['class'])) {	// This icon has a class
+                        $params['class'] = $icon['class'];
+                    } else {
+                        $params['class'] = '';
+                    }
+                }
+
+                // Include size (optional):
+                if (isset($icon['size'])) {
+                    $r .= 'width="' . $icon['size'][0] . '" height="' . $icon['size'][1] . '" ';
+                }
+
+                // Include alt (XHTML mandatory):
+                if (! isset($params['alt'])) {
+                    if (isset($icon['alt'])) { // alt-tag from $map_iconfiles
+                        $params['alt'] = $icon['alt'];
+                    } else { // $iconKey as alt-tag
+                        $params['alt'] = $iconKey;
+                    }
+                }
+
+                // Format alt attribute because it may contains the unexpected chars from translatable strings:
+                if (isset($params['alt'])) {
+                    $params['alt'] = format_to_output($params['alt'], 'htmlattr');
+                }
+
+                // Add all the attributes:
+                $r .= get_field_attribs_as_string($params, false);
+
+                // Close tag:
+                $r .= '/>';
+
+                if ($include_in_legend && ($IconLegend = &get_IconLegend())) { // This icon should be included into the legend:
+                    $IconLegend->add_icon($iconKey);
+                }
+            }
+            return $r;
+            /* BREAK */
+
+        case 'noimg':
+            global $b2evo_icons_type;
+
+            if (isset($b2evo_icons_type)) { // Specific icons type is defined
+                $current_icons_type = $b2evo_icons_type;
+                if ($current_icons_type == 'fontawesome-glyphicons') { // Use fontawesome icons as a priority over the glyphicons
+                    $current_icons_type = isset($icon['fa']) ? 'fontawesome' : 'glyphicons';
+                }
+                switch ($current_icons_type) {
+                    case 'glyphicons':
+                        // Use glyph icons of bootstrap
+                        $icon_param_name = 'glyph';
+                        break;
+
+                    case 'fontawesome':
+                        // Use the icons from http://fortawesome.github.io/Font-Awesome/icons/
+                        $icon_param_name = 'fa';
+                        break;
+                }
+            }
+
+            $styles = [];
+            if (isset($icon_param_name) && ! empty($icon[$icon_param_name])) { // Use glyph or fa icon if it is defined in icons config
+                if (isset($icon['size-' . $icon_param_name])) { // Set a size for icon only for current type
+                    if (isset($icon['size-' . $icon_param_name][0])) { // Width
+                        $styles['width'] = 'width:' . $icon['size-' . $icon_param_name][0] . 'px';
+                    }
+                    if (isset($icon['size-' . $icon_param_name][1])) { // Height
+                        $styles['width'] = 'height:' . $icon['size-' . $icon_param_name][1] . 'px';
+                    }
+                    if (isset($icon['size'])) { // Unset size for sprite icon
+                        unset($icon['size']);
+                    }
+                }
+            }
+
+            // Include size (optional):
+            if (isset($icon['size'])) {
+                $params['size'] = $icon['size'];
+            }
+            $styles[] = 'margin:0 2px';
+
+            if (isset($params['style'])) { // Keep styles from params
+                $styles[] = $params['style'];
+            }
+            if (! empty($styles)) { // Init attribute 'style'
+                $params['style'] = implode(';', $styles);
+            }
+
+            return get_icon('pixel', 'imgtag', $params);
+            /* BREAK */
+            /*
+            $blank_icon = get_icon_info('pixel');
+
+            $r = '<img src="'.$rsc_uri.$blank_icon['file'].'" ';
+
+            // TODO: dh> add this only for !$use_strict, like above?
+            // Include non CSS fallbacks (needed by bozos... and basic skin):
+            $r .= 'border="0" align="top" ';
+
+            // Include class (will default to "noicon"):
+            if( ! isset( $params['class'] ) )
+            {
+                if( isset($icon['class']) )
+                {	// This icon has a class
+                    $params['class'] = $icon['class'];
+                }
+                else
+                {
+                    $params['class'] = 'no_icon';
+                }
+            }
+
+            // Include size (optional):
+            if( isset( $icon['size'] ) )
+            {
+                $r .= 'width="'.$icon['size'][0].'" height="'.$icon['size'][1].'" ';
+            }
+
+            // Include alt (XHTML mandatory):
+            if( ! isset( $params['alt'] ) )
+            {
+                $params['alt'] = '';
+            }
+
+            // Add all the attributes:
+            $r .= get_field_attribs_as_string( $params, false );
+
+            // Close tag:
+            $r .= '/>';
+
+            return $r;*/
+            /* BREAK */
+    }
 }
 
 
@@ -5659,9 +5079,9 @@ function get_icon( $iconKey, $what = 'imgtag', $params = NULL, $include_in_legen
  * @param string date (YYYY-MM-DD)
  * @param string time
  */
-function form_date( $date, $time = '' )
+function form_date($date, $time = '')
 {
-	return substr( $date.'          ', 0, 10 ).' '.$time;
+    return substr($date . '          ', 0, 10) . ' ' . $time;
 }
 
 
@@ -5673,91 +5093,77 @@ function form_date( $date, $time = '' )
  * @param boolean True, to convert IPv6 to IPv4 format
  * @return array|string Depends on first param.
  */
-function get_ip_list( $firstOnly = false, $convert_to_ipv4 = false )
+function get_ip_list($firstOnly = false, $convert_to_ipv4 = false)
 {
-	$r = array();
+    $r = [];
 
-	if( ! empty( $_SERVER['REMOTE_ADDR'] ) )
-	{
-		foreach( explode( ',', $_SERVER['REMOTE_ADDR'] ) as $l_ip )
-		{
-			$l_ip = trim( $l_ip );
-			if( ! empty( $l_ip ) )
-			{
-				if( $convert_to_ipv4 )
-				{ // Convert IP address to IPv4 format(if it is in IPv6 format)
-					$l_ip = int2ip( ip2int( $l_ip ) );
-				}
-				$r[] = $l_ip;
-			}
-		}
-	}
+    if (! empty($_SERVER['REMOTE_ADDR'])) {
+        foreach (explode(',', $_SERVER['REMOTE_ADDR']) as $l_ip) {
+            $l_ip = trim($l_ip);
+            if (! empty($l_ip)) {
+                if ($convert_to_ipv4) { // Convert IP address to IPv4 format(if it is in IPv6 format)
+                    $l_ip = int2ip(ip2int($l_ip));
+                }
+                $r[] = $l_ip;
+            }
+        }
+    }
 
-	if( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) )
-	{ // IP(s) behind Proxy - this can be easily forged!
-		foreach( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ) as $l_ip )
-		{
-			$l_ip = trim( $l_ip );
-			if( ! empty( $l_ip ) && $l_ip != 'unknown' )
-			{
-				if( $convert_to_ipv4 )
-				{ // Convert IP address to IPv4 format(if it is in IPv6 format)
-					$l_ip = int2ip( ip2int( $l_ip ) );
-				}
-				$r[] = $l_ip;
-			}
-		}
-	}
+    if (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) { // IP(s) behind Proxy - this can be easily forged!
+        foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $l_ip) {
+            $l_ip = trim($l_ip);
+            if (! empty($l_ip) && $l_ip != 'unknown') {
+                if ($convert_to_ipv4) { // Convert IP address to IPv4 format(if it is in IPv6 format)
+                    $l_ip = int2ip(ip2int($l_ip));
+                }
+                $r[] = $l_ip;
+            }
+        }
+    }
 
-	if( ! isset( $r[0] ) )
-	{ // No IP found.
-		$r[] = '';
-	}
+    if (! isset($r[0])) { // No IP found.
+        $r[] = '';
+    }
 
-	// Remove the duplicates
-	$r = array_unique( $r );
+    // Remove the duplicates
+    $r = array_unique($r);
 
-	return $firstOnly ? $r[0] : $r;
+    return $firstOnly ? $r[0] : $r;
 }
 
 
 /**
  * Get list of IP addresses with link to back-office page if User has an access
  *
- * @param object|NULL User
- * @param array|NULL List of IP addresses
+ * @param object|null User
+ * @param array|null List of IP addresses
  * @param string Text of link, Use '#' to display IP address
  * @return array List of IP addresses
  */
-function get_linked_ip_list( $ip_list = NULL, $User = NULL, $link_text = '#' )
+function get_linked_ip_list($ip_list = null, $User = null, $link_text = '#')
 {
-	if( $User === NULL )
-	{ // Get current User by default
-		global $current_User;
-		$User = & $current_User;
-	}
+    if ($User === null) { // Get current User by default
+        global $current_User;
+        $User = &$current_User;
+    }
 
-	if( $ip_list === NULL )
-	{ // Get IP addresses by function get_ip_list()
-		$ip_list = get_ip_list( false, true );
-	}
+    if ($ip_list === null) { // Get IP addresses by function get_ip_list()
+        $ip_list = get_ip_list(false, true);
+    }
 
-	if( ! empty( $User ) &&
-	    $User->check_perm( 'admin', 'restricted' ) &&
-	    $User->check_perm( 'spamblacklist', 'view' ) )
-	{ // User has an access to backoffice, Display a link for each IP address
-		global $admin_url;
-		foreach( $ip_list as $i => $ip_address )
-		{
-			if( $link_text == '#' )
-			{ // Use IP address aslink text
-				$link_text = $ip_address;
-			}
-			$ip_list[ $i ] = '<a href="'.$admin_url.'?ctrl=antispam&amp;tab3=ipranges&amp;ip_address='.$ip_address.'">'.$link_text.'</a>';
-		}
-	}
+    if (! empty($User) &&
+        $User->check_perm('admin', 'restricted') &&
+        $User->check_perm('spamblacklist', 'view')) { // User has an access to backoffice, Display a link for each IP address
+        global $admin_url;
+        foreach ($ip_list as $i => $ip_address) {
+            if ($link_text == '#') { // Use IP address aslink text
+                $link_text = $ip_address;
+            }
+            $ip_list[$i] = '<a href="' . $admin_url . '?ctrl=antispam&amp;tab3=ipranges&amp;ip_address=' . $ip_address . '">' . $link_text . '</a>';
+        }
+    }
 
-	return $ip_list;
+    return $ip_list;
 }
 
 
@@ -5769,55 +5175,50 @@ function get_linked_ip_list( $ip_list = NULL, $User = NULL, $link_text = '#' )
  * @param string URL
  * @return string the base domain (may become empty, if found invalid)
  */
-function get_base_domain( $url )
+function get_base_domain($url)
 {
-	global $evo_charset;
+    global $evo_charset;
 
-	// Chop away the protocol part(http,htpps,ftp) and the path:
-	$domain = preg_replace( '~^([a-z]+://)?([^:/#]+)(.*)$~i', '\\2', $url );
+    // Chop away the protocol part(http,htpps,ftp) and the path:
+    $domain = preg_replace('~^([a-z]+://)?([^:/#]+)(.*)$~i', '\\2', $url);
 
-	if( empty( $domain ) || preg_match( '~^(\d+\.)+\d+$~', $domain ) )
-	{	// Empty or All numeric = IP address, don't try to cut it any further:
-		return $domain;
-	}
+    if (empty($domain) || preg_match('~^(\d+\.)+\d+$~', $domain)) {	// Empty or All numeric = IP address, don't try to cut it any further:
+        return $domain;
+    }
 
-	// Get the base domain up to 2 or 3 levels (x.y.tld):
-	// NOTE: "_" is not really valid, but for Windows it is..
-	// NOTE: \w includes "_"
+    // Get the base domain up to 2 or 3 levels (x.y.tld):
+    // NOTE: "_" is not really valid, but for Windows it is..
+    // NOTE: \w includes "_"
 
-	// Convert URL to IDN:
-	$domain = idna_encode( $domain );
+    // Convert URL to IDN:
+    $domain = idna_encode($domain);
 
-	if( preg_match( '~\.(com|net|org|int|edu|gov|mil)$~i', $domain ) )
-	{	// Use max 2 level domain for very well known TLDs:
-		// (for example: "sub3.sub2.sub1.domain.com" will be "domain.com")
-		$max_level = 2;
-	}
-	else
-	{	// Use max 3 level domain for all others:
-		// (for example: "sub3.sub2.sub1.domain.fr" will be "sub1.domain.fr")
-		$max_level = 3;
-	}
+    if (preg_match('~\.(com|net|org|int|edu|gov|mil)$~i', $domain)) {	// Use max 2 level domain for very well known TLDs:
+        // (for example: "sub3.sub2.sub1.domain.com" will be "domain.com")
+        $max_level = 2;
+    } else {	// Use max 3 level domain for all others:
+        // (for example: "sub3.sub2.sub1.domain.fr" will be "sub1.domain.fr")
+        $max_level = 3;
+    }
 
-	// Limit domain by 2 or 3 level depending on TLD:
-	if( ! preg_match( '~ ( \w (\w|-|_)* \. ){0,'.( $max_level - 1 ).'}   \w (\w|-|_)* $~ix', $domain, $match ) )
-	{	// Return an empty if domain doesn't match to proper format:
-		return '';
-	}
+    // Limit domain by 2 or 3 level depending on TLD:
+    if (! preg_match('~ ( \w (\w|-|_)* \. ){0,' . ($max_level - 1) . '}   \w (\w|-|_)* $~ix', $domain, $match)) {	// Return an empty if domain doesn't match to proper format:
+        return '';
+    }
 
-	// Convert all symbols of domain name to UTF-8:
-	$domain = convert_charset( idna_decode( $match[0] ), $evo_charset, 'UTF-8' );
+    // Convert all symbols of domain name to UTF-8:
+    $domain = convert_charset(idna_decode($match[0]), $evo_charset, 'UTF-8');
 
-	// Remove any prefix like "www.", "www2.", "www9999." and etc.:
-	$domain = preg_replace( '~^www[0-9]*\.~i', '', $domain );
+    // Remove any prefix like "www.", "www2.", "www9999." and etc.:
+    $domain = preg_replace('~^www[0-9]*\.~i', '', $domain);
 
-	return $domain;
+    return $domain;
 }
 
 
 /**
  * Generate login from registration information
- * 
+ *
  * @param string Email address
  * @param string First name
  * @param string Last name
@@ -5825,65 +5226,49 @@ function get_base_domain( $url )
  * @param boolean Use random alphanumeric string as login
  * @return string Generated login
  */
-function generate_login_from_register_info( $email = NULL, $firstname = NULL, $lastname = NULL, $nickname = NULL, $use_random = false )
+function generate_login_from_register_info($email = null, $firstname = null, $lastname = null, $nickname = null, $use_random = false)
 {
-	global $Settings;
+    global $Settings;
 
-	if( ! empty( $firstname ) || ( ! empty( $lastname ) && ( $Settings->get( 'registration_no_username') == 'firstname.lastname' ) ) )
-	{ // Firstname or lastname given, let's use these:
-		$login = array();
-		if( ! empty( $firstname ) )
-		{
-			$login[] = trim( $firstname );
-		}
+    if (! empty($firstname) || (! empty($lastname) && ($Settings->get('registration_no_username') == 'firstname.lastname'))) { // Firstname or lastname given, let's use these:
+        $login = [];
+        if (! empty($firstname)) {
+            $login[] = trim($firstname);
+        }
 
-		if( $Settings->get( 'registration_no_username' ) == 'firstname.lastname' )
-		{	// We can use lastname too:
-			if( ! empty( $lastname ) )
-			{
-				$login[] = trim( $lastname );
-			}
-		}
-		$login = preg_replace( '/[\s]+/', '_', utf8_strtolower( implode( '.', $login ) ) );
-		$login = generate_login_from_string( $login );
-	}
-	elseif( ! empty( $email ) )
-	{ // Get the login from email address:
-		$login = preg_replace( '/^([^@]+)@(.+)$/', '$1', utf8_strtolower( $email ) );
-		$login = preg_replace( '/[\'"><@\s]/', '', $login );
+        if ($Settings->get('registration_no_username') == 'firstname.lastname') {	// We can use lastname too:
+            if (! empty($lastname)) {
+                $login[] = trim($lastname);
+            }
+        }
+        $login = preg_replace('/[\s]+/', '_', utf8_strtolower(implode('.', $login)));
+        $login = generate_login_from_string($login);
+    } elseif (! empty($email)) { // Get the login from email address:
+        $login = preg_replace('/^([^@]+)@(.+)$/', '$1', utf8_strtolower($email));
+        $login = preg_replace('/[\'"><@\s]/', '', $login);
 
-		if( strpos( $login, '.' ) && ( $Settings->get( 'registration_no_username' ) == 'firstname' ) )
-		{ // Get only the part before the "." if it has one
-			$temp_login = $login;
-			$login = substr( $login, 0, strpos( $login, '.' ) );
-			$login = generate_login_from_string( $login );
+        if (strpos($login, '.') && ($Settings->get('registration_no_username') == 'firstname')) { // Get only the part before the "." if it has one
+            $temp_login = $login;
+            $login = substr($login, 0, strpos($login, '.'));
+            $login = generate_login_from_string($login);
 
-			if( empty( $login ) )
-			{ // Resulting login empty, use full email address
-				$login = generate_login_from_string( $temp_login );
-			}
-		}
-		else
-		{
-			$login = generate_login_from_string( $login );
-		}
-	}
-	elseif( ! empty( $nickname ) )
-	{
-		$login = preg_replace( '/[\s]+/', '_', utf8_strtolower( trim( $nickname ) ) );
-		$login = generate_login_from_string( $login );
-	}
-	elseif( $use_random )
-	{	// Nothing else to use as login, use random numbers:
-		$login = 'user_'.rand( 1, 999 );
-		$login = generate_login_from_string( $login );
-	}
-	else
-	{
-		return '';
-	}
+            if (empty($login)) { // Resulting login empty, use full email address
+                $login = generate_login_from_string($temp_login);
+            }
+        } else {
+            $login = generate_login_from_string($login);
+        }
+    } elseif (! empty($nickname)) {
+        $login = preg_replace('/[\s]+/', '_', utf8_strtolower(trim($nickname)));
+        $login = generate_login_from_string($login);
+    } elseif ($use_random) {	// Nothing else to use as login, use random numbers:
+        $login = 'user_' . rand(1, 999);
+        $login = generate_login_from_string($login);
+    } else {
+        return '';
+    }
 
-	return $login;
+    return $login;
 }
 
 
@@ -5893,57 +5278,48 @@ function generate_login_from_register_info( $email = NULL, $firstname = NULL, $l
  * @param string string to generate login from
  * @return string login
  */
-function generate_login_from_string( $login )
+function generate_login_from_string($login)
 {
-	global $Settings;
+    global $Settings;
 
-	// Normalize login
-	load_funcs('locales/_charset.funcs.php');
-	$login = replace_special_chars( $login, NULL, true );
+    // Normalize login
+    load_funcs('locales/_charset.funcs.php');
+    $login = replace_special_chars($login, null, true);
 
-	if( $Settings->get( 'strict_logins' ) )
-	{ // We allow only the plain ACSII characters, digits, the chars _ and . and -
-		$login = preg_replace( '/[^A-Za-z0-9_.\-]/', '', $login );
-	}
-	else
-	{ // We allow any character that is not explicitly forbidden in Step 1
-		// Enforce additional limitations
-		$login = preg_replace( '|%([a-fA-F0-9][a-fA-F0-9])|', '', $login ); // Kill octets
-		$login = preg_replace( '/&.+?;/', '', $login ); // Kill entities
-	}
+    if ($Settings->get('strict_logins')) { // We allow only the plain ACSII characters, digits, the chars _ and . and -
+        $login = preg_replace('/[^A-Za-z0-9_.\-]/', '', $login);
+    } else { // We allow any character that is not explicitly forbidden in Step 1
+        // Enforce additional limitations
+        $login = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $login); // Kill octets
+        $login = preg_replace('/&.+?;/', '', $login); // Kill entities
+    }
 
-	$login = preg_replace( '/^usr_/i', '', $login );
+    $login = preg_replace('/^usr_/i', '', $login);
 
-	// Trim to allowed login length
-	$max_login_length = 20;
-	if( strlen( $login ) > $max_login_length )
-	{
-		$login = substr( $login, 0, $max_login_length );
-	}
+    // Trim to allowed login length
+    $max_login_length = 20;
+    if (strlen($login) > $max_login_length) {
+        $login = substr($login, 0, $max_login_length);
+    }
 
-	if( ! empty( $login ) )
-	{
-		// Check and search free login name if current is already in use
-		$login_name = $login;
-		$login_number = 1;
-		$UserCache = & get_UserCache();
-		while( $UserCache->get_by_login( $login_name ) )
-		{
-			$num_suffix_length = strlen( $login_number );
-			if( strlen( $login_name ) + $num_suffix_length > $max_login_length )
-			{
-				$login_name = substr( $login, 0, $max_login_length - $num_suffix_length ).$login_number;
-			}
-			else
-			{
-				$login_name = $login.$login_number;
-			}
-			$login_number++;
-		}
-		$login = $login_name;
-	}
+    if (! empty($login)) {
+        // Check and search free login name if current is already in use
+        $login_name = $login;
+        $login_number = 1;
+        $UserCache = &get_UserCache();
+        while ($UserCache->get_by_login($login_name)) {
+            $num_suffix_length = strlen($login_number);
+            if (strlen($login_name) + $num_suffix_length > $max_login_length) {
+                $login_name = substr($login, 0, $max_login_length - $num_suffix_length) . $login_number;
+            } else {
+                $login_name = $login . $login_number;
+            }
+            $login_number++;
+        }
+        $login = $login_name;
+    }
 
-	return $login;
+    return $login;
 }
 
 
@@ -5954,17 +5330,16 @@ function generate_login_from_string( $login )
  * @param string chars to use in generated key
  * @return string key
  */
-function generate_random_key( $length = 32, $keychars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' )
+function generate_random_key($length = 32, $keychars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
 {
-	$key = '';
-	$rnd_max = strlen($keychars) - 1;
+    $key = '';
+    $rnd_max = strlen($keychars) - 1;
 
-	for( $i = 0; $i < $length; $i++ )
-	{
-		$key .= $keychars[random_int(0, $rnd_max)]; // get a random character out of $keychars
-	}
+    for ($i = 0; $i < $length; $i++) {
+        $key .= $keychars[random_int(0, $rnd_max)]; // get a random character out of $keychars
+    }
 
-	return $key;
+    return $key;
 }
 
 
@@ -5974,48 +5349,46 @@ function generate_random_key( $length = 32, $keychars = 'abcdefghijklmnopqrstuvw
  * @param integer length of password
  * @return string password
  */
-function generate_random_passwd( $length = NULL )
+function generate_random_passwd($length = null)
 {
-	// fp> NOTE: do not include any characters that would make autogenerated passwords ambiguous
-	// 1 (one) vs l (L) vs I (i)
-	// O (letter) vs 0 (digit)
+    // fp> NOTE: do not include any characters that would make autogenerated passwords ambiguous
+    // 1 (one) vs l (L) vs I (i)
+    // O (letter) vs 0 (digit)
 
-	if( empty($length) )
-	{
-		$length = rand( 8, 14 );
-	}
+    if (empty($length)) {
+        $length = rand(8, 14);
+    }
 
-	return generate_random_key( $length, 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789' );
+    return generate_random_key($length, 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789');
 }
 
 
-function is_create_action( $action )
+function is_create_action($action)
 {
-	$action_parts = explode( '_', $action );
+    $action_parts = explode('_', $action);
 
-	switch( $action_parts[0] )
-	{
-		case 'new':
-		case 'new_switchtab':
-		case 'copy':
-		case 'create':	// we return in this state after a validation error
-		case 'preview':
-			return true;
+    switch ($action_parts[0]) {
+        case 'new':
+        case 'new_switchtab':
+        case 'copy':
+        case 'create':	// we return in this state after a validation error
+        case 'preview':
+            return true;
 
-		case 'edit':
-		case 'edit_switchtab':
-		case 'propose':
-		case 'update':	// we return in this state after a validation error
-		case 'delete':
-		// The following one's a bit far fetched, but can happen if we have no sheet display:
-		case 'unlink':
-		case 'view':
-		case 'extract':
-			return false;
+        case 'edit':
+        case 'edit_switchtab':
+        case 'propose':
+        case 'update':	// we return in this state after a validation error
+        case 'delete':
+            // The following one's a bit far fetched, but can happen if we have no sheet display:
+        case 'unlink':
+        case 'view':
+        case 'extract':
+            return false;
 
-		default:
-			debug_die( 'Unhandled action in form: '.strip_tags($action_parts[0]) );
-	}
+        default:
+            debug_die('Unhandled action in form: ' . strip_tags($action_parts[0]));
+    }
 }
 
 
@@ -6024,9 +5397,9 @@ function is_create_action( $action )
  *
  * @param string date
  */
-function compact_date( $date )
+function compact_date($date)
 {
-	return preg_replace( '#[^0-9]#', '', $date );
+    return preg_replace('#[^0-9]#', '', $date);
 }
 
 
@@ -6035,12 +5408,12 @@ function compact_date( $date )
  *
  * @param string date
  */
-function decompact_date( $date )
+function decompact_date($date)
 {
-	$date0 = $date;
+    $date0 = $date;
 
-	return  substr($date0,0,4).'-'.substr($date0,4,2).'-'.substr($date0,6,2).' '
-								.substr($date0,8,2).':'.substr($date0,10,2).':'.substr($date0,12,2);
+    return substr($date0, 0, 4) . '-' . substr($date0, 4, 2) . '-' . substr($date0, 6, 2) . ' '
+                                . substr($date0, 8, 2) . ':' . substr($date0, 10, 2) . ':' . substr($date0, 12, 2);
 }
 
 /**
@@ -6049,54 +5422,38 @@ function decompact_date( $date )
  *
  * @param string phone number
  */
-function format_phone( $phone, $hide_country_dialing_code_if_same_as_locale = true )
+function format_phone($phone, $hide_country_dialing_code_if_same_as_locale = true)
 {
-	global $CountryCache;
+    global $CountryCache;
 
-	$dialing_code = NULL;
+    $dialing_code = null;
 
-	if( substr( $phone, 0, 1 ) == '+' )
-	{	// We have a dialing code in the phone, so we extract it:
-		$dialing_code = $CountryCache->extract_country_dialing_code( substr( $phone, 1 ) );
-	}
+    if (substr($phone, 0, 1) == '+') {	// We have a dialing code in the phone, so we extract it:
+        $dialing_code = $CountryCache->extract_country_dialing_code(substr($phone, 1));
+    }
 
-	if( !is_null( $dialing_code ) && ( locale_dialing_code() == $dialing_code )
-			&& $hide_country_dialing_code_if_same_as_locale )
-	{	// The phone dialing code is same as locale and we want to hide it in this case
-		if( ( strlen( $phone ) - strlen( $dialing_code ) ) == 10 )
-		{	// We can format it like a french phone number ( 0x.xx.xx.xx.xx )
-			$phone_formated = format_french_phone( '0'.substr( $phone, strlen( $dialing_code )+1 ) );
-		}
-		else
-		{ // ( 0xxxxxxxxxxxxxx )
-			$phone_formated = '0'.substr( $phone, strlen( $dialing_code )+1 );
-		}
+    if (! is_null($dialing_code) && (locale_dialing_code() == $dialing_code)
+            && $hide_country_dialing_code_if_same_as_locale) {	// The phone dialing code is same as locale and we want to hide it in this case
+        if ((strlen($phone) - strlen($dialing_code)) == 10) {	// We can format it like a french phone number ( 0x.xx.xx.xx.xx )
+            $phone_formated = format_french_phone('0' . substr($phone, strlen($dialing_code) + 1));
+        } else { // ( 0xxxxxxxxxxxxxx )
+            $phone_formated = '0' . substr($phone, strlen($dialing_code) + 1);
+        }
+    } elseif (! is_null($dialing_code)) {	// Phone has a dialing code
+        if ((strlen($phone) - strlen($dialing_code)) == 10) { // We can format it like a french phone number with the dialing code ( +dialing x.xx.xx.xx.xx )
+            $phone_formated = '+' . $dialing_code . format_french_phone(' ' . substr($phone, strlen($dialing_code) + 1));
+        } else { // ( +dialing  xxxxxxxxxxx )
+            $phone_formated = '+' . $dialing_code . ' ' . substr($phone, strlen($dialing_code) + 1);
+        }
+    } else {
+        if (strlen($phone) == 10) { //  We can format it like a french phone number ( xx.xx.xx.xx.xx )
+            $phone_formated = format_french_phone($phone);
+        } else {	// We don't format phone: TODO generic format phone ( xxxxxxxxxxxxxxxx )
+            $phone_formated = $phone;
+        }
+    }
 
-	}
-	elseif( !is_null( $dialing_code ) )
-	{	// Phone has a dialing code
-		if( ( strlen( $phone ) - strlen( $dialing_code ) ) == 10 )
-		{ // We can format it like a french phone number with the dialing code ( +dialing x.xx.xx.xx.xx )
-			$phone_formated = '+'.$dialing_code.format_french_phone( ' '.substr( $phone, strlen( $dialing_code )+1 ) );
-		}
-		else
-		{ // ( +dialing  xxxxxxxxxxx )
-			$phone_formated = '+'.$dialing_code.' '.substr( $phone, strlen( $dialing_code )+1 );
-		}
-	}
-	else
-	{
-		if( strlen( $phone ) == 10 )
-		{ //  We can format it like a french phone number ( xx.xx.xx.xx.xx )
-			$phone_formated = format_french_phone( $phone );
-		}
-		else
-		{	// We don't format phone: TODO generic format phone ( xxxxxxxxxxxxxxxx )
-			$phone_formated = $phone;
-		}
-	}
-
-	return $phone_formated;
+    return $phone_formated;
 }
 
 
@@ -6105,10 +5462,10 @@ function format_phone( $phone, $hide_country_dialing_code_if_same_as_locale = tr
  *
  * @param string phone number
  */
-function format_french_phone( $phone )
+function format_french_phone($phone)
 {
-	return substr($phone, 0 , 2).'.'.substr($phone, 2, 2).'.'.substr($phone, 4, 2)
-					.'.'.substr($phone, 6, 2).'.'.substr($phone, 8, 2);
+    return substr($phone, 0, 2) . '.' . substr($phone, 2, 2) . '.' . substr($phone, 4, 2)
+                    . '.' . substr($phone, 6, 2) . '.' . substr($phone, 8, 2);
 }
 
 
@@ -6118,10 +5475,10 @@ function format_french_phone( $phone )
  * @param string topic
  * @return string url to the manual
  */
-function get_manual_url( $topic )
+function get_manual_url($topic)
 {
-	// fp> TODO: this below is a temmporary hack while we work on the new manual:
-	return 'http://b2evolution.net/man/'.str_replace( '_', '-', strtolower( rawurlencode( $topic ) ) );
+    // fp> TODO: this below is a temmporary hack while we work on the new manual:
+    return 'http://b2evolution.net/man/' . str_replace('_', '-', strtolower(rawurlencode($topic)));
 }
 
 
@@ -6141,33 +5498,28 @@ function get_manual_url( $topic )
  * @param integer 1-5: weight of the word. The word will be displayed only if its weight is >= than the user setting threshold. (Default: 1)
  * @return string
  */
-function get_manual_link( $topic, $link_text = NULL, $action_word = NULL, $word_weight = 1 )
+function get_manual_link($topic, $link_text = null, $action_word = null, $word_weight = 1)
 {
-	global $online_help_links;
+    global $online_help_links;
 
-	if( $online_help_links )
-	{
-		$manual_url = get_manual_url( $topic );
+    if ($online_help_links) {
+        $manual_url = get_manual_url($topic);
 
-		if( $link_text == NULL )
-		{
-			if( $action_word == NULL )
-			{
-				$action_word = T_('Manual');
-			}
-			$webhelp_link = action_icon( T_('Open relevant page in online manual'), 'manual', $manual_url, $action_word, 5, $word_weight, array( 'target' => '_blank' ) );
-		}
-		else
-		{
-			$webhelp_link = '<a href="'.$manual_url.'" target = "_blank">'.$link_text.'</a>';
-		}
+        if ($link_text == null) {
+            if ($action_word == null) {
+                $action_word = T_('Manual');
+            }
+            $webhelp_link = action_icon(T_('Open relevant page in online manual'), 'manual', $manual_url, $action_word, 5, $word_weight, [
+                'target' => '_blank',
+            ]);
+        } else {
+            $webhelp_link = '<a href="' . $manual_url . '" target = "_blank">' . $link_text . '</a>';
+        }
 
-		return ' '.$webhelp_link;
-	}
-	else
-	{
-		return '';
-	}
+        return ' ' . $webhelp_link;
+    } else {
+        return '';
+    }
 }
 
 
@@ -6179,29 +5531,24 @@ function get_manual_link( $topic, $link_text = NULL, $action_word = NULL, $word_
  * @param boolean Use format_to_output() for the attributes?
  * @return string
  */
-function get_field_attribs_as_string( $field_attribs, $format_to_output = true )
+function get_field_attribs_as_string($field_attribs, $format_to_output = true)
 {
-	$r = '';
-	foreach( $field_attribs as $l_attr => $l_value )
-	{
-		if( $l_value === NULL )
-		{ // don't generate empty attributes (it may be NULL if we pass 'value' => NULL as field_param for example, because isset() does not match it!)
-			// sam2kb> what about alt="" how do we handle this?
-			// I've removed the "=== ''" check now. Should not do any harm. IIRC NULL is what we want to avoid here.
-			continue;
-		}
+    $r = '';
+    foreach ($field_attribs as $l_attr => $l_value) {
+        if ($l_value === null) { // don't generate empty attributes (it may be NULL if we pass 'value' => NULL as field_param for example, because isset() does not match it!)
+            // sam2kb> what about alt="" how do we handle this?
+            // I've removed the "=== ''" check now. Should not do any harm. IIRC NULL is what we want to avoid here.
+            continue;
+        }
 
-		if( $format_to_output )
-		{
-			$r .= ' '.$l_attr.'="'.format_to_output( $l_value, 'formvalue' ).'"';
-		}
-		else
-		{
-			$r .= ' '.$l_attr.'="'.$l_value.'"';
-		}
-	}
+        if ($format_to_output) {
+            $r .= ' ' . $l_attr . '="' . format_to_output($l_value, 'formvalue') . '"';
+        } else {
+            $r .= ' ' . $l_attr . '="' . $l_value . '"';
+        }
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -6217,63 +5564,56 @@ function get_field_attribs_as_string( $field_attribs, $format_to_output = true )
  *              'replace' - Replace attribute to new value completely
  * @return string Updated HTML tag
  */
-function update_html_tag_attribs( $html_tag, $new_attribs, $attrib_actions = array() )
+function update_html_tag_attribs($html_tag, $new_attribs, $attrib_actions = [])
 {
-	// Check for a valid html tag at the beginning of the string:
-	if( ! preg_match( '#^<([\S]+)[^>]*>#i', $html_tag, $tag_match ) )
-	{	// Wrong HTML tag format, Return original string:
-		return $html_tag;
-	}
+    // Check for a valid html tag at the beginning of the string:
+    if (! preg_match('#^<([\S]+)[^>]*>#i', $html_tag, $tag_match)) {	// Wrong HTML tag format, Return original string:
+        return $html_tag;
+    }
 
-	$html_tag_name = $tag_match[1];
+    $html_tag_name = $tag_match[1];
 
-	// Get the remaining string after the first HTML tag:
-	$trailing_str = str_replace( $tag_match[0], '', $html_tag );
+    // Get the remaining string after the first HTML tag:
+    $trailing_str = str_replace($tag_match[0], '', $html_tag);
 
-	$old_attribs = array();
-	$updated_attribs = array();
-	if( preg_match_all( '@(\S+)=("|\'|)(.*)("|\'|>)@isU', $html_tag, $attr_matches ) )
-	{	// Get all existing attributes:
-		foreach( $attr_matches[1] as $o => $old_attr_name )
-		{
-			$old_attribs[ $old_attr_name ] = $attr_matches[3][ $o ];
-			if( ! isset( $new_attribs[ $old_attr_name ] ) )
-			{	// This attribute is not updated, keep current value:
-				$updated_attribs[] = $old_attr_name.'="'.format_to_output( $attr_matches[3][ $o ], 'formvalue' ).'"';
-			}
-		}
-	}
+    $old_attribs = [];
+    $updated_attribs = [];
+    if (preg_match_all('@(\S+)=("|\'|)(.*)("|\'|>)@isU', $html_tag, $attr_matches)) {	// Get all existing attributes:
+        foreach ($attr_matches[1] as $o => $old_attr_name) {
+            $old_attribs[$old_attr_name] = $attr_matches[3][$o];
+            if (! isset($new_attribs[$old_attr_name])) {	// This attribute is not updated, keep current value:
+                $updated_attribs[] = $old_attr_name . '="' . format_to_output($attr_matches[3][$o], 'formvalue') . '"';
+            }
+        }
+    }
 
-	foreach( $new_attribs as $new_attrib_name => $new_attrib_value )
-	{
-		if( isset( $old_attribs[ $new_attrib_name ] ) )
-		{	// If attribute exists in original HTML tag then Update it depending on selected action:
-			$attrib_action = isset( $attrib_actions[ $new_attrib_name ] ) ? $attrib_actions[ $new_attrib_name ] : 'append';
-			switch( $attrib_action )
-			{
-				case 'skip':
-					// Don't update old value:
-					$new_attrib_value = $old_attribs[ $new_attrib_name ];
-					break;
+    foreach ($new_attribs as $new_attrib_name => $new_attrib_value) {
+        if (isset($old_attribs[$new_attrib_name])) {	// If attribute exists in original HTML tag then Update it depending on selected action:
+            $attrib_action = isset($attrib_actions[$new_attrib_name]) ? $attrib_actions[$new_attrib_name] : 'append';
+            switch ($attrib_action) {
+                case 'skip':
+                    // Don't update old value:
+                    $new_attrib_value = $old_attribs[$new_attrib_name];
+                    break;
 
-				case 'replace':
-					// Replace  old value with new:
-					// $new_attrib_value = $new_attrib_value;
-					break;
+                case 'replace':
+                    // Replace  old value with new:
+                    // $new_attrib_value = $new_attrib_value;
+                    break;
 
-				case 'append':
-				default:
-					// Append new value to old:
-					$new_attrib_value = $old_attribs[ $new_attrib_name ].' '.$new_attrib_value;
-					break;
-			}
-		}
-		// ELSE If attribute doesn't exist in original HTML tag then create new one.
+                case 'append':
+                default:
+                    // Append new value to old:
+                    $new_attrib_value = $old_attribs[$new_attrib_name] . ' ' . $new_attrib_value;
+                    break;
+            }
+        }
+        // ELSE If attribute doesn't exist in original HTML tag then create new one.
 
-		$updated_attribs[] = $new_attrib_name.'="'.format_to_output( $new_attrib_value, 'formvalue' ).'"';
-	}
+        $updated_attribs[] = $new_attrib_name . '="' . format_to_output($new_attrib_value, 'formvalue') . '"';
+    }
 
-	return '<'.$html_tag_name.' '.implode( ' ', $updated_attribs ).'>'.$trailing_str;
+    return '<' . $html_tag_name . ' ' . implode(' ', $updated_attribs) . '>' . $trailing_str;
 }
 
 
@@ -6284,9 +5624,9 @@ function update_html_tag_attribs( $html_tag, $new_attribs, $attrib_actions = arr
  */
 function is_install_page()
 {
-	global $is_install_page;
+    global $is_install_page;
 
-	return isset( $is_install_page ) && $is_install_page === true; // check for type also, because of register_globals!
+    return isset($is_install_page) && $is_install_page === true; // check for type also, because of register_globals!
 }
 
 
@@ -6297,9 +5637,9 @@ function is_install_page()
  */
 function is_admin_page()
 {
-	global $is_admin_page;
+    global $is_admin_page;
 
-	return isset( $is_admin_page ) && $is_admin_page === true; // check for type also, because of register_globals!
+    return isset($is_admin_page) && $is_admin_page === true; // check for type also, because of register_globals!
 }
 
 
@@ -6310,9 +5650,9 @@ function is_admin_page()
  */
 function is_front_page()
 {
-	global $is_front;
+    global $is_front;
 
-	return isset( $is_front ) && $is_front === true;
+    return isset($is_front) && $is_front === true;
 }
 
 
@@ -6323,9 +5663,9 @@ function is_front_page()
  */
 function is_pro()
 {
-	global $app_pro;
+    global $app_pro;
 
-	return isset( $app_pro ) && $app_pro === true;
+    return isset($app_pro) && $app_pro === true;
 }
 
 
@@ -6334,12 +5674,11 @@ function is_pro()
  */
 function check_pro()
 {
-	if( ! is_pro() )
-	{	// Restrict the checking feature for NOT PRO version:
-		global $admin_url;
+    if (! is_pro()) {	// Restrict the checking feature for NOT PRO version:
+        global $admin_url;
 
-		header_redirect( $admin_url.'?ctrl=pro_only' );
-	}
+        header_redirect($admin_url . '?ctrl=pro_only');
+    }
 }
 
 
@@ -6350,38 +5689,32 @@ function check_pro()
  * @param boolean set true to also check if url is login screen or not
  * @return boolean
  */
-function require_login( $url, $check_login_screen )
+function require_login($url, $check_login_screen)
 {
-	global $Settings, $dispatcher;
-	if( preg_match( '#/'.preg_quote( $dispatcher, '#' ).'([&?].*)?$#', $url ) )
-	{ // admin always require logged in user
-		return true;
-	}
+    global $Settings, $dispatcher;
+    if (preg_match('#/' . preg_quote($dispatcher, '#') . '([&?].*)?$#', $url)) { // admin always require logged in user
+        return true;
+    }
 
-	if( $check_login_screen &&  preg_match( '#/login.php([&?].*)?$#', $url ) )
-	{
-		return true;
-	}
+    if ($check_login_screen && preg_match('#/login.php([&?].*)?$#', $url)) {
+        return true;
+    }
 
-	$disp_names = 'threads|messages|contacts';
-	if( !$Settings->get( 'allow_anonymous_user_list' ) )
-	{
-		$disp_names .= '|users';
-	}
-	if( !$Settings->get( 'allow_anonymous_user_profiles' ) )
-	{
-		$disp_names .= '|user';
-	}
-	if( $check_login_screen )
-	{
-		$disp_names .= '|login';
-	}
-	if( preg_match( '#disp=('.$disp_names.')#', $url ) )
-	{ // $url require logged in user
-		return true;
-	}
+    $disp_names = 'threads|messages|contacts';
+    if (! $Settings->get('allow_anonymous_user_list')) {
+        $disp_names .= '|users';
+    }
+    if (! $Settings->get('allow_anonymous_user_profiles')) {
+        $disp_names .= '|user';
+    }
+    if ($check_login_screen) {
+        $disp_names .= '|login';
+    }
+    if (preg_match('#disp=(' . $disp_names . ')#', $url)) { // $url require logged in user
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -6396,22 +5729,21 @@ function require_login( $url, $check_login_screen )
  * @todo Support for locales that have a different kind of enumeration?!
  * @return string
  */
-function implode_with_and( $arr, $implode_by = ', ', $implode_last = ' &amp; ' )
+function implode_with_and($arr, $implode_by = ', ', $implode_last = ' &amp; ')
 {
-	switch( count($arr) )
-	{
-		case 0:
-			return '';
+    switch (count($arr)) {
+        case 0:
+            return '';
 
-		case 1:
-			$r = array_shift($arr);
-			return $r;
+        case 1:
+            $r = array_shift($arr);
+            return $r;
 
-		default:
-			$r = implode( $implode_by, array_slice( $arr, 0, -1 ) )
-			    .$implode_last.array_pop( $arr );
-			return $r;
-	}
+        default:
+            $r = implode($implode_by, array_slice($arr, 0, -1))
+                . $implode_last . array_pop($arr);
+            return $r;
+    }
 }
 
 
@@ -6425,52 +5757,53 @@ function implode_with_and( $arr, $implode_by = ', ', $implode_last = ' &amp; ' )
  * @param string
  * @param string
  */
-function display_list( $items, $list_start = '<ul>', $list_end = '</ul>', $item_separator = '',
-												$item_start = '<li>', $item_end = '</li>', $force_hash = NULL, $max_items = NULL, $link_params = array() )
-{
-	if( !is_null($max_items) && $max_items < 1 )
-	{
-		return;
-	}
+function display_list(
+    $items,
+    $list_start = '<ul>',
+    $list_end = '</ul>',
+    $item_separator = '',
+    $item_start = '<li>',
+    $item_end = '</li>',
+    $force_hash = null,
+    $max_items = null,
+    $link_params = []
+) {
+    if (! is_null($max_items) && $max_items < 1) {
+        return;
+    }
 
-	if( !empty( $items ) )
-	{
-		echo $list_start;
-		$count = 0;
-		$first = true;
+    if (! empty($items)) {
+        echo $list_start;
+        $count = 0;
+        $first = true;
 
-		foreach( $items as $item )
-		{	// For each list item:
+        foreach ($items as $item) {	// For each list item:
+            $link = resolve_link_params($item, $force_hash, $link_params);
+            if (empty($link)) {
+                continue;
+            }
 
-			$link = resolve_link_params( $item, $force_hash, $link_params );
-			if( empty( $link ) )
-			{
-				continue;
-			}
+            $count++;
+            if ($count > 1) {
+                echo $item_separator;
+            }
+            echo $item_start . $link . $item_end;
 
-			$count++;
-			if( $count>1 )
-			{
-				echo $item_separator;
-			}
-			echo $item_start.$link.$item_end;
-
-			if( !is_null($max_items) && $count >= $max_items )
-			{
-				break;
-			}
-		}
-		echo $list_end;
-	}
+            if (! is_null($max_items) && $count >= $max_items) {
+                break;
+            }
+        }
+        echo $list_end;
+    }
 }
 
 
 /**
  * Credits stuff.
  */
-function display_param_link( $params )
+function display_param_link($params)
 {
-	echo resolve_link_params( $params );
+    echo resolve_link_params($params);
 }
 
 
@@ -6482,41 +5815,34 @@ function display_param_link( $params )
  * @param array
  * @return string
  */
-function resolve_link_params( $item, $force_hash = NULL, $params = array() )
+function resolve_link_params($item, $force_hash = null, $params = [])
 {
-	global $current_locale;
+    global $current_locale;
 
-	// echo 'resolve link ';
+    // echo 'resolve link ';
 
-	if( is_array( $item ) )
-	{
-		if( isset( $item[0] ) )
-		{	// Older format, which displays the same thing for all locales:
-			return generate_link_from_params( $item, $params );
-		}
-		else
-		{	// First get the right locale:
-			// echo $current_locale;
-			foreach( $item as $l_locale => $loc_item )
-			{
-				if( $l_locale == substr( $current_locale, 0, strlen($l_locale) ) )
-				{	// We found a matching locale:
-					//echo "[$l_locale/$current_locale]";
-					if( is_array( $loc_item[0] ) )
-					{	// Randomize:
-						$loc_item = hash_link_params( $loc_item, $force_hash );
-					}
+    if (is_array($item)) {
+        if (isset($item[0])) {	// Older format, which displays the same thing for all locales:
+            return generate_link_from_params($item, $params);
+        } else {	// First get the right locale:
+            // echo $current_locale;
+            foreach ($item as $l_locale => $loc_item) {
+                if ($l_locale == substr($current_locale, 0, strlen($l_locale))) {	// We found a matching locale:
+                    //echo "[$l_locale/$current_locale]";
+                    if (is_array($loc_item[0])) {	// Randomize:
+                        $loc_item = hash_link_params($loc_item, $force_hash);
+                    }
 
-					return generate_link_from_params( $loc_item, $params );
-				}
-			}
-			// No match found!
-			return '';
-		}
-	}
+                    return generate_link_from_params($loc_item, $params);
+                }
+            }
+            // No match found!
+            return '';
+        }
+    }
 
-	// Super old format:
-	return $item;
+    // Super old format:
+    return $item;
 }
 
 
@@ -6526,56 +5852,48 @@ function resolve_link_params( $item, $force_hash = NULL, $params = array() )
  * @param array of arrays
  * @param display for a specific hash key
  */
-function hash_link_params( $link_array, $force_hash = NULL )
+function hash_link_params($link_array, $force_hash = null)
 {
-	global $ReqHost, $ReqPath, $ReqURI;
+    global $ReqHost, $ReqPath, $ReqURI;
 
-	static $hash;
+    static $hash;
 
-	if( !is_null($force_hash) )
-	{
-		$hash = $force_hash;
-	}
-	elseif( !isset($hash) )
-	{
-		$key = $ReqHost.$ReqPath;
+    if (! is_null($force_hash)) {
+        $hash = $force_hash;
+    } elseif (! isset($hash)) {
+        $key = $ReqHost . $ReqPath;
 
-		global $Collection, $Blog;
-		if( !empty($Blog) && strpos( $Blog->get_setting('single_links'), 'param_' ) === 0 )
-		{	// We are on a blog that doesn't even have clean URLs for posts
-			$key .= $ReqURI;
-		}
+        global $Collection, $Blog;
+        if (! empty($Blog) && strpos($Blog->get_setting('single_links'), 'param_') === 0) {	// We are on a blog that doesn't even have clean URLs for posts
+            $key .= $ReqURI;
+        }
 
-		$hash = 0;
-		for( $i=0; $i<strlen($key); $i++ )
-		{
-			$hash += ord($key[$i]);
-		}
-		$hash = $hash % 100 + 1;
+        $hash = 0;
+        for ($i = 0; $i < strlen($key); $i++) {
+            $hash += ord($key[$i]);
+        }
+        $hash = $hash % 100 + 1;
 
-		// $hash = rand( 1, 100 );
-		global $debug, $Debuglog;
-		if( $debug )
-		{
-			$Debuglog->add( 'Hash key: '.$hash, 'request' );
-		}
-	}
-	//	echo "[$hash] ";
+        // $hash = rand( 1, 100 );
+        global $debug, $Debuglog;
+        if ($debug) {
+            $Debuglog->add('Hash key: ' . $hash, 'request');
+        }
+    }
+    //	echo "[$hash] ";
 
-	foreach( $link_array as $link_params )
-	{
-		// echo '<br>'.$hash.'-'.$link_params[ 0 ];
-		if( $hash <= $link_params[ 0 ] )
-		{	// select this link!
-			// pre_dump( $link_params );
-			array_shift( $link_params );
-			return $link_params;
-		}
-	}
-	// somehow no match, return 1st element:
-	$link_params = $link_array[0];
-	array_shift( $link_params );
-	return $link_params;
+    foreach ($link_array as $link_params) {
+        // echo '<br>'.$hash.'-'.$link_params[ 0 ];
+        if ($hash <= $link_params[0]) {	// select this link!
+            // pre_dump( $link_params );
+            array_shift($link_params);
+            return $link_params;
+        }
+    }
+    // somehow no match, return 1st element:
+    $link_params = $link_array[0];
+    array_shift($link_params);
+    return $link_params;
 }
 
 
@@ -6585,56 +5903,50 @@ function hash_link_params( $link_array, $force_hash = NULL )
  * @param array
  * @param array
  */
-function generate_link_from_params( $link_params, $params = array() )
+function generate_link_from_params($link_params, $params = [])
 {
-	$url = $link_params[0];
-	if( empty( $url ) )
-	{
-		return '';
-	}
+    $url = $link_params[0];
+    if (empty($url)) {
+        return '';
+    }
 
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'type'        => 'link',
-			'img_url'     => '',
-			'img_width'   => '',
-			'img_height'  => '',
-			'title'       => '',
-			'target'      => '_blank',
-			'rel'         => 'noopener',
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'type' => 'link',
+        'img_url' => '',
+        'img_width' => '',
+        'img_height' => '',
+        'title' => '',
+        'target' => '_blank',
+        'rel' => 'noopener',
+    ], $params);
 
-	$text = $link_params[1];
-	if( is_array($text) )
-	{
-		$text = hash_link_params( $text );
-		$text = $text[0];
-	}
-	if( empty( $text ) )
-	{
-		return '';
-	}
+    $text = $link_params[1];
+    if (is_array($text)) {
+        $text = hash_link_params($text);
+        $text = $text[0];
+    }
+    if (empty($text)) {
+        return '';
+    }
 
-	$r = '<a href="'.$url.'"';
+    $r = '<a href="' . $url . '"';
 
-	if( !empty($params['target'] ) )
-	{
-		$r .= ' target="'.$params['target'].'"';
-	}
+    if (! empty($params['target'])) {
+        $r .= ' target="' . $params['target'] . '"';
+    }
 
-	if( !empty($params['rel'] ) )
-	{
-		$r .= ' rel="'.$params['rel'].'"';
-	}
+    if (! empty($params['rel'])) {
+        $r .= ' rel="' . $params['rel'] . '"';
+    }
 
-	if( $params['type'] == 'img' )
-	{
-		return $r.' title="'.$params['title'].'"><img src="'.$params['img_url'].'" alt="'
-						.$text.'" title="'.$params['title'].'" width="'.$params['img_width'].'" height="'.$params['img_height']
-						.'" border="0" /></a>';
-	}
+    if ($params['type'] == 'img') {
+        return $r . ' title="' . $params['title'] . '"><img src="' . $params['img_url'] . '" alt="'
+                        . $text . '" title="' . $params['title'] . '" width="' . $params['img_width'] . '" height="' . $params['img_height']
+                        . '" border="0" /></a>';
+    }
 
-	return $r.'>'.$text.'</a>';
+    return $r . '>' . $text . '</a>';
 }
 
 
@@ -6652,122 +5964,97 @@ function generate_link_from_params( $link_params, $params = array() )
  * @param boolean $send_as_html Wrap the script into an html page with script tag; default is to send as js file
  * @param string $target prepended to function calls : blank or window.parent
  */
-function send_javascript_message( $methods = array(), $send_as_html = false, $target = '' )
+function send_javascript_message($methods = [], $send_as_html = false, $target = '')
 {
-	// lets spit out any messages
-	global $Messages, $param_input_err_messages;
-	ob_start();
-	$Messages->display();
-	$output = ob_get_clean();
+    // lets spit out any messages
+    global $Messages, $param_input_err_messages;
+    ob_start();
+    $Messages->display();
+    $output = ob_get_clean();
 
-	// Initialize JavaScript params to send what field should be marked are error
-	$js_error_params = array();
-	if( ! empty( $param_input_err_messages ) && is_array( $param_input_err_messages ) )
-	{
-		foreach( $param_input_err_messages as $param_name => $param_error )
-		{
-			$js_error_params[] = $param_name.': \''.format_to_js( $param_error ).'\'';
-		}
-	}
-	$js_error_params = '{'.implode( ', ', $js_error_params ).'}';
+    // Initialize JavaScript params to send what field should be marked are error
+    $js_error_params = [];
+    if (! empty($param_input_err_messages) && is_array($param_input_err_messages)) {
+        foreach ($param_input_err_messages as $param_name => $param_error) {
+            $js_error_params[] = $param_name . ': \'' . format_to_js($param_error) . '\'';
+        }
+    }
+    $js_error_params = '{' . implode(', ', $js_error_params) . '}';
 
-	// set target
-	$target = ( $target ? $target : param( 'js_target', 'string' ) );
-	if( $target )
-	{	// add trailing [dot]
-		$target = trim( $target, '.' ).'.';
-	}
+    $target = ($target ? $target : param('js_target', 'string'));
+    if ($target) {	// add trailing [dot]
+        $target = trim($target, '.') . '.';
+    }
 
-	// target should be empty or window.parent.
-	if( $target && $target != 'window.parent.' )
-	{
-		debug_die( 'Unexpected javascript target' );
-	}
+    // target should be empty or window.parent.
+    if ($target && $target != 'window.parent.') {
+        debug_die('Unexpected javascript target');
+    }
 
-	if( $output )
-	{	// we have some messages
-		$output = $target.'DisplayServerMessages( \''.format_to_js( $output ).'\', '.$js_error_params.' );'."\n";
-	}
+    if ($output) {	// we have some messages
+        $output = $target . 'DisplayServerMessages( \'' . format_to_js($output) . '\', ' . $js_error_params . ' );' . "\n";
+    }
 
-	if( !empty( $methods ) )
-	{	// we have a methods to call
-		foreach( $methods as $method => $param_list )
-		{	// loop through each requested method
-			$params = array();
-			$internal_scripts = array();
-			if( !is_array( $param_list ) )
-			{	// lets make it an array
-				$param_list = array( $param_list );
-			}
-			foreach( $param_list as $param )
-			{	// add each parameter to the output
-				if( is_array( $param ) )
-				{	// This is an array:
-					$param = json_encode( $param );
-				}
-				elseif( !is_numeric( $param ) )
-				{	// This is a string
-					if( preg_match_all( '#<script(.*?)?>(.*?)</script>#is', $param, $match_scripts ) )
-					{	// Extract internal scripts from content:
-						$param = str_replace( $match_scripts[0], '', $param );
-						foreach( $match_scripts[2] as $i => $internal_script_code )
-						{
-							if( $internal_script_code === '' && strpos( $match_scripts[1][ $i ], 'src=' ) !== false )
-							{	// Append external JS file to <head> to execute code:
-								$internal_script_code = 'jQuery( \'head\' ).append( \''.format_to_js( $match_scripts[0][ $i ] ).'\' );';
-							}
-							$internal_scripts[] = $internal_script_code;
-						}
-					}
-					// Quote the string to javascript format:
-					$param = '\''.format_to_js( $param ).'\'';
-				}
-				$params[] = $param;// add param to the list
-			}
-			// Add method and parameters:
-			$output .= $target.$method.'('.implode( ',', $params ).');'."\n";
-			// Append all internal scripts from content on order to execute this properly:
-			foreach( $internal_scripts as $internal_script )
-			{
-				$output .= "\n// Internal script from {$target}{$method}():\n".$internal_script;
-			}
-		}
-	}
+    if (! empty($methods)) {	// we have a methods to call
+        foreach ($methods as $method => $param_list) {	// loop through each requested method
+            $params = [];
+            $internal_scripts = [];
+            if (! is_array($param_list)) {	// lets make it an array
+                $param_list = [$param_list];
+            }
+            foreach ($param_list as $param) {	// add each parameter to the output
+                if (is_array($param)) {	// This is an array:
+                    $param = json_encode($param);
+                } elseif (! is_numeric($param)) {	// This is a string
+                    if (preg_match_all('#<script(.*?)?>(.*?)</script>#is', $param, $match_scripts)) {	// Extract internal scripts from content:
+                        $param = str_replace($match_scripts[0], '', $param);
+                        foreach ($match_scripts[2] as $i => $internal_script_code) {
+                            if ($internal_script_code === '' && strpos($match_scripts[1][$i], 'src=') !== false) {	// Append external JS file to <head> to execute code:
+                                $internal_script_code = 'jQuery( \'head\' ).append( \'' . format_to_js($match_scripts[0][$i]) . '\' );';
+                            }
+                            $internal_scripts[] = $internal_script_code;
+                        }
+                    }
+                    // Quote the string to javascript format:
+                    $param = '\'' . format_to_js($param) . '\'';
+                }
+                $params[] = $param; // add param to the list
+            }
+            // Add method and parameters:
+            $output .= $target . $method . '(' . implode(',', $params) . ');' . "\n";
+            // Append all internal scripts from content on order to execute this properly:
+            foreach ($internal_scripts as $internal_script) {
+                $output .= "\n// Internal script from {$target}{$method}():\n" . $internal_script;
+            }
+        }
+    }
 
-	// Send the predefined cookies:
-	evo_sendcookies();
+    // Send the predefined cookies:
+    evo_sendcookies();
 
-	if( $send_as_html )
-	{	// we want to send as a html document
-		if( ! headers_sent() )
-		{	// Send headers only when they are not send yet to avoid an error:
-			headers_content_mightcache( 'text/html', 0 );		// Do NOT cache interactive communications.
-		}
-		echo '<html><head></head><body><script>'."\n";
-		echo $output;
-		echo '</script></body></html>';
-	}
-	else
-	{	// we want to send as js
-		if( ! headers_sent() )
-		{	// Send headers only when they are not send yet to avoid an error:
-			headers_content_mightcache( 'text/javascript', 0 );		// Do NOT cache interactive communications.
-		}
-		global $baseurl;
-		if( empty( $_SERVER['HTTP_REFERER'] ) ||
-		    ! ( $referer_url = parse_url( $_SERVER['HTTP_REFERER'] ) ) || empty( $referer_url['host'] ) ||
-		    ! ( $baseurl_info = parse_url( $baseurl ) ) || empty( $baseurl_info['host'] ) ||
-		    ( $baseurl_info['host'] != $referer_url['host'] ) )
-		{	// Deny request from other server:
-			echo 'alert( \''.sprintf( TS_('This action can only be performed with HTTP_REFERER = %s'), $baseurl ).' \');';
-		}
-		else
-		{	// Send JS content only for allowed referer:
-			echo $output;
-		}
-	}
+    if ($send_as_html) {	// we want to send as a html document
+        if (! headers_sent()) {	// Send headers only when they are not send yet to avoid an error:
+            headers_content_mightcache('text/html', 0);		// Do NOT cache interactive communications.
+        }
+        echo '<html><head></head><body><script>' . "\n";
+        echo $output;
+        echo '</script></body></html>';
+    } else {	// we want to send as js
+        if (! headers_sent()) {	// Send headers only when they are not send yet to avoid an error:
+            headers_content_mightcache('text/javascript', 0);		// Do NOT cache interactive communications.
+        }
+        global $baseurl;
+        if (empty($_SERVER['HTTP_REFERER']) ||
+            ! ($referer_url = parse_url($_SERVER['HTTP_REFERER'])) || empty($referer_url['host']) ||
+            ! ($baseurl_info = parse_url($baseurl)) || empty($baseurl_info['host']) ||
+            ($baseurl_info['host'] != $referer_url['host'])) {	// Deny request from other server:
+            echo 'alert( \'' . sprintf(TS_('This action can only be performed with HTTP_REFERER = %s'), $baseurl) . ' \');';
+        } else {	// Send JS content only for allowed referer:
+            echo $output;
+        }
+    }
 
-	exit(0);
+    exit(0);
 }
 
 
@@ -6780,74 +6067,74 @@ function send_javascript_message( $methods = array(), $send_as_html = false, $ta
  * @param string Unformatted raw data
  * @return string Formatted data
  */
-function format_to_js( $unformatted )
+function format_to_js($unformatted)
 {
-	// Convert the following chars:
-	// \               => \\
-	// '               => \'
-	// \n              => \\n
-	// newline         => \n
-	// \r              => \\r
-	// carriage return => \r
-	// \t              => \\t
-	// tab space       => \t
-	return addcslashes( $unformatted, "\\'\n\r\t" );
+    // Convert the following chars:
+    // \               => \\
+    // '               => \'
+    // \n              => \\n
+    // newline         => \n
+    // \r              => \\r
+    // carriage return => \r
+    // \t              => \\t
+    // tab space       => \t
+    return addcslashes($unformatted, "\\'\n\r\t");
 }
 
 
 /**
  * Get available cort oprions for items
  *
- * @param integer|NULL Collection ID to get only enabled item types for the collection, NULL to get all item types
+ * @param integer|null Collection ID to get only enabled item types for the collection, NULL to get all item types
  * @param boolean true to enable none option
  * @param boolean true to also return custom field options, false otherwise
  * @return array key=>name or array( 'general' => array( key=>name ), 'custom' => array( key=>name ) )
  */
-function get_available_sort_options( $coll_ID = NULL, $allow_none = false, $include_custom_fields = false )
+function get_available_sort_options($coll_ID = null, $allow_none = false, $include_custom_fields = false)
 {
-	$options = array();
+    $options = [];
 
-	if( $allow_none )
-	{ // Enable none option
-		$options[''] = T_('None');
-	}
+    if ($allow_none) { // Enable none option
+        $options[''] = T_('None');
+    }
 
-	$options = array_merge( $options, array(
-		'datestart'                => T_('Date issued (Default)'),
-		'order'                    => T_('Order (as explicitly specified)'),
-		//'datedeadline'           => T_('Deadline'),
-		'title'                    => T_('Title'),
-		'datecreated'              => T_('Date created'),
-		'datemodified'             => T_('Date last modified'),
-		'last_touched_ts'          => T_('Date last touched'),
-		'contents_last_updated_ts' => T_('Contents last updated'),
-		'urltitle'                 => T_('URL "filename"'),
-		'priority'                 => T_('Priority'),
-		'numviews'                 => T_('Number of members who have viewed the post (If tracking enabled)'),
-		'RAND'                     => T_('Random order!'),
-	) );
+    $options = array_merge($options, [
+        'datestart' => T_('Date issued (Default)'),
+        'order' => T_('Order (as explicitly specified)'),
+        //'datedeadline'           => T_('Deadline'),
+        'title' => T_('Title'),
+        'datecreated' => T_('Date created'),
+        'datemodified' => T_('Date last modified'),
+        'last_touched_ts' => T_('Date last touched'),
+        'contents_last_updated_ts' => T_('Contents last updated'),
+        'urltitle' => T_('URL "filename"'),
+        'priority' => T_('Priority'),
+        'numviews' => T_('Number of members who have viewed the post (If tracking enabled)'),
+        'RAND' => T_('Random order!'),
+    ]);
 
-	if( $include_custom_fields )
-	{	// We need to include custom fields as well:
-		global $DB;
+    if ($include_custom_fields) {	// We need to include custom fields as well:
+        global $DB;
 
-		$SQL = new SQL( 'Get custom fields for items sort options' );
-		$SQL->SELECT( 'DISTINCT( CONCAT( "custom_", itcf_type, "_", itcf_name ) ), itcf_name' );
-		$SQL->FROM( 'T_items__type_custom_field' );
-		$SQL->FROM_add( 'INNER JOIN T_items__type ON ityp_ID = itcf_ityp_ID' );
-		$SQL->WHERE( 'ityp_usage = "post"' );
-		if( ! empty( $coll_ID ) )
-		{	// Restrict by enabled item types for the given collection:
-			$SQL->FROM_add( 'INNER JOIN T_items__type_coll ON itc_ityp_ID = ityp_ID' );
-			$SQL->WHERE_and( 'itc_coll_ID = '.$DB->quote( $coll_ID ) );
-		}
-		$custom_fields = $DB->get_assoc( $SQL );
+        $SQL = new SQL('Get custom fields for items sort options');
+        $SQL->SELECT('DISTINCT( CONCAT( "custom_", itcf_type, "_", itcf_name ) ), itcf_name');
+        $SQL->FROM('T_items__type_custom_field');
+        $SQL->FROM_add('INNER JOIN T_items__type ON ityp_ID = itcf_ityp_ID');
+        $SQL->WHERE('ityp_usage = "post"');
+        if (! empty($coll_ID)) {	// Restrict by enabled item types for the given collection:
+            $SQL->FROM_add('INNER JOIN T_items__type_coll ON itc_ityp_ID = ityp_ID');
+            $SQL->WHERE_and('itc_coll_ID = ' . $DB->quote($coll_ID));
+        }
+        $custom_fields = $DB->get_assoc($SQL);
 
-		// Add custom fields as available sort options:
-		return array( 'general' => $options, 'custom' => $custom_fields );
-	}
+        // Add custom fields as available sort options:
+        return [
+            'general' => $options,
+            'custom' => $custom_fields,
+        ];
+    }
 
-	return $options;
+    return $options;
 }
 
 
@@ -6858,16 +6145,16 @@ function get_available_sort_options( $coll_ID = NULL, $allow_none = false, $incl
  */
 function get_coll_sort_options()
 {
-	return array(
-		'order'        => T_('Order (Default)'),
-		'ID'           => T_('Blog ID'),
-		'name'         => T_('Name'),
-		'shortname'    => T_('Short name'),
-		'tagline'      => T_('Tagline'),
-		'shortdesc'    => T_('Short Description'),
-		'urlname'      => T_('URL "filename"'),
-		'RAND'         => T_('Random order!'),
-	);
+    return [
+        'order' => T_('Order (Default)'),
+        'ID' => T_('Blog ID'),
+        'name' => T_('Name'),
+        'shortname' => T_('Short name'),
+        'tagline' => T_('Tagline'),
+        'shortdesc' => T_('Short Description'),
+        'urlname' => T_('URL "filename"'),
+        'RAND' => T_('Random order!'),
+    ];
 }
 
 
@@ -6879,32 +6166,33 @@ function get_coll_sort_options()
  * @param array provide a choice for "none_value" with value ''
  * @return string
  */
-function array_to_option_list( $array, $default = '', $allow_none = array() )
+function array_to_option_list($array, $default = '', $allow_none = [])
 {
-	if( !is_array( $default ) )
-	{
-		$default = array( $default );
-	}
+    if (! is_array($default)) {
+        $default = [$default];
+    }
 
-	$r = '';
+    $r = '';
 
-	if( !empty($allow_none) )
-	{
-		$r .= '<option value="'.$allow_none['none_value'].'"';
-		if( empty($default) ) $r .= ' selected="selected"';
-		$r .= '>'.format_to_output($allow_none['none_text']).'</option>'."\n";
-	}
+    if (! empty($allow_none)) {
+        $r .= '<option value="' . $allow_none['none_value'] . '"';
+        if (empty($default)) {
+            $r .= ' selected="selected"';
+        }
+        $r .= '>' . format_to_output($allow_none['none_text']) . '</option>' . "\n";
+    }
 
-	foreach( $array as $k=>$v )
-	{
-		$r .=  '<option value="'.format_to_output($k,'formvalue').'"';
-		if( in_array( $k, $default ) ) $r .= ' selected="selected"';
-		$r .= '>';
-		$r .= format_to_output( $v, 'htmlbody' );
-		$r .=  '</option>'."\n";
-	}
+    foreach ($array as $k => $v) {
+        $r .= '<option value="' . format_to_output($k, 'formvalue') . '"';
+        if (in_array($k, $default)) {
+            $r .= ' selected="selected"';
+        }
+        $r .= '>';
+        $r .= format_to_output($v, 'htmlbody');
+        $r .= '</option>' . "\n";
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -6915,40 +6203,33 @@ function array_to_option_list( $array, $default = '', $allow_none = array() )
  * @param boolean success (by reference)
  * @return mixed True in case of success, false in case of failure. NULL, if no backend is available.
  */
-function get_from_mem_cache( $key, & $success )
+function get_from_mem_cache($key, &$success)
 {
-	global $Timer;
+    global $Timer;
 
-	$Timer->resume( 'get_from_mem_cache', false );
+    $Timer->resume('get_from_mem_cache', false);
 
-	if( function_exists( 'apcu_fetch' ) )
-	{	// APCu
-		$r = apcu_fetch( $key, $success );
-	}
-	elseif( function_exists( 'apc_fetch' ) )
-	{	// APC
-		$r = apc_fetch( $key, $success );
-	}
-	elseif( function_exists( 'xcache_get' ) && ini_get( 'xcache.var_size' ) > 0 )
-	{	// XCache
-		$r = xcache_get( $key );
-	}
+    if (function_exists('apcu_fetch')) {	// APCu
+        $r = apcu_fetch($key, $success);
+    } elseif (function_exists('apc_fetch')) {	// APC
+        $r = apc_fetch($key, $success);
+    } elseif (function_exists('xcache_get') && ini_get('xcache.var_size') > 0) {	// XCache
+        $r = xcache_get($key);
+    }
 
-	if( ! isset($success) )
-	{ // set $success for implementation that do not set it itself (only APC does so)
-		$success = isset($r);
-	}
-	if( ! $success )
-	{
-		$r = NULL;
+    if (! isset($success)) { // set $success for implementation that do not set it itself (only APC does so)
+        $success = isset($r);
+    }
+    if (! $success) {
+        $r = null;
 
-		global $Debuglog;
-		$Debuglog->add( 'No caching backend available for reading "'.$key.'".', 'cache' );
-	}
+        global $Debuglog;
+        $Debuglog->add('No caching backend available for reading "' . $key . '".', 'cache');
+    }
 
-	$Timer->pause( 'get_from_mem_cache', false );
+    $Timer->pause('get_from_mem_cache', false);
 
-	return $r;
+    return $r;
 }
 
 
@@ -6963,34 +6244,27 @@ function get_from_mem_cache( $key, & $success )
  * @param int Time to live (seconds). Default is 0 and means "forever".
  * @return mixed
  */
-function set_to_mem_cache( $key, $payload, $ttl = 0 )
+function set_to_mem_cache($key, $payload, $ttl = 0)
 {
-	global $Timer;
+    global $Timer;
 
-	$Timer->resume( 'set_to_mem_cache', false );
+    $Timer->resume('set_to_mem_cache', false);
 
-	if( function_exists( 'apcu_store' ) )
-	{	// APCu
-		$r = apcu_store( $key, $payload, $ttl );
-	}
-	elseif( function_exists( 'apc_store' ) )
-	{	// APC
-		$r = apc_store( $key, $payload, $ttl );
-	}
-	elseif( function_exists( 'xcache_set' ) && ini_get( 'xcache.var_size' ) > 0 )
-	{	// XCache
-		$r = xcache_set( $key, $payload, $ttl );
-	}
-	else
-	{	// No available cache module:
-		global $Debuglog;
-		$Debuglog->add( 'No caching backend available for writing "'.$key.'".', 'cache' );
-		$r = NULL;
-	}
+    if (function_exists('apcu_store')) {	// APCu
+        $r = apcu_store($key, $payload, $ttl);
+    } elseif (function_exists('apc_store')) {	// APC
+        $r = apc_store($key, $payload, $ttl);
+    } elseif (function_exists('xcache_set') && ini_get('xcache.var_size') > 0) {	// XCache
+        $r = xcache_set($key, $payload, $ttl);
+    } else {	// No available cache module:
+        global $Debuglog;
+        $Debuglog->add('No caching backend available for writing "' . $key . '".', 'cache');
+        $r = null;
+    }
 
-	$Timer->pause( 'set_to_mem_cache', false );
+    $Timer->pause('set_to_mem_cache', false);
 
-	return $r;
+    return $r;
 }
 
 
@@ -7000,22 +6274,19 @@ function set_to_mem_cache( $key, $payload, $ttl = 0 )
  * @param string key
  * @return boolean True on success, false on failure. NULL if no backend available.
  */
-function unset_from_mem_cache( $key )
+function unset_from_mem_cache($key)
 {
-	if( function_exists( 'apc_delete' ) )
-	{	// APC
-		return apc_delete( $key );
-	}
+    if (function_exists('apc_delete')) {	// APC
+        return apc_delete($key);
+    }
 
-	if( function_exists( 'xcache_unset' ) )
-	{	// XCache
-		return xcache_unset( gen_key_for_cache( $key ) );
-	}
+    if (function_exists('xcache_unset')) {	// XCache
+        return xcache_unset(gen_key_for_cache($key));
+    }
 
-	if( function_exists( 'apcu_delete' ) )
-	{	// APCu
-		return apcu_delete( $key );
-	}
+    if (function_exists('apcu_delete')) {	// APCu
+        return apcu_delete($key);
+    }
 }
 
 
@@ -7029,40 +6300,36 @@ function unset_from_mem_cache( $key )
  * @param array Names of DB fields(without prefix) that are available
  * @return string The order fields are separated by comma
  */
-function gen_order_clause( $order_by, $order_dir, $dbprefix, $dbIDname_disambiguation, $available_fields = NULL )
+function gen_order_clause($order_by, $order_dir, $dbprefix, $dbIDname_disambiguation, $available_fields = null)
 {
-	$order_by = str_replace( ' ', ',', $order_by );
-	$orderby_array = explode( ',', $order_by );
+    $order_by = str_replace(' ', ',', $order_by);
+    $orderby_array = explode(',', $order_by);
 
-	$order_dir = explode( ',', str_replace( ' ', ',', $order_dir ) );
+    $order_dir = explode(',', str_replace(' ', ',', $order_dir));
 
-	if( is_array( $available_fields ) )
-	{ // Exclude the incorrect fields from order clause
-		foreach( $orderby_array as $i => $orderby_field )
-		{
-			if( ! in_array( $orderby_field, $available_fields ) )
-			{
-				unset( $orderby_array[ $i ] );
-			}
-		}
-	}
+    if (is_array($available_fields)) { // Exclude the incorrect fields from order clause
+        foreach ($orderby_array as $i => $orderby_field) {
+            if (! in_array($orderby_field, $available_fields)) {
+                unset($orderby_array[$i]);
+            }
+        }
+    }
 
-	// Format each order param with default column names:
-	foreach( $orderby_array as $i => $orderby_value )
-	{ // If the order_by field contains a '.' character which is a table separator we must not use the prefix ( E.g. temp_table.value )
-		$use_dbprefix = ( strpos( $orderby_value, '.' ) !== false ) ? '' : $dbprefix;
-		$orderby_array[ $i ] = $use_dbprefix.$orderby_value.' '.( isset( $order_dir[ $i ] ) ? $order_dir[ $i ] : $order_dir[0] );
-	}
+    // Format each order param with default column names:
+    foreach ($orderby_array as $i => $orderby_value) { // If the order_by field contains a '.' character which is a table separator we must not use the prefix ( E.g. temp_table.value )
+        $use_dbprefix = (strpos($orderby_value, '.') !== false) ? '' : $dbprefix;
+        $orderby_array[$i] = $use_dbprefix . $orderby_value . ' ' . (isset($order_dir[$i]) ? $order_dir[$i] : $order_dir[0]);
+    }
 
-	// Add an ID parameter to make sure there is no ambiguity in ordering on similar items:
-	$orderby_array[] = $dbIDname_disambiguation.' '.$order_dir[0];
+    // Add an ID parameter to make sure there is no ambiguity in ordering on similar items:
+    $orderby_array[] = $dbIDname_disambiguation . ' ' . $order_dir[0];
 
-	$order_by = implode( ', ', $orderby_array );
+    $order_by = implode(', ', $orderby_array);
 
-	// Special case for RAND:
-	$order_by = str_replace( $dbprefix.'RAND ', 'RAND() ', $order_by );
+    // Special case for RAND:
+    $order_by = str_replace($dbprefix . 'RAND ', 'RAND() ', $order_by);
 
-	return $order_by;
+    return $order_by;
 }
 
 
@@ -7071,27 +6338,23 @@ function gen_order_clause( $order_by, $order_dir, $dbprefix, $dbIDname_disambigu
  *
  * @return IconLegend or false, if the user has not set "display_icon_legend"
  */
-function & get_IconLegend()
+function &get_IconLegend()
 {
-	static $IconLegend;
+    static $IconLegend;
 
-	if( ! isset($IconLegend) )
-	{
-		global $UserSettings;
-		if( $UserSettings->get('display_icon_legend') )
-		{
-			/**
-			 * Icon Legend
-			 */
-			load_class( '_core/ui/_iconlegend.class.php', 'IconLegend' );
-			$IconLegend = new IconLegend();
-		}
-		else
-		{
-			$IconLegend = false;
-		}
-	}
-	return $IconLegend;
+    if (! isset($IconLegend)) {
+        global $UserSettings;
+        if ($UserSettings->get('display_icon_legend')) {
+            /**
+             * Icon Legend
+             */
+            load_class('_core/ui/_iconlegend.class.php', 'IconLegend');
+            $IconLegend = new IconLegend();
+        } else {
+            $IconLegend = false;
+        }
+    }
+    return $IconLegend;
 }
 
 
@@ -7102,32 +6365,27 @@ function & get_IconLegend()
  */
 function get_active_opcode_cache()
 {
-	if( function_exists('opcache_invalidate') )
-	{
-		return 'OPCache';
-	}
+    if (function_exists('opcache_invalidate')) {
+        return 'OPCache';
+    }
 
-	if( function_exists('apc_delete_file') )
-	{
-		return 'APC';
-	}
+    if (function_exists('apc_delete_file')) {
+        return 'APC';
+    }
 
-	// xcache: xcache.var_size must be > 0. xcache_set is not necessary (might have been disabled).
-	if( ini_get('xcache.size') > 0 )
-	{
-		return 'xcache';
-	}
+    // xcache: xcache.var_size must be > 0. xcache_set is not necessary (might have been disabled).
+    if (ini_get('xcache.size') > 0) {
+        return 'xcache';
+    }
 
-	if( ini_get('eaccelerator.enable') )
-	{
-		$eac_info = eaccelerator_info();
-		if( $eac_info['cache'] )
-		{
-			return 'eAccelerator';
-		}
-	}
+    if (ini_get('eaccelerator.enable')) {
+        $eac_info = eaccelerator_info();
+        if ($eac_info['cache']) {
+            return 'eAccelerator';
+        }
+    }
 
-	return 'none';
+    return 'none';
 }
 
 
@@ -7138,23 +6396,20 @@ function get_active_opcode_cache()
  */
 function get_active_user_cache()
 {
-	if( function_exists( 'apcu_cache_info' ) /* && ini_get( 'apc.enabled' ) */ )
-	{
-		return 'APCu';
-	}
+    if (function_exists('apcu_cache_info') /* && ini_get( 'apc.enabled' ) */) {
+        return 'APCu';
+    }
 
-	if( function_exists( 'apc_cache_info' ) /* && ini_get( 'apc.enabled' ) */ )
-	{
-		return 'APC';
-	}
+    if (function_exists('apc_cache_info') /* && ini_get( 'apc.enabled' ) */) {
+        return 'APC';
+    }
 
-	// xcache: xcache.var_size must be > 0. xcache_set is not necessary (might have been disabled).
-	if( ini_get('xcache.size') > 0 )
-	{
-		return 'xcache';
-	}
+    // xcache: xcache.var_size must be > 0. xcache_set is not necessary (might have been disabled).
+    if (ini_get('xcache.size') > 0) {
+        return 'xcache';
+    }
 
-	return 'none';
+    return 'none';
 }
 
 
@@ -7168,121 +6423,97 @@ function get_active_user_cache()
  */
 function invalidate_pagecaches()
 {
-	global $DB, $Settings, $servertimenow;
+    global $DB, $Settings, $servertimenow;
 
-	// get current server time
-	$timestamp = ( empty( $servertimenow ) ? time() : $servertimenow );
+    // get current server time
+    $timestamp = (empty($servertimenow) ? time() : $servertimenow);
 
-	// get all blog ids
-	if( $blog_ids = $DB->get_col( 'SELECT blog_ID FROM T_blogs' ) )
-	{	// build invalidate query
-		$query = 'REPLACE INTO T_coll_settings ( cset_coll_ID, cset_name, cset_value ) VALUES';
-		foreach( $blog_ids as $blog_id )
-		{
-			$query .= ' ('.$blog_id.', "last_invalidation_timestamp", '.$timestamp.' ),';
-		}
-		$query = substr( $query, 0, strlen( $query ) - 1 );
-		$DB->query( $query, 'Invalidate blogs\'s page caches' );
-	}
+    // get all blog ids
+    if ($blog_ids = $DB->get_col('SELECT blog_ID FROM T_blogs')) {	// build invalidate query
+        $query = 'REPLACE INTO T_coll_settings ( cset_coll_ID, cset_name, cset_value ) VALUES';
+        foreach ($blog_ids as $blog_id) {
+            $query .= ' (' . $blog_id . ', "last_invalidation_timestamp", ' . $timestamp . ' ),';
+        }
+        $query = substr($query, 0, strlen($query) - 1);
+        $DB->query($query, 'Invalidate blogs\'s page caches');
+    }
 
-	// Invalidate general cache content also
-	$Settings->set( 'last_invalidation_timestamp', $timestamp );
-	$Settings->dbupdate();
+    // Invalidate general cache content also
+    $Settings->set('last_invalidation_timestamp', $timestamp);
+    $Settings->dbupdate();
 }
 
 
 /**
-* Get $ReqPath, $ReqURI
-*
-* @return array ($ReqPath,$ReqURI);
-*/
+ * Get $ReqPath, $ReqURI
+ *
+ * @return array ($ReqPath,$ReqURI);
+ */
 function get_ReqURI()
 {
-	global $Debuglog;
+    global $Debuglog;
 
-	// Investigation for following code by Isaac - http://isaacschlueter.com/
-	if( isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) )
-	{ // Warning: on some IIS installs it it set but empty!
-		$Debuglog->add( 'vars: vars: Getting ReqURI from REQUEST_URI', 'request' );
-		$ReqURI = $_SERVER['REQUEST_URI'];
+    // Investigation for following code by Isaac - http://isaacschlueter.com/
+    if (isset($_SERVER['REQUEST_URI']) && ! empty($_SERVER['REQUEST_URI'])) { // Warning: on some IIS installs it it set but empty!
+        $Debuglog->add('vars: vars: Getting ReqURI from REQUEST_URI', 'request');
+        $ReqURI = $_SERVER['REQUEST_URI'];
 
-		// Build requested Path without query string:
-		$pos = strpos( $ReqURI, '?' );
-		if( false !== $pos )
-		{
-			$ReqPath = substr( $ReqURI, 0, $pos  );
-		}
-		else
-		{
-			$ReqPath = $ReqURI;
-		}
-	}
-	elseif( isset($_SERVER['URL']) )
-	{ // ISAPI
-		$Debuglog->add( 'vars: Getting ReqPath from URL', 'request' );
-		$ReqPath = $_SERVER['URL'];
-		$ReqURI = isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ? ($ReqPath.'?'.$_SERVER['QUERY_STRING']) : $ReqPath;
-	}
-	elseif( isset($_SERVER['PATH_INFO']) )
-	{ // CGI/FastCGI
-		if( isset($_SERVER['SCRIPT_NAME']) )
-		{
-			$Debuglog->add( 'vars: Getting ReqPath from PATH_INFO and SCRIPT_NAME', 'request' );
+        // Build requested Path without query string:
+        $pos = strpos($ReqURI, '?');
+        if (false !== $pos) {
+            $ReqPath = substr($ReqURI, 0, $pos);
+        } else {
+            $ReqPath = $ReqURI;
+        }
+    } elseif (isset($_SERVER['URL'])) { // ISAPI
+        $Debuglog->add('vars: Getting ReqPath from URL', 'request');
+        $ReqPath = $_SERVER['URL'];
+        $ReqURI = isset($_SERVER['QUERY_STRING']) && ! empty($_SERVER['QUERY_STRING']) ? ($ReqPath . '?' . $_SERVER['QUERY_STRING']) : $ReqPath;
+    } elseif (isset($_SERVER['PATH_INFO'])) { // CGI/FastCGI
+        if (isset($_SERVER['SCRIPT_NAME'])) {
+            $Debuglog->add('vars: Getting ReqPath from PATH_INFO and SCRIPT_NAME', 'request');
 
-			if ($_SERVER['SCRIPT_NAME'] == $_SERVER['PATH_INFO'] )
-			{	/* both the same so just use one of them
-				 * this happens on a windoze 2003 box
-				 * gotta love microdoft
-				 */
-				$Debuglog->add( 'vars: PATH_INFO and SCRIPT_NAME are the same', 'request' );
-				$Debuglog->add( 'vars: Getting ReqPath from PATH_INFO only instead', 'request' );
-				$ReqPath = $_SERVER['PATH_INFO'];
-			}
-			else
-			{
-				$ReqPath = $_SERVER['SCRIPT_NAME'].$_SERVER['PATH_INFO'];
-			}
-		}
-		else
-		{ // does this happen??
-			$Debuglog->add( 'vars: Getting ReqPath from PATH_INFO only!', 'request' );
+            if ($_SERVER['SCRIPT_NAME'] == $_SERVER['PATH_INFO']) {	/* both the same so just use one of them
+                 * this happens on a windoze 2003 box
+                 * gotta love microdoft
+                 */
+                $Debuglog->add('vars: PATH_INFO and SCRIPT_NAME are the same', 'request');
+                $Debuglog->add('vars: Getting ReqPath from PATH_INFO only instead', 'request');
+                $ReqPath = $_SERVER['PATH_INFO'];
+            } else {
+                $ReqPath = $_SERVER['SCRIPT_NAME'] . $_SERVER['PATH_INFO'];
+            }
+        } else { // does this happen??
+            $Debuglog->add('vars: Getting ReqPath from PATH_INFO only!', 'request');
 
-			$ReqPath = $_SERVER['PATH_INFO'];
-		}
-		$ReqURI = isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ? ($ReqPath.'?'.$_SERVER['QUERY_STRING']) : $ReqPath;
-	}
-	elseif( isset($_SERVER['ORIG_PATH_INFO']) )
-	{ // Tomcat 5.5.x with Herbelin PHP servlet and PHP 5.1
-		$Debuglog->add( 'vars: Getting ReqPath from ORIG_PATH_INFO', 'request' );
-		$ReqPath = $_SERVER['ORIG_PATH_INFO'];
-		$ReqURI = isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ? ($ReqPath.'?'.$_SERVER['QUERY_STRING']) : $ReqPath;
-	}
-	elseif( isset($_SERVER['SCRIPT_NAME']) )
-	{ // Some Odd Win2k Stuff
-		$Debuglog->add( 'vars: Getting ReqPath from SCRIPT_NAME', 'request' );
-		$ReqPath = $_SERVER['SCRIPT_NAME'];
-		$ReqURI = isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ? ($ReqPath.'?'.$_SERVER['QUERY_STRING']) : $ReqPath;
-	}
-	elseif( isset($_SERVER['PHP_SELF']) )
-	{ // The Old Stand-By
-		$Debuglog->add( 'vars: Getting ReqPath from PHP_SELF', 'request' );
-		$ReqPath = $_SERVER['PHP_SELF'];
-		$ReqURI = isset($_SERVER['QUERY_STRING']) && !empty( $_SERVER['QUERY_STRING'] ) ? ($ReqPath.'?'.$_SERVER['QUERY_STRING']) : $ReqPath;
-	}
-	else
-	{
-		$ReqPath = false;
-		$ReqURI = false;
-		?>
+            $ReqPath = $_SERVER['PATH_INFO'];
+        }
+        $ReqURI = isset($_SERVER['QUERY_STRING']) && ! empty($_SERVER['QUERY_STRING']) ? ($ReqPath . '?' . $_SERVER['QUERY_STRING']) : $ReqPath;
+    } elseif (isset($_SERVER['ORIG_PATH_INFO'])) { // Tomcat 5.5.x with Herbelin PHP servlet and PHP 5.1
+        $Debuglog->add('vars: Getting ReqPath from ORIG_PATH_INFO', 'request');
+        $ReqPath = $_SERVER['ORIG_PATH_INFO'];
+        $ReqURI = isset($_SERVER['QUERY_STRING']) && ! empty($_SERVER['QUERY_STRING']) ? ($ReqPath . '?' . $_SERVER['QUERY_STRING']) : $ReqPath;
+    } elseif (isset($_SERVER['SCRIPT_NAME'])) { // Some Odd Win2k Stuff
+        $Debuglog->add('vars: Getting ReqPath from SCRIPT_NAME', 'request');
+        $ReqPath = $_SERVER['SCRIPT_NAME'];
+        $ReqURI = isset($_SERVER['QUERY_STRING']) && ! empty($_SERVER['QUERY_STRING']) ? ($ReqPath . '?' . $_SERVER['QUERY_STRING']) : $ReqPath;
+    } elseif (isset($_SERVER['PHP_SELF'])) { // The Old Stand-By
+        $Debuglog->add('vars: Getting ReqPath from PHP_SELF', 'request');
+        $ReqPath = $_SERVER['PHP_SELF'];
+        $ReqURI = isset($_SERVER['QUERY_STRING']) && ! empty($_SERVER['QUERY_STRING']) ? ($ReqPath . '?' . $_SERVER['QUERY_STRING']) : $ReqPath;
+    } else {
+        $ReqPath = false;
+        $ReqURI = false;
+        ?>
 		<p class="error">
 		Warning: $ReqPath could not be set. Probably an odd IIS problem.
 		</p>
 		<p>
-		Go to your <a href="<?php echo $baseurl.$install_subdir ?>phpinfo.php">phpinfo page</a>,
+		Go to your <a href="<?php echo $baseurl . $install_subdir ?>phpinfo.php">phpinfo page</a>,
 		look for occurences of <code><?php
-		// take the baseurlroot out..
-		echo preg_replace('#^'.preg_quote( $baseurlroot, '#' ).'#', '', $baseurl.$install_subdir )
-		?>phpinfo.php</code> and copy all lines
+        // take the baseurlroot out..
+        echo preg_replace('#^' . preg_quote($baseurlroot, '#') . '#', '', $baseurl . $install_subdir)
+        ?>phpinfo.php</code> and copy all lines
 		containing this to the <a href="http://forums.b2evolution.net">forum</a>. Also specify what webserver
 		you're running on.
 		<br />
@@ -7290,14 +6521,14 @@ function get_ReqURI()
 		you have to upload it again before doing this).
 		</p>
 		<?php
-	}
+    }
 
-	$r = array( $ReqPath, $ReqURI );
+    $r = [$ReqPath, $ReqURI];
 
-	// Format several danger chars to urlencoded format to avoid issues:
-	$r = str_replace( array( '"', '\'', '<', '>' ), array( '%22', '%27', '%3C', '%3E' ), $r );
+    // Format several danger chars to urlencoded format to avoid issues:
+    $r = str_replace(['"', '\'', '<', '>'], ['%22', '%27', '%3C', '%3E'], $r);
 
-	return $r;
+    return $r;
 }
 
 
@@ -7310,9 +6541,9 @@ function get_ReqURI()
  */
 function get_restapi_url()
 {
-	global $restapi_script;
+    global $restapi_script;
 
-	return get_htsrv_url().$restapi_script;
+    return get_htsrv_url() . $restapi_script;
 }
 
 
@@ -7325,20 +6556,18 @@ function get_restapi_url()
  *                       'login' - Force only when it is enabled by setting "Require SSL"
  * @return string Forced URL
  */
-function force_https_url( $url, $force_https = true )
+function force_https_url($url, $force_https = true)
 {
-	if( $force_https === 'login' )
-	{	// Force url to use https if it is defiend in the setting "Require SSL":
-		global $Settings;
-		$force_https = (boolean)$Settings->get( 'require_ssl' );
-	}
+    if ($force_https === 'login') {	// Force url to use https if it is defiend in the setting "Require SSL":
+        global $Settings;
+        $force_https = (bool) $Settings->get('require_ssl');
+    }
 
-	if( $force_https === true )
-	{	// Force URL only when it is requested by param or enabled by setting checking above:
-		$url = preg_replace( '#^http://#i', 'https://', $url );
-	}
+    if ($force_https === true) {	// Force URL only when it is requested by param or enabled by setting checking above:
+        $url = preg_replace('#^http://#i', 'https://', $url);
+    }
 
-	return $url;
+    return $url;
 }
 
 
@@ -7350,25 +6579,22 @@ function force_https_url( $url, $force_https = true )
  *                       'login' - Force only when it is enabled by setting "Require SSL"
  * @param string Original URL, NULL - to use current URL = $ReqURL
  */
-function check_https_url( $force_https = true, $url = NULL )
+function check_https_url($force_https = true, $url = null)
 {
-	if( $url === NULL )
-	{	// Use current URL by default:
-		global $ReqURL;
-		if( empty( $ReqURL ) )
-		{	// If this URL is not defined yet:
-			return;
-		}
-		$url = $ReqURL;
-	}
+    if ($url === null) {	// Use current URL by default:
+        global $ReqURL;
+        if (empty($ReqURL)) {	// If this URL is not defined yet:
+            return;
+        }
+        $url = $ReqURL;
+    }
 
-	// Try to force the requested URL:
-	$forced_url = force_https_url( $url, $force_https );
+    // Try to force the requested URL:
+    $forced_url = force_https_url($url, $force_https);
 
-	if( $forced_url != $url )
-	{	// If the requested is wrong then redirect to correct what must be used instead:
-		header_redirect( $forced_url );
-	}
+    if ($forced_url != $url) {	// If the requested is wrong then redirect to correct what must be used instead:
+        header_redirect($forced_url);
+    }
 }
 
 
@@ -7380,18 +6606,15 @@ function check_https_url( $force_https = true, $url = NULL )
  * @param boolean TRUE to use https URL
  * @return string URL to htsrv folder
  */
-function get_htsrv_url( $force_https = false )
+function get_htsrv_url($force_https = false)
 {
-	global $Collection, $Blog;
+    global $Collection, $Blog;
 
-	if( is_admin_page() || empty( $Blog ) )
-	{	// For back-office or when no collection page:
-		return get_samedomain_htsrv_url( $force_https );
-	}
-	else
-	{	// For current collection:
-		return $Blog->get_local_htsrv_url( NULL, $force_https );
-	}
+    if (is_admin_page() || empty($Blog)) {	// For back-office or when no collection page:
+        return get_samedomain_htsrv_url($force_https);
+    } else {	// For current collection:
+        return $Blog->get_local_htsrv_url(null, $force_https);
+    }
 }
 
 
@@ -7403,60 +6626,57 @@ function get_htsrv_url( $force_https = false )
  * @param boolean|string TRUE to use https URL
  * @return string URL to htsrv folder
  */
-function get_samedomain_htsrv_url( $force_https = false )
+function get_samedomain_htsrv_url($force_https = false)
 {
-	global $ReqHost, $ReqPath, $baseurl, $htsrv_url, $htsrv_subdir, $Collection, $Blog, $is_cli;
+    global $ReqHost, $ReqPath, $baseurl, $htsrv_url, $htsrv_subdir, $Collection, $Blog, $is_cli;
 
-	// Force URL if it is required and enabled by settings:
-	$req_htsrv_url = force_https_url( $htsrv_url, $force_https );
+    // Force URL if it is required and enabled by settings:
+    $req_htsrv_url = force_https_url($htsrv_url, $force_https);
 
-	// Cut htsrv folder from end of the URL:
-	$req_htsrv_url = substr( $req_htsrv_url, 0, strlen( $req_htsrv_url ) - strlen( $htsrv_subdir ) );
+    // Cut htsrv folder from end of the URL:
+    $req_htsrv_url = substr($req_htsrv_url, 0, strlen($req_htsrv_url) - strlen($htsrv_subdir));
 
-	if( $is_cli || empty( $ReqHost ) || strpos( $ReqHost.$ReqPath, $req_htsrv_url ) !== false )
-	{	// If current request path contains the required htsrv URL
-		// or $ReqHost is not initialized e-g on install
-		// or this is CLI mode where $ReqHost is not defined:
-		return $req_htsrv_url.$htsrv_subdir;
-	}
+    if ($is_cli || empty($ReqHost) || strpos($ReqHost . $ReqPath, $req_htsrv_url) !== false) {	// If current request path contains the required htsrv URL
+        // or $ReqHost is not initialized e-g on install
+        // or this is CLI mode where $ReqHost is not defined:
+        return $req_htsrv_url . $htsrv_subdir;
+    }
 
-	$baseurl_parts = @parse_url( $baseurl );
-	$req_url_parts = @parse_url( $ReqHost );
-	$htsrv_url_parts = @parse_url( $req_htsrv_url );
-	if( ( ! isset( $baseurl_parts['host'] ) ) ||
-	    ( ! isset( $req_url_parts['host'] ) ) ||
-	    ( ! isset( $htsrv_url_parts['host'] ) ) )
-	{
-		debug_die( 'Invalid hosts!' );
-	}
+    $baseurl_parts = @parse_url($baseurl);
+    $req_url_parts = @parse_url($ReqHost);
+    $htsrv_url_parts = @parse_url($req_htsrv_url);
+    if ((! isset($baseurl_parts['host'])) ||
+        (! isset($req_url_parts['host'])) ||
+        (! isset($htsrv_url_parts['host']))) {
+        debug_die('Invalid hosts!');
+    }
 
-	if( $req_url_parts['host'] == $baseurl_parts['host'] &&
-	    ! isset( $req_url_parts['path'] ) &&
-	    isset( $baseurl_parts['path'] ) )
-	{	// Don't miss folder of base url from url like http://site.com/folder/:
-		$req_url_parts['path'] = $baseurl_parts['path'];
-	}
+    if ($req_url_parts['host'] == $baseurl_parts['host'] &&
+        ! isset($req_url_parts['path']) &&
+        isset($baseurl_parts['path'])) {	// Don't miss folder of base url from url like http://site.com/folder/:
+        $req_url_parts['path'] = $baseurl_parts['path'];
+    }
 
-	$req_domain = rtrim( $req_url_parts['host'].( isset( $req_url_parts['path'] ) ? $req_url_parts['path'] : '' ), '/' );
-	$htsrv_domain = rtrim( $htsrv_url_parts['host'].( isset( $htsrv_url_parts['path'] ) ? $htsrv_url_parts['path'] : '' ), '/' );
+    $req_domain = rtrim($req_url_parts['host'] . (isset($req_url_parts['path']) ? $req_url_parts['path'] : ''), '/');
+    $htsrv_domain = rtrim($htsrv_url_parts['host'] . (isset($htsrv_url_parts['path']) ? $htsrv_url_parts['path'] : ''), '/');
 
-	// Replace domain + path of htsrv URL with current request:
-	$samedomain_htsrv_url = substr_replace( $req_htsrv_url, $req_domain, strpos( $req_htsrv_url, $htsrv_domain ), strlen( $htsrv_domain ) );
+    // Replace domain + path of htsrv URL with current request:
+    $samedomain_htsrv_url = substr_replace($req_htsrv_url, $req_domain, strpos($req_htsrv_url, $htsrv_domain), strlen($htsrv_domain));
 
-	// Revert htsrv folder to end of the URL which has been cut above:
-	$samedomain_htsrv_url .= $htsrv_subdir;
+    // Revert htsrv folder to end of the URL which has been cut above:
+    $samedomain_htsrv_url .= $htsrv_subdir;
 
-	// fp> The following check would apply well if we always had 301 redirects.
-	// But it's possible to turn them off in SEO settings for some page and not others (we don't know which here)
-  // And some kinds of pages do not have 301 redirections implemented yet, e-g: disp=users
-  /*
-	if( ( !is_admin_page() ) && ( !empty( $Blog ) ) && ( $samedomain_htsrv_url != $Blog->get_htsrv_url( $secure ) ) )
-	{
-		debug_die( 'The blog is configured to have /htsrv/ at:<br> '.$Blog->get_htsrv_url( $secure ).'<br>but in order to stay on the current domain, we would need to use:<br>'.$samedomain_htsrv_url.'<br>Maybe we have a missing redirection to the proper blog url?' );
-	}
-	*/
+    // fp> The following check would apply well if we always had 301 redirects.
+    // But it's possible to turn them off in SEO settings for some page and not others (we don't know which here)
+    // And some kinds of pages do not have 301 redirections implemented yet, e-g: disp=users
+    /*
+      if( ( !is_admin_page() ) && ( !empty( $Blog ) ) && ( $samedomain_htsrv_url != $Blog->get_htsrv_url( $secure ) ) )
+      {
+          debug_die( 'The blog is configured to have /htsrv/ at:<br> '.$Blog->get_htsrv_url( $secure ).'<br>but in order to stay on the current domain, we would need to use:<br>'.$samedomain_htsrv_url.'<br>Maybe we have a missing redirection to the proper blog url?' );
+      }
+      */
 
-	return $samedomain_htsrv_url;
+    return $samedomain_htsrv_url;
 }
 
 
@@ -7466,13 +6686,12 @@ function get_samedomain_htsrv_url( $force_https = false )
  * @param integer seconds
  * @return string the old value on success, false on failure.
  */
-function set_max_execution_time( $seconds )
+function set_max_execution_time($seconds)
 {
-	if( function_exists( 'set_time_limit' ) )
-	{
-		set_time_limit( $seconds );
-	}
-	return @ini_set( 'max_execution_time', $seconds );
+    if (function_exists('set_time_limit')) {
+        set_time_limit($seconds);
+    }
+    return @ini_set('max_execution_time', $seconds);
 }
 
 
@@ -7484,25 +6703,23 @@ function set_max_execution_time( $seconds )
  * @param bool Quote each element (for use in SQL queries)
  * @return string
  */
-function sanitize_id_list( $str, $return_array = false, $quote = false )
+function sanitize_id_list($str, $return_array = false, $quote = false)
 {
-	if( is_null($str) )
-	{	// Allow NULL values
-		$str = '';
-	}
+    if (is_null($str)) {	// Allow NULL values
+        $str = '';
+    }
 
-	// Explode and trim
-	$array = array_map( 'trim', explode(',', $str) );
+    // Explode and trim
+    $array = array_map('trim', explode(',', $str));
 
-	// Convert to integer and remove all empty values
-	$array = array_filter( array_map('intval', $array) );
+    // Convert to integer and remove all empty values
+    $array = array_filter(array_map('intval', $array));
 
-	if( !$return_array && $quote )
-	{	// Quote each element and return a string
-		global $DB;
-		return $DB->quote($array);
-	}
-	return ( $return_array ? $array : implode(',', $array) );
+    if (! $return_array && $quote) {	// Quote each element and return a string
+        global $DB;
+        return $DB->quote($array);
+    }
+    return ($return_array ? $array : implode(',', $array));
 }
 
 
@@ -7513,24 +6730,20 @@ function sanitize_id_list( $str, $return_array = false, $quote = false )
  * @param mixed
  * @return string
  */
-function evo_json_encode( $a = false )
+function evo_json_encode($a = false)
 {
-	if( is_string( $a ) )
-	{ // Convert to UTF-8
-		$a = current_charset_to_utf8( $a );
-	}
-	elseif( is_array( $a ) )
-	{ // Recursively convert to UTF-8
-		array_walk_recursive( $a, 'current_charset_to_utf8' );
-	}
+    if (is_string($a)) { // Convert to UTF-8
+        $a = current_charset_to_utf8($a);
+    } elseif (is_array($a)) { // Recursively convert to UTF-8
+        array_walk_recursive($a, 'current_charset_to_utf8');
+    }
 
-	$result = json_encode( $a );
-	if( $result === false )
-	{ // If json_encode returns FALSE because of some error we should set correct json empty value as '[]' instead of false
-		$result = '[]';
-	}
+    $result = json_encode($a);
+    if ($result === false) { // If json_encode returns FALSE because of some error we should set correct json empty value as '[]' instead of false
+        $result = '[]';
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -7540,40 +6753,35 @@ function evo_json_encode( $a = false )
  * @param string
  * @return string
  */
-function current_charset_to_utf8( & $a )
+function current_charset_to_utf8(&$a)
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( is_string( $a ) && $current_charset != '' && $current_charset != 'utf-8' )
-	{ // Convert string to utf-8 if it has another charset
-		$a = convert_charset( $a, 'utf-8', $current_charset );
-	}
+    if (is_string($a) && $current_charset != '' && $current_charset != 'utf-8') { // Convert string to utf-8 if it has another charset
+        $a = convert_charset($a, 'utf-8', $current_charset);
+    }
 
-	return $a;
+    return $a;
 }
 
 
-if( !function_exists( 'property_exists' ) )
-{
-	/**
-	 * Create property_exists function if it does not exist ( PHP < 5.1 )
-	 * @param object
-	 * @param string
-	 *
-	 * @return bool
-	 */
-	function property_exists( $class, $property )
-	{
-		if( is_object( $class ) )
-		{
-			$vars = get_object_vars( $class );
-		}
-		else
-		{
-			$vars = get_class_vars( $class );
-		}
-		return array_key_exists( $property, $vars );
-	}
+if (! function_exists('property_exists')) {
+    /**
+     * Create property_exists function if it does not exist ( PHP < 5.1 )
+     * @param object
+     * @param string
+     *
+     * @return bool
+     */
+    function property_exists($class, $property)
+    {
+        if (is_object($class)) {
+            $vars = get_object_vars($class);
+        } else {
+            $vars = get_class_vars($class);
+        }
+        return array_key_exists($property, $vars);
+    }
 }
 
 
@@ -7588,25 +6796,21 @@ if( !function_exists( 'property_exists' ) )
  * @param string Header
  * @param integer Header response code
  */
-function header_http_response( $string, $code = NULL )
+function header_http_response($string, $code = null)
 {
-	global $http_response_code;
+    global $http_response_code;
 
-	$string = 'HTTP/1.1 '. $string;
+    $string = 'HTTP/1.1 ' . $string;
 
-	if( is_null( $code ) )
-	{
-		if( preg_match( '/(\d{3})/', $string, $matches ) )
-		{
-			$http_response_code = (int)$matches[0];
-		}
-	}
-	else
-	{
-		$http_response_code = $code;
-	}
+    if (is_null($code)) {
+        if (preg_match('/(\d{3})/', $string, $matches)) {
+            $http_response_code = (int) $matches[0];
+        }
+    } else {
+        $http_response_code = $code;
+    }
 
-	header( $string );
+    header($string);
 }
 
 
@@ -7616,16 +6820,13 @@ function header_http_response( $string, $code = NULL )
  * @param string the path/url
  * @return string the path/url with trailing slash
  */
-function trailing_slash( $path )
+function trailing_slash($path)
 {
-	if( empty($path) || utf8_substr( $path, -1 ) == '/' )
-	{
-		return $path;
-	}
-	else
-	{
-		return $path.'/';
-	}
+    if (empty($path) || utf8_substr($path, -1) == '/') {
+        return $path;
+    } else {
+        return $path . '/';
+    }
 }
 
 
@@ -7635,16 +6836,13 @@ function trailing_slash( $path )
  * @param string the path/url
  * @return string the path/url without trailing slash
  */
-function no_trailing_slash( $path )
+function no_trailing_slash($path)
 {
-	if( utf8_substr( $path, -1 ) == '/' )
-	{
-		return utf8_substr( $path, 0, utf8_strlen( $path )-1 );
-	}
-	else
-	{
-		return $path;
-	}
+    if (utf8_substr($path, -1) == '/') {
+        return utf8_substr($path, 0, utf8_strlen($path) - 1);
+    } else {
+        return $path;
+    }
 }
 
 
@@ -7654,15 +6852,15 @@ function no_trailing_slash( $path )
  * @param integer Number
  * @return string IP address
  */
-function int2ip( $int )
+function int2ip($int)
 {
-	$ip = array();
-	$ip[0] = (int) ( $int / 256 / 256 / 256 );
-	$ip[1] = (int) ( ( $int - ( $ip[0] * 256 * 256 * 256 ) ) / 256 / 256 );
-	$ip[2] = (int) ( ( $int - ( $ip[0] * 256 * 256 * 256 ) - ( $ip[1] * 256 * 256 ) ) / 256 );
-	$ip[3] = $int - ( $ip[0] * 256 * 256 * 256 ) - ( $ip[1] * 256 * 256 ) - ( $ip[2] * 256 );
+    $ip = [];
+    $ip[0] = (int) ($int / 256 / 256 / 256);
+    $ip[1] = (int) (($int - ($ip[0] * 256 * 256 * 256)) / 256 / 256);
+    $ip[2] = (int) (($int - ($ip[0] * 256 * 256 * 256) - ($ip[1] * 256 * 256)) / 256);
+    $ip[3] = $int - ($ip[0] * 256 * 256 * 256) - ($ip[1] * 256 * 256) - ($ip[2] * 256);
 
-	return $ip[0].'.'.$ip[1].'.'.$ip[2].'.'.$ip[3];
+    return $ip[0] . '.' . $ip[1] . '.' . $ip[2] . '.' . $ip[3];
 }
 
 
@@ -7672,9 +6870,9 @@ function int2ip( $int )
  * @param string IP
  * @return boolean true if valid, false otherwise
  */
-function is_valid_ip_format( $ip )
+function is_valid_ip_format($ip)
 {
-	return filter_var( $ip, FILTER_VALIDATE_IP ) !== false;
+    return filter_var($ip, FILTER_VALIDATE_IP) !== false;
 }
 
 
@@ -7686,29 +6884,26 @@ function is_valid_ip_format( $ip )
  * @param string IP address
  * @return integer Number
  */
-function ip2int( $ip )
+function ip2int($ip)
 {
-	if( ! is_valid_ip_format( $ip ) )
-	{ // IP format is incorrect
-		return 0;
-	}
+    if (! is_valid_ip_format($ip)) { // IP format is incorrect
+        return 0;
+    }
 
-	if( $ip == '::1' )
-	{	// Reserved IP for localhost
-		$ip = '127.0.0.1';
-	}
+    if ($ip == '::1') {	// Reserved IP for localhost
+        $ip = '127.0.0.1';
+    }
 
-	$parts = unpack( 'N*', inet_pton( $ip ) );
-	// In case of IPv6 return only a parts of it
-	$result = ( strpos( $ip, '.' ) !== false ) ? $parts[1] /* IPv4*/ : $parts[4] /* IPv6*/;
+    $parts = unpack('N*', inet_pton($ip));
+    // In case of IPv6 return only a parts of it
+    $result = (strpos($ip, '.') !== false) ? $parts[1] /* IPv4*/ : $parts[4] /* IPv6*/;
 
-	if( $result < 0 )
-	{ // convert unsigned int to signed from unpack.
-		// this should be OK as it will be a PHP float not an int
-		$result += 4294967296;
-	}
+    if ($result < 0) { // convert unsigned int to signed from unpack.
+        // this should be OK as it will be a PHP float not an int
+        $result += 4294967296;
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -7718,17 +6913,16 @@ function ip2int( $ip )
  * @param string URL
  * @return boolean
  */
-function is_ip_url_domain( $url )
+function is_ip_url_domain($url)
 {
-	$url_data = parse_url( $url );
+    $url_data = parse_url($url);
 
-	if( $url_data === false || ! isset( $url_data['host'] ) )
-	{	// Wrong url:
-		return false;
-	}
+    if ($url_data === false || ! isset($url_data['host'])) {	// Wrong url:
+        return false;
+    }
 
-	// Check if host is IP address:
-	return is_valid_ip_format( $url_data['host'] );
+    // Check if host is IP address:
+    return is_valid_ip_format($url_data['host']);
 }
 
 
@@ -7739,55 +6933,48 @@ function is_ip_url_domain( $url )
  * @param string filename (full path to a file)
  * @param string fopen mode
  */
-function save_to_file( $data, $filename, $mode = 'a' )
+function save_to_file($data, $filename, $mode = 'a')
 {
-	global $Settings, $evo_save_file_error_msg;
+    global $Settings, $evo_save_file_error_msg;
 
-	if( ! file_exists( $filename ) )
-	{	// Try to create a target file:
-		if( ! @touch( $filename ) )
-		{	// If file could not be created:
-			$evo_save_file_error_msg = T_('File could not be created!');
-			return false;
-		}
+    if (! file_exists($filename)) {	// Try to create a target file:
+        if (! @touch($filename)) {	// If file could not be created:
+            $evo_save_file_error_msg = T_('File could not be created!');
+            return false;
+        }
 
-		// Doesn't work during installation
-		if( ! empty( $Settings ) )
-		{
-			$chmod = $Settings->get( 'fm_default_chmod_file' );
-			@chmod( $filename, octdec( $chmod ) );
-		}
-	}
+        // Doesn't work during installation
+        if (! empty($Settings)) {
+            $chmod = $Settings->get('fm_default_chmod_file');
+            @chmod($filename, octdec($chmod));
+        }
+    }
 
-	if( ! is_writable( $filename ) )
-	{	// File is not writable:
-		$evo_save_file_error_msg = T_('File is not writable!');
-		return false;
-	}
+    if (! is_writable($filename)) {	// File is not writable:
+        $evo_save_file_error_msg = T_('File is not writable!');
+        return false;
+    }
 
-	if( ! ( $f = @fopen( $filename, $mode ) ) )
-	{	// Could not open file:
-		$evo_save_file_error_msg = T_('File could not be opened for writing data!');
-		return false;
-	}
-	if( ! @fwrite( $f, $data ) )
-	{	// Could not write data into file:
-		$evo_save_file_error_msg = T_('Data could not be written to the file!');
-		return false;
-	}
-	@fclose( $f );
+    if (! ($f = @fopen($filename, $mode))) {	// Could not open file:
+        $evo_save_file_error_msg = T_('File could not be opened for writing data!');
+        return false;
+    }
+    if (! @fwrite($f, $data)) {	// Could not write data into file:
+        $evo_save_file_error_msg = T_('Data could not be written to the file!');
+        return false;
+    }
+    @fclose($f);
 
-	if( ! file_exists( $filename ) )
-	{	// Additonal check for existing file on disk:
-		$evo_save_file_error_msg = T_('File doesn\'t exist!');
-		return false;
-	}
+    if (! file_exists($filename)) {	// Additonal check for existing file on disk:
+        $evo_save_file_error_msg = T_('File doesn\'t exist!');
+        return false;
+    }
 
-	// Reset error log on success result:
-	$evo_save_file_error_msg = '';
+    // Reset error log on success result:
+    $evo_save_file_error_msg = '';
 
-	// Return file name on success result:
-	return $filename;
+    // Return file name on success result:
+    return $filename;
 }
 
 
@@ -7798,9 +6985,9 @@ function save_to_file( $data, $filename, $mode = 'a' )
  */
 function is_ajax_request()
 {
-	global $is_ajax_request;
+    global $is_ajax_request;
 
-	return isset( $is_ajax_request ) && $is_ajax_request === true;
+    return isset($is_ajax_request) && $is_ajax_request === true;
 }
 
 
@@ -7811,16 +6998,16 @@ function is_ajax_request()
  * @param string Template name
  * @return boolean TRUE/FALSE
  */
-function is_ajax_content( $template_name = '' )
+function is_ajax_content($template_name = '')
 {
-	global $ajax_content_mode;
+    global $ajax_content_mode;
 
-	// Template names of content: @see skin_include()
-	$content_templates = array( '$disp$', '_item_block.inc.php', '_item_content.inc.php' );
+    // Template names of content: @see skin_include()
+    $content_templates = ['$disp$', '_item_block.inc.php', '_item_content.inc.php'];
 
-	return !empty( $ajax_content_mode ) &&
-		$ajax_content_mode === true &&
-		!in_array( $template_name, $content_templates );
+    return ! empty($ajax_content_mode) &&
+        $ajax_content_mode === true &&
+        ! in_array($template_name, $content_templates);
 }
 
 
@@ -7831,18 +7018,17 @@ function is_ajax_content( $template_name = '' )
  * @param string|array Category, default is to use the object's default category.
  *        Can also be an array of categories to add the same message to.
  */
-function ajax_log_add( $message, $category = NULL )
+function ajax_log_add($message, $category = null)
 {
-	global $ajax_Log;
+    global $ajax_Log;
 
-	if( ! isset( $ajax_Log ) ||
-	    ! ( $ajax_Log instanceof Log ) )
-	{	// AJAX Log is not initialized:
-		return;
-	}
+    if (! isset($ajax_Log) ||
+        ! ($ajax_Log instanceof Log)) {	// AJAX Log is not initialized:
+        return;
+    }
 
-	// Add a message to AJAX Log:
-	$ajax_Log->add( $message, $category );
+    // Add a message to AJAX Log:
+    $ajax_Log->add($message, $category);
 }
 
 
@@ -7851,25 +7037,36 @@ function ajax_log_add( $message, $category = NULL )
  */
 function ajax_log_display()
 {
-	global $ajax_Log, $debug, $debug_jslog, $current_debug, $current_debug_jslog;
+    global $ajax_Log, $debug, $debug_jslog, $current_debug, $current_debug_jslog;
 
-	if( ! ( $debug || $debug_jslog || $current_debug || $current_debug_jslog ) )
-	{	// At least one debug must be enabled:
-		return;
-	}
+    if (! ($debug || $debug_jslog || $current_debug || $current_debug_jslog)) {	// At least one debug must be enabled:
+        return;
+    }
 
-	if( ! isset( $ajax_Log ) ||
-	    ! ( $ajax_Log instanceof Log ) )
-	{	// AJAX Log is not initialized:
-		return;
-	}
+    if (! isset($ajax_Log) ||
+        ! ($ajax_Log instanceof Log)) {	// AJAX Log is not initialized:
+        return;
+    }
 
-	// Print out AJAX Log messages:
-	$ajax_Log->display( NULL, NULL, true, 'all',
-		array(
-				'error' => array( 'class' => 'jslog_error', 'divClass' => false ),
-				'note'  => array( 'class' => 'jslog_note',  'divClass' => false ),
-			), 'ul', 'jslog' );
+    // Print out AJAX Log messages:
+    $ajax_Log->display(
+        null,
+        null,
+        true,
+        'all',
+        [
+            'error' => [
+                'class' => 'jslog_error',
+                'divClass' => false,
+            ],
+            'note' => [
+                'class' => 'jslog_note',
+                'divClass' => false,
+            ],
+        ],
+        'ul',
+        'jslog'
+    );
 }
 
 
@@ -7884,18 +7081,18 @@ function ajax_log_display()
  * @param integer Origin ID
  * @param integer User ID
  */
-function syslog_insert( $message, $log_type, $object_type = NULL, $object_ID = NULL, $origin_type = 'core', $origin_ID = NULL, $user_ID = NULL )
+function syslog_insert($message, $log_type, $object_type = null, $object_ID = null, $origin_type = 'core', $origin_ID = null, $user_ID = null)
 {
-	global $servertimenow;
+    global $servertimenow;
 
-	$Syslog = new Syslog();
-	$Syslog->set_user( $user_ID );
-	$Syslog->set( 'type', $log_type );
-	$Syslog->set_origin( $origin_type, $origin_ID );
-	$Syslog->set_object( $object_type, $object_ID );
-	$Syslog->set_message( $message );
-	$Syslog->set( 'timestamp', date2mysql( $servertimenow ) );
-	$Syslog->dbinsert();
+    $Syslog = new Syslog();
+    $Syslog->set_user($user_ID);
+    $Syslog->set('type', $log_type);
+    $Syslog->set_origin($origin_type, $origin_ID);
+    $Syslog->set_object($object_type, $object_ID);
+    $Syslog->set_message($message);
+    $Syslog->set('timestamp', date2mysql($servertimenow));
+    $Syslog->dbinsert();
 }
 
 
@@ -7906,22 +7103,18 @@ function syslog_insert( $message, $log_type, $object_type = NULL, $object_ID = N
  */
 function request_from()
 {
-	global $request_from;
+    global $request_from;
 
-	if( !empty( $request_from ) )
-	{ // AJAX request
-		return $request_from;
-	}
+    if (! empty($request_from)) { // AJAX request
+        return $request_from;
+    }
 
-	if( is_admin_page() )
-	{ // Backoffice
-		global $ctrl;
-		return !empty( $ctrl ) ? $ctrl : 'admin';
-	}
-	else
-	{ // Frontoffice
-		return 'front';
-	}
+    if (is_admin_page()) { // Backoffice
+        global $ctrl;
+        return ! empty($ctrl) ? $ctrl : 'admin';
+    } else { // Frontoffice
+        return 'front';
+    }
 }
 
 
@@ -7930,7 +7123,7 @@ function request_from()
  */
 function get_file_permissions_message()
 {
-	return sprintf( T_( '(Please check UNIX file permissions on the parent folder. %s)' ), get_manual_link( 'file-permissions' ) );
+    return sprintf(T_('(Please check UNIX file permissions on the parent folder. %s)'), get_manual_link('file-permissions'));
 }
 
 
@@ -7939,39 +7132,35 @@ function get_file_permissions_message()
  */
 function evo_flush()
 {
-	global $Timer, $disable_evo_flush;
+    global $Timer, $disable_evo_flush;
 
-	if( isset( $disable_evo_flush ) && $disable_evo_flush )
-	{	// This function is disabled (for example, used for ajax/rest api requests)
-		return;
-	}
+    if (isset($disable_evo_flush) && $disable_evo_flush) {	// This function is disabled (for example, used for ajax/rest api requests)
+        return;
+    }
 
-	// To fill the output buffer in order to flush data:
-	// NOTE: Uncomment the below line if flush doesn't work as expected
-	// echo str_repeat( ' ', 4096 );
+    // To fill the output buffer in order to flush data:
+    // NOTE: Uncomment the below line if flush doesn't work as expected
+    // echo str_repeat( ' ', 4096 );
 
-	// New line char is required as flag of that output portion is printed out:
-	echo "\n";
+    // New line char is required as flag of that output portion is printed out:
+    echo "\n";
 
-	$zlib_output_compression = ini_get( 'zlib.output_compression' );
-	if( empty( $zlib_output_compression ) || $zlib_output_compression == 'Off' )
-	{ // This function helps to turn off output buffering
-		// But do NOT use it when zlib.output_compression is ON, because it creates the die errors
+    $zlib_output_compression = ini_get('zlib.output_compression');
+    if (empty($zlib_output_compression) || $zlib_output_compression == 'Off') { // This function helps to turn off output buffering
+        // But do NOT use it when zlib.output_compression is ON, because it creates the die errors
 
-		// fp/yura TODO: we need to optimize this: We want to flush to screen and continue caching.
-		//               This needs investigation and checking other similar places.
-		global $PageCache;
-		if( ! ( isset( $PageCache ) && ! empty( $PageCache->is_collecting ) ) )
-		{ // Only when page cache is not running now because a notice error can appears in function PageCache->end_collect()
-			@ob_end_flush();
-		}
-	}
-	flush();
+        // fp/yura TODO: we need to optimize this: We want to flush to screen and continue caching.
+        //               This needs investigation and checking other similar places.
+        global $PageCache;
+        if (! (isset($PageCache) && ! empty($PageCache->is_collecting))) { // Only when page cache is not running now because a notice error can appears in function PageCache->end_collect()
+            @ob_end_flush();
+        }
+    }
+    flush();
 
-	if( isset( $Timer ) && $Timer->get_state( 'first_flush' ) == 'running' )
-	{ // The first fulsh() was called, stop the timer
-		$Timer->pause( 'first_flush' );
-	}
+    if (isset($Timer) && $Timer->get_state('first_flush') == 'running') { // The first fulsh() was called, stop the timer
+        $Timer->pause('first_flush');
+    }
 }
 
 // ---------- APM : Application Performance Monitoring -----------
@@ -7982,12 +7171,11 @@ function evo_flush()
  *
  * @param mixed $request_transaction_name
  */
-function apm_name_transaction( $request_transaction_name )
+function apm_name_transaction($request_transaction_name)
 {
-	if(extension_loaded('newrelic'))
-	{	// New Relic is installed on the server for monitoring.
-		newrelic_name_transaction( $request_transaction_name );
-	}
+    if (extension_loaded('newrelic')) {	// New Relic is installed on the server for monitoring.
+        newrelic_name_transaction($request_transaction_name);
+    }
 }
 
 /**
@@ -7996,12 +7184,11 @@ function apm_name_transaction( $request_transaction_name )
  * @param mixed $name name of the custom metric
  * @param mixed $value assumed to be in milliseconds (ms)
  */
-function apm_log_custom_metric( $name, $value )
+function apm_log_custom_metric($name, $value)
 {
-	if(extension_loaded('newrelic'))
-	{	// New Relic is installed on the server for monitoring.
-		newrelic_custom_metric( 'Custom/'.$name, $value );
-	}
+    if (extension_loaded('newrelic')) {	// New Relic is installed on the server for monitoring.
+        newrelic_custom_metric('Custom/' . $name, $value);
+    }
 }
 
 /**
@@ -8010,12 +7197,11 @@ function apm_log_custom_metric( $name, $value )
  * @param mixed $name name of the custom param
  * @param mixed $value of the custom param
  */
-function apm_log_custom_param( $name, $value )
+function apm_log_custom_param($name, $value)
 {
-	if(extension_loaded('newrelic'))
-	{	// New Relic is installed on the server for monitoring.
-		newrelic_add_custom_parameter( $name, $value );
-	}
+    if (extension_loaded('newrelic')) {	// New Relic is installed on the server for monitoring.
+        newrelic_add_custom_parameter($name, $value);
+    }
 }
 
 
@@ -8024,25 +7210,25 @@ function apm_log_custom_param( $name, $value )
  *
  * @param array Params
  */
-function echo_editable_column_js( $params = array() )
+function echo_editable_column_js($params = [])
 {
-	$params = array_merge( array(
-			'column_selector' => '', // jQuery selector of cell
-			'ajax_url'        => '', // AJAX url to update a column value
-			'options'         => array(), // Key = Value of option, Value = Title of option. Do not use Javascript code to populate this - use 'options_eval' param to do this.
-			'new_field_name'  => '', // Name of _POST variable that will be send to ajax request with new value
-			'ID_value'        => '', // jQuery to get value of ID
-			'ID_name'         => '', // ID of field in DB
-			'tooltip'         => T_('Click to edit'),
-			'colored_cells'   => false, // Use TRUE when colors are used for background of cell
-			'print_init_tags' => true, // Use FALSE to don't print <script> tags if it is already used inside js
-			'field_type'      => 'select', // Type of the editable field: 'select', 'text'
-			'field_class'     => '', // Class of the editable field
-			'null_text'       => '', // Null text of an input field, Use TS_() to translate it
-			'callback_code'   => '', // Additional JS code after main callback code
-		), $params );
+    $params = array_merge([
+        'column_selector' => '', // jQuery selector of cell
+        'ajax_url' => '', // AJAX url to update a column value
+        'options' => [], // Key = Value of option, Value = Title of option. Do not use Javascript code to populate this - use 'options_eval' param to do this.
+        'new_field_name' => '', // Name of _POST variable that will be send to ajax request with new value
+        'ID_value' => '', // jQuery to get value of ID
+        'ID_name' => '', // ID of field in DB
+        'tooltip' => T_('Click to edit'),
+        'colored_cells' => false, // Use TRUE when colors are used for background of cell
+        'print_init_tags' => true, // Use FALSE to don't print <script> tags if it is already used inside js
+        'field_type' => 'select', // Type of the editable field: 'select', 'text'
+        'field_class' => '', // Class of the editable field
+        'null_text' => '', // Null text of an input field, Use TS_() to translate it
+        'callback_code' => '', // Additional JS code after main callback code
+    ], $params);
 
-	expose_var_to_js( $params['column_selector'], $params, 'evo_init_editable_column_config' );
+    expose_var_to_js($params['column_selector'], $params, 'evo_init_editable_column_config');
 }
 
 
@@ -8053,49 +7239,42 @@ function echo_editable_column_js( $params = array() )
  * @param string TRUE - to get class value for jQuery selector
  * @return string Class name
  */
-function button_class( $type = 'button', $jQuery_selector = false )
+function button_class($type = 'button', $jQuery_selector = false)
 {
-	// Default class names
-	$classes = array(
-			'button'       => 'roundbutton', // Simple button with icon
-			'button_red'   => 'roundbutton_red', // Button with red background
-			'button_green' => 'roundbutton_green', // Button with green background
-			'text'         => 'roundbutton_text', // Button with text
-			'text_primary' => 'roundbutton_text', // Button with text with special style color
-			'text_success' => 'roundbutton_text', // Button with text with special style color
-			'text_danger'  => 'roundbutton_text', // Button with text with special style color
-			'group'        => 'roundbutton_group', // Group of the buttons
-		);
+    // Default class names
+    $classes = [
+        'button' => 'roundbutton', // Simple button with icon
+        'button_red' => 'roundbutton_red', // Button with red background
+        'button_green' => 'roundbutton_green', // Button with green background
+        'text' => 'roundbutton_text', // Button with text
+        'text_primary' => 'roundbutton_text', // Button with text with special style color
+        'text_success' => 'roundbutton_text', // Button with text with special style color
+        'text_danger' => 'roundbutton_text', // Button with text with special style color
+        'group' => 'roundbutton_group', // Group of the buttons
+    ];
 
-	if( is_admin_page() )
-	{ // Some admin skins may have special class names
-		global $AdminUI;
-		if( ! empty( $AdminUI ) )
-		{
-			$template_classes = $AdminUI->get_template( 'button_classes' );
-		}
-	}
-	else
-	{ // Some front end skins may have special class names
-		global $Skin;
-		if( ! empty( $Skin ) )
-		{
-			$template_classes = $Skin->get_template( 'button_classes' );
-		}
-	}
-	if( !empty( $template_classes ) )
-	{ // Get class names from admin template
-		$classes = array_merge( $classes, $template_classes );
-	}
+    if (is_admin_page()) { // Some admin skins may have special class names
+        global $AdminUI;
+        if (! empty($AdminUI)) {
+            $template_classes = $AdminUI->get_template('button_classes');
+        }
+    } else { // Some front end skins may have special class names
+        global $Skin;
+        if (! empty($Skin)) {
+            $template_classes = $Skin->get_template('button_classes');
+        }
+    }
+    if (! empty($template_classes)) { // Get class names from admin template
+        $classes = array_merge($classes, $template_classes);
+    }
 
-	$class_name = isset( $classes[ $type ] ) ? $classes[ $type ] : '';
+    $class_name = isset($classes[$type]) ? $classes[$type] : '';
 
-	if( $jQuery_selector && ! empty( $class_name ) )
-	{ // Convert class name to jQuery selector
-		$class_name = '.'.str_replace( ' ', '.', $class_name );
-	}
+    if ($jQuery_selector && ! empty($class_name)) { // Convert class name to jQuery selector
+        $class_name = '.' . str_replace(' ', '.', $class_name);
+    }
 
-	return $class_name;
+    return $class_name;
 }
 
 
@@ -8104,37 +7283,31 @@ function button_class( $type = 'button', $jQuery_selector = false )
  */
 function echo_modalwindow_js()
 {
-	global $AdminUI, $Collection, $Blog, $modal_window_js_initialized;
+    global $AdminUI, $Collection, $Blog, $modal_window_js_initialized;
 
-	if( ! empty( $modal_window_js_initialized ) )
-	{ // Don't print out these functions twice
-		return;
-	}
+    if (! empty($modal_window_js_initialized)) { // Don't print out these functions twice
+        return;
+    }
 
-	// TODO: asimo> Should not use AdminUI templates for the openModalWindow function. The style part should be handled by css.
-	if( is_admin_page() && isset( $AdminUI ) && $AdminUI->get_template( 'modal_window_js_func' ) !== false )
-	{ // Use the modal functions from back-office skin
-		$skin_modal_window_js_func = $AdminUI->get_template( 'modal_window_js_func' );
-	}
-	elseif( ! is_admin_page() && ! empty( $Blog ) )
-	{ // Use the modal functions from front-office skin
-		$blog_skin_ID = $Blog->get_skin_ID();
-		$SkinCache = & get_SkinCache();
-		$Skin = & $SkinCache->get_by_ID( $blog_skin_ID, false, false );
-		if( $Skin && $Skin->get_template( 'modal_window_js_func' ) !== false )
-		{
-			$skin_modal_window_js_func = $Skin->get_template( 'modal_window_js_func' );
-		}
-	}
+    // TODO: asimo> Should not use AdminUI templates for the openModalWindow function. The style part should be handled by css.
+    if (is_admin_page() && isset($AdminUI) && $AdminUI->get_template('modal_window_js_func') !== false) { // Use the modal functions from back-office skin
+        $skin_modal_window_js_func = $AdminUI->get_template('modal_window_js_func');
+    } elseif (! is_admin_page() && ! empty($Blog)) { // Use the modal functions from front-office skin
+        $blog_skin_ID = $Blog->get_skin_ID();
+        $SkinCache = &get_SkinCache();
+        $Skin = &$SkinCache->get_by_ID($blog_skin_ID, false, false);
+        if ($Skin && $Skin->get_template('modal_window_js_func') !== false) {
+            $skin_modal_window_js_func = $Skin->get_template('modal_window_js_func');
+        }
+    }
 
-	if( ! empty( $skin_modal_window_js_func ) && is_string( $skin_modal_window_js_func ) && function_exists( $skin_modal_window_js_func ) )
-	{ // Call skin function only if it exists
-		call_user_func( $skin_modal_window_js_func );
-		$modal_window_js_initialized = true;
-		return;
-	}
+    if (! empty($skin_modal_window_js_func) && is_string($skin_modal_window_js_func) && function_exists($skin_modal_window_js_func)) { // Call skin function only if it exists
+        call_user_func($skin_modal_window_js_func);
+        $modal_window_js_initialized = true;
+        return;
+    }
 
-	$modal_window_js_initialized = true;
+    $modal_window_js_initialized = true;
 }
 
 /**
@@ -8142,16 +7315,16 @@ function echo_modalwindow_js()
  */
 function echo_modalwindow_js_bootstrap()
 {
-	// Initialize variables for the file "bootstrap-evo_modal_window.js":
-	echo '<script>
-		var evo_js_lang_close = \''.TS_('Close').'\'
-		var evo_js_lang_loading = \''.TS_('Loading...').'\';
-		var evo_js_lang_edit_image = \''.TS_('Insert or edit inline image').'\';
-		var evo_js_lang_select_image_insert = \''.TS_('Select image to insert').'\';
-		var evo_js_lang_alert_before_insert_item = \''.TS_('Save post to start uploading files').'\';
-		var evo_js_lang_alert_before_insert_comment = \''.TS_('Save comment to start uploading files').'\';
-		var evo_js_lang_alert_before_insert_emailcampaign = \''.TS_('Save email campaign to start uploading files').'\';
-		var evo_js_lang_alert_before_insert_message = \''.TS_('Save message to start uploading files').'\';
+    // Initialize variables for the file "bootstrap-evo_modal_window.js":
+    echo '<script>
+		var evo_js_lang_close = \'' . TS_('Close') . '\'
+		var evo_js_lang_loading = \'' . TS_('Loading...') . '\';
+		var evo_js_lang_edit_image = \'' . TS_('Insert or edit inline image') . '\';
+		var evo_js_lang_select_image_insert = \'' . TS_('Select image to insert') . '\';
+		var evo_js_lang_alert_before_insert_item = \'' . TS_('Save post to start uploading files') . '\';
+		var evo_js_lang_alert_before_insert_comment = \'' . TS_('Save comment to start uploading files') . '\';
+		var evo_js_lang_alert_before_insert_emailcampaign = \'' . TS_('Save email campaign to start uploading files') . '\';
+		var evo_js_lang_alert_before_insert_message = \'' . TS_('Save message to start uploading files') . '\';
 	</script>';
 }
 
@@ -8160,10 +7333,10 @@ function echo_modalwindow_js_bootstrap()
  */
 function echo_whois_js_bootstrap()
 {
-	echo '<script>
-		var evo_js_lang_close = \''.TS_('Close').'\';
-		var evo_js_lang_loading = \''.TS_('Loading...').'\';
-		var evo_js_lang_whois_title = \''.TS_('Querying WHOIS server...').'\';
+    echo '<script>
+		var evo_js_lang_close = \'' . TS_('Close') . '\';
+		var evo_js_lang_loading = \'' . TS_('Loading...') . '\';
+		var evo_js_lang_whois_title = \'' . TS_('Querying WHOIS server...') . '\';
 	</script>';
 }
 
@@ -8173,20 +7346,18 @@ function echo_whois_js_bootstrap()
  */
 function evo_error_handler()
 {
-	global $evo_last_handled_error;
+    global $evo_last_handled_error;
 
-	// Get last error
-	$error = error_get_last();
+    // Get last error
+    $error = error_get_last();
 
-	if( ! empty( $error ) && $error['type'] === E_ERROR )
-	{ // Save only last fatal error
-		$evo_last_handled_error = $error;
-	}
+    if (! empty($error) && $error['type'] === E_ERROR) { // Save only last fatal error
+        $evo_last_handled_error = $error;
+    }
 
-	// fp> WTF?!? and what about warnings?
-	// fp> And where do we die()? why is there not a debug_die() here?
-	// There should be ONE MILLION COMMENTS in this function to explain what we do!
-
+    // fp> WTF?!? and what about warnings?
+    // fp> And where do we die()? why is there not a debug_die() here?
+    // There should be ONE MILLION COMMENTS in this function to explain what we do!
 }
 
 
@@ -8197,70 +7368,57 @@ function evo_error_handler()
  * @param array Params
  * @return string Icon with hidden input field
  */
-function get_fieldset_folding_icon( $id, $params = array() )
+function get_fieldset_folding_icon($id, $params = [])
 {
-	if( ! is_logged_in() )
-	{	// Only loggedin users can fold fieldset
-		return;
-	}
+    if (! is_logged_in()) {	// Only loggedin users can fold fieldset
+        return;
+    }
 
-	$params = array_merge( array(
-			'before'     => '',
-			'after'      => ' ',
-			'deny_fold'  => false, // TRUE to don't allow fold the block and keep it opened always on page loading
-			'default_fold' => NULL, // Set default "fold" value for current icon
-			'fold_value' => NULL,
-		), $params );
+    $params = array_merge([
+        'before' => '',
+        'after' => ' ',
+        'deny_fold' => false, // TRUE to don't allow fold the block and keep it opened always on page loading
+        'default_fold' => null, // Set default "fold" value for current icon
+        'fold_value' => null,
+    ], $params);
 
-	if( $params['deny_fold'] )
-	{	// Deny folding for this case
-		$value = 0;
-	}
-	elseif( ! is_null( $params['fold_value'] ) )
-	{	// Fold value is specified, use this:
-		$value = intval( $params['fold_value'] );
-	}
-	else
-	{	// Get the fold value from user settings
-		global $UserSettings, $Collection, $Blog, $ctrl;
-		if( empty( $Blog ) || ( isset( $ctrl ) && in_array( $ctrl, array( 'plugins', 'user' ) ) ) )
-		{	// Get user setting value
-			$value = $UserSettings->get( 'fold_'.$id );
-		}
-		else
-		{	// Get user-collection setting
-			$value = $UserSettings->get_collection_setting( 'fold_'.$id, $Blog->ID );
-		}
-		if( $value === NULL && $params['default_fold'] !== NULL )
-		{	// Use custom default value for this icon:
-			$value = $params['default_fold'];
-		}
-		$value = intval( $value );
-	}
+    if ($params['deny_fold']) {	// Deny folding for this case
+        $value = 0;
+    } elseif (! is_null($params['fold_value'])) {	// Fold value is specified, use this:
+        $value = intval($params['fold_value']);
+    } else {	// Get the fold value from user settings
+        global $UserSettings, $Collection, $Blog, $ctrl;
+        if (empty($Blog) || (isset($ctrl) && in_array($ctrl, ['plugins', 'user']))) {	// Get user setting value
+            $value = $UserSettings->get('fold_' . $id);
+        } else {	// Get user-collection setting
+            $value = $UserSettings->get_collection_setting('fold_' . $id, $Blog->ID);
+        }
+        if ($value === null && $params['default_fold'] !== null) {	// Use custom default value for this icon:
+            $value = $params['default_fold'];
+        }
+        $value = intval($value);
+    }
 
-	// Icon
-	if( $value )
-	{
-		$icon_current = 'filters_show';
-		$icon_reverse = 'filters_hide';
-		$title_reverse = T_('Collapse');
-	}
-	else
-	{
-		$icon_current = 'filters_hide';
-		$icon_reverse = 'filters_show';
-		$title_reverse = T_('Expand');
-	}
-	$icon = get_icon( $icon_current, 'imgtag', array(
-			'id'         => 'icon_folding_'.$id,
-			'data-xy'    => get_icon( $icon_reverse, 'xy' ),
-			'data-title' => format_to_output( $title_reverse, 'htmlattr' ),
-		) );
+    // Icon
+    if ($value) {
+        $icon_current = 'filters_show';
+        $icon_reverse = 'filters_hide';
+        $title_reverse = T_('Collapse');
+    } else {
+        $icon_current = 'filters_hide';
+        $icon_reverse = 'filters_show';
+        $title_reverse = T_('Expand');
+    }
+    $icon = get_icon($icon_current, 'imgtag', [
+        'id' => 'icon_folding_' . $id,
+        'data-xy' => get_icon($icon_reverse, 'xy'),
+        'data-title' => format_to_output($title_reverse, 'htmlattr'),
+    ]);
 
-	// Hidden input to store current value of the folding status
-	$hidden_input = '<input type="hidden" name="folding_values['.$id.']" id="folding_value_'.$id.'" value="'.$value.'" />';
+    // Hidden input to store current value of the folding status
+    $hidden_input = '<input type="hidden" name="folding_values[' . $id . ']" id="folding_value_' . $id . '" value="' . $value . '" />';
 
-	return $hidden_input.$params['before'].$icon.$params['after'];
+    return $hidden_input . $params['before'] . $icon . $params['after'];
 }
 
 
@@ -8269,12 +7427,11 @@ function get_fieldset_folding_icon( $id, $params = array() )
  */
 function echo_fieldset_folding_js()
 {
-	if( ! is_logged_in() )
-	{ // Only loggedin users can fold fieldset
-		return;
-	}
+    if (! is_logged_in()) { // Only loggedin users can fold fieldset
+        return;
+    }
 
-	expose_var_to_js( 'evo_fieldset_folding_config', true );
+    expose_var_to_js('evo_fieldset_folding_config', true);
 }
 
 
@@ -8283,34 +7440,30 @@ function echo_fieldset_folding_js()
  *
  * @param integer Blog ID is used to save setting per blog, NULL- to don't save per blog
  */
-function save_fieldset_folding_values( $blog_ID = NULL )
+function save_fieldset_folding_values($blog_ID = null)
 {
-	if( ! is_logged_in() )
-	{ // Only loggedin users can fold fieldset
-		return;
-	}
+    if (! is_logged_in()) { // Only loggedin users can fold fieldset
+        return;
+    }
 
-	$folding_values = param( 'folding_values', 'array:integer' );
+    $folding_values = param('folding_values', 'array:integer');
 
-	if( empty( $folding_values ) )
-	{ // No folding values go from request, Exit here
-		return;
-	}
+    if (empty($folding_values)) { // No folding values go from request, Exit here
+        return;
+    }
 
-	global $UserSettings;
+    global $UserSettings;
 
-	foreach( $folding_values as $key => $value )
-	{
-		$setting_name = 'fold_'.$key;
-		if( $blog_ID !== NULL )
-		{ // Save setting per blog
-			$setting_name .= '_'.$blog_ID;
-		}
-		$UserSettings->set( $setting_name, $value );
-	}
+    foreach ($folding_values as $key => $value) {
+        $setting_name = 'fold_' . $key;
+        if ($blog_ID !== null) { // Save setting per blog
+            $setting_name .= '_' . $blog_ID;
+        }
+        $UserSettings->set($setting_name, $value);
+    }
 
-	// Update the folding setting for current user
-	$UserSettings->dbupdate();
+    // Update the folding setting for current user
+    $UserSettings->dbupdate();
 }
 
 
@@ -8319,48 +7472,41 @@ function save_fieldset_folding_values( $blog_ID = NULL )
  *
  * @param integer Blog ID is used to save setting per blog, NULL- to don't save per blog
  */
-function save_active_tab_pane_value( $blog_ID = NULL )
+function save_active_tab_pane_value($blog_ID = null)
 {
-	if( ! is_logged_in() )
-	{ // Only loggedin users can fold fieldset
-		return;
-	}
+    if (! is_logged_in()) { // Only loggedin users can fold fieldset
+        return;
+    }
 
-	$tab_pane_value = param( 'tab_pane_active', 'array:string' );
+    $tab_pane_value = param('tab_pane_active', 'array:string');
 
-	if( empty( $tab_pane_value ) )
-	{ // No tab pane value go from request, Exit here
-		return;
-	}
+    if (empty($tab_pane_value)) { // No tab pane value go from request, Exit here
+        return;
+    }
 
-	global $UserSettings;
+    global $UserSettings;
 
-	if( is_array( $tab_pane_value ) && ! empty( $tab_pane_value ) )
-	{	// Get first key:
-		$key = array_keys( $tab_pane_value );
-		$key = trim( $key[0] );
-	}
-	else
-	{
-		$key = '';
-	}
+    if (is_array($tab_pane_value) && ! empty($tab_pane_value)) {	// Get first key:
+        $key = array_keys($tab_pane_value);
+        $key = trim($key[0]);
+    } else {
+        $key = '';
+    }
 
-	$value = ( isset( $tab_pane_value[ $key ] ) ) ? $tab_pane_value[ $key ] : '';
-	$value = trim( $value );
-	
-	if( ! empty( $key ) &&  ! empty( $value ) )
-	{
-		$setting_name = 'active_'.$key;
+    $value = (isset($tab_pane_value[$key])) ? $tab_pane_value[$key] : '';
+    $value = trim($value);
 
-		if( $blog_ID !== NULL )
-		{ // Save setting per blog
-			$setting_name .= '_'.$blog_ID;
-		}
-		$UserSettings->set( $setting_name, $value );
+    if (! empty($key) && ! empty($value)) {
+        $setting_name = 'active_' . $key;
 
-		// Update the folding setting for current user
-		$UserSettings->dbupdate();
-	}
+        if ($blog_ID !== null) { // Save setting per blog
+            $setting_name .= '_' . $blog_ID;
+        }
+        $UserSettings->set($setting_name, $value);
+
+        // Update the folding setting for current user
+        $UserSettings->dbupdate();
+    }
 }
 
 
@@ -8369,39 +7515,35 @@ function save_active_tab_pane_value( $blog_ID = NULL )
  *
  * @param array Params
  */
-function get_status_dropdown_button( $params = array() )
+function get_status_dropdown_button($params = [])
 {
-	$params = array_merge( array(
-			'name'             => '',
-			'value'            => '',
-			'title_format'     => '',
-			'options'          => NULL,
-			'exclude_statuses' => array( 'trash' ),
-		), $params );
+    $params = array_merge([
+        'name' => '',
+        'value' => '',
+        'title_format' => '',
+        'options' => null,
+        'exclude_statuses' => ['trash'],
+    ], $params);
 
-	if( $params['options'] === NULL )
-	{	// Get status options by title format:
-		$status_options = get_visibility_statuses( $params['title_format'], $params['exclude_statuses'] );
-	}
-	else
-	{	// Use status options from params:
-		$status_options = $params['options'];
-	}
-	$status_icon_options = get_visibility_statuses( 'icons', $params['exclude_statuses'] );
+    if ($params['options'] === null) {	// Get status options by title format:
+        $status_options = get_visibility_statuses($params['title_format'], $params['exclude_statuses']);
+    } else {	// Use status options from params:
+        $status_options = $params['options'];
+    }
+    $status_icon_options = get_visibility_statuses('icons', $params['exclude_statuses']);
 
-	$r = '<div class="btn-group dropdown autoselected" data-toggle="tooltip" data-placement="top" data-container="body" title="'.get_status_tooltip_title( $params['value'] ).'">';
-	$r .= '<button type="button" class="btn btn-status-'.$params['value'].' dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
-					.'<span>'.$status_options[ $params['value'] ].'</span>'
-				.' <span class="caret"></span></button>';
-	$r .= '<ul class="dropdown-menu" role="menu" aria-labelledby="'.$params['name'].'">';
-	foreach( $status_options as $status_key => $status_title )
-	{
-		$r .= '<li rel="'.$status_key.'" role="presentation"><a href="#" role="menuitem" tabindex="-1">'.$status_icon_options[ $status_key ].' <span>'.$status_title.'</span></a></li>';
-	}
-	$r .= '</ul>';
-	$r .= '</div>';
+    $r = '<div class="btn-group dropdown autoselected" data-toggle="tooltip" data-placement="top" data-container="body" title="' . get_status_tooltip_title($params['value']) . '">';
+    $r .= '<button type="button" class="btn btn-status-' . $params['value'] . ' dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                    . '<span>' . $status_options[$params['value']] . '</span>'
+                . ' <span class="caret"></span></button>';
+    $r .= '<ul class="dropdown-menu" role="menu" aria-labelledby="' . $params['name'] . '">';
+    foreach ($status_options as $status_key => $status_title) {
+        $r .= '<li rel="' . $status_key . '" role="presentation"><a href="#" role="menuitem" tabindex="-1">' . $status_icon_options[$status_key] . ' <span>' . $status_title . '</span></a></li>';
+    }
+    $r .= '</ul>';
+    $r .= '</div>';
 
-	return $r;
+    return $r;
 }
 
 /**
@@ -8409,15 +7551,14 @@ function get_status_dropdown_button( $params = array() )
  */
 function echo_form_dropdown_js()
 {
-	// Build a string to initialize javascript array with button titles
-	$tooltip_titles = get_visibility_statuses( 'tooltip-titles' );
-	$tooltip_titles_js_array = array();
-	foreach( $tooltip_titles as $status => $tooltip_title )
-	{
-		$tooltip_titles_js_array[] = $status.': \''.TS_( $tooltip_title ).'\'';
-	}
-	$tooltip_titles_js_array = implode( ', ', $tooltip_titles_js_array );
-?>
+    // Build a string to initialize javascript array with button titles
+    $tooltip_titles = get_visibility_statuses('tooltip-titles');
+    $tooltip_titles_js_array = [];
+    foreach ($tooltip_titles as $status => $tooltip_title) {
+        $tooltip_titles_js_array[] = $status . ': \'' . TS_($tooltip_title) . '\'';
+    }
+    $tooltip_titles_js_array = implode(', ', $tooltip_titles_js_array);
+    ?>
 <script>
 jQuery( '.btn-group.dropdown.autoselected li a' ).on( 'click', function()
 {
@@ -8454,39 +7595,28 @@ jQuery( '.btn-group.dropdown.autoselected li a' ).on( 'click', function()
  */
 function get_script_baseurl()
 {
-	if( isset( $_SERVER['SERVER_NAME'] ) )
-	{ // Set baseurl from current server name
+    if (isset($_SERVER['SERVER_NAME'])) { // Set baseurl from current server name
+        $temp_baseurl = 'http://' . $_SERVER['SERVER_NAME'];
 
-		$temp_baseurl = 'http://'.$_SERVER['SERVER_NAME'];
+        if (isset($_SERVER['SERVER_PORT'])) {
+            if ($_SERVER['SERVER_PORT'] == '443') {	// Rewrite that as https:
+                $temp_baseurl = 'https://' . $_SERVER['SERVER_NAME'];
+            } elseif ($_SERVER['SERVER_PORT'] == '8890') {	// Used for testing
+                $temp_baseurl = 'https://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
+            } elseif ($_SERVER['SERVER_PORT'] != '80') { // Get also a port number
+                $temp_baseurl .= ':' . $_SERVER['SERVER_PORT'];
+            }
+        }
 
-		if( isset( $_SERVER['SERVER_PORT'] ) )
-		{
-			if( $_SERVER['SERVER_PORT'] == '443' )
-			{	// Rewrite that as https:
-				$temp_baseurl = 'https://'.$_SERVER['SERVER_NAME'];
-			}
-			elseif( $_SERVER['SERVER_PORT'] == '8890' )
-			{	// Used for testing
-				$temp_baseurl = 'https://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
-			}
-			elseif( $_SERVER['SERVER_PORT'] != '80' )
-			{ // Get also a port number
-				$temp_baseurl .= ':'.$_SERVER['SERVER_PORT'];
-			}
-		}
+        if (isset($_SERVER['SCRIPT_NAME'])) { // Get also the subfolders, when script is called e.g. from http://localhost/blogs/b2evolution/
+            $temp_baseurl .= preg_replace('~(.*/)[^/]*$~', '$1', $_SERVER['SCRIPT_NAME']);
+        }
+    } else { // Use baseurl from config
+        global $baseurl;
+        $temp_baseurl = $baseurl;
+    }
 
-		if( isset( $_SERVER['SCRIPT_NAME'] ) )
-		{ // Get also the subfolders, when script is called e.g. from http://localhost/blogs/b2evolution/
-			$temp_baseurl .= preg_replace( '~(.*/)[^/]*$~', '$1', $_SERVER['SCRIPT_NAME'] );
-		}
-	}
-	else
-	{ // Use baseurl from config
-		global $baseurl;
-		$temp_baseurl = $baseurl;
-	}
-
-	return $temp_baseurl;
+    return $temp_baseurl;
 }
 
 
@@ -8500,70 +7630,56 @@ function get_script_baseurl()
  * @param string Value
  * @return string
  */
-function get_admin_badge( $type = 'coll', $manual_url = '#', $text = '#', $title = '#', $value = NULL )
+function get_admin_badge($type = 'coll', $manual_url = '#', $text = '#', $title = '#', $value = null)
 {
-	switch( $type )
-	{
-		case 'coll':
-			if( $text == '#' )
-			{	// Use default text:
-				$text = T_('Coll. Admin');
-			}
-			if( $title == '#' )
-			{	// Use default title:
-				$title = T_('This can only be edited by users with the Collection Admin permission.');
-			}
-			if( $manual_url == '#' )
-			{	// Use default manual url:
-				$manual_url = 'collection-admin';
-			}
-			break;
+    switch ($type) {
+        case 'coll':
+            if ($text == '#') {	// Use default text:
+                $text = T_('Coll. Admin');
+            }
+            if ($title == '#') {	// Use default title:
+                $title = T_('This can only be edited by users with the Collection Admin permission.');
+            }
+            if ($manual_url == '#') {	// Use default manual url:
+                $manual_url = 'collection-admin';
+            }
+            break;
 
-		case 'user':
-			if( $text == '#' )
-			{	// Use default text:
-				$text = T_('User Admin');
-			}
-			if( $title == '#' )
-			{	// Use default title:
-				$title = T_('This can only be edited by users with the User Admin permission.');
-			}
-			if( $manual_url == '#' )
-			{	// Use default manual url:
-				$manual_url = 'user-admin';
-			}
-			break;
+        case 'user':
+            if ($text == '#') {	// Use default text:
+                $text = T_('User Admin');
+            }
+            if ($title == '#') {	// Use default title:
+                $title = T_('This can only be edited by users with the User Admin permission.');
+            }
+            if ($manual_url == '#') {	// Use default manual url:
+                $manual_url = 'user-admin';
+            }
+            break;
 
-		default:
-			// Unknown badge type:
-			return '';
-	}
+        default:
+            // Unknown badge type:
+            return '';
+    }
 
-	if( empty( $manual_url ) )
-	{	// Don't use a link:
-		$r = ' <b';
-	}
-	else
-	{	// Use link:
-		$r = ' <a href="'.get_manual_url( $manual_url ).'" target="_blank"';
-	}
-	$r .= ' class="badge badge-warning"';
-	if( ! empty( $title ) && $title != '#' )
-	{	// Use title for tooltip:
-		$r .= ' data-toggle="tooltip" data-placement="top" title="'.format_to_output( $title, 'htmlattr' ).'"';
-	}
-	$r .= '>';
-	$r .= $text;
-	if( empty( $manual_url ) )
-	{	// End of text formatted badge:
-		$r .= '</b>';
-	}
-	else
-	{	// End of the link:
-		$r .= '</a>';
-	}
+    if (empty($manual_url)) {	// Don't use a link:
+        $r = ' <b';
+    } else {	// Use link:
+        $r = ' <a href="' . get_manual_url($manual_url) . '" target="_blank"';
+    }
+    $r .= ' class="badge badge-warning"';
+    if (! empty($title) && $title != '#') {	// Use title for tooltip:
+        $r .= ' data-toggle="tooltip" data-placement="top" title="' . format_to_output($title, 'htmlattr') . '"';
+    }
+    $r .= '>';
+    $r .= $text;
+    if (empty($manual_url)) {	// End of text formatted badge:
+        $r .= '</b>';
+    } else {	// End of the link:
+        $r .= '</a>';
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -8578,57 +7694,44 @@ function get_admin_badge( $type = 'coll', $manual_url = '#', $text = '#', $title
  * @return integer|boolean -1 if the first version is lower than the second, 0 if they are equal, and 1 if the second is lower.
  *                         When using the optional operator argument, the function will return TRUE if the relationship is the one specified by the operator, FALSE otherwise.
  */
-function evo_version_compare( $version1, $version2, $operator = NULL )
+function evo_version_compare($version1, $version2, $operator = null)
 {
-	if( $version1 === 'current' )
-	{	// Use current version of application:
-		global $app_version;
-		$version1 = $app_version;
-	}
+    if ($version1 === 'current') {	// Use current version of application:
+        global $app_version;
+        $version1 = $app_version;
+    }
 
-	preg_match( '#^([\d\.]+)(-.+)?$#', $version1, $m_ver1 );
-	preg_match( '#^([\d\.]+)(-.+)?$#', $version2, $m_ver2 );
+    preg_match('#^([\d\.]+)(-.+)?$#', $version1, $m_ver1);
+    preg_match('#^([\d\.]+)(-.+)?$#', $version2, $m_ver2);
 
-	if( isset( $m_ver1[1], $m_ver2[1] ) && $m_ver1[1] == $m_ver2[1] )
-	{	// If versions number is same:
-		$version1_suffix = ( isset( $m_ver1[2] ) ? $m_ver1[2] : '' );
-		$version2_suffix = ( isset( $m_ver2[2] ) ? $m_ver2[2] : '' );
+    if (isset($m_ver1[1], $m_ver2[1]) && $m_ver1[1] == $m_ver2[1]) {	// If versions number is same:
+        $version1_suffix = (isset($m_ver1[2]) ? $m_ver1[2] : '');
+        $version2_suffix = (isset($m_ver2[2]) ? $m_ver2[2] : '');
 
-		if( $version1_suffix == '-PRO' )
-		{	// Remove "PRO" suffix to compare such versions as upper than "stable", "alpha", "beta" and etc.:
-			$version1 = $m_ver1[1];
-			if( $version2_suffix === '' )
-			{	// Add suffix "stable" in order to make version(without suffix) lower than "PRO":
-				$version2 .= '-stable';
-			}
-		}
-		elseif( $version2_suffix == '-stable' )
-		{	// Remove "stable" suffix to compare such versions as upper than "alpha", "beta" and etc. except of "PRO":
-			$version2 = $m_ver2[1];
-		}
+        if ($version1_suffix == '-PRO') {	// Remove "PRO" suffix to compare such versions as upper than "stable", "alpha", "beta" and etc.:
+            $version1 = $m_ver1[1];
+            if ($version2_suffix === '') {	// Add suffix "stable" in order to make version(without suffix) lower than "PRO":
+                $version2 .= '-stable';
+            }
+        } elseif ($version2_suffix == '-stable') {	// Remove "stable" suffix to compare such versions as upper than "alpha", "beta" and etc. except of "PRO":
+            $version2 = $m_ver2[1];
+        }
 
-		if( $version2_suffix == '-PRO' )
-		{	// Remove "PRO" suffix to compare such versions as upper than "stable", "alpha", "beta" and etc.:
-			$version2 = $m_ver2[1];
-			if( $version1_suffix === '' )
-			{	// Add suffix "stable" in order to make version(without suffix) lower than "PRO":
-				$version1 .= '-stable';
-			}
-		}
-		elseif( $version1_suffix == '-stable' )
-		{	// Remove "stable" suffix to compare such versions as upper than "alpha", "beta" and etc. except of "PRO":
-			$version1 = $m_ver1[1];
-		}
-	}
+        if ($version2_suffix == '-PRO') {	// Remove "PRO" suffix to compare such versions as upper than "stable", "alpha", "beta" and etc.:
+            $version2 = $m_ver2[1];
+            if ($version1_suffix === '') {	// Add suffix "stable" in order to make version(without suffix) lower than "PRO":
+                $version1 .= '-stable';
+            }
+        } elseif ($version1_suffix == '-stable') {	// Remove "stable" suffix to compare such versions as upper than "alpha", "beta" and etc. except of "PRO":
+            $version1 = $m_ver1[1];
+        }
+    }
 
-	if( is_null( $operator ) )
-	{	// To return integer:
-		return version_compare( $version1, $version2 );
-	}
-	else
-	{	// To return boolean:
-		return version_compare( $version1, $version2, $operator );
-	}
+    if (is_null($operator)) {	// To return integer:
+        return version_compare($version1, $version2);
+    } else {	// To return boolean:
+        return version_compare($version1, $version2, $operator);
+    }
 }
 
 
@@ -8639,231 +7742,219 @@ function evo_version_compare( $version1, $version2, $operator = NULL )
  * @param string Format (Used for CLI mode)
  * @return string Prepared text
  */
-function get_install_format_text_and_log( $text, $format = 'string' )
+function get_install_format_text_and_log($text, $format = 'string')
 {
-	global $display, $logs_path, $log_file_handle, $avoid_log_file;
+    global $display, $logs_path, $log_file_handle, $avoid_log_file;
 
-	if( empty( $display ) || $display != 'cli' )
-	{	// Don't touch text for non CLI modes:
-		if( ! $avoid_log_file )
-		{	// Include in log file:
-			prepare_install_log_message( $text );
-		}
-		return $text;
-	}
+    if (empty($display) || $display != 'cli') {	// Don't touch text for non CLI modes:
+        if (! $avoid_log_file) {	// Include in log file:
+            prepare_install_log_message($text);
+        }
+        return $text;
+    }
 
-	// Don't remove these HTML tags on CLI mode:
-	$allowable_html_tags = '<evo:error><evo:warning><evo:success><evo:note><evo:login><evo:password>';
+    // Don't remove these HTML tags on CLI mode:
+    $allowable_html_tags = '<evo:error><evo:warning><evo:success><evo:note><evo:login><evo:password>';
 
-	// Remove all new lines because we build them from requested format:
-	$text = str_replace( array( "\n", "\r" ), '', $text );
+    // Remove all new lines because we build them from requested format:
+    $text = str_replace(["\n", "\r"], '', $text);
 
-	// Keep all URLs and display them
-	$text = preg_replace( '/<a[^>]+href="([^"]+)"[^>]*>(.+)<\/a>/i', '$2(URL: $1)', $text );
+    // Keep all URLs and display them
+    $text = preg_replace('/<a[^>]+href="([^"]+)"[^>]*>(.+)<\/a>/i', '$2(URL: $1)', $text);
 
-	// Remove HTML tags from text:
-	$text = strip_tags( $text, $allowable_html_tags );
+    // Remove HTML tags from text:
+    $text = strip_tags($text, $allowable_html_tags);
 
-	switch( $format )
-	{
-		case 'h2':
-			// Header 2
-			$text = "\n\n----- ".$text." -----\n\n";
-			break;
+    switch ($format) {
+        case 'h2':
+            // Header 2
+            $text = "\n\n----- " . $text . " -----\n\n";
+            break;
 
-		case 'br':
-			// Paragraph:
-			$text = $text."\n";
-			break;
+        case 'br':
+            // Paragraph:
+            $text = $text . "\n";
+            break;
 
-		case 'p':
-			// Paragraph:
-			$text = "\n".$text."\n\n";
-			break;
+        case 'p':
+            // Paragraph:
+            $text = "\n" . $text . "\n\n";
+            break;
 
-		case 'p-start':
-			// Start paragraph:
-			$text = "\n".$text;
-			break;
+        case 'p-start':
+            // Start paragraph:
+            $text = "\n" . $text;
+            break;
 
-		case 'p-start-br':
-			// Start paragraph:
-			$text = "\n".$text."\n";
-			break;
+        case 'p-start-br':
+            // Start paragraph:
+            $text = "\n" . $text . "\n";
+            break;
 
-		case 'p-end':
-			// End paragraph:
-			$text = $text."\n\n";
-			break;
+        case 'p-end':
+            // End paragraph:
+            $text = $text . "\n\n";
+            break;
 
-		case 'li':
-			// List item:
-			$text = "\n- ".$text."\n";
-			break;
+        case 'li':
+            // List item:
+            $text = "\n- " . $text . "\n";
+            break;
 
-		case 'code':
-			// Code:
-			$text = "\n================\n".$text."\n================\n";
-			break;
-	}
+        case 'code':
+            // Code:
+            $text = "\n================\n" . $text . "\n================\n";
+            break;
+    }
 
-	// Replace all html entities like "&nbsp;", "&raquo;", "&laquo;" to readable chars:
-	$text = html_entity_decode( $text );
-	
-	if( ! $avoid_log_file )
-	{	// Include in log file:
-		prepare_install_log_message( $text );
-	}
-	
-	return $text;
+    // Replace all html entities like "&nbsp;", "&raquo;", "&laquo;" to readable chars:
+    $text = html_entity_decode($text);
+
+    if (! $avoid_log_file) {	// Include in log file:
+        prepare_install_log_message($text);
+    }
+
+    return $text;
 }
 
 
 /**
-* Start to log into file on disk
-*/
-function start_install_log( $log_file_name )
+ * Start to log into file on disk
+ */
+function start_install_log($log_file_name)
 {	// TODO: Factorize with start_log():
-	global $rsc_url, $app_version_long, $log_file_handle, $logs_path, $servertimenow;
+    global $rsc_url, $app_version_long, $log_file_handle, $logs_path, $servertimenow;
 
-	// Get file path for log:
-	$log_file_path = $logs_path.date( 'Y-m-d-H-i-s', $servertimenow ).'-'.$log_file_name.'.html';
-	
-	// Check log path is writeable or not: 
-	if ( ! is_writable( $logs_path ) ) {
+    // Get file path for log:
+    $log_file_path = $logs_path . date('Y-m-d-H-i-s', $servertimenow) . '-' . $log_file_name . '.html';
 
-		return false;
-	}
-	
-	// Try to create log file:
-	if( ! ( $log_file_handle = fopen( $log_file_path, 'w' ) ) )
-	{	
-		return false;
-	}
+    // Check log path is writeable or not:
+    if (! is_writable($logs_path)) {
+        return false;
+    }
 
-	// Write header of the log file:
-	install_log_to_file( '<!DOCTYPE html>'."\r\n"
-		.'<html lang="en-US">'."\r\n"
-		.'<head>'."\r\n"
-		.'<link href="'.$rsc_url.'css/bootstrap/bootstrap.css?v='.$app_version_long.'" type="text/css" rel="stylesheet" />'."\r\n"
-		.'</head>'."\r\n"
-		.'<body>'."\r\n"
-		.'<div style="padding:5px">' );
+    // Try to create log file:
+    if (! ($log_file_handle = fopen($log_file_path, 'w'))) {
+        return false;
+    }
+
+    // Write header of the log file:
+    install_log_to_file('<!DOCTYPE html>' . "\r\n"
+        . '<html lang="en-US">' . "\r\n"
+        . '<head>' . "\r\n"
+        . '<link href="' . $rsc_url . 'css/bootstrap/bootstrap.css?v=' . $app_version_long . '" type="text/css" rel="stylesheet" />' . "\r\n"
+        . '</head>' . "\r\n"
+        . '<body>' . "\r\n"
+        . '<div style="padding:5px">');
 }
 
 
 /**
-* End of log into file on disk
-*/
+ * End of log into file on disk
+ */
 function end_install_log()
 {	// TODO: Factorize with end_log():
-	global $log_file_handle;
+    global $log_file_handle;
 
-	// Write footer of the log file:
-	install_log_to_file( '</div>'."\r\n"
-		.'</body>'."\r\n"
-		.'</html>' );
+    // Write footer of the log file:
+    install_log_to_file('</div>' . "\r\n"
+        . '</body>' . "\r\n"
+        . '</html>');
 
-	if( isset( $log_file_handle ) && $log_file_handle )
-	{	// Close the log file:
-		fclose( $log_file_handle );
-	}
+    if (isset($log_file_handle) && $log_file_handle) {	// Close the log file:
+        fclose($log_file_handle);
+    }
 }
 
 
 /**
-* Log a message on screen and into file on disk
-*
-* @param string Message
-* @param string Type: 'success', 'error', 'warning'
-* @param string HTML tag for type/styled log: 'p', 'span', 'b', etc.
-* @param boolean TRUE to display label
-*/
-function prepare_install_log_message( $message, $type = NULL, $type_html_tag = 'p', $display_label = true )
+ * Log a message on screen and into file on disk
+ *
+ * @param string Message
+ * @param string Type: 'success', 'error', 'warning'
+ * @param string HTML tag for type/styled log: 'p', 'span', 'b', etc.
+ * @param boolean TRUE to display label
+ */
+function prepare_install_log_message($message, $type = null, $type_html_tag = 'p', $display_label = true)
 {	// TODO: Factorize with log():
-	global $log_file_handle;
+    global $log_file_handle;
 
-	if( ! isset( $log_file_handle ) || ! $log_file_handle )
-	{	
-		return false;
-	}
-	
-	$message = get_install_log( $message, $type, $type_html_tag, $display_label );
+    if (! isset($log_file_handle) || ! $log_file_handle) {
+        return false;
+    }
 
-	if( $message === false )
-	{	// Skip when message should not be displayed:
-		return;
-	}
+    $message = get_install_log($message, $type, $type_html_tag, $display_label);
 
-	// Try to store a message into the log file on the disk:
-	install_log_to_file( $message );
+    if ($message === false) {	// Skip when message should not be displayed:
+        return;
+    }
+
+    // Try to store a message into the log file on the disk:
+    install_log_to_file($message);
 }
 
 
 /**
-* Get a log message
-*
-* @param string Message
-* @param string Type: 'success', 'error', 'warning', 'info'
-* @param string HTML tag for type/styled log: 'p', 'span', 'b', etc.
-* @param boolean TRUE to display label
-* @return string|FALSE Formatted log message, FALSE - when message should not be displayed
-*/
-function get_install_log( $message, $type = NULL, $type_html_tag = 'p', $display_label = true )
+ * Get a log message
+ *
+ * @param string Message
+ * @param string Type: 'success', 'error', 'warning', 'info'
+ * @param string HTML tag for type/styled log: 'p', 'span', 'b', etc.
+ * @param boolean TRUE to display label
+ * @return string|false Formatted log message, FALSE - when message should not be displayed
+ */
+function get_install_log($message, $type = null, $type_html_tag = 'p', $display_label = true)
 {	// TODO: Factorize with get_log():
-	if( $message === '' )
-	{	// Don't log empty strings:
-		return false;
-	}
+    if ($message === '') {	// Don't log empty strings:
+        return false;
+    }
 
-	switch( $type )
-	{
-		case 'success':
-			$before = '<'.$type_html_tag.' class="text-success"> ';
-			$after = '</'.$type_html_tag.'>';
-			break;
+    switch ($type) {
+        case 'success':
+            $before = '<' . $type_html_tag . ' class="text-success"> ';
+            $after = '</' . $type_html_tag . '>';
+            break;
 
-		case 'error':
-			$before = '<'.$type_html_tag.' class="text-danger">'.( $display_label ? '<span class="label label-danger">ERROR</span>' : '' ).' ';
-			$after = '</'.$type_html_tag.'>';
-			break;
+        case 'error':
+            $before = '<' . $type_html_tag . ' class="text-danger">' . ($display_label ? '<span class="label label-danger">ERROR</span>' : '') . ' ';
+            $after = '</' . $type_html_tag . '>';
+            break;
 
-		case 'warning':
-			$before = '<'.$type_html_tag.' class="text-warning">'.( $display_label ? '<span class="label label-warning">WARNING</span>' : '' ).' ';
-			$after = '</'.$type_html_tag.'>';
-			break;
+        case 'warning':
+            $before = '<' . $type_html_tag . ' class="text-warning">' . ($display_label ? '<span class="label label-warning">WARNING</span>' : '') . ' ';
+            $after = '</' . $type_html_tag . '>';
+            break;
 
-		case 'info':
-			$before = '<'.$type_html_tag.' class="text-info">'.( $display_label ? '<span class="label label-info">INFO</span>' : '' ).' ';
-			$after = '</'.$type_html_tag.'>';
-			break;
+        case 'info':
+            $before = '<' . $type_html_tag . ' class="text-info">' . ($display_label ? '<span class="label label-info">INFO</span>' : '') . ' ';
+            $after = '</' . $type_html_tag . '>';
+            break;
 
-		default:
-			$before = '';
-			$after = '';
-			break;
-	}
+        default:
+            $before = '';
+            $after = '';
+            break;
+    }
 
-	return $before.$message.$after;
+    return $before . $message . $after;
 }
 
 
 /**
-* Log a message into file on disk
-*
-* @param string Message
-*/
-function install_log_to_file( $message )
+ * Log a message into file on disk
+ *
+ * @param string Message
+ */
+function install_log_to_file($message)
 {	// TODO: Factorize with log_to_file():
-	global $log_file_handle;
+    global $log_file_handle;
 
-	if( ! isset( $log_file_handle ) || ! $log_file_handle )
-	{	
-		return false;
-	}
+    if (! isset($log_file_handle) || ! $log_file_handle) {
+        return false;
+    }
 
-	// Put a message into the log file on the disk:
-	fwrite( $log_file_handle, $message."\r\n" );
+    // Put a message into the log file on the disk:
+    fwrite($log_file_handle, $message . "\r\n");
 }
 
 
@@ -8874,21 +7965,20 @@ function install_log_to_file( $message )
  */
 function can_use_hashed_password()
 {
-	global $transmit_hashed_password;
+    global $transmit_hashed_password;
 
-	if( isset( $transmit_hashed_password ) )
-	{	// Get value from already defined var:
-		return $transmit_hashed_password;
-	}
+    if (isset($transmit_hashed_password)) {	// Get value from already defined var:
+        return $transmit_hashed_password;
+    }
 
-	global $Settings, $Plugins;
+    global $Settings, $Plugins;
 
-	// Allow to transmit hashed password only when:
-	// - it is enabled by general setting "Password hashing during Login"
-	// - no plugins that automatically disable this option during Login
-	$transmit_hashed_password = (bool)$Settings->get( 'js_passwd_hashing' ) && !(bool)$Plugins->trigger_event_first_true( 'LoginAttemptNeedsRawPassword' );
+    // Allow to transmit hashed password only when:
+    // - it is enabled by general setting "Password hashing during Login"
+    // - no plugins that automatically disable this option during Login
+    $transmit_hashed_password = (bool) $Settings->get('js_passwd_hashing') && ! (bool) $Plugins->trigger_event_first_true('LoginAttemptNeedsRawPassword');
 
-	return $transmit_hashed_password;
+    return $transmit_hashed_password;
 }
 
 
@@ -8900,88 +7990,77 @@ function can_use_hashed_password()
  * @param array Params
  * @return string Content
  */
-function render_inline_files( $content, $Object, $params = array() )
+function render_inline_files($content, $Object, $params = [])
 {
-	$params = array_merge( array(
-			'check_code_block' => false,
-			'clear_paragraph'  => true,
-			'render_tag_image'     => true,
-			'render_tag_file'      => true,
-			'render_tag_inline'    => true,
-			'render_tag_video'     => true,
-			'render_tag_audio'     => true,
-			'render_tag_thumbnail' => true,
-			'render_tag_folder'    => true,
-		), $params );
+    $params = array_merge([
+        'check_code_block' => false,
+        'clear_paragraph' => true,
+        'render_tag_image' => true,
+        'render_tag_file' => true,
+        'render_tag_inline' => true,
+        'render_tag_video' => true,
+        'render_tag_audio' => true,
+        'render_tag_thumbnail' => true,
+        'render_tag_folder' => true,
+    ], $params);
 
-		$render_tags = array();
-		if( $params['render_tag_image'] )
-		{	// Render short tag [image:]
-			$render_tags[] = 'image';
-		}
-		if( $params['render_tag_file'] )
-		{	// Render short tag [file:]
-			$render_tags[] = 'file';
-		}
-		if( $params['render_tag_inline'] )
-		{	// Render short tag [inline:]
-			$render_tags[] = 'inline';
-		}
-		if( $params['render_tag_video'] )
-		{	// Render short tag [video:]
-			$render_tags[] = 'video';
-		}
-		if( $params['render_tag_audio'] )
-		{	// Render short tag [audio:]
-			$render_tags[] = 'audio';
-		}
-		if( $params['render_tag_thumbnail'] )
-		{	// Render short tag [thumbnail:]
-			$render_tags[] = 'thumbnail';
-		}
-		if( $params['render_tag_folder'] )
-		{	// Render short tag [folder:]
-			$render_tags[] = 'folder';
-		}
+    $render_tags = [];
+    if ($params['render_tag_image']) {	// Render short tag [image:]
+        $render_tags[] = 'image';
+    }
+    if ($params['render_tag_file']) {	// Render short tag [file:]
+        $render_tags[] = 'file';
+    }
+    if ($params['render_tag_inline']) {	// Render short tag [inline:]
+        $render_tags[] = 'inline';
+    }
+    if ($params['render_tag_video']) {	// Render short tag [video:]
+        $render_tags[] = 'video';
+    }
+    if ($params['render_tag_audio']) {	// Render short tag [audio:]
+        $render_tags[] = 'audio';
+    }
+    if ($params['render_tag_thumbnail']) {	// Render short tag [thumbnail:]
+        $render_tags[] = 'thumbnail';
+    }
+    if ($params['render_tag_folder']) {	// Render short tag [folder:]
+        $render_tags[] = 'folder';
+    }
 
-		if( empty( $render_tags ) )
-		{	// No tags for rendering:
-			return $content;
-		}
+    if (empty($render_tags)) {	// No tags for rendering:
+        return $content;
+    }
 
-	if( $params['check_code_block'] && ( ( stristr( $content, '<code' ) !== false ) || ( stristr( $content, '<pre' ) !== false ) ) )
-	{	// Call render_inline_files() on everything outside code/pre:
-		$params['check_code_block'] = false;
-		$content = callback_on_non_matching_blocks( $content,
-			'~<(code|pre)[^>]*>.*?</\1>~is',
-			'render_inline_files', array( $Object, $params ) );
-		return $content;
-	}
+    if ($params['check_code_block'] && ((stristr($content, '<code') !== false) || (stristr($content, '<pre') !== false))) {	// Call render_inline_files() on everything outside code/pre:
+        $params['check_code_block'] = false;
+        $content = callback_on_non_matching_blocks(
+            $content,
+            '~<(code|pre)[^>]*>.*?</\1>~is',
+            'render_inline_files',
+            [$Object, $params]
+        );
+        return $content;
+    }
 
-	// No code/pre blocks, replace on the whole thing
+    // No code/pre blocks, replace on the whole thing
 
-	if( $params['clear_paragraph'] )
-	{	// Remove block level short tags inside <p> blocks and move them before the paragraph:
-		$content = move_short_tags( $content );
-	}
+    if ($params['clear_paragraph']) {	// Remove block level short tags inside <p> blocks and move them before the paragraph:
+        $content = move_short_tags($content);
+    }
 
-	// Find all matches with inline tags
-	preg_match_all( '/\[('.implode( '|', $render_tags ).'):(\d+)(:?)([^\]]*)\]/i', $content, $inlines );
+    // Find all matches with inline tags
+    preg_match_all('/\[(' . implode('|', $render_tags) . '):(\d+)(:?)([^\]]*)\]/i', $content, $inlines);
 
-	if( !empty( $inlines[0] ) )
-	{	// There are inline tags in the content...
+    if (! empty($inlines[0])) {	// There are inline tags in the content...
+        $rendered_tags = render_inline_tags($Object, $inlines[0], $params);
+        if ($rendered_tags) {	// Do replacing if the object really contains inline attached tags:
+            foreach ($rendered_tags as $current_link_tag => $rendered_link_tag) {
+                $content = str_replace($current_link_tag, $rendered_link_tag, $content);
+            }
+        }
+    }
 
-		$rendered_tags = render_inline_tags( $Object, $inlines[0], $params );
-		if( $rendered_tags )
-		{	// Do replacing if the object really contains inline attached tags:
-			foreach( $rendered_tags as $current_link_tag => $rendered_link_tag )
-			{
-				$content = str_replace( $current_link_tag, $rendered_link_tag, $content );
-			}
-		}
-	}
-
-	return $content;
+    return $content;
 }
 
 
@@ -8993,631 +8072,555 @@ function render_inline_files( $content, $Object, $params = array() )
  * @param array Params
  * @return array Associative array of rendered HTML tags with inline tags as key
  */
-function render_inline_tags( $Object, $tags, $params = array() )
+function render_inline_tags($Object, $tags, $params = [])
 {
-	global $Plugins;
-	$inlines = array();
-
-	$object_class = get_class( $Object );
-
-	$params = array_merge( array(
-				'before'                   => '<div>',
-				'before_image'             => '<div'.( $object_class == 'EmailCampaign' ? emailskin_style( '.image_block' ) : ' class="image_block"' ).'>',
-				'before_image_legend'      => '<div'.( $object_class == 'EmailCampaign' ? emailskin_style( '.image_legend' ) : ' class="image_legend"' ).'>',
-				'after_image_legend'       => '</div>',
-				'after_image'              => '</div>',
-				'after'                    => '</div>',
-				'image_size'               => 'fit-400x320',
-				'image_link_to'            => 'original', // Can be 'orginal' (image) or 'single' (this post)
-				'limit'                    => 1000, // Max # of images displayed
-			), $params );
-
-	if( !isset( $LinkList ) )
-	{	// Get list of attached Links only first time:
-		if( $Object->ID == 0 )
-		{	// Get temporary object ID on preview new creating object:
-			$temp_link_owner_ID = param( 'temp_link_owner_ID', 'integer', NULL );
-		}
-		else
-		{	// Don't use temporary object for existing object:
-			$temp_link_owner_ID = NULL;
-		}
-
-		switch( $object_class )
-		{
-			case 'Item':
-				$LinkOwner = new LinkItem( $Object, $temp_link_owner_ID );
-				$prepare_plugin_event_name = 'PrepareForRenderItemAttachment';
-				$render_plugin_event_name = 'RenderItemAttachment';
-				break;
-
-			case 'Comment':
-				$LinkOwner = new LinkComment( $Object, empty( $Object->temp_link_owner_ID ) ? $temp_link_owner_ID : $Object->temp_link_owner_ID );
-				$prepare_plugin_event_name = 'PrepareForRenderCommentAttachment';
-				$render_plugin_event_name = 'RenderCommentAttachment';
-				break;
-
-			case 'EmailCampaign':
-				$LinkOwner = new LinkEmailCampaign( $Object );
-				$prepare_plugin_event_name = 'PrepareForRenderEmailAttachment';
-				$render_plugin_event_name = 'RenderEmailAttachment';
-				break;
-
-			case 'Message':
-				$LinkOwner = new LinkMessage( $Object, $temp_link_owner_ID );
-				$prepare_plugin_event_name = 'PrepareForRenderMessageAttachment';
-				$render_plugin_event_name = 'RenderMessageAttachment';
-				break;
-
-			default:
-				// Wrong source object type:
-				return false;
-		}
-		$LinkList = $LinkOwner->get_attachment_LinkList( $params['limit'] );
-	}
-
-	if( empty( $LinkList ) )
-	{	// This Object has no attached files for 'inline' position, Exit here:
-		return false;
-	}
-
-	// Render inline tags by active plugins:
-	$plugins_inlines = $Plugins->trigger_collect( 'RenderInlineTags', array_merge( $params, array(
-			'Object'      => $Object,
-			'inline_tags' => $tags,
-		) ) );
-	foreach( $plugins_inlines as $plugin_ID => $plugin_inlines )
-	{
-		$inlines = array_merge( $inlines, $plugin_inlines );
-	}
-
-	foreach( $tags as $current_inline )
-	{
-		if( isset( $inlines[$current_inline] ) )
-		{	// Skip inline tag if it has been already rendered before, e-g by some plugin in the event "RenderInlineTags" above:
-			continue;
-		}
-
-		if( ! preg_match( '/\[(image|file|inline|video|audio|thumbnail|folder):(\d+)(:?)([^\]]*)\]/i', $current_inline, $inline ) )
-		{	// Don't render a not supported inline tag:
-			$inlines[$current_inline] = $current_inline;
-			continue;
-		}
-
-		$inline_type = $inline[1]; // image|file|inline|video|audio|thumbnail|folder
-		$current_link_ID = (int) $inline[2];
-
-		if( empty( $current_link_ID ) )
-		{	// Invalid link ID, Go to next match
-			$inlines[$current_inline] = $current_inline;
-			continue;
-		}
-
-		if( ! ( $Link = & $LinkList->get_by_field( 'link_ID', $current_link_ID ) ) )
-		{	// Link ID is not part of the linked files for position "inline"
-			$inlines[$current_inline] = $current_inline;
-			continue;
-		}
-
-		if( ! ( $File = & $Link->get_File() ) )
-		{	// No File object:
-			global $Debuglog;
-			$Debuglog->add( sprintf( 'Link ID#%d of '.$object_class.' #%d does not have a file object!', $Link->ID, $Object->ID ), array( 'error', 'files' ) );
-			$inlines[$current_inline] = $current_inline;
-			continue;
-		}
-
-		if( ! $File->exists() )
-		{	// File doesn't exist:
-			global $Debuglog;
-			$Debuglog->add( sprintf( 'File linked to '.$object_class.' #%d does not exist (%s)!', $Object->ID, $File->get_full_path() ), array( 'error', 'files' ) );
-			$inlines[$current_inline] = $current_inline;
-			continue;
-		}
-
-		$params['File'] = $File;
-		$params['Link'] = $Link;
-		$params[ $object_class ] = $Object;
-
-		$current_file_params = array();
-
-		switch( $inline_type )
-		{
-			case 'image':
-			case 'inline': // valid file type: image
-				if( $File->is_image() )
-				{
-					$current_image_params = $params;
-					$image_href = false;
-					$image_rel = NULL;
-					$image_additional_class = false;
-
-					if( ! empty( $inline[3] ) ) // check if second colon is present
-					{
-						// Get the inline params: caption and class
-						$inline_params = explode( ':', $inline[4] );
-						$opt_index = 0;
-
-						// Caption:
-						if( $inline_type != 'inline' && ! empty( $inline_params[0] ) )
-						{	// Caption is set, so overwrite the image link title
-							if( $inline_params[0] == '-' )
-							{	// Caption display is disabled
-								$current_image_params['image_link_title'] = '';
-								$current_image_params['hide_image_link_title'] = true;
-							}
-							else
-							{	// New image caption was set
-								$current_image_params['image_link_title'] = strip_tags( $inline_params[0] );
-							}
-
-							$current_image_params['image_desc'] = $current_image_params['image_link_title'];
-							$current_file_params['title'] = $inline_params[0];
-						}
-						if( $inline_type == 'image' )
-						{	// Caption has always a reserved placefor image short tag:
-							$opt_index++;
-						}
-
-						// RegExp to detect HRef option:
-						$href_regexp = '#^(https?|\(\((.*?)\)\))$#i';
-
-						// Alt text:
-						$current_image_params['image_alt'] = '';
-						if( isset( $inline_params[ $opt_index ] ) &&
-						    substr( $inline_params[ $opt_index ], 0, 1 ) != '.' &&
-						    ! preg_match( $href_regexp, $inline_params[ $opt_index ] ) &&
-						    ( $inline_type == 'image' || ! in_array( $inline_params[ $opt_index ], array( 'small', 'medium', 'large', 'original' ) ) ) )
-						{	// Override the image File's alt text with provided in current inline tag:
-							if( $inline_params[ $opt_index ] == '-' )
-							{	// Alt text display is disabled:
-								$current_image_params['image_alt'] = '-';
-							}
-							else
-							{	// New image alt text was set:
-								$current_image_params['image_alt'] = strip_tags( $inline_params[ $opt_index ] );
-							}
-							$opt_index++;
-						}
-
-						// HRef:
-						if( $inline_type != 'inline' &&
-						    ! empty( $inline_params[ $opt_index ] ) &&
-						    preg_match( $href_regexp, $inline_params[ $opt_index ], $href_match ) )
-						{
-							if( stripos( $href_match[0], 'http' ) === 0 )
-							{	// Absolute URL:
-								$image_href = $href_match[0].':'.$inline_params[ $opt_index + 1 ];
-								$image_rel = ''; // reset default attribute "rel" to don't display colorbox on click
-								$opt_index++;
-							}
-							else
-							{	// Item slug:
-								$ItemCache = & get_ItemCache();
-								if( $href_match[2] === '' )
-								{	// No link, Display image tag without link tag around:
-									$image_href = '';
-								}
-								elseif( $slug_Item = & $ItemCache->get_by_urltitle( $href_match[2], false, false ) )
-								{	// Use a link with item permanent url around image tag:
-									$image_href = $slug_Item->get_permanent_url();
-								}
-								else
-								{	// Wrong Item provided, Singal with special red class:
-									$image_href = '';
-									$image_additional_class = 'imgerror';
-								}
-								$image_rel = ''; // reset default attribute "rel" to don't display colorbox on click
-							}
-							$opt_index++;
-						}
-
-						$current_image_params['image_link_to'] = ( $image_href === false ? 'original' : $image_href );
-						$current_image_params['image_link_rel'] = $image_rel;
-
-						// TODO: Size:
-
-						// Class Name(s):
-						$inline_param_class = ( empty( $inline_params[ $opt_index ] ) ? '' : $inline_params[ $opt_index ] );
-						if( $image_additional_class !== false )
-						{	// Append additional class, e.g. on wrong provided item slug:
-							$inline_param_class .= '.'.$image_additional_class;
-						}
-						if( ! empty( $inline_param_class ) )
-						{	// A class name is set for the inline tags
-							$image_extraclass = strip_tags( trim( str_replace( '.', ' ', $inline_param_class ) ) );
-
-							if( preg_match('#^[A-Za-z0-9\s\-_]+$#', $image_extraclass ) )
-							{
-								if( $object_class == 'EmailCampaign' )
-								{	// Append extra class to image/file inline img tags:
-									$current_image_params['image_class'] = $image_extraclass;
-								}
-								else
-								{	// Inject extra class name(s) into 'before_image' param:
-									$current_image_params['before_image'] = update_html_tag_attribs( $current_image_params['before_image'], array( 'class' => $image_extraclass ) );
-								}
-								$current_file_params['class'] = $image_extraclass;
-							}
-						}
-					}
-
-					foreach( $current_image_params as $param_key => $param_value )
-					{	// Pass all params by reference, in order to give possibility to modify them by plugin
-						// So plugins can add some data before/after image tags (E.g. used by infodots plugin)
-						$current_image_params[ $param_key ] = & $current_image_params[ $param_key ];
-					}
-
-					// Prepare params before rendering attachment:
-					$Plugins->trigger_event_first_true_with_params( $prepare_plugin_event_name, $current_image_params );
-
-					// Render attachments by plugin, Append the html content to $current_image_params['data'] and to $r:
-					if( count( $Plugins->trigger_event_first_true_with_params( $render_plugin_event_name, $current_image_params ) ) != 0 )
-					{	// This attachment has been rendered by a plugin (to $current_image_params['data']):
-						$inlines[ $current_inline ] = $current_image_params['data'];
-						break;
-					}
-
-					if( $inline_type == 'image' )
-					{	// Generate the IMG tag with all the alt, title and desc if available:
-						switch( $object_class )
-						{
-							case 'Item':
-								// Get the IMG tag with link to original image or to Item page:
-								$inlines[ $current_inline ] = $Object->get_attached_image_tag( $Link, $current_image_params );
-								break;
-
-							case 'EmailCampaign':
-								// Get the IMG tag without link for email content:
-								$image_style = '';
-								if( ! empty( $current_image_params['image_class'] ) )
-								{	// Convert classes to style format:
-									$image_style = emailskin_style( '.'.str_replace( ' ', '+.', $current_image_params['image_class'] ), false );
-									// We cannot use class attribute on email campaign content:
-									unset( $current_image_params['image_class'] );
-								}
-
-								$inlines[ $current_inline ] = $Link->get_tag( array_merge( $current_image_params, array(
-										'image_link_to' => $image_href,
-										'image_style'   => 'border: none; max-width: 100%; height: auto;'.$image_style,
-										'add_loadimg'   => false,
-									) ) );
-								break;
-
-							default:
-								// Get the IMG tag with link to original big image:
-								$inlines[ $current_inline ] = $Link->get_tag( array_merge( $params, $current_image_params ) );
-								break;
-						}
-					}
-					elseif( $inline_type == 'inline' )
-					{	// Generate simple IMG tag with resized image size:
-						switch( $object_class )
-						{
-							case 'EmailCampaign':
-								$image_style = '';
-								if( ! empty( $current_file_params['class'] ) )
-								{	// Convert classes to style format:
-									$image_style = emailskin_style( '.'.str_replace( ' ', '+.', $current_file_params['class'] ), false );
-									// We cannot use class attribute on email campaign content:
-									unset( $current_file_params['class'] );
-								}
-								$inlines[ $current_inline ] = $File->get_tag( '', '', '', '', $current_image_params['image_size'], '', '', '',
-										'', '', $current_image_params['image_alt'], '', '', 1, NULL, 'border: none; max-width: 100%; height: auto;'.$image_style, false );
-								break;
-
-							default:
-								$inlines[ $current_inline ] = $File->get_tag( '', '', '', '', $current_image_params['image_size'], '', '', '',
-										( empty( $current_file_params['class'] ) ? '' : $current_file_params['class'] ), '', $current_image_params['image_alt'], '' );
-						}
-					}
-				}
-				else
-				{ // not an image file, do not process
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			case 'thumbnail':
-				if( $File->is_image() )
-				{
-					global $thumbnail_sizes;
-
-					$thumbnail_alt = '';
-					$thumbnail_href = false;
-					$thumbnail_rel = NULL;
-					$thumbnail_additional_class = false;
-					$thumbnail_size = 'medium';
-					$thumbnail_position = 'left';
-
-					$thumbnail_classes = array();
-
-					if( ! empty( $inline[3] ) ) // check if second colon is present
-					{
-						// Get optional inline params: HRef, Size, Alignment, Class
-						$inline_params = explode( ':', $inline[4] );
-						$opt_index = 0;
-
-						// RegExp to detect HRef option:
-						$href_regexp = '#^(https?|\(\((.*?)\)\))$#i';
-
-						// Alt text:
-						if( isset( $inline_params[ $opt_index ] ) &&
-						    substr( $inline_params[ $opt_index ], 0, 1 ) != '.' &&
-						    ! preg_match( $href_regexp, $inline_params[ $opt_index ] ) &&
-						    ! in_array( $inline_params[ $opt_index ], array( 'small', 'medium', 'large', 'left', 'right' ) ) )
-						{	// Override the image File's alt text with provided in current inline tag:
-							if( $inline_params[ $opt_index ] == '-' )
-							{	// Alt text display is disabled:
-								$thumbnail_alt = '-';
-							}
-							else
-							{	// New image alt text was set:
-								$thumbnail_alt = strip_tags( $inline_params[ $opt_index ] );
-							}
-							$opt_index++;
-						}
-
-						// HRef:
-						if( ! empty( $inline_params[ $opt_index ] ) &&
-						    preg_match( $href_regexp, $inline_params[ $opt_index ], $href_match ) )
-						{
-							if( stripos( $href_match[0], 'http' ) === 0 )
-							{	// Absolute URL:
-								$thumbnail_href = $href_match[0].':'.$inline_params[ $opt_index + 1 ];
-								$thumbnail_rel = ''; // reset default attribute "rel" to don't display colorbox on click
-								$opt_index++;
-							}
-							else
-							{	// Item slug:
-								$ItemCache = & get_ItemCache();
-								if( $href_match[2] === '' )
-								{	// No link, Display image tag without link tag around:
-									$thumbnail_href = '';
-								}
-								elseif( $slug_Item = & $ItemCache->get_by_urltitle( $href_match[2], false, false ) )
-								{	// Use a link with item permanent url around image tag:
-									$thumbnail_href = $slug_Item->get_permanent_url();
-								}
-								else
-								{	// Wrong Item provided, Singal with special red class:
-									$thumbnail_href = '';
-									$thumbnail_additional_class = 'imgerror';
-								}
-								$thumbnail_rel = ''; // reset default attribute "rel" to don't display colorbox on click
-							}
-							$opt_index++;
-						}
-
-						// Size:
-						$valid_thumbnail_sizes = array( 'small', 'medium', 'large' );
-						if( ! empty( $inline_params[ $opt_index ] ) && in_array( $inline_params[ $opt_index ], $valid_thumbnail_sizes ) )
-						{
-							$thumbnail_size = $inline_params[ $opt_index ];
-							$opt_index++;
-						}
-
-						// Alignment:
-						$valid_thumbnail_positions = array( 'left', 'right' );
-						if( ! empty( $inline_params[ $opt_index ] ) && in_array( $inline_params[ $opt_index ], $valid_thumbnail_positions ) )
-						{
-							$thumbnail_position = $inline_params[ $opt_index ];
-							$opt_index++;
-						}
-
-						// Class:
-						$inline_param_class = ( empty( $inline_params[ $opt_index ] ) ? '' : $inline_params[ $opt_index ] );
-						if( $thumbnail_additional_class !== false )
-						{	// Append additional class, e.g. on wrong provided item slug:
-							$inline_param_class .= '.'.$thumbnail_additional_class;
-						}
-						if( ! empty( $inline_param_class ) )
-						{	// A class name is set for the inline tags
-							$extra_classes = explode( '.', ltrim( $inline_param_class, '.' ) );
-						}
-					}
-
-					switch( $thumbnail_size )
-					{
-						case 'small':
-							$thumbnail_size = 'fit-128x128';
-							break;
-
-						case 'large':
-							$thumbnail_size = 'fit-320x320';
-							break;
-
-						case 'medium':
-						default:
-							$thumbnail_size = 'fit-192x192';
-							break;
-					}
-
-					$thumbnail_classes[] = 'evo_thumbnail';
-					$thumbnail_classes[] = 'evo_thumbnail__'.$thumbnail_position;
-					if( isset( $extra_classes ) )
-					{
-						$thumbnail_classes = array_merge( $thumbnail_classes, $extra_classes );
-					}
-
-					$current_image_params = array(
-						'before_image'        => '',
-						'before_image_legend' => '', // can be NULL
-						'after_image_legend'  => '',
-						'after_image'         => '',
-						'image_size'          => $thumbnail_size,
-						'image_link_to'       => ( $thumbnail_href === false ? 'original' : $thumbnail_href ),
-						'image_link_title'    => '',	// can be text or #title# or #desc#
-						'image_link_rel'      => $thumbnail_rel,
-						'image_class'         => implode( ' ', $thumbnail_classes ),
-						'image_alt'           => $thumbnail_alt,
-					);
-
-					switch( $object_class )
-					{
-						case 'Item':
-							// Get the IMG tag with link to original image or to Item page:
-							$inlines[ $current_inline ] = $Object->get_attached_image_tag( $Link, $current_image_params );
-							break;
-
-						case 'EmailCampaign':
-							// Get the IMG tag without link for email content:
-							$image_style = '';
-							if( ! empty( $current_image_params['image_class'] ) )
-							{	// Convert classes to style format:
-								$image_style = emailskin_style( '.'.str_replace( ' ', '+.', $current_image_params['image_class'] ), false );
-								// We cannot use class attribute on email campaign content:
-								unset( $current_image_params['image_class'] );
-							}
-							$inlines[ $current_inline ] = $Link->get_tag( array_merge( $current_image_params, array(
-									'image_link_to' => $thumbnail_href,
-									'image_style'   => 'border: none; max-width: 100%; height: auto;'.$image_style,
-									'add_loadimg'   => false,
-								) ) );
-							break;
-
-						default:
-							// Get the IMG tag with link to original big image:
-							$inlines[ $current_inline ] = $Link->get_tag( array_merge( $params, $current_image_params ) );
-							break;
-					}
-				}
-				else
-				{	// not an image file, do not process
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			case 'file': // valid file types: image, video, audio, other
-				$valid_file_types = array( 'image', 'video', 'audio', 'other' );
-				if( in_array( $File->get_file_type(), $valid_file_types ) )
-				{
-					if( ! empty( $inline[3] ) ) // check if second colon is present
-					{
-						// Get the file caption
-						$caption = $inline[4];
-
-						if( ! empty( $caption ) )
-						{ // Caption is set
-							$current_file_params['title'] = strip_tags( $caption );
-						}
-					}
-
-					if( empty( $current_file_params['title'] ) )
-					{ // Use real file name as title when it is not defined for inline tag
-						$file_title = $File->get( 'title' );
-						$current_file_params['title'] = ' '.( empty( $file_title ) ? $File->get_name() : $file_title );
-					}
-					elseif( $current_file_params['title'] == '-' )
-					{ // Don't display a title in this case, Only file icon will be displayed
-						$current_file_params['title'] = '';
-					}
-					else
-					{ // Add a space between file icon and title
-						$current_file_params['title'] = ' '.$current_file_params['title'];
-					}
-
-					$inlines[$current_inline] = '<a href="'.$File->get_url().'"'
-						.( empty( $current_file_params['class'] ) ? '' : ' class="'.$current_file_params['class'].'"' )
-						.'>'.$File->get_icon( $current_file_params ).$current_file_params['title'].'</a>';
-				}
-				else
-				{ // not a valid file type, do not process
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			case 'video':	// valid file type: video
-				if( $File->is_video() )
-				{
-					$current_video_params = $params;
-					// Create an empty dummy element where the plugin is expected to append the rendered video
-					$current_video_params['data'] = '';
-
-					foreach( $current_video_params as $param_key => $param_value )
-					{ // Pass all params by reference, in order to give possibility to modify them by plugin
-						// So plugins can add some data before/after tags (E.g. used by infodots plugin)
-						$current_video_params[ $param_key ] = & $current_video_params[ $param_key ];
-					}
-
-					// Prepare params before rendering attachment:
-					$Plugins->trigger_event_first_true_with_params( $prepare_plugin_event_name, $current_video_params );
-
-					// Render attachments by plugin:
-					if( count( $Plugins->trigger_event_first_true_with_params( $render_plugin_event_name, $current_video_params ) ) != 0 )
-					{	// This attachment has been rendered by a plugin (to $current_video_params['data']):
-						$inlines[$current_inline] = $current_video_params['data'];
-					}
-					else
-					{ // no plugin available or was able to render the tag
-						$inlines[$current_inline] = $current_inline;
-					}
-				}
-				else
-				{ // not a video file, do not process
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			case 'audio': // valid file type: audio
-				if( $File->is_audio() )
-				{
-					$current_audio_params = $params;
-					// Create an empty dummy element where the plugin is expected to append the rendered video
-					$current_audio_params['data'] = '';
-
-					foreach( $current_audio_params as $param_key => $param_value )
-					{ // Pass all params by reference, in order to give possibility to modify them by plugin
-						// So plugins can add some data before/after tags (E.g. used by infodots plugin)
-						$current_audio_params[ $param_key ] = & $current_audio_params[ $param_key ];
-					}
-
-					// Prepare params before rendering attachment:
-					$Plugins->trigger_event_first_true_with_params( $prepare_plugin_event_name, $current_audio_params );
-
-					// Render attachments by plugin:
-					if( count( $Plugins->trigger_event_first_true_with_params( $render_plugin_event_name, $current_audio_params ) ) != 0 )
-					{	// This attachment has been rendered by a plugin (to $current_audio_params['data']):
-						$inlines[$current_inline] = $current_audio_params['data'];
-					}
-					else
-					{ // no plugin available or was able to render the tag
-						$inlines[$current_inline] = $current_inline;
-					}
-				}
-				else
-				{ // not a video file, do not process
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			case 'folder':
-				if( $File->is_dir() )
-				{
-					$current_folder_params = $params;
-
-					if( ! empty( $inline[3] ) ) // check if second colon is present
-					{
-						if( preg_match( '/^\d+$/', $inline[4] ) )
-						{ // limit number of images
-							$current_folder_params['gallery_image_limit'] = (int) $inline[4];
-						}
-					}
-
-					$inlines[$current_inline] = $File->get_gallery( $current_folder_params );
-				}
-				else
-				{
-					$inlines[$current_inline] = $current_inline;
-				}
-				break;
-
-			default:
-				$inlines[$current_inline] = $current_inline;
-		}
-	}
-
-	return $inlines;
+    global $Plugins;
+    $inlines = [];
+
+    $object_class = get_class($Object);
+
+    $params = array_merge([
+        'before' => '<div>',
+        'before_image' => '<div' . ($object_class == 'EmailCampaign' ? emailskin_style('.image_block') : ' class="image_block"') . '>',
+        'before_image_legend' => '<div' . ($object_class == 'EmailCampaign' ? emailskin_style('.image_legend') : ' class="image_legend"') . '>',
+        'after_image_legend' => '</div>',
+        'after_image' => '</div>',
+        'after' => '</div>',
+        'image_size' => 'fit-400x320',
+        'image_link_to' => 'original', // Can be 'orginal' (image) or 'single' (this post)
+        'limit' => 1000, // Max # of images displayed
+    ], $params);
+
+    if (! isset($LinkList)) {	// Get list of attached Links only first time:
+        if ($Object->ID == 0) {	// Get temporary object ID on preview new creating object:
+            $temp_link_owner_ID = param('temp_link_owner_ID', 'integer', null);
+        } else {	// Don't use temporary object for existing object:
+            $temp_link_owner_ID = null;
+        }
+
+        switch ($object_class) {
+            case 'Item':
+                $LinkOwner = new LinkItem($Object, $temp_link_owner_ID);
+                $prepare_plugin_event_name = 'PrepareForRenderItemAttachment';
+                $render_plugin_event_name = 'RenderItemAttachment';
+                break;
+
+            case 'Comment':
+                $LinkOwner = new LinkComment($Object, empty($Object->temp_link_owner_ID) ? $temp_link_owner_ID : $Object->temp_link_owner_ID);
+                $prepare_plugin_event_name = 'PrepareForRenderCommentAttachment';
+                $render_plugin_event_name = 'RenderCommentAttachment';
+                break;
+
+            case 'EmailCampaign':
+                $LinkOwner = new LinkEmailCampaign($Object);
+                $prepare_plugin_event_name = 'PrepareForRenderEmailAttachment';
+                $render_plugin_event_name = 'RenderEmailAttachment';
+                break;
+
+            case 'Message':
+                $LinkOwner = new LinkMessage($Object, $temp_link_owner_ID);
+                $prepare_plugin_event_name = 'PrepareForRenderMessageAttachment';
+                $render_plugin_event_name = 'RenderMessageAttachment';
+                break;
+
+            default:
+                // Wrong source object type:
+                return false;
+        }
+        $LinkList = $LinkOwner->get_attachment_LinkList($params['limit']);
+    }
+
+    if (empty($LinkList)) {	// This Object has no attached files for 'inline' position, Exit here:
+        return false;
+    }
+
+    // Render inline tags by active plugins:
+    $plugins_inlines = $Plugins->trigger_collect('RenderInlineTags', array_merge($params, [
+        'Object' => $Object,
+        'inline_tags' => $tags,
+    ]));
+    foreach ($plugins_inlines as $plugin_ID => $plugin_inlines) {
+        $inlines = array_merge($inlines, $plugin_inlines);
+    }
+
+    foreach ($tags as $current_inline) {
+        if (isset($inlines[$current_inline])) {	// Skip inline tag if it has been already rendered before, e-g by some plugin in the event "RenderInlineTags" above:
+            continue;
+        }
+
+        if (! preg_match('/\[(image|file|inline|video|audio|thumbnail|folder):(\d+)(:?)([^\]]*)\]/i', $current_inline, $inline)) {	// Don't render a not supported inline tag:
+            $inlines[$current_inline] = $current_inline;
+            continue;
+        }
+
+        $inline_type = $inline[1]; // image|file|inline|video|audio|thumbnail|folder
+        $current_link_ID = (int) $inline[2];
+
+        if (empty($current_link_ID)) {	// Invalid link ID, Go to next match
+            $inlines[$current_inline] = $current_inline;
+            continue;
+        }
+
+        if (! ($Link = &$LinkList->get_by_field('link_ID', $current_link_ID))) {	// Link ID is not part of the linked files for position "inline"
+            $inlines[$current_inline] = $current_inline;
+            continue;
+        }
+
+        if (! ($File = &$Link->get_File())) {	// No File object:
+            global $Debuglog;
+            $Debuglog->add(sprintf('Link ID#%d of ' . $object_class . ' #%d does not have a file object!', $Link->ID, $Object->ID), ['error', 'files']);
+            $inlines[$current_inline] = $current_inline;
+            continue;
+        }
+
+        if (! $File->exists()) {	// File doesn't exist:
+            global $Debuglog;
+            $Debuglog->add(sprintf('File linked to ' . $object_class . ' #%d does not exist (%s)!', $Object->ID, $File->get_full_path()), ['error', 'files']);
+            $inlines[$current_inline] = $current_inline;
+            continue;
+        }
+
+        $params['File'] = $File;
+        $params['Link'] = $Link;
+        $params[$object_class] = $Object;
+
+        $current_file_params = [];
+
+        switch ($inline_type) {
+            case 'image':
+            case 'inline': // valid file type: image
+                if ($File->is_image()) {
+                    $current_image_params = $params;
+                    $image_href = false;
+                    $image_rel = null;
+                    $image_additional_class = false;
+
+                    if (! empty($inline[3])) { // check if second colon is present
+                        // Get the inline params: caption and class
+                        $inline_params = explode(':', $inline[4]);
+                        $opt_index = 0;
+
+                        // Caption:
+                        if ($inline_type != 'inline' && ! empty($inline_params[0])) {	// Caption is set, so overwrite the image link title
+                            if ($inline_params[0] == '-') {	// Caption display is disabled
+                                $current_image_params['image_link_title'] = '';
+                                $current_image_params['hide_image_link_title'] = true;
+                            } else {	// New image caption was set
+                                $current_image_params['image_link_title'] = strip_tags($inline_params[0]);
+                            }
+
+                            $current_image_params['image_desc'] = $current_image_params['image_link_title'];
+                            $current_file_params['title'] = $inline_params[0];
+                        }
+                        if ($inline_type == 'image') {	// Caption has always a reserved placefor image short tag:
+                            $opt_index++;
+                        }
+
+                        // RegExp to detect HRef option:
+                        $href_regexp = '#^(https?|\(\((.*?)\)\))$#i';
+
+                        // Alt text:
+                        $current_image_params['image_alt'] = '';
+                        if (isset($inline_params[$opt_index]) &&
+                            substr($inline_params[$opt_index], 0, 1) != '.' &&
+                            ! preg_match($href_regexp, $inline_params[$opt_index]) &&
+                            ($inline_type == 'image' || ! in_array($inline_params[$opt_index], ['small', 'medium', 'large', 'original']))) {	// Override the image File's alt text with provided in current inline tag:
+                            if ($inline_params[$opt_index] == '-') {	// Alt text display is disabled:
+                                $current_image_params['image_alt'] = '-';
+                            } else {	// New image alt text was set:
+                                $current_image_params['image_alt'] = strip_tags($inline_params[$opt_index]);
+                            }
+                            $opt_index++;
+                        }
+
+                        // HRef:
+                        if ($inline_type != 'inline' &&
+                            ! empty($inline_params[$opt_index]) &&
+                            preg_match($href_regexp, $inline_params[$opt_index], $href_match)) {
+                            if (stripos($href_match[0], 'http') === 0) {	// Absolute URL:
+                                $image_href = $href_match[0] . ':' . $inline_params[$opt_index + 1];
+                                $image_rel = ''; // reset default attribute "rel" to don't display colorbox on click
+                                $opt_index++;
+                            } else {	// Item slug:
+                                $ItemCache = &get_ItemCache();
+                                if ($href_match[2] === '') {	// No link, Display image tag without link tag around:
+                                    $image_href = '';
+                                } elseif ($slug_Item = &$ItemCache->get_by_urltitle($href_match[2], false, false)) {	// Use a link with item permanent url around image tag:
+                                    $image_href = $slug_Item->get_permanent_url();
+                                } else {	// Wrong Item provided, Singal with special red class:
+                                    $image_href = '';
+                                    $image_additional_class = 'imgerror';
+                                }
+                                $image_rel = ''; // reset default attribute "rel" to don't display colorbox on click
+                            }
+                            $opt_index++;
+                        }
+
+                        $current_image_params['image_link_to'] = ($image_href === false ? 'original' : $image_href);
+                        $current_image_params['image_link_rel'] = $image_rel;
+
+                        // TODO: Size:
+
+                        $inline_param_class = (empty($inline_params[$opt_index]) ? '' : $inline_params[$opt_index]);
+                        if ($image_additional_class !== false) {	// Append additional class, e.g. on wrong provided item slug:
+                            $inline_param_class .= '.' . $image_additional_class;
+                        }
+                        if (! empty($inline_param_class)) {	// A class name is set for the inline tags
+                            $image_extraclass = strip_tags(trim(str_replace('.', ' ', $inline_param_class)));
+
+                            if (preg_match('#^[A-Za-z0-9\s\-_]+$#', $image_extraclass)) {
+                                if ($object_class == 'EmailCampaign') {	// Append extra class to image/file inline img tags:
+                                    $current_image_params['image_class'] = $image_extraclass;
+                                } else {	// Inject extra class name(s) into 'before_image' param:
+                                    $current_image_params['before_image'] = update_html_tag_attribs($current_image_params['before_image'], [
+                                        'class' => $image_extraclass,
+                                    ]);
+                                }
+                                $current_file_params['class'] = $image_extraclass;
+                            }
+                        }
+                    }
+
+                    foreach ($current_image_params as $param_key => $param_value) {	// Pass all params by reference, in order to give possibility to modify them by plugin
+                        // So plugins can add some data before/after image tags (E.g. used by infodots plugin)
+                        $current_image_params[$param_key] = &$current_image_params[$param_key];
+                    }
+
+                    // Prepare params before rendering attachment:
+                    $Plugins->trigger_event_first_true_with_params($prepare_plugin_event_name, $current_image_params);
+
+                    // Render attachments by plugin, Append the html content to $current_image_params['data'] and to $r:
+                    if (count($Plugins->trigger_event_first_true_with_params($render_plugin_event_name, $current_image_params)) != 0) {	// This attachment has been rendered by a plugin (to $current_image_params['data']):
+                        $inlines[$current_inline] = $current_image_params['data'];
+                        break;
+                    }
+
+                    if ($inline_type == 'image') {	// Generate the IMG tag with all the alt, title and desc if available:
+                        switch ($object_class) {
+                            case 'Item':
+                                // Get the IMG tag with link to original image or to Item page:
+                                $inlines[$current_inline] = $Object->get_attached_image_tag($Link, $current_image_params);
+                                break;
+
+                            case 'EmailCampaign':
+                                // Get the IMG tag without link for email content:
+                                $image_style = '';
+                                if (! empty($current_image_params['image_class'])) {	// Convert classes to style format:
+                                    $image_style = emailskin_style('.' . str_replace(' ', '+.', $current_image_params['image_class']), false);
+                                    // We cannot use class attribute on email campaign content:
+                                    unset($current_image_params['image_class']);
+                                }
+
+                                $inlines[$current_inline] = $Link->get_tag(array_merge($current_image_params, [
+                                    'image_link_to' => $image_href,
+                                    'image_style' => 'border: none; max-width: 100%; height: auto;' . $image_style,
+                                    'add_loadimg' => false,
+                                ]));
+                                break;
+
+                            default:
+                                // Get the IMG tag with link to original big image:
+                                $inlines[$current_inline] = $Link->get_tag(array_merge($params, $current_image_params));
+                                break;
+                        }
+                    } elseif ($inline_type == 'inline') {	// Generate simple IMG tag with resized image size:
+                        switch ($object_class) {
+                            case 'EmailCampaign':
+                                $image_style = '';
+                                if (! empty($current_file_params['class'])) {	// Convert classes to style format:
+                                    $image_style = emailskin_style('.' . str_replace(' ', '+.', $current_file_params['class']), false);
+                                    // We cannot use class attribute on email campaign content:
+                                    unset($current_file_params['class']);
+                                }
+                                $inlines[$current_inline] = $File->get_tag(
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                    $current_image_params['image_size'],
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                    $current_image_params['image_alt'],
+                                    '',
+                                    '',
+                                    1,
+                                    null,
+                                    'border: none; max-width: 100%; height: auto;' . $image_style,
+                                    false
+                                );
+                                break;
+
+                            default:
+                                $inlines[$current_inline] = $File->get_tag(
+                                    '',
+                                    '',
+                                    '',
+                                    '',
+                                    $current_image_params['image_size'],
+                                    '',
+                                    '',
+                                    '',
+                                    (empty($current_file_params['class']) ? '' : $current_file_params['class']),
+                                    '',
+                                    $current_image_params['image_alt'],
+                                    ''
+                                );
+                        }
+                    }
+                } else { // not an image file, do not process
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            case 'thumbnail':
+                if ($File->is_image()) {
+                    global $thumbnail_sizes;
+
+                    $thumbnail_alt = '';
+                    $thumbnail_href = false;
+                    $thumbnail_rel = null;
+                    $thumbnail_additional_class = false;
+                    $thumbnail_size = 'medium';
+                    $thumbnail_position = 'left';
+
+                    $thumbnail_classes = [];
+
+                    if (! empty($inline[3])) { // check if second colon is present
+                        // Get optional inline params: HRef, Size, Alignment, Class
+                        $inline_params = explode(':', $inline[4]);
+                        $opt_index = 0;
+
+                        // RegExp to detect HRef option:
+                        $href_regexp = '#^(https?|\(\((.*?)\)\))$#i';
+
+                        // Alt text:
+                        if (isset($inline_params[$opt_index]) &&
+                            substr($inline_params[$opt_index], 0, 1) != '.' &&
+                            ! preg_match($href_regexp, $inline_params[$opt_index]) &&
+                            ! in_array($inline_params[$opt_index], ['small', 'medium', 'large', 'left', 'right'])) {	// Override the image File's alt text with provided in current inline tag:
+                            if ($inline_params[$opt_index] == '-') {	// Alt text display is disabled:
+                                $thumbnail_alt = '-';
+                            } else {	// New image alt text was set:
+                                $thumbnail_alt = strip_tags($inline_params[$opt_index]);
+                            }
+                            $opt_index++;
+                        }
+
+                        // HRef:
+                        if (! empty($inline_params[$opt_index]) &&
+                            preg_match($href_regexp, $inline_params[$opt_index], $href_match)) {
+                            if (stripos($href_match[0], 'http') === 0) {	// Absolute URL:
+                                $thumbnail_href = $href_match[0] . ':' . $inline_params[$opt_index + 1];
+                                $thumbnail_rel = ''; // reset default attribute "rel" to don't display colorbox on click
+                                $opt_index++;
+                            } else {	// Item slug:
+                                $ItemCache = &get_ItemCache();
+                                if ($href_match[2] === '') {	// No link, Display image tag without link tag around:
+                                    $thumbnail_href = '';
+                                } elseif ($slug_Item = &$ItemCache->get_by_urltitle($href_match[2], false, false)) {	// Use a link with item permanent url around image tag:
+                                    $thumbnail_href = $slug_Item->get_permanent_url();
+                                } else {	// Wrong Item provided, Singal with special red class:
+                                    $thumbnail_href = '';
+                                    $thumbnail_additional_class = 'imgerror';
+                                }
+                                $thumbnail_rel = ''; // reset default attribute "rel" to don't display colorbox on click
+                            }
+                            $opt_index++;
+                        }
+
+                        // Size:
+                        $valid_thumbnail_sizes = ['small', 'medium', 'large'];
+                        if (! empty($inline_params[$opt_index]) && in_array($inline_params[$opt_index], $valid_thumbnail_sizes)) {
+                            $thumbnail_size = $inline_params[$opt_index];
+                            $opt_index++;
+                        }
+
+                        // Alignment:
+                        $valid_thumbnail_positions = ['left', 'right'];
+                        if (! empty($inline_params[$opt_index]) && in_array($inline_params[$opt_index], $valid_thumbnail_positions)) {
+                            $thumbnail_position = $inline_params[$opt_index];
+                            $opt_index++;
+                        }
+
+                        // Class:
+                        $inline_param_class = (empty($inline_params[$opt_index]) ? '' : $inline_params[$opt_index]);
+                        if ($thumbnail_additional_class !== false) {	// Append additional class, e.g. on wrong provided item slug:
+                            $inline_param_class .= '.' . $thumbnail_additional_class;
+                        }
+                        if (! empty($inline_param_class)) {	// A class name is set for the inline tags
+                            $extra_classes = explode('.', ltrim($inline_param_class, '.'));
+                        }
+                    }
+
+                    switch ($thumbnail_size) {
+                        case 'small':
+                            $thumbnail_size = 'fit-128x128';
+                            break;
+
+                        case 'large':
+                            $thumbnail_size = 'fit-320x320';
+                            break;
+
+                        case 'medium':
+                        default:
+                            $thumbnail_size = 'fit-192x192';
+                            break;
+                    }
+
+                    $thumbnail_classes[] = 'evo_thumbnail';
+                    $thumbnail_classes[] = 'evo_thumbnail__' . $thumbnail_position;
+                    if (isset($extra_classes)) {
+                        $thumbnail_classes = array_merge($thumbnail_classes, $extra_classes);
+                    }
+
+                    $current_image_params = [
+                        'before_image' => '',
+                        'before_image_legend' => '', // can be NULL
+                        'after_image_legend' => '',
+                        'after_image' => '',
+                        'image_size' => $thumbnail_size,
+                        'image_link_to' => ($thumbnail_href === false ? 'original' : $thumbnail_href),
+                        'image_link_title' => '',	// can be text or #title# or #desc#
+                        'image_link_rel' => $thumbnail_rel,
+                        'image_class' => implode(' ', $thumbnail_classes),
+                        'image_alt' => $thumbnail_alt,
+                    ];
+
+                    switch ($object_class) {
+                        case 'Item':
+                            // Get the IMG tag with link to original image or to Item page:
+                            $inlines[$current_inline] = $Object->get_attached_image_tag($Link, $current_image_params);
+                            break;
+
+                        case 'EmailCampaign':
+                            // Get the IMG tag without link for email content:
+                            $image_style = '';
+                            if (! empty($current_image_params['image_class'])) {	// Convert classes to style format:
+                                $image_style = emailskin_style('.' . str_replace(' ', '+.', $current_image_params['image_class']), false);
+                                // We cannot use class attribute on email campaign content:
+                                unset($current_image_params['image_class']);
+                            }
+                            $inlines[$current_inline] = $Link->get_tag(array_merge($current_image_params, [
+                                'image_link_to' => $thumbnail_href,
+                                'image_style' => 'border: none; max-width: 100%; height: auto;' . $image_style,
+                                'add_loadimg' => false,
+                            ]));
+                            break;
+
+                        default:
+                            // Get the IMG tag with link to original big image:
+                            $inlines[$current_inline] = $Link->get_tag(array_merge($params, $current_image_params));
+                            break;
+                    }
+                } else {	// not an image file, do not process
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            case 'file': // valid file types: image, video, audio, other
+                $valid_file_types = ['image', 'video', 'audio', 'other'];
+                if (in_array($File->get_file_type(), $valid_file_types)) {
+                    if (! empty($inline[3])) { // check if second colon is present
+                        // Get the file caption
+                        $caption = $inline[4];
+
+                        if (! empty($caption)) { // Caption is set
+                            $current_file_params['title'] = strip_tags($caption);
+                        }
+                    }
+
+                    if (empty($current_file_params['title'])) { // Use real file name as title when it is not defined for inline tag
+                        $file_title = $File->get('title');
+                        $current_file_params['title'] = ' ' . (empty($file_title) ? $File->get_name() : $file_title);
+                    } elseif ($current_file_params['title'] == '-') { // Don't display a title in this case, Only file icon will be displayed
+                        $current_file_params['title'] = '';
+                    } else { // Add a space between file icon and title
+                        $current_file_params['title'] = ' ' . $current_file_params['title'];
+                    }
+
+                    $inlines[$current_inline] = '<a href="' . $File->get_url() . '"'
+                        . (empty($current_file_params['class']) ? '' : ' class="' . $current_file_params['class'] . '"')
+                        . '>' . $File->get_icon($current_file_params) . $current_file_params['title'] . '</a>';
+                } else { // not a valid file type, do not process
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            case 'video':	// valid file type: video
+                if ($File->is_video()) {
+                    $current_video_params = $params;
+                    // Create an empty dummy element where the plugin is expected to append the rendered video
+                    $current_video_params['data'] = '';
+
+                    foreach ($current_video_params as $param_key => $param_value) { // Pass all params by reference, in order to give possibility to modify them by plugin
+                        // So plugins can add some data before/after tags (E.g. used by infodots plugin)
+                        $current_video_params[$param_key] = &$current_video_params[$param_key];
+                    }
+
+                    // Prepare params before rendering attachment:
+                    $Plugins->trigger_event_first_true_with_params($prepare_plugin_event_name, $current_video_params);
+
+                    // Render attachments by plugin:
+                    if (count($Plugins->trigger_event_first_true_with_params($render_plugin_event_name, $current_video_params)) != 0) {	// This attachment has been rendered by a plugin (to $current_video_params['data']):
+                        $inlines[$current_inline] = $current_video_params['data'];
+                    } else { // no plugin available or was able to render the tag
+                        $inlines[$current_inline] = $current_inline;
+                    }
+                } else { // not a video file, do not process
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            case 'audio': // valid file type: audio
+                if ($File->is_audio()) {
+                    $current_audio_params = $params;
+                    // Create an empty dummy element where the plugin is expected to append the rendered video
+                    $current_audio_params['data'] = '';
+
+                    foreach ($current_audio_params as $param_key => $param_value) { // Pass all params by reference, in order to give possibility to modify them by plugin
+                        // So plugins can add some data before/after tags (E.g. used by infodots plugin)
+                        $current_audio_params[$param_key] = &$current_audio_params[$param_key];
+                    }
+
+                    // Prepare params before rendering attachment:
+                    $Plugins->trigger_event_first_true_with_params($prepare_plugin_event_name, $current_audio_params);
+
+                    // Render attachments by plugin:
+                    if (count($Plugins->trigger_event_first_true_with_params($render_plugin_event_name, $current_audio_params)) != 0) {	// This attachment has been rendered by a plugin (to $current_audio_params['data']):
+                        $inlines[$current_inline] = $current_audio_params['data'];
+                    } else { // no plugin available or was able to render the tag
+                        $inlines[$current_inline] = $current_inline;
+                    }
+                } else { // not a video file, do not process
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            case 'folder':
+                if ($File->is_dir()) {
+                    $current_folder_params = $params;
+
+                    if (! empty($inline[3])) { // check if second colon is present
+                        if (preg_match('/^\d+$/', $inline[4])) { // limit number of images
+                            $current_folder_params['gallery_image_limit'] = (int) $inline[4];
+                        }
+                    }
+
+                    $inlines[$current_inline] = $File->get_gallery($current_folder_params);
+                } else {
+                    $inlines[$current_inline] = $current_inline;
+                }
+                break;
+
+            default:
+                $inlines[$current_inline] = $current_inline;
+        }
+    }
+
+    return $inlines;
 }
 
 
@@ -9627,73 +8630,70 @@ function render_inline_tags( $Object, $tags, $params = array() )
  * @param string Date format of locale from DB; for example: Y-m-d
  * @return string Date format for jQuery datepicker plugin; for example: yy-mm-dd
  */
-function php_to_jquery_date_format( $php_format )
+function php_to_jquery_date_format($php_format)
 {
-	$tokens = array(
-			// Day
-			'd' => 'dd',
-			'D' => 'D',
-			'j' => 'd',
-			'l' => 'DD',
-			'N' => '',
-			'S' => '',
-			'w' => '',
-			'z' => 'o',
-			// Week
-			'W' => '',
-			// Month
-			'F' => 'MM',
-			'm' => 'mm',
-			'M' => 'M',
-			'n' => 'm',
-			't' => '',
-			// Year
-			'L' => '',
-			'o' => '',
-			'Y' => 'yy',
-			'y' => 'y',
-			// Time
-			'a' => '',
-			'A' => '',
-			'B' => '',
-			'g' => '',
-			'G' => '',
-			'h' => '',
-			'H' => '',
-			'i' => '',
-			's' => '',
-			'u' => '' );
+    $tokens = [
+        // Day
+        'd' => 'dd',
+        'D' => 'D',
+        'j' => 'd',
+        'l' => 'DD',
+        'N' => '',
+        'S' => '',
+        'w' => '',
+        'z' => 'o',
+        // Week
+        'W' => '',
+        // Month
+        'F' => 'MM',
+        'm' => 'mm',
+        'M' => 'M',
+        'n' => 'm',
+        't' => '',
+        // Year
+        'L' => '',
+        'o' => '',
+        'Y' => 'yy',
+        'y' => 'y',
+        // Time
+        'a' => '',
+        'A' => '',
+        'B' => '',
+        'g' => '',
+        'G' => '',
+        'h' => '',
+        'H' => '',
+        'i' => '',
+        's' => '',
+        'u' => '',
+    ];
 
-	$js_format = "";
-	$escaping = false;
-	for( $i = 0; $i < strlen( $php_format ); $i++ )
-	{
-		$char = $php_format[$i];
-		if($char === '\\') // PHP date format escaping character
-		{
-			$i++;
-			if( $escaping ) $js_format .= $php_format[$i];
-			else $js_format .= '\'' . $php_format[$i];
-			$escaping = true;
-		}
-		else
-		{
-			if( $escaping )
-			{
-				$jqueryui_format .= "'"; $escaping = false;
-			}
-			if( isset( $tokens[$char] ) )
-			{
-				$js_format .= $tokens[$char];
-			}
-			else
-			{
-				$js_format .= $char;
-			}
-		}
-	}
+    $js_format = "";
+    $escaping = false;
+    for ($i = 0; $i < strlen($php_format); $i++) {
+        $char = $php_format[$i];
+        if ($char === '\\') { // PHP date format escaping character
+            $i++;
+            if ($escaping) {
+                $js_format .= $php_format[$i];
+            } else {
+                $js_format .= '\'' . $php_format[$i];
+            }
+            $escaping = true;
+        } else {
+            if ($escaping) {
+                $jqueryui_format .= "'";
+                $escaping = false;
+            }
+            if (isset($tokens[$char])) {
+                $js_format .= $tokens[$char];
+            } else {
+                $js_format .= $char;
+            }
+        }
+    }
 
-	return $js_format;
+    return $js_format;
 }
 
 
@@ -9703,9 +8703,9 @@ function php_to_jquery_date_format( $php_format )
  * @param string String to check if HTML
  * @return boolean True if string is HTML
  */
-function is_html( $string )
+function is_html($string)
 {
-	return $string != strip_tags( $string ) ? true : false;
+    return $string != strip_tags($string) ? true : false;
 }
 
 
@@ -9716,7 +8716,7 @@ function is_html( $string )
  */
 function jquery_datepicker_datefmt()
 {
-	return php_to_jquery_date_format( locale_input_datefmt() );
+    return php_to_jquery_date_format(locale_input_datefmt());
 }
 
 
@@ -9727,22 +8727,22 @@ function jquery_datepicker_datefmt()
  */
 function jquery_datepicker_month_names()
 {
-	$months = array(
-			TS_('January'),
-			TS_('February'),
-			TS_('March'),
-			TS_('April'),
-			TS_('May'),
-			TS_('June'),
-			TS_('July'),
-			TS_('August'),
-			TS_('September'),
-			TS_('October'),
-			TS_('November'),
-			TS_('December')
-		);
+    $months = [
+        TS_('January'),
+        TS_('February'),
+        TS_('March'),
+        TS_('April'),
+        TS_('May'),
+        TS_('June'),
+        TS_('July'),
+        TS_('August'),
+        TS_('September'),
+        TS_('October'),
+        TS_('November'),
+        TS_('December'),
+    ];
 
-	return '[\''.implode( '\', \'', $months ).'\']';
+    return '[\'' . implode('\', \'', $months) . '\']';
 }
 
 
@@ -9753,22 +8753,21 @@ function jquery_datepicker_month_names()
  */
 function jquery_datepicker_day_names()
 {
-	$days = array(
-			TS_('Sun'),
-			TS_('Mon'),
-			TS_('Tue'),
-			TS_('Wed'),
-			TS_('Thu'),
-			TS_('Fri'),
-			TS_('Sat')
-		);
+    $days = [
+        TS_('Sun'),
+        TS_('Mon'),
+        TS_('Tue'),
+        TS_('Wed'),
+        TS_('Thu'),
+        TS_('Fri'),
+        TS_('Sat'),
+    ];
 
-	foreach( $days as $d => $day )
-	{
-		$days[ $d ] = utf8_substr( $day, 0, 2 );
-	}
+    foreach ($days as $d => $day) {
+        $days[$d] = utf8_substr($day, 0, 2);
+    }
 
-	return '[\''.implode( '\', \'', $days ).'\']';
+    return '[\'' . implode('\', \'', $days) . '\']';
 }
 
 
@@ -9781,90 +8780,82 @@ function jquery_datepicker_day_names()
  * @param string End date of log in format 'YYYY-mm-dd'
  * @return array Fixed data
  */
-function fill_empty_days( $data, $default_data, $start_date, $end_date )
+function fill_empty_days($data, $default_data, $start_date, $end_date)
 {
-	$fixed_data = array();
-	$start_date = date( 'Y-n-j', strtotime( $start_date) );
-	$end_date = date( 'Y-n-j', strtotime( $end_date) );
+    $fixed_data = [];
+    $start_date = date('Y-n-j', strtotime($start_date));
+    $end_date = date('Y-n-j', strtotime($end_date));
 
-	if( empty( $data ) )
-	{
-		return $fixed_data;
-	}
+    if (empty($data)) {
+        return $fixed_data;
+    }
 
-	// Get additional fields which must be exist in each array item of new filled empty day below:
-	$additional_fields = array_diff_key( $data[0], array( 'year' => 0, 'month' => 0, 'day' => 0 ) );
+    // Get additional fields which must be exist in each array item of new filled empty day below:
+    $additional_fields = array_diff_key($data[0], [
+        'year' => 0,
+        'month' => 0,
+        'day' => 0,
+    ]);
 
-	// Check if data array contains start and end dates:
-	$start_date_is_contained = empty( $start_date );
-	$end_date_is_contained = empty( $end_date );
+    // Check if data array contains start and end dates:
+    $start_date_is_contained = empty($start_date);
+    $end_date_is_contained = empty($end_date);
 
-	if( ! $start_date_is_contained || ! $end_date_is_contained )
-	{
-		foreach( $data as $row )
-		{
-			$this_date = $row['year'].'-'.$row['month'].'-'.$row['day'];
-			if( $this_date == $start_date )
-			{	// The start date is detected:
-				$start_date_is_contained = true;
-			}
-			if( $this_date == $end_date )
-			{	// The start date is detected:
-				$end_date_is_contained = true;
-			}
-			if( $start_date_is_contained && $end_date_is_contained )
-			{	// Stop array searching here because we have found the dates:
-				break;
-			}
-		}
-	}
+    if (! $start_date_is_contained || ! $end_date_is_contained) {
+        foreach ($data as $row) {
+            $this_date = $row['year'] . '-' . $row['month'] . '-' . $row['day'];
+            if ($this_date == $start_date) {	// The start date is detected:
+                $start_date_is_contained = true;
+            }
+            if ($this_date == $end_date) {	// The start date is detected:
+                $end_date_is_contained = true;
+            }
+            if ($start_date_is_contained && $end_date_is_contained) {	// Stop array searching here because we have found the dates:
+                break;
+            }
+        }
+    }
 
-	if( ! $start_date_is_contained )
-	{	// Add item to array with 0 for start date if stats has no data for the date:
-		array_push( $data, array_merge( array(
-				'year'     => date( 'Y', strtotime( $start_date ) ),
-				'month'    => date( 'n', strtotime( $start_date ) ),
-				'day'      => date( 'j', strtotime( $start_date ) ),
-		), $default_data ) + $additional_fields );
-	}
-	if( ! $end_date_is_contained )
-	{	// Add item to array with 0 for end date if stats has no data for the date:
-		array_unshift( $data, array_merge( array(
-				'year'     => date( 'Y', strtotime( $end_date ) ),
-				'month'    => date( 'n', strtotime( $end_date ) ),
-				'day'      => date( 'j', strtotime( $end_date ) ),
-		), $default_data ) + $additional_fields );
-	}
+    if (! $start_date_is_contained) {	// Add item to array with 0 for start date if stats has no data for the date:
+        array_push($data, array_merge([
+            'year' => date('Y', strtotime($start_date)),
+            'month' => date('n', strtotime($start_date)),
+            'day' => date('j', strtotime($start_date)),
+        ], $default_data) + $additional_fields);
+    }
+    if (! $end_date_is_contained) {	// Add item to array with 0 for end date if stats has no data for the date:
+        array_unshift($data, array_merge([
+            'year' => date('Y', strtotime($end_date)),
+            'month' => date('n', strtotime($end_date)),
+            'day' => date('j', strtotime($end_date)),
+        ], $default_data) + $additional_fields);
+    }
 
-	foreach( $data as $row )
-	{
-		$this_date = $row['year'].'-'.$row['month'].'-'.$row['day'];
+    foreach ($data as $row) {
+        $this_date = $row['year'] . '-' . $row['month'] . '-' . $row['day'];
 
-		if( isset( $prev_date ) && $prev_date != $this_date )
-		{	// If data are from another day:
-			$prev_time = strtotime( $prev_date ) - 86400;
-			$this_time = strtotime( $this_date );
+        if (isset($prev_date) && $prev_date != $this_date) {	// If data are from another day:
+            $prev_time = strtotime($prev_date) - 86400;
+            $this_time = strtotime($this_date);
 
-			if( $prev_time != $this_time )
-			{	// If previous date is not previous day(it means some day has no data):
-				$empty_days = ( $prev_time - $this_time ) / 86400;
-				for( $d = 0; $d < $empty_days; $d++ )
-				{	// Add each empty day to array with default data:
-					$empty_day = $prev_time - $d * 86400;
-					$fixed_data[] = array_merge( array(
-							'year'     => date( 'Y', $empty_day ),
-							'month'    => date( 'n', $empty_day ),
-							'day'      => date( 'j', $empty_day ),
-					), $default_data ) + $additional_fields;
-				}
-			}
-		}
+            if ($prev_time != $this_time) {	// If previous date is not previous day(it means some day has no data):
+                $empty_days = ($prev_time - $this_time) / 86400;
+                for ($d = 0; $d < $empty_days; $d++) {	// Add each empty day to array with default data:
+                    $empty_day = $prev_time - $d * 86400;
+                    $fixed_data[] = array_merge([
+                        'year' => date('Y', $empty_day),
+                        'month' => date('n', $empty_day),
+                        'day' => date('j', $empty_day),
+                    ], $default_data) + $additional_fields;
+                }
+            }
+        }
 
-		$prev_date = $row['year'].'-'.$row['month'].'-'.$row['day'];
-		$fixed_data[] = $row;
-	}
+        $prev_date = $row['year'] . '-' . $row['month'] . '-' . $row['day'];
+        $fixed_data[] = $row;
+    }
 
-	return $fixed_data;
+    return $fixed_data;
 }
 
 
@@ -9875,94 +8866,79 @@ function fill_empty_days( $data, $default_data, $start_date, $end_date )
  * @param array Params
  * @return object Image File or Link object
  */
-function get_social_media_image( $Item = NULL, $params = array() )
+function get_social_media_image($Item = null, $params = [])
 {
-	$params = array_merge( array(
-			'use_item_cat_fallback'      => true,
-			'use_coll_fallback'          => true,
-			'use_site_fallback'          => true,
-			'return_as_link'             => false,
-		), $params );
+    $params = array_merge([
+        'use_item_cat_fallback' => true,
+        'use_coll_fallback' => true,
+        'use_site_fallback' => true,
+        'return_as_link' => false,
+    ], $params);
 
-	$social_media_image = NULL;
+    $social_media_image = null;
 
-	if( ! empty( $Item ) )
-	{	// Try to get attached images
-		$LinkOwner = new LinkItem( $Item );
-		if(  $LinkList = $LinkOwner->get_attachment_LinkList( 1000, 'cover,background,teaser,teaserperm,teaserlink', 'image', array(
-				'sql_select_add' => ', CASE WHEN link_position = "cover" THEN 1 WHEN link_position IN ( "teaser", "teaserperm", "teaserlink" ) THEN 2 ELSE 3 END AS link_priority',
-				'sql_order_by'   => 'link_priority ASC, link_order ASC' ) ) )
-		{	// Item has linked files:
-			while( $Link = & $LinkList->get_next() )
-			{
-				if( ! ( $File = & $Link->get_File() ) )
-				{	// No File object:
-					global $Debuglog;
-					$Debuglog->add( sprintf( 'Link ID#%d of item #%d does not have a file object!', $Link->ID, $Item->ID ), array( 'error', 'files' ) );
-					continue;
-				}
+    if (! empty($Item)) {	// Try to get attached images
+        $LinkOwner = new LinkItem($Item);
+        if ($LinkList = $LinkOwner->get_attachment_LinkList(1000, 'cover,background,teaser,teaserperm,teaserlink', 'image', [
+            'sql_select_add' => ', CASE WHEN link_position = "cover" THEN 1 WHEN link_position IN ( "teaser", "teaserperm", "teaserlink" ) THEN 2 ELSE 3 END AS link_priority',
+            'sql_order_by' => 'link_priority ASC, link_order ASC',
+        ])) {	// Item has linked files:
+            while ($Link = &$LinkList->get_next()) {
+                if (! ($File = &$Link->get_File())) {	// No File object:
+                    global $Debuglog;
+                    $Debuglog->add(sprintf('Link ID#%d of item #%d does not have a file object!', $Link->ID, $Item->ID), ['error', 'files']);
+                    continue;
+                }
 
-				if( ! $File->exists() )
-				{	// File doesn't exist:
-					global $Debuglog;
-					$Debuglog->add( sprintf( 'File linked to item #%d does not exist (%s)!', $Item->ID, $File->get_full_path() ), array( 'error', 'files' ) );
-					continue;
-				}
+                if (! $File->exists()) {	// File doesn't exist:
+                    global $Debuglog;
+                    $Debuglog->add(sprintf('File linked to item #%d does not exist (%s)!', $Item->ID, $File->get_full_path()), ['error', 'files']);
+                    continue;
+                }
 
-				if( $File->is_image() )
-				{	// Use only image files for og:image tag:
-					if( $params['return_as_link'] )
-					{
-						return $Link;
-					}
-					else
-					{
-						return $File;
-					}
-					break;
-				}
-			}
-		}
+                if ($File->is_image()) {	// Use only image files for og:image tag:
+                    if ($params['return_as_link']) {
+                        return $Link;
+                    } else {
+                        return $File;
+                    }
+                    break;
+                }
+            }
+        }
 
-		if( $params['use_item_cat_fallback'] )
-		{	// No attached image from Item, let's try getting one from the Item's default chapter
-			$FileCache = & get_FileCache();
-			if( $default_Chapter = & $Item->get_main_Chapter() )
-			{	// Try social media boilerplate image first:
-				$social_media_image_file_ID = $default_Chapter->get( 'social_media_image_file_ID', false );
-				if( $social_media_image_file_ID > 0 && ( $File = & $FileCache->get_by_ID( $social_media_image_file_ID  ) ) && $File->is_image() )
-				{
-					return $File;
-				}
-			}
-		}
-	}
+        if ($params['use_item_cat_fallback']) {	// No attached image from Item, let's try getting one from the Item's default chapter
+            $FileCache = &get_FileCache();
+            if ($default_Chapter = &$Item->get_main_Chapter()) {	// Try social media boilerplate image first:
+                $social_media_image_file_ID = $default_Chapter->get('social_media_image_file_ID', false);
+                if ($social_media_image_file_ID > 0 && ($File = &$FileCache->get_by_ID($social_media_image_file_ID)) && $File->is_image()) {
+                    return $File;
+                }
+            }
+        }
+    }
 
-	global $Blog;
+    global $Blog;
 
-	if( $params['use_coll_fallback'] && $Blog )
-	{	// Try to get collection social media boiler plate and collection image/logo:
-		$FileCache = & get_FileCache();
-		$social_media_image_file_ID = $Blog->get_setting( 'social_media_image_file_ID', false );
-		if( $social_media_image_file_ID > 0 && ( $File = & $FileCache->get_by_ID( $social_media_image_file_ID  ) ) && $File->is_image() )
-		{	// Try social media boiler plate first:
-			return $File;
-		}
-	}
+    if ($params['use_coll_fallback'] && $Blog) {	// Try to get collection social media boiler plate and collection image/logo:
+        $FileCache = &get_FileCache();
+        $social_media_image_file_ID = $Blog->get_setting('social_media_image_file_ID', false);
+        if ($social_media_image_file_ID > 0 && ($File = &$FileCache->get_by_ID($social_media_image_file_ID)) && $File->is_image()) {	// Try social media boiler plate first:
+            return $File;
+        }
+    }
 
-	if( $params['use_site_fallback'] )
-	{	// Use social media boilerplate logo if configured
-		global $Settings;
+    if ($params['use_site_fallback']) {	// Use social media boilerplate logo if configured
+        global $Settings;
 
-		$FileCache = & get_FileCache();
-		$social_media_image_file_ID = intval( $Settings->get( 'social_media_image_file_ID' ) );
-		if( $social_media_image_file_ID > 0 && ( $File = $FileCache->get_by_ID( $social_media_image_file_ID, false ) ) && $File->is_image() )
-		{
-			return $File;
-		}
-	}
+        $FileCache = &get_FileCache();
+        $social_media_image_file_ID = intval($Settings->get('social_media_image_file_ID'));
+        if ($social_media_image_file_ID > 0 && ($File = $FileCache->get_by_ID($social_media_image_file_ID, false)) && $File->is_image()) {
+            return $File;
+        }
+    }
 
-	return NULL;
+    return null;
 }
 
 
@@ -9974,147 +8950,132 @@ function get_social_media_image( $Item = NULL, $params = array() )
  *
  * @param array Params
  */
-function insert_image_links_block( $params )
+function insert_image_links_block($params)
 {
-	global $current_User, $inc_path, $Blog, $blog, $LinkOwner;
-	global $is_admin_page;
+    global $current_User, $inc_path, $Blog, $blog, $LinkOwner;
+    global $is_admin_page;
 
-	load_funcs( 'links/model/_link.funcs.php' );
+    load_funcs('links/model/_link.funcs.php');
 
-	$params = array_merge( array(
-			'target_type' => NULL,
-		), $params );
+    $params = array_merge([
+        'target_type' => null,
+    ], $params);
 
-	if( ! empty( $params['blog'] ) )
-	{
-		$BlogCache = & get_BlogCache();
-		$blog = $params['blog'];
-		$Blog = $BlogCache->get_by_ID( $blog );
-	}
+    if (! empty($params['blog'])) {
+        $BlogCache = &get_BlogCache();
+        $blog = $params['blog'];
+        $Blog = $BlogCache->get_by_ID($blog);
+    }
 
-	$temp_ID = empty( $params['temp_ID'] ) ? NULL : $params['temp_ID'];
-	$is_admin_page = is_logged_in() && isset( $params['request_from'] ) && ( $params['request_from'] == 'back' );
+    $temp_ID = empty($params['temp_ID']) ? null : $params['temp_ID'];
+    $is_admin_page = is_logged_in() && isset($params['request_from']) && ($params['request_from'] == 'back');
 
-	switch( $params['target_type'] )
-	{
-		case 'Item':
-			if( ! isset( $params['target_ID'] ) && ! isset( $params['temp_ID'] ) )
-			{
-				return;
-			}
+    switch ($params['target_type']) {
+        case 'Item':
+            if (! isset($params['target_ID']) && ! isset($params['temp_ID'])) {
+                return;
+            }
 
-			$ItemCache = & get_ItemCache();
-			$edited_Item = & $ItemCache->get_by_ID( $params['target_ID'], false, false );
+            $ItemCache = &get_ItemCache();
+            $edited_Item = &$ItemCache->get_by_ID($params['target_ID'], false, false);
 
-			if( empty( $blog ) && $edited_Item )
-			{
-				$Blog = $edited_Item->get_Blog();
-				$blog = $Blog->ID;
-			}
+            if (empty($blog) && $edited_Item) {
+                $Blog = $edited_Item->get_Blog();
+                $blog = $Blog->ID;
+            }
 
-			if( isset( $GLOBALS['files_Module'] )
-				&& ( ( $edited_Item && check_user_perm( 'item_post!CURSTATUS', 'edit', false, $edited_Item ) ) || ( empty( $edited_Item ) && $params['temp_ID'] ) )
-				&& check_user_perm( 'files', 'view', false ) )
-			{	// Files module is enabled, but in case of creating new posts we should show file attachments block only if user has all required permissions to attach files
-				load_class( 'links/model/_linkitem.class.php', 'LinkItem' );
-				global $LinkOwner; // Initialize this object as global because this is used in many link functions
-				$LinkOwner = new LinkItem( $edited_Item, $temp_ID );
-			}
-			break;
+            if (isset($GLOBALS['files_Module'])
+                && (($edited_Item && check_user_perm('item_post!CURSTATUS', 'edit', false, $edited_Item)) || (empty($edited_Item) && $params['temp_ID']))
+                && check_user_perm('files', 'view', false)) {	// Files module is enabled, but in case of creating new posts we should show file attachments block only if user has all required permissions to attach files
+                load_class('links/model/_linkitem.class.php', 'LinkItem');
+                global $LinkOwner; // Initialize this object as global because this is used in many link functions
+                $LinkOwner = new LinkItem($edited_Item, $temp_ID);
+            }
+            break;
 
-		case 'Comment':
-			if( ! isset( $params['target_ID'] ) )
-			{
-				return;
-			}
+        case 'Comment':
+            if (! isset($params['target_ID'])) {
+                return;
+            }
 
-			$CommentCache = & get_CommentCache();
-			$edited_Comment = & $CommentCache->get_by_ID( $params['target_ID'] );
-			$comment_Item = & $edited_Comment->get_Item();
+            $CommentCache = &get_CommentCache();
+            $edited_Comment = &$CommentCache->get_by_ID($params['target_ID']);
+            $comment_Item = &$edited_Comment->get_Item();
 
-			if( empty( $blog ) && $comment_Item )
-			{
-				$Blog = $comment_Item->get_Blog();
-				$blog = $Blog->ID;
-			}
+            if (empty($blog) && $comment_Item) {
+                $Blog = $comment_Item->get_Blog();
+                $blog = $Blog->ID;
+            }
 
-			if( isset( $GLOBALS['files_Module'] )
-				&& check_user_perm( 'comment!CURSTATUS', 'edit', false, $edited_Comment )
-				&& check_user_perm( 'files', 'view', false ) )
-			{	// Files module is enabled, but in case of creating new comments we should show file attachments block only if user has all required permissions to attach files
-				load_class( 'links/model/_linkcomment.class.php', 'LinkComment' );
-				global $LinkOwner; // Initialize this object as global because this is used in many link functions
-				$LinkOwner = new LinkComment( $edited_Comment );
-			}
-			break;
+            if (isset($GLOBALS['files_Module'])
+                && check_user_perm('comment!CURSTATUS', 'edit', false, $edited_Comment)
+                && check_user_perm('files', 'view', false)) {	// Files module is enabled, but in case of creating new comments we should show file attachments block only if user has all required permissions to attach files
+                load_class('links/model/_linkcomment.class.php', 'LinkComment');
+                global $LinkOwner; // Initialize this object as global because this is used in many link functions
+                $LinkOwner = new LinkComment($edited_Comment);
+            }
+            break;
 
-		case 'EmailCampaign':
-			if( ! isset( $params['target_ID'] ) )
-			{
-				return;
-			}
+        case 'EmailCampaign':
+            if (! isset($params['target_ID'])) {
+                return;
+            }
 
-			$EmailCampaignCache = & get_EmailCampaignCache();
-			$edited_EmailCampaign = $EmailCampaignCache->get_by_ID( $params['target_ID'] );
+            $EmailCampaignCache = &get_EmailCampaignCache();
+            $edited_EmailCampaign = $EmailCampaignCache->get_by_ID($params['target_ID']);
 
-			if( isset( $GLOBALS['files_Module'] )
-				&& check_user_perm( 'emails', 'edit', false )
-				&& check_user_perm( 'files', 'view', false ) )
-			{	// Files module is enabled, but in case of creating new email campaign  we should show file attachments block only if user has all required permissions to attach files
-				load_class( 'links/model/_linkemailcampaign.class.php', 'LinkEmailCampaign' );
-				global $LinkOwner; // Initialize this object as global because this is used in many link functions
-				$LinkOwner = new LinkEmailCampaign( $edited_EmailCampaign );
-			}
-			break;
+            if (isset($GLOBALS['files_Module'])
+                && check_user_perm('emails', 'edit', false)
+                && check_user_perm('files', 'view', false)) {	// Files module is enabled, but in case of creating new email campaign  we should show file attachments block only if user has all required permissions to attach files
+                load_class('links/model/_linkemailcampaign.class.php', 'LinkEmailCampaign');
+                global $LinkOwner; // Initialize this object as global because this is used in many link functions
+                $LinkOwner = new LinkEmailCampaign($edited_EmailCampaign);
+            }
+            break;
 
-		case 'Message':
-			if( ! isset( $params['target_ID'] ) && ! isset( $params['temp_ID'] ) )
-			{
-				return;
-			}
+        case 'Message':
+            if (! isset($params['target_ID']) && ! isset($params['temp_ID'])) {
+                return;
+            }
 
-			$MessageCache = & get_MessageCache();
-			$edited_Message = $MessageCache->get_by_ID( $params['target_ID'], false, false );
+            $MessageCache = &get_MessageCache();
+            $edited_Message = $MessageCache->get_by_ID($params['target_ID'], false, false);
 
-			if( isset( $GLOBALS['files_Module'] )
-				&& check_user_perm( 'perm_messaging', 'reply' )
-				&& check_user_perm( 'files', 'view', false ) )
-			{	// Files module is enabled, but in case of creating new messages we should show file attachments block only if user has all required permissions to attach files
-				load_class( 'links/model/_linkmessage.class.php', 'LinkMessage' );
-				global $LinkOwner; // Initialize this object as global because this is used in many link functions
-				$LinkOwner = new LinkMessage( $edited_Message, $temp_ID );
-			}
-			break;
+            if (isset($GLOBALS['files_Module'])
+                && check_user_perm('perm_messaging', 'reply')
+                && check_user_perm('files', 'view', false)) {	// Files module is enabled, but in case of creating new messages we should show file attachments block only if user has all required permissions to attach files
+                load_class('links/model/_linkmessage.class.php', 'LinkMessage');
+                global $LinkOwner; // Initialize this object as global because this is used in many link functions
+                $LinkOwner = new LinkMessage($edited_Message, $temp_ID);
+            }
+            break;
 
-		default:
-			return;
-	}
+        default:
+            return;
+    }
 
-	global $fm_mode;
-	$fm_mode = 'file_select';
-	// Set a different drag and drop fieldset prefix:
-	$fieldset_prefix = 'modal_';
+    global $fm_mode;
+    $fm_mode = 'file_select';
+    // Set a different drag and drop fieldset prefix:
+    $fieldset_prefix = 'modal_';
 
-	if( is_admin_page() )
-	{
-		global $UserSettings, $adminskins_path, $AdminUI;
+    if (is_admin_page()) {
+        global $UserSettings, $adminskins_path, $AdminUI;
 
-		$admin_skin = $UserSettings->get( 'admin_skin', $current_User->ID );
-		require_once $adminskins_path.$admin_skin.'/_adminUI.class.php';
-		$AdminUI = new AdminUI();
-	}
-	else
-	{
-		global $Skin, $inc_path;
+        $admin_skin = $UserSettings->get('admin_skin', $current_User->ID);
+        require_once $adminskins_path . $admin_skin . '/_adminUI.class.php';
+        $AdminUI = new AdminUI();
+    } else {
+        global $Skin, $inc_path;
 
-		init_fontawesome_icons();
+        init_fontawesome_icons();
 
-		$blog_skin_ID = $Blog->get_skin_ID();
-		$SkinCache = & get_SkinCache();
-		$Skin = & $SkinCache->get_by_ID( $blog_skin_ID );
-	}
+        $blog_skin_ID = $Blog->get_skin_ID();
+        $SkinCache = &get_SkinCache();
+        $Skin = &$SkinCache->get_by_ID($blog_skin_ID);
+    }
 
-	require $inc_path.'links/views/_link_list.view.php';
+    require $inc_path . 'links/views/_link_list.view.php';
 }
 
 
@@ -10127,18 +9088,16 @@ function insert_image_links_block( $params )
  * @param string End of line
  * @return string
  */
-function get_csv_line( $row, $delimiter = ';', $enclosure = '"', $eol = "\n" )
+function get_csv_line($row, $delimiter = ';', $enclosure = '"', $eol = "\n")
 {
-	foreach( $row as $r => $cell )
-	{
-		$row[ $r ] = str_replace( $enclosure, $enclosure.$enclosure, $cell );
-		if( strpos( $cell, $delimiter ) !== false )
-		{
-			$row[ $r ] = $enclosure.$row[ $r ].$enclosure;
-		}
-	}
+    foreach ($row as $r => $cell) {
+        $row[$r] = str_replace($enclosure, $enclosure . $enclosure, $cell);
+        if (strpos($cell, $delimiter) !== false) {
+            $row[$r] = $enclosure . $row[$r] . $enclosure;
+        }
+    }
 
-	return implode( $delimiter, $row ).$eol;
+    return implode($delimiter, $row) . $eol;
 }
 
 
@@ -10148,141 +9107,145 @@ function get_csv_line( $row, $delimiter = ';', $enclosure = '"', $eol = "\n" )
  * @param array Params
  * @return array Already uploaded files in the requested folder
  */
-function display_importer_upload_panel( $params = array() )
+function display_importer_upload_panel($params = [])
 {
-	global $admin_url, $media_path;
+    global $admin_url, $media_path;
 
-	$params = array_merge( array(
-			'folder'                 => '',
-			'allowed_extensions'     => 'csv', // Allowed extensions to import, separated by |
-			'infolder_extensions'    => false, // Allowed extensions inside folders, separated by |, FALSE - to don't find files in subfolders
-			'folder_with_extensions' => false, // Find folders which contain at least one file with extensions(separated by |) in subfolders recursively
-			'find_attachments'       => false,
-			'display_type'           => false,
-			'help_slug'              => '',
-			'refresh_url'            => '',
-		), $params );
+    $params = array_merge([
+        'folder' => '',
+        'allowed_extensions' => 'csv', // Allowed extensions to import, separated by |
+        'infolder_extensions' => false, // Allowed extensions inside folders, separated by |, FALSE - to don't find files in subfolders
+        'folder_with_extensions' => false, // Find folders which contain at least one file with extensions(separated by |) in subfolders recursively
+        'find_attachments' => false,
+        'display_type' => false,
+        'help_slug' => '',
+        'refresh_url' => '',
+    ], $params);
 
-	evo_flush();
+    evo_flush();
 
-	// Get available files to import from the folder /media/import/
-	$import_files = get_import_files( $params['folder'], $params['allowed_extensions'], $params['infolder_extensions'], $params['find_attachments'], $params['folder_with_extensions'] );
+    // Get available files to import from the folder /media/import/
+    $import_files = get_import_files($params['folder'], $params['allowed_extensions'], $params['infolder_extensions'], $params['find_attachments'], $params['folder_with_extensions']);
 
-	load_class( '_core/ui/_table.class.php', 'Table' );
-	$Table = new Table( NULL, 'import' );
+    load_class('_core/ui/_table.class.php', 'Table');
+    $Table = new Table(null, 'import');
 
-	$Table->cols = array();
-	$Table->cols[] = array( 'th' => T_('Import'), 'td_class' => 'shrinkwrap' );
-	$Table->cols[] = array( 'th' => T_('File') );
-	if( $params['display_type'] )
-	{	// Display file type:
-		$Table->cols[] = array( 'th' => T_('Type') );
-	}
-	$Table->cols[] = array( 'th' => T_('Date'), 'td_class' => 'shrinkwrap' );
+    $Table->cols = [];
+    $Table->cols[] = [
+        'th' => T_('Import'),
+        'td_class' => 'shrinkwrap',
+    ];
+    $Table->cols[] = [
+        'th' => T_('File'),
+    ];
+    if ($params['display_type']) {	// Display file type:
+        $Table->cols[] = [
+            'th' => T_('Type'),
+        ];
+    }
+    $Table->cols[] = [
+        'th' => T_('Date'),
+        'td_class' => 'shrinkwrap',
+    ];
 
-	// Get link to manual page:
-	$manual_link = ( empty( $params['help_slug'] ) ? '' : get_manual_link( $params['help_slug'] ) );
+    // Get link to manual page:
+    $manual_link = (empty($params['help_slug']) ? '' : get_manual_link($params['help_slug']));
 
-	$Table->title = T_('Potential files to be imported').$manual_link;
-	if( ! empty( $params['refresh_url'] ) )
-	{	// Display a link to refresh the uploaded files:
-		$Table->title .= ' - '.action_icon( T_('Refresh'), 'refresh', $params['refresh_url'], T_('Refresh'), 3, 4 );
-	}
+    $Table->title = T_('Potential files to be imported') . $manual_link;
+    if (! empty($params['refresh_url'])) {	// Display a link to refresh the uploaded files:
+        $Table->title .= ' - ' . action_icon(T_('Refresh'), 'refresh', $params['refresh_url'], T_('Refresh'), 3, 4);
+    }
 
-	$FileRootCache = & get_FileRootCache();
-	$FileRoot = & $FileRootCache->get_by_type_and_ID( 'import', '0', true );
-	$import_perm_view = check_user_perm( 'files', 'view', false, $FileRoot );
-	if( $import_perm_view )
-	{ // Current user must has access to the import dir
-		if( check_user_perm( 'files', 'edit_allowed', false, $FileRoot ) )
-		{ // User has full access
-			$import_title = T_('Upload/Manage import files');
-		}
-		else if( check_user_perm( 'files', 'add', false, $FileRoot ) )
-		{ // User can only upload the files to import root
-			$import_title = T_('Upload import files');
-		}
-		else
-		{ // Only view
-			$import_title = T_('View import files');
-		}
-		$Table->title .= ' - '
-			.action_icon( $import_title, 'folder', $admin_url.'?ctrl=files&amp;root=import_0&amp;path='.$params['folder'], $import_title, 3, 4,
-				array( 'onclick' => 'return import_files_window()' )
-			).' <span class="note">(popup)</span>';
-	}
-	$Table->display_init();
+    $FileRootCache = &get_FileRootCache();
+    $FileRoot = &$FileRootCache->get_by_type_and_ID('import', '0', true);
+    $import_perm_view = check_user_perm('files', 'view', false, $FileRoot);
+    if ($import_perm_view) { // Current user must has access to the import dir
+        if (check_user_perm('files', 'edit_allowed', false, $FileRoot)) { // User has full access
+            $import_title = T_('Upload/Manage import files');
+        } elseif (check_user_perm('files', 'add', false, $FileRoot)) { // User can only upload the files to import root
+            $import_title = T_('Upload import files');
+        } else { // Only view
+            $import_title = T_('View import files');
+        }
+        $Table->title .= ' - '
+            . action_icon(
+                $import_title,
+                'folder',
+                $admin_url . '?ctrl=files&amp;root=import_0&amp;path=' . $params['folder'],
+                $import_title,
+                3,
+                4,
+                [
+                    'onclick' => 'return import_files_window()',
+                ]
+            ) . ' <span class="note">(popup)</span>';
+    }
+    $Table->display_init();
 
-	echo $Table->params['before'];
+    echo $Table->params['before'];
 
-	// TITLE:
-	$Table->display_head();
+    // TITLE:
+    $Table->display_head();
 
-	if( empty( $import_files ) )
-	{	// No files to import:
-		$Table->total_pages = 0;
-		$Table->no_results_text = '<div class="center">'.T_('We have not found any suitable file to perform the import. Please read the details at the manual page.').$manual_link.'</div>';
+    if (empty($import_files)) {	// No files to import:
+        $Table->total_pages = 0;
+        $Table->no_results_text = '<div class="center">' . T_('We have not found any suitable file to perform the import. Please read the details at the manual page.') . $manual_link . '</div>';
 
-		// BODY START:
-		$Table->display_body_start();
-		$Table->display_list_start();
-		$Table->display_list_end();
-		// BODY END:
-		$Table->display_body_end();
-	}
-	else
-	{	// Display the files to import in table:
+        // BODY START:
+        $Table->display_body_start();
+        $Table->display_list_start();
+        $Table->display_list_end();
+        // BODY END:
+        $Table->display_body_end();
+    } else {	// Display the files to import in table:
+        // TABLE START:
+        $Table->display_list_start();
 
-		// TABLE START:
-		$Table->display_list_start();
+        // COLUMN HEADERS:
+        $Table->display_col_headers();
+        // BODY START:
+        $Table->display_body_start();
 
-		// COLUMN HEADERS:
-		$Table->display_col_headers();
-		// BODY START:
-		$Table->display_body_start();
+        foreach ($import_files as $import_file) {
+            $Table->display_line_start();
 
-		foreach( $import_files as $import_file )
-		{
-			$Table->display_line_start();
+            // Checkbox to import
+            $Table->display_col_start();
+            echo '<input type="radio" name="import_file" value="' . $import_file['path'] . '"' . (get_param('import_file') == $import_file['path'] ? ' checked="checked"' : '') . ' />';
+            $Table->display_col_end();
 
-			// Checkbox to import
-			$Table->display_col_start();
-			echo '<input type="radio" name="import_file" value="'.$import_file['path'].'"'.( get_param( 'import_file' ) == $import_file['path'] ? ' checked="checked"' : '' ).' />';
-			$Table->display_col_end();
+            // File
+            $Table->display_col_start();
+            echo $import_file['name'];
+            $Table->display_col_end();
 
-			// File
-			$Table->display_col_start();
-			echo $import_file['name'];
-			$Table->display_col_end();
+            // Type
+            if ($params['display_type']) {	// Display file type:
+                $Table->display_col_start();
+                echo $import_file['type'];
+                $Table->display_col_end();
+            }
 
-			// Type
-			if( $params['display_type'] )
-			{	// Display file type:
-				$Table->display_col_start();
-				echo $import_file['type'];
-				$Table->display_col_end();
-			}
+            // File date
+            $Table->display_col_start();
+            echo date(locale_datefmt() . ' ' . locale_timefmt(), $import_file['date']);
+            $Table->display_col_end();
 
-			// File date
-			$Table->display_col_start();
-			echo date( locale_datefmt().' '.locale_timefmt(), $import_file['date'] );
-			$Table->display_col_end();
+            $Table->display_line_end();
 
-			$Table->display_line_end();
+            evo_flush();
+        }
 
-			evo_flush();
-		}
+        // BODY END:
+        $Table->display_body_end();
 
-		// BODY END:
-		$Table->display_body_end();
+        // TABLE END:
+        $Table->display_list_end();
+    }
 
-		// TABLE END:
-		$Table->display_list_end();
-	}
+    echo $Table->params['after'];
 
-	echo $Table->params['after'];
-
-?>
+    ?>
 <script>
 jQuery( '.table_scroll td' ).on( 'click', function()
 {
@@ -10290,12 +9253,10 @@ jQuery( '.table_scroll td' ).on( 'click', function()
 } );
 </script>
 <?php
-	if( $import_perm_view )
-	{	// Current user must has access to the import dir:
-
-		// Initialize JavaScript to build and open window:
-		echo_modalwindow_js();
-?>
+        if ($import_perm_view) {	// Current user must has access to the import dir:
+            // Initialize JavaScript to build and open window:
+            echo_modalwindow_js();
+            ?>
 <script>
 function import_files_window()
 {
@@ -10309,7 +9270,7 @@ function import_files_window()
 		{
 			'action': 'import_files',
 			'path': '<?php echo $params['folder']; ?>',
-			'crumb_import': '<?php echo get_crumb( 'import' ); ?>',
+			'crumb_import': '<?php echo get_crumb('import'); ?>',
 		},
 		success: function( result )
 		{
@@ -10325,9 +9286,9 @@ jQuery( document ).on( 'click', '#modal_window button[data-dismiss=modal]', func
 } );
 </script>
 <?php
-	}
+        }
 
-	return $import_files;
+        return $import_files;
 }
 
 
@@ -10341,87 +9302,73 @@ jQuery( document ).on( 'click', '#modal_window button[data-dismiss=modal]', func
  * @param string|boolean Find folders which contain at least one file with extensions(separated by |) recursively in all subfolders
  * @return array Files
  */
-function get_import_files( $folder = '', $allowed_extensions = 'xml|txt|zip', $infolder_extensions = 'xml|txt', $find_attachments = true, $folder_with_extensions = false )
+function get_import_files($folder = '', $allowed_extensions = 'xml|txt|zip', $infolder_extensions = 'xml|txt', $find_attachments = true, $folder_with_extensions = false)
 {
-	global $media_path;
+    global $media_path;
 
-	// Get all files from the import folder:
-	$root_path = $media_path.'import/'.( empty( $folder ) ? '' : $folder.'/' );
-	$files = get_filenames( $root_path, array(
-			'flat' => false
-		) );
+    // Get all files from the import folder:
+    $root_path = $media_path . 'import/' . (empty($folder) ? '' : $folder . '/');
+    $files = get_filenames($root_path, [
+        'flat' => false,
+    ]);
 
-	$import_files = array();
+    $import_files = [];
 
-	if( empty( $files ) )
-	{ // No access to the import folder OR it is empty
-		return $import_files;
-	}
+    if (empty($files)) { // No access to the import folder OR it is empty
+        return $import_files;
+    }
 
-	$file_paths = array();
-	foreach( $files as $folder_name => $file )
-	{
-		if( is_array( $file ) )
-		{	// It is a folder
-			if( $infolder_extensions !== false )
-			{	// Find files inside:
-				foreach( $file as $key => $sub_file )
-				{
-					if( is_string( $sub_file ) && preg_match( '/\.('.$infolder_extensions.')$/i', $sub_file, $file_matches ) )
-					{
-						$file_paths[] = array( $sub_file, $file_matches[1] );
-					}
-				}
-			}
-			if( $folder_with_extensions !== false && check_folder_with_extensions( $root_path.$folder_name, $folder_with_extensions ) )
-			{	// Use full folder as single import pack when it contains file with requested extensions:
-				$file_paths[] = array( $root_path.$folder_name, '$dir$' );
-			}
-		}
-		elseif( is_string( $file ) && preg_match( '/\.('.$allowed_extensions.')$/i', $file, $file_matches ) )
-		{	// File in the root:
-			$file_paths[] = array( $file, $file_matches[1] );
-		}
-	}
+    $file_paths = [];
+    foreach ($files as $folder_name => $file) {
+        if (is_array($file)) {	// It is a folder
+            if ($infolder_extensions !== false) {	// Find files inside:
+                foreach ($file as $key => $sub_file) {
+                    if (is_string($sub_file) && preg_match('/\.(' . $infolder_extensions . ')$/i', $sub_file, $file_matches)) {
+                        $file_paths[] = [$sub_file, $file_matches[1]];
+                    }
+                }
+            }
+            if ($folder_with_extensions !== false && check_folder_with_extensions($root_path . $folder_name, $folder_with_extensions)) {	// Use full folder as single import pack when it contains file with requested extensions:
+                $file_paths[] = [$root_path . $folder_name, '$dir$'];
+            }
+        } elseif (is_string($file) && preg_match('/\.(' . $allowed_extensions . ')$/i', $file, $file_matches)) {	// File in the root:
+            $file_paths[] = [$file, $file_matches[1]];
+        }
+    }
 
-	$media_path_length = strlen( $media_path.'import/'.( empty( $folder ) ? '' : $folder.'/' ) );
+    $media_path_length = strlen($media_path . 'import/' . (empty($folder) ? '' : $folder . '/'));
 
-	foreach( $file_paths as $file_data )
-	{
-		switch( $file_data[1] )
-		{
-			case '$dir$':
-				$file_type = T_('Folder');
-				break;
+    foreach ($file_paths as $file_data) {
+        switch ($file_data[1]) {
+            case '$dir$':
+                $file_type = T_('Folder');
+                break;
 
-			case 'zip':
-				$file_type = T_('Compressed Archive');
-				break;
+            case 'zip':
+                $file_type = T_('Compressed Archive');
+                break;
 
-			default:
-				if( $find_attachments && ( $file_attachments_folder = get_import_attachments_folder( $file_data[0] ) ) )
-				{	// Probably it is a file with attachments folder:
-					$file_type = sprintf( T_('Complete export (attachments folder: %s)'), '<code>'.substr( $file_attachments_folder, strlen( dirname( $file_data[0] ) ) + 1, -1 ).'</code>' );
-				}
-				else
-				{	// Single XML file without attachments folder:
-					$file_type = T_('Basic export').( $find_attachments ? ' ('.T_('no attachments folder found').')' : '' );
-				}
-				break;
-		}
+            default:
+                if ($find_attachments && ($file_attachments_folder = get_import_attachments_folder($file_data[0]))) {	// Probably it is a file with attachments folder:
+                    $file_type = sprintf(T_('Complete export (attachments folder: %s)'), '<code>' . substr($file_attachments_folder, strlen(dirname($file_data[0])) + 1, -1) . '</code>');
+                } else {	// Single XML file without attachments folder:
+                    $file_type = T_('Basic export') . ($find_attachments ? ' (' . T_('no attachments folder found') . ')' : '');
+                }
+                break;
+        }
 
-		$import_files[] = array(
-				'path' => $file_data[0],
-				'name' => substr( $file_data[0], $media_path_length ),
-				'type' => $file_type,
-				'date' => filemtime( $file_data[0] ),
-			);
-	}
+        $import_files[] = [
+            'path' => $file_data[0],
+            'name' => substr($file_data[0], $media_path_length),
+            'type' => $file_type,
+            'date' => filemtime($file_data[0]),
+        ];
+    }
 
-	// Sort import files by date DESC:
-	usort( $import_files, 'sort_import_files_callback' );
+    // Sort import files by date DESC:
+    usort($import_files, 'sort_import_files_callback');
 
-	return $import_files;
+    return $import_files;
 }
 
 
@@ -10432,14 +9379,13 @@ function get_import_files( $folder = '', $allowed_extensions = 'xml|txt|zip', $i
  * @param array Import file data
  * @return boolean
  */
-function sort_import_files_callback( $a, $b )
+function sort_import_files_callback($a, $b)
 {
-	if( $a['date'] == $b['date'] )
-	{	// Sort by file name with same dates:
-		return $a['name'] < $b['name'] ? -1 : 1;
-	}
+    if ($a['date'] == $b['date']) {	// Sort by file name with same dates:
+        return $a['name'] < $b['name'] ? -1 : 1;
+    }
 
-	return ( $a['date'] > $b['date'] ? -1 : 1 );
+    return ($a['date'] > $b['date'] ? -1 : 1);
 }
 
 
@@ -10450,73 +9396,59 @@ function sort_import_files_callback( $a, $b )
  * @param boolean TRUE to use first found folder if no reserved folders not found before
  * @return string Folder path
  */
-function get_import_attachments_folder( $file_path, $first_folder = false )
+function get_import_attachments_folder($file_path, $first_folder = false)
 {
-	$file_name = basename( $file_path );
-	$file_folder_path = dirname( $file_path ).'/';
-	$folder_full_name = preg_replace( '#\.[^\.]+$#', '', $file_name );
-	$folder_part_name = preg_replace( '#_[^_]+$#', '', $folder_full_name );
+    $file_name = basename($file_path);
+    $file_folder_path = dirname($file_path) . '/';
+    $folder_full_name = preg_replace('#\.[^\.]+$#', '', $file_name);
+    $folder_part_name = preg_replace('#_[^_]+$#', '', $folder_full_name);
 
-	// Find and get first existing folder with attachments:
-	if( is_dir( $file_folder_path.$folder_full_name ) )
-	{	// 1st priority folder:
-		return $file_folder_path.$folder_full_name.'/';
-	}
-	if( is_dir( $file_folder_path.$folder_part_name.'_files' ) )
-	{	// 2nd priority folder:
-		return $file_folder_path.$folder_part_name.'_files/';
-	}
-	if( is_dir( $file_folder_path.$folder_part_name.'_attachments' ) )
-	{	// 3rd priority folder:
-		return $file_folder_path.$folder_part_name.'_attachments/';
-	}
-	if( is_dir( $file_folder_path.'b2evolution_export_files' ) )
-	{	// 4th priority folder:
-		return $file_folder_path.'b2evolution_export_files/';
-	}
-	if( is_dir( $file_folder_path.'export_files' ) )
-	{	// 5th priority folder:
-		return $file_folder_path.'export_files/';
-	}
-	if( is_dir( $file_folder_path.'import_files' ) )
-	{	// 6th priority folder:
-		return $file_folder_path.'import_files/';
-	}
-	if( is_dir( $file_folder_path.'files' ) )
-	{	// 7th priority folder:
-		return $file_folder_path.'files/';
-	}
-	if( is_dir( $file_folder_path.'attachments' ) )
-	{	// 8th priority folder:
-		return $file_folder_path.'attachments/';
-	}
-	if( is_dir( $file_folder_path.'uploads' ) )
-	{	// 9th priority folder:
-		return $file_folder_path.'uploads/';
-	}
-	if( is_dir( $file_folder_path.'wp-content/uploads' ) )
-	{	// 10th priority folder:
-		return $file_folder_path.'wp-content/uploads/';
-	}
+    // Find and get first existing folder with attachments:
+    if (is_dir($file_folder_path . $folder_full_name)) {	// 1st priority folder:
+        return $file_folder_path . $folder_full_name . '/';
+    }
+    if (is_dir($file_folder_path . $folder_part_name . '_files')) {	// 2nd priority folder:
+        return $file_folder_path . $folder_part_name . '_files/';
+    }
+    if (is_dir($file_folder_path . $folder_part_name . '_attachments')) {	// 3rd priority folder:
+        return $file_folder_path . $folder_part_name . '_attachments/';
+    }
+    if (is_dir($file_folder_path . 'b2evolution_export_files')) {	// 4th priority folder:
+        return $file_folder_path . 'b2evolution_export_files/';
+    }
+    if (is_dir($file_folder_path . 'export_files')) {	// 5th priority folder:
+        return $file_folder_path . 'export_files/';
+    }
+    if (is_dir($file_folder_path . 'import_files')) {	// 6th priority folder:
+        return $file_folder_path . 'import_files/';
+    }
+    if (is_dir($file_folder_path . 'files')) {	// 7th priority folder:
+        return $file_folder_path . 'files/';
+    }
+    if (is_dir($file_folder_path . 'attachments')) {	// 8th priority folder:
+        return $file_folder_path . 'attachments/';
+    }
+    if (is_dir($file_folder_path . 'uploads')) {	// 9th priority folder:
+        return $file_folder_path . 'uploads/';
+    }
+    if (is_dir($file_folder_path . 'wp-content/uploads')) {	// 10th priority folder:
+        return $file_folder_path . 'wp-content/uploads/';
+    }
 
-	if( $first_folder )
-	{	// Try to use first found folder:
-		$files = scandir( $file_folder_path );
-		foreach( $files as $file )
-		{
-			if( $file == '.' || $file == '..' )
-			{	// Skip reserved dir names of the current path:
-				continue;
-			}
-			if( is_dir( $file_folder_path.$file ) )
-			{	// 11th priority folder:
-				return $file_folder_path.$file.'/';
-			}
-		}
-	}
+    if ($first_folder) {	// Try to use first found folder:
+        $files = scandir($file_folder_path);
+        foreach ($files as $file) {
+            if ($file == '.' || $file == '..') {	// Skip reserved dir names of the current path:
+                continue;
+            }
+            if (is_dir($file_folder_path . $file)) {	// 11th priority folder:
+                return $file_folder_path . $file . '/';
+            }
+        }
+    }
 
-	// File has no attachments folder
-	return false;
+    // File has no attachments folder
+    return false;
 }
 
 
@@ -10527,29 +9459,25 @@ function get_import_attachments_folder( $file_path, $first_folder = false )
  * @param string Separator
  * @return string Fixed list
  */
-function clear_ids_list( $ids_list, $separator = ',' )
+function clear_ids_list($ids_list, $separator = ',')
 {
-	if( $ids_list === '' )
-	{	// Empty list:
-		return $ids_list;
-	}
+    if ($ids_list === '') {	// Empty list:
+        return $ids_list;
+    }
 
-	if( strpos( $ids_list, '-' ) === 0 )
-	{	// Remove first '-' char from start, which is used for exluding list:
-		$ids_list = substr( $ids_list, 1 );
-	}
+    if (strpos($ids_list, '-') === 0) {	// Remove first '-' char from start, which is used for exluding list:
+        $ids_list = substr($ids_list, 1);
+    }
 
-	$ids_list = explode( $separator, $ids_list );
+    $ids_list = explode($separator, $ids_list);
 
-	foreach( $ids_list as $i => $ID )
-	{
-		if( ! is_number( $ID ) )
-		{	// Remove a not number value from list:
-			unset( $ids_list[ $i ] );
-		}
-	}
+    foreach ($ids_list as $i => $ID) {
+        if (! is_number($ID)) {	// Remove a not number value from list:
+            unset($ids_list[$i]);
+        }
+    }
 
-	return implode( $separator, $ids_list );
+    return implode($separator, $ids_list);
 }
 
 
@@ -10560,24 +9488,22 @@ function clear_ids_list( $ids_list, $separator = ',' )
  * @param string String of options separated by comma, '*' - allow all options, use '-' before options if they should be excluded/denied
  * @return boolean
  */
-function is_allowed_option( $checked_option, $allowed_options )
+function is_allowed_option($checked_option, $allowed_options)
 {
-	if( $allowed_options === '*' )
-	{	// All options are allowed:
-		return true;
-	}
+    if ($allowed_options === '*') {	// All options are allowed:
+        return true;
+    }
 
-	$is_allowed_options = true;
-	$allowed_options = $allowed_options;
-	if( substr( $allowed_options, 0, 1 ) == '-' )
-	{	// The options should excluded/denied:
-		$allowed_options = substr( $allowed_options, 1 );
-		$is_allowed_options = false;
-	}
-	$allowed_options = explode( ',', $allowed_options );
-	$is_in_checked_array = in_array( $checked_option, $allowed_options );
+    $is_allowed_options = true;
+    $allowed_options = $allowed_options;
+    if (substr($allowed_options, 0, 1) == '-') {	// The options should excluded/denied:
+        $allowed_options = substr($allowed_options, 1);
+        $is_allowed_options = false;
+    }
+    $allowed_options = explode(',', $allowed_options);
+    $is_in_checked_array = in_array($checked_option, $allowed_options);
 
-	return ( $is_allowed_options ? $is_in_checked_array : ! $is_in_checked_array );
+    return ($is_allowed_options ? $is_in_checked_array : ! $is_in_checked_array);
 }
 
 
@@ -10589,23 +9515,23 @@ function is_allowed_option( $checked_option, $allowed_options )
  * @param string Separator string
  * @return array Schema property array
  */
-function convert_path_to_array( $property, $value, $separator = '.' )
+function convert_path_to_array($property, $value, $separator = '.')
 {
-	$output = NULL;
+    $output = null;
 
-	foreach( array_reverse( explode( $separator, $property ) ) as $key )
-	{
-		if( empty( $output ) )
-		{
-			$output = array( $key => $value );
-		}
-		else
-		{
-			$output = array( $key => $output );
-		}
-	}
+    foreach (array_reverse(explode($separator, $property)) as $key) {
+        if (empty($output)) {
+            $output = [
+                $key => $value,
+            ];
+        } else {
+            $output = [
+                $key => $output,
+            ];
+        }
+    }
 
-	return $output;
+    return $output;
 }
 
 
@@ -10615,16 +9541,15 @@ function convert_path_to_array( $property, $value, $separator = '.' )
  * @param object Collection
  * @return string Customizer URL
  */
-function get_customizer_url( $url_Blog = NULL )
+function get_customizer_url($url_Blog = null)
 {
-	global $customizer_relative_url, $Blog;
+    global $customizer_relative_url, $Blog;
 
-	if( $url_Blog === NULL && isset( $Blog ) )
-	{	// Use current collection:
-		$url_Blog = $Blog;
-	}
+    if ($url_Blog === null && isset($Blog)) {	// Use current collection:
+        $url_Blog = $Blog;
+    }
 
-	return $url_Blog->get_baseurl_root().$customizer_relative_url;
+    return $url_Blog->get_baseurl_root() . $customizer_relative_url;
 }
 
 
@@ -10634,26 +9559,25 @@ function get_customizer_url( $url_Blog = NULL )
  * @param string Alias Operator
  * @return string Query Builder Operator
  */
-function get_querybuilder_operator( $operator )
+function get_querybuilder_operator($operator)
 {
-	switch( $operator )
-	{
-		case '=':
-			return 'equal';
-		case '!=':
-		case '<>':
-			return 'not_equal';
-		case '<':
-			return 'less';
-		case '<=':
-			return 'less_or_equal';
-		case '>':
-			return 'greater';
-		case '>=':
-			return 'greater_or_equal';
-		default:
-			return $operator;
-	}
+    switch ($operator) {
+        case '=':
+            return 'equal';
+        case '!=':
+        case '<>':
+            return 'not_equal';
+        case '<':
+            return 'less';
+        case '<=':
+            return 'less_or_equal';
+        case '>':
+            return 'greater';
+        case '>=':
+            return 'greater_or_equal';
+        default:
+            return $operator;
+    }
 }
 
 
@@ -10662,53 +9586,53 @@ function get_querybuilder_operator( $operator )
  */
 function use_defer()
 {
-	global $disp, $ReqPath,
-		$use_defer,
-		$use_defer_for_backoffice,
-		$use_defer_for_loggedin_users,
-		$use_defer_for_anonymous_users,
-		$use_defer_for_anonymous_disp_register,
-		$use_defer_for_anonymous_disp_register_finish,
-		$use_defer_for_anonymous_disp_users,
-		$use_defer_for_anonymous_disp_anonpost,
-		$use_defer_for_loggedin_disp_single_page,
-		$use_defer_for_loggedin_disp_front,
-		$use_defer_for_loggedin_disp_profile,
-		$use_defer_for_loggedin_disp_pwdchange,
-		$use_defer_for_loggedin_disp_edit,
-		$use_defer_for_loggedin_disp_proposechange,
-		$use_defer_for_loggedin_disp_edit_comment,
-		$use_defer_for_loggedin_disp_comments,
-		$use_defer_for_loggedin_disp_visits,
-		$use_defer_for_loggedin_disp_messages,
-		$use_defer_for_loggedin_disp_threads,
-		$use_defer_for_loggedin_disp_users,
-		$use_defer_for_loggedin_disp_contacts,
-		$use_defer_for_default_register_form;
-	
-	$r =  $use_defer
-		   && ( is_admin_page() ? $use_defer_for_backoffice : true )
-		   && ( is_logged_in() ? $use_defer_for_loggedin_users : $use_defer_for_anonymous_users )
-		   && ( $disp == 'register' ? $use_defer_for_anonymous_disp_register : true )
-		   && ( $disp == 'register_finish' ? $use_defer_for_anonymous_disp_register_finish : true )
-		   && ( $disp == 'users' ? $use_defer_for_anonymous_disp_users : true )
-		   && ( $disp == 'anonpost' ? $use_defer_for_anonymous_disp_anonpost : true )
-		   && ( empty( $disp ) && $ReqPath == '/htsrv/register.php' ? $use_defer_for_default_register_form : true )
-		   && ( is_logged_in() && in_array( $disp, array( 'single', 'page' ) ) ? $use_defer_for_loggedin_disp_single_page : true )
-		   && ( is_logged_in() && $disp == 'front' ? $use_defer_for_loggedin_disp_front : true )
-		   && ( is_logged_in() && $disp == 'profile' ? $use_defer_for_loggedin_disp_profile : true )
-		   && ( is_logged_in() && $disp == 'pwdchange' ? $use_defer_for_loggedin_disp_pwdchange : true )
-		   && ( is_logged_in() && $disp == 'edit' ? $use_defer_for_loggedin_disp_edit : true )
-		   && ( is_logged_in() && $disp == 'proposechange' ? $use_defer_for_loggedin_disp_proposechange : true )
-		   && ( is_logged_in() && $disp == 'edit_comment' ? $use_defer_for_loggedin_disp_edit_comment : true )
-		   && ( is_logged_in() && $disp == 'comments' ? $use_defer_for_loggedin_disp_comments : true )
-		   && ( is_logged_in() && $disp == 'visits' ? $use_defer_for_loggedin_disp_visits : true )
-		   && ( is_logged_in() && $disp == 'messages' ? $use_defer_for_loggedin_disp_messages : true )
-		   && ( is_logged_in() && $disp == 'threads' ? $use_defer_for_loggedin_disp_threads : true )
-		   && ( is_logged_in() && $disp == 'users' ? $use_defer_for_loggedin_disp_users : true )
-		   && ( is_logged_in() && $disp == 'contacts' ? $use_defer_for_loggedin_disp_contacts : true );
+    global $disp, $ReqPath,
+    $use_defer,
+    $use_defer_for_backoffice,
+    $use_defer_for_loggedin_users,
+    $use_defer_for_anonymous_users,
+    $use_defer_for_anonymous_disp_register,
+    $use_defer_for_anonymous_disp_register_finish,
+    $use_defer_for_anonymous_disp_users,
+    $use_defer_for_anonymous_disp_anonpost,
+    $use_defer_for_loggedin_disp_single_page,
+    $use_defer_for_loggedin_disp_front,
+    $use_defer_for_loggedin_disp_profile,
+    $use_defer_for_loggedin_disp_pwdchange,
+    $use_defer_for_loggedin_disp_edit,
+    $use_defer_for_loggedin_disp_proposechange,
+    $use_defer_for_loggedin_disp_edit_comment,
+    $use_defer_for_loggedin_disp_comments,
+    $use_defer_for_loggedin_disp_visits,
+    $use_defer_for_loggedin_disp_messages,
+    $use_defer_for_loggedin_disp_threads,
+    $use_defer_for_loggedin_disp_users,
+    $use_defer_for_loggedin_disp_contacts,
+    $use_defer_for_default_register_form;
 
-	return $r;
+    $r = $use_defer
+           && (is_admin_page() ? $use_defer_for_backoffice : true)
+           && (is_logged_in() ? $use_defer_for_loggedin_users : $use_defer_for_anonymous_users)
+           && ($disp == 'register' ? $use_defer_for_anonymous_disp_register : true)
+           && ($disp == 'register_finish' ? $use_defer_for_anonymous_disp_register_finish : true)
+           && ($disp == 'users' ? $use_defer_for_anonymous_disp_users : true)
+           && ($disp == 'anonpost' ? $use_defer_for_anonymous_disp_anonpost : true)
+           && (empty($disp) && $ReqPath == '/htsrv/register.php' ? $use_defer_for_default_register_form : true)
+           && (is_logged_in() && in_array($disp, ['single', 'page']) ? $use_defer_for_loggedin_disp_single_page : true)
+           && (is_logged_in() && $disp == 'front' ? $use_defer_for_loggedin_disp_front : true)
+           && (is_logged_in() && $disp == 'profile' ? $use_defer_for_loggedin_disp_profile : true)
+           && (is_logged_in() && $disp == 'pwdchange' ? $use_defer_for_loggedin_disp_pwdchange : true)
+           && (is_logged_in() && $disp == 'edit' ? $use_defer_for_loggedin_disp_edit : true)
+           && (is_logged_in() && $disp == 'proposechange' ? $use_defer_for_loggedin_disp_proposechange : true)
+           && (is_logged_in() && $disp == 'edit_comment' ? $use_defer_for_loggedin_disp_edit_comment : true)
+           && (is_logged_in() && $disp == 'comments' ? $use_defer_for_loggedin_disp_comments : true)
+           && (is_logged_in() && $disp == 'visits' ? $use_defer_for_loggedin_disp_visits : true)
+           && (is_logged_in() && $disp == 'messages' ? $use_defer_for_loggedin_disp_messages : true)
+           && (is_logged_in() && $disp == 'threads' ? $use_defer_for_loggedin_disp_threads : true)
+           && (is_logged_in() && $disp == 'users' ? $use_defer_for_loggedin_disp_users : true)
+           && (is_logged_in() && $disp == 'contacts' ? $use_defer_for_loggedin_disp_contacts : true);
+
+    return $r;
 }
 
 
@@ -10719,14 +9643,13 @@ function use_defer()
  * @param string HTML tag: <p>, <span>, <div>
  * @return string
  */
-function get_rendering_error( $error_message, $html_tag = 'p' )
+function get_rendering_error($error_message, $html_tag = 'p')
 {
-	if( ! in_array( $html_tag, array( 'p', 'span', 'div' ) ) )
-	{	// Force not allowed html tag:
-		$html_tag = 'p';
-	}
+    if (! in_array($html_tag, ['p', 'span', 'div'])) {	// Force not allowed html tag:
+        $html_tag = 'p';
+    }
 
-	return '<'.$html_tag.' class="evo_rendering_error">'.$error_message.'</'.$html_tag.'>';
+    return '<' . $html_tag . ' class="evo_rendering_error">' . $error_message . '</' . $html_tag . '>';
 }
 
 
@@ -10736,9 +9659,9 @@ function get_rendering_error( $error_message, $html_tag = 'p' )
  * @param string Error message
  * @param string HTML tag: <p>, <span>, <div>
  */
-function display_rendering_error( $error_message, $html_tag = 'p' )
+function display_rendering_error($error_message, $html_tag = 'p')
 {
-	echo get_rendering_error( $error_message, $html_tag );
+    echo get_rendering_error($error_message, $html_tag);
 }
 
 
@@ -10748,8 +9671,8 @@ function display_rendering_error( $error_message, $html_tag = 'p' )
  * @param string Content with rendering error
  * @return string Content without rendering error
  */
-function clear_rendering_errors( $content )
+function clear_rendering_errors($content)
 {
-	return preg_replace( '#<([a-z]+) class="evo_rendering_error">.+?</\1>#', '', $content );
+    return preg_replace('#<([a-z]+) class="evo_rendering_error">.+?</\1>#', '', $content);
 }
 ?>

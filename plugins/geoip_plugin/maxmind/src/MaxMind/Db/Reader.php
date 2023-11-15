@@ -14,14 +14,21 @@ use MaxMind\Db\Reader\Util;
 class Reader
 {
     private static $DATA_SECTION_SEPARATOR_SIZE = 16;
+
     private static $METADATA_START_MARKER = "\xAB\xCD\xEFMaxMind.com";
+
     private static $METADATA_START_MARKER_LENGTH = 14;
+
     private static $METADATA_MAX_SIZE = 131072; // 128 * 1024 = 128KB
 
     private $decoder;
+
     private $fileHandle;
+
     private $fileSize;
+
     private $ipV4Start;
+
     private $metadata;
 
     /**
@@ -44,7 +51,7 @@ class Reader
             );
         }
 
-        if (!is_readable($database)) {
+        if (! is_readable($database)) {
             throw new \InvalidArgumentException(
                 "The file \"$database\" does not exist or is not readable."
             );
@@ -94,13 +101,13 @@ class Reader
             );
         }
 
-        if (!\is_resource($this->fileHandle)) {
+        if (! \is_resource($this->fileHandle)) {
             throw new \BadMethodCallException(
                 'Attempt to read from a closed MaxMind DB.'
             );
         }
 
-        if (!filter_var($ipAddress, FILTER_VALIDATE_IP)) {
+        if (! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
             throw new \InvalidArgumentException(
                 "The value \"$ipAddress\" is not a valid IP address."
             );
@@ -282,7 +289,7 @@ class Reader
 
         // Not technically required, but this makes it consistent with
         // C extension and it allows us to change our implementation later.
-        if (!\is_resource($this->fileHandle)) {
+        if (! \is_resource($this->fileHandle)) {
             throw new \BadMethodCallException(
                 'Attempt to read from a closed MaxMind DB.'
             );
@@ -299,7 +306,7 @@ class Reader
      */
     public function close()
     {
-        if (!\is_resource($this->fileHandle)) {
+        if (! \is_resource($this->fileHandle)) {
             throw new \BadMethodCallException(
                 'Attempt to close a closed MaxMind DB.'
             );

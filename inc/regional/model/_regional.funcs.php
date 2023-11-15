@@ -12,7 +12,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -23,79 +25,77 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  * @param array field params
  * @return string html tags <option>
  */
-function get_regional_option_list( $rows, $selected = 0, $params = array() )
+function get_regional_option_list($rows, $selected = 0, $params = [])
 {
-	$params = array_merge( array(
-			'allow_none' => true,
-			'none_option_value' => '',
-			'none_option_text' => T_('All'),
-			'group_preferred' => true,
-			'group_name_preferred' => T_('Frequent'),
-			'group_name_other' => T_('Other'),
-		), $params );
+    $params = array_merge([
+        'allow_none' => true,
+        'none_option_value' => '',
+        'none_option_text' => T_('All'),
+        'group_preferred' => true,
+        'group_name_preferred' => T_('Frequent'),
+        'group_name_other' => T_('Other'),
+    ], $params);
 
-	$r = '';
+    $r = '';
 
-	if( $params['allow_none'] )
-	{	// we set current value of a country if it is sent to function
-		$r .= '<option value="'.$params['none_option_value'].'"';
-		if( empty($default) ) $r .= ' selected="selected"';
-		$r .= '>'.format_to_output( $params['none_option_text'] ).'</option>'."\n";
-	}
+    if ($params['allow_none']) {	// we set current value of a country if it is sent to function
+        $r .= '<option value="' . $params['none_option_value'] . '"';
+        if (empty($default)) {
+            $r .= ' selected="selected"';
+        }
+        $r .= '>' . format_to_output($params['none_option_text']) . '</option>' . "\n";
+    }
 
-	$pref_rows = array(); //preferred countries.
-	$rest_rows = array(); // not preffered countries (the rest)
+    $pref_rows = []; //preferred countries.
+    $rest_rows = []; // not preffered countries (the rest)
 
-	foreach( $rows as $row_Obj )
-	{
-		if( $params['group_preferred'] && $row_Obj->preferred == 1 )
-		{	// if the country is preferred we add it to selected array.
-			$pref_rows[] = $row_Obj;
-		}
-		$rest_rows[] = $row_Obj;
-	}
+    foreach ($rows as $row_Obj) {
+        if ($params['group_preferred'] && $row_Obj->preferred == 1) {	// if the country is preferred we add it to selected array.
+            $pref_rows[] = $row_Obj;
+        }
+        $rest_rows[] = $row_Obj;
+    }
 
-	if( count( $pref_rows ) )
-	{	// if we don't have preferred countries in this case we don't have to show optgroup
-		// in option list
-		$r .= '<optgroup label="'.$params['group_name_preferred'].'">';
-		foreach( $pref_rows as $row_Obj )
-		{
-			$r .=  '<option value="'.$row_Obj->ID.'"';
-			if( $row_Obj->ID == $selected ) $r .= ' selected="selected"';
-			$r .= '>';
-			$r .= format_to_output( $row_Obj->name, 'htmlbody' );
-			$r .=  '</option>'."\n";
-		}
-		$r .= '</optgroup>';
+    if (count($pref_rows)) {	// if we don't have preferred countries in this case we don't have to show optgroup
+        // in option list
+        $r .= '<optgroup label="' . $params['group_name_preferred'] . '">';
+        foreach ($pref_rows as $row_Obj) {
+            $r .= '<option value="' . $row_Obj->ID . '"';
+            if ($row_Obj->ID == $selected) {
+                $r .= ' selected="selected"';
+            }
+            $r .= '>';
+            $r .= format_to_output($row_Obj->name, 'htmlbody');
+            $r .= '</option>' . "\n";
+        }
+        $r .= '</optgroup>';
 
-		if( count( $rest_rows ) )
-		{ // if we don't have rest countries we do not create optgroup for them
-			$r .= '<optgroup label="'.$params['group_name_other'].'">';
-			foreach( $rest_rows as $row_Obj )
-			{
-				$r .=  '<option value="'.$row_Obj->ID.'"';
-				if( $row_Obj->ID == $selected ) $r .= ' selected="selected"';
-				$r .= '>';
-				$r .= format_to_output( $row_Obj->name, 'htmlbody' );
-				$r .=  '</option>'."\n";
-			}
-			$r .= '</optgroup>';
-		}
-	}
-	else
-	{	// if we have only rest countries we get here
-		foreach( $rest_rows as $row_Obj )
-		{
-			$r .=  '<option value="'.$row_Obj->ID.'"';
-			if( $row_Obj->ID == $selected ) $r .= ' selected="selected"';
-			$r .= '>';
-			$r .= format_to_output( $row_Obj->name, 'htmlbody' );
-			$r .=  '</option>'."\n";
-		}
-	}
+        if (count($rest_rows)) { // if we don't have rest countries we do not create optgroup for them
+            $r .= '<optgroup label="' . $params['group_name_other'] . '">';
+            foreach ($rest_rows as $row_Obj) {
+                $r .= '<option value="' . $row_Obj->ID . '"';
+                if ($row_Obj->ID == $selected) {
+                    $r .= ' selected="selected"';
+                }
+                $r .= '>';
+                $r .= format_to_output($row_Obj->name, 'htmlbody');
+                $r .= '</option>' . "\n";
+            }
+            $r .= '</optgroup>';
+        }
+    } else {	// if we have only rest countries we get here
+        foreach ($rest_rows as $row_Obj) {
+            $r .= '<option value="' . $row_Obj->ID . '"';
+            if ($row_Obj->ID == $selected) {
+                $r .= ' selected="selected"';
+            }
+            $r .= '>';
+            $r .= format_to_output($row_Obj->name, 'htmlbody');
+            $r .= '</option>' . "\n";
+        }
+    }
 
-	return $r;
+    return $r;
 }
 
 /**
@@ -106,23 +106,23 @@ function get_regional_option_list( $rows, $selected = 0, $params = array() )
  * @param array field params
  * @return string html tags <option>
  */
-function get_regions_option_list( $country_ID, $region_ID = 0, $params = array() )
+function get_regions_option_list($country_ID, $region_ID = 0, $params = [])
 {
-	$params = array_merge( array(
-			'group_name_preferred' => T_('Frequent regions'),
-			'group_name_other' => T_('Other regions'),
-		), $params );
+    $params = array_merge([
+        'group_name_preferred' => T_('Frequent regions'),
+        'group_name_other' => T_('Other regions'),
+    ], $params);
 
-	global $DB;
+    global $DB;
 
-	$regions = $DB->get_results( '
+    $regions = $DB->get_results('
 		SELECT rgn_ID as ID, rgn_name as name, rgn_preferred as preferred
 			FROM T_regional__region
-		 WHERE rgn_ctry_ID = "'.$DB->escape( $country_ID ).'"
+		 WHERE rgn_ctry_ID = "' . $DB->escape($country_ID) . '"
 		   AND rgn_enabled = 1
-		 ORDER BY rgn_name' );
+		 ORDER BY rgn_name');
 
-	return get_regional_option_list( $regions, $region_ID, $params );
+    return get_regional_option_list($regions, $region_ID, $params);
 }
 
 /**
@@ -133,23 +133,23 @@ function get_regions_option_list( $country_ID, $region_ID = 0, $params = array()
  * @param array field params
  * @return string html tags <option>
  */
-function get_subregions_option_list( $region_ID, $subregion_ID = 0, $params = array() )
+function get_subregions_option_list($region_ID, $subregion_ID = 0, $params = [])
 {
-	$params = array_merge( array(
-			'group_name_preferred' => T_('Frequent sub-regions'),
-			'group_name_other' => T_('Other sub-regions'),
-		), $params );
+    $params = array_merge([
+        'group_name_preferred' => T_('Frequent sub-regions'),
+        'group_name_other' => T_('Other sub-regions'),
+    ], $params);
 
-	global $DB;
+    global $DB;
 
-	$subregions = $DB->get_results( '
+    $subregions = $DB->get_results('
 		SELECT subrg_ID as ID, subrg_name as name, subrg_preferred as preferred
 		  FROM T_regional__subregion
-		 WHERE subrg_rgn_ID = "'.$DB->escape( $region_ID ).'"
+		 WHERE subrg_rgn_ID = "' . $DB->escape($region_ID) . '"
 		   AND subrg_enabled = 1
-		 ORDER BY subrg_name' );
+		 ORDER BY subrg_name');
 
-	return get_regional_option_list( $subregions, $subregion_ID, $params );
+    return get_regional_option_list($subregions, $subregion_ID, $params);
 }
 
 /**
@@ -162,81 +162,65 @@ function get_subregions_option_list( $region_ID, $subregion_ID = 0, $params = ar
  * @param array field params
  * @return string html tags <option>
  */
-function get_cities_option_list( $country_ID, $region_ID = 0, $subregion_ID = 0, $city_ID = 0, $params = array() )
+function get_cities_option_list($country_ID, $region_ID = 0, $subregion_ID = 0, $city_ID = 0, $params = [])
 {
-	$params = array_merge( array(
-			'group_name_preferred' => T_('Frequent cities'),
-			'group_name_other' => T_('Other cities'),
-		), $params );
+    $params = array_merge([
+        'group_name_preferred' => T_('Frequent cities'),
+        'group_name_other' => T_('Other cities'),
+    ], $params);
 
-	global $DB;
+    global $DB;
 
-	$get_cities = true;
-	$sql_where = array();
+    $get_cities = true;
+    $sql_where = [];
 
-	// Get city by country
-	$sql_where[] = 'city_ctry_ID = "'.$DB->escape( $country_ID ).'"';
+    // Get city by country
+    $sql_where[] = 'city_ctry_ID = "' . $DB->escape($country_ID) . '"';
 
-	if( $region_ID > 0 )
-	{	// Get cities by region
-		$sql_where[] = 'city_rgn_ID = "'.$DB->escape( $region_ID ).'"';
-	}
-	else
-	{	// Select all cities from current country
-		$regions_count = $DB->get_var( '
+    if ($region_ID > 0) {	// Get cities by region
+        $sql_where[] = 'city_rgn_ID = "' . $DB->escape($region_ID) . '"';
+    } else {	// Select all cities from current country
+        $regions_count = $DB->get_var('
 			SELECT COUNT( rgn_ID )
 			  FROM T_regional__region
-			 WHERE rgn_ctry_ID = "'.$DB->escape( $country_ID ).'"
-			   AND rgn_enabled = 1' );
-		if( $regions_count == 0 )
-		{	// If regions don't exist for current country we show all cities of the country
-			$sql_where[] = 'city_rgn_ID IS NULL';
-		}
-		else
-		{	// Don't get cities without selected region
-			$get_cities = false;
-		}
-	}
+			 WHERE rgn_ctry_ID = "' . $DB->escape($country_ID) . '"
+			   AND rgn_enabled = 1');
+        if ($regions_count == 0) {	// If regions don't exist for current country we show all cities of the country
+            $sql_where[] = 'city_rgn_ID IS NULL';
+        } else {	// Don't get cities without selected region
+            $get_cities = false;
+        }
+    }
 
-	if( $region_ID > 0 )
-	{	// Select sub-regions only when region_ID is defined
-		if( $subregion_ID > 0 )
-		{	// Get cities by sub-region
-			$sql_where[] = 'city_subrg_ID = "'.$DB->escape( $subregion_ID ).'"';
-		}
-		else
-		{	// Select all cities from current region
-			$subregions_count = $DB->get_var( '
+    if ($region_ID > 0) {	// Select sub-regions only when region_ID is defined
+        if ($subregion_ID > 0) {	// Get cities by sub-region
+            $sql_where[] = 'city_subrg_ID = "' . $DB->escape($subregion_ID) . '"';
+        } else {	// Select all cities from current region
+            $subregions_count = $DB->get_var('
 				SELECT COUNT( subrg_ID )
 				  FROM T_regional__subregion
-				 WHERE subrg_rgn_ID = "'.$DB->escape( $region_ID ).'"
-			     AND subrg_enabled = 1' );
-			if( $subregions_count == 0 )
-			{	// If sub-regions don't exist for current region we show all cities of the region
-				$sql_where[] = 'city_subrg_ID IS NULL';
-			}
-			else
-			{	// Don't get cities without selected sub-region
-				$get_cities = false;
-			}
-		}
-	}
+				 WHERE subrg_rgn_ID = "' . $DB->escape($region_ID) . '"
+			     AND subrg_enabled = 1');
+            if ($subregions_count == 0) {	// If sub-regions don't exist for current region we show all cities of the region
+                $sql_where[] = 'city_subrg_ID IS NULL';
+            } else {	// Don't get cities without selected sub-region
+                $get_cities = false;
+            }
+        }
+    }
 
-	if( $get_cities )
-	{	// Get cities from DB
-		$sql_where[] = 'city_enabled = 1';
-		$cities = $DB->get_results( '
+    if ($get_cities) {	// Get cities from DB
+        $sql_where[] = 'city_enabled = 1';
+        $cities = $DB->get_results('
 			SELECT city_ID as ID, CONCAT( city_name, " (", city_postcode, ")" ) as name, city_preferred as preferred
 			  FROM T_regional__city
-			 WHERE '.implode( ' AND ', $sql_where ).'
-			 ORDER BY city_name' );
-	}
-	else
-	{
-		$cities = array();
-	}
+			 WHERE ' . implode(' AND ', $sql_where) . '
+			 ORDER BY city_name');
+    } else {
+        $cities = [];
+    }
 
-	return get_regional_option_list( $cities, $city_ID, $params );
+    return get_regional_option_list($cities, $city_ID, $params);
 }
 
 
@@ -249,80 +233,72 @@ function get_cities_option_list( $country_ID, $region_ID = 0, $subregion_ID = 0,
  *   'inserted' => Count of inserted regions,
  *   'updated'  => Count of updated regions );
  */
-function import_regions( $country_ID, $file_path )
+function import_regions($country_ID, $file_path)
 {
-	global $DB;
+    global $DB;
 
-	$DB->begin();
+    $DB->begin();
 
-	// Get regions of the requested country from DB:
-	$SQL = new SQL( 'Get regions of the country #'.$country_ID.' before import' );
-	$SQL->SELECT( 'rgn_code, rgn_name' );
-	$SQL->FROM( 'T_regional__region' );
-	$SQL->WHERE( 'rgn_ctry_ID = '.$DB->quote( $country_ID ) );
-	$existing_regions = $DB->get_assoc( $SQL );
+    // Get regions of the requested country from DB:
+    $SQL = new SQL('Get regions of the country #' . $country_ID . ' before import');
+    $SQL->SELECT('rgn_code, rgn_name');
+    $SQL->FROM('T_regional__region');
+    $SQL->WHERE('rgn_ctry_ID = ' . $DB->quote($country_ID));
+    $existing_regions = $DB->get_assoc($SQL);
 
-	// Open file:
-	$file_handle = fopen( $file_path, 'r' );
+    // Open file:
+    $file_handle = fopen($file_path, 'r');
 
-	$r = 0;
-	$regions_insert_values = array();
-	$regions_update_values = array();
-	while( $data = fgetcsv( $file_handle, 1024, ";" ) )
-	{
-		$r++;
-		if( $r == 1 )
-		{	// Skip first row with titles:
-			continue;
-		}
+    $r = 0;
+    $regions_insert_values = [];
+    $regions_update_values = [];
+    while ($data = fgetcsv($file_handle, 1024, ";")) {
+        $r++;
+        if ($r == 1) {	// Skip first row with titles:
+            continue;
+        }
 
-		$code = trim( $data[0], " \xA0" ); // \xA0 - ASCII Non-breaking space
-		$name = trim( $data[1], " \xA0" );
+        $code = trim($data[0], " \xA0"); // \xA0 - ASCII Non-breaking space
+        $name = trim($data[1], " \xA0");
 
-		if( empty( $code ) || empty( $name ) )
-		{	// Skip empty row:
-			continue;
-		}
+        if (empty($code) || empty($name)) {	// Skip empty row:
+            continue;
+        }
 
-		if( isset( $existing_regions[ $code ] ) )
-		{	// Set new name for existing region if it already exists in the requested country:
-			$regions_update_values[ $code ] = $name;
-		}
-		else
-		{	// Insert a new region:
-			$regions_insert_values[] = '( '.$DB->quote( $country_ID ).', '.$DB->quote( $code ).', '.$DB->quote( $name ).' )';
-			$existing_regions[ $code ] = $name;
-		}
-	}
+        if (isset($existing_regions[$code])) {	// Set new name for existing region if it already exists in the requested country:
+            $regions_update_values[$code] = $name;
+        } else {	// Insert a new region:
+            $regions_insert_values[] = '( ' . $DB->quote($country_ID) . ', ' . $DB->quote($code) . ', ' . $DB->quote($name) . ' )';
+            $existing_regions[$code] = $name;
+        }
+    }
 
-	// Close file pointer:
-	fclose( $file_handle );
+    // Close file pointer:
+    fclose($file_handle);
 
-	$count_insert_regions = count( $regions_insert_values );
-	$count_update_regions = count( $regions_update_values );
+    $count_insert_regions = count($regions_insert_values);
+    $count_update_regions = count($regions_update_values);
 
-	if( $count_insert_regions > 0 )
-	{	// New regions are found to import:
-		$DB->query( 'INSERT INTO T_regional__region ( rgn_ctry_ID, rgn_code, rgn_name )
-			VALUES '.implode( ', ', $regions_insert_values ) );
-	}
+    if ($count_insert_regions > 0) {	// New regions are found to import:
+        $DB->query('INSERT INTO T_regional__region ( rgn_ctry_ID, rgn_code, rgn_name )
+			VALUES ' . implode(', ', $regions_insert_values));
+    }
 
-	if( $count_update_regions > 0 )
-	{	// Some regions should be updated:
-		foreach( $regions_update_values as $region_code => $region_name )
-		{	// Update an existing region:
-			$DB->query( 'UPDATE T_regional__region
-				  SET rgn_name = '.$DB->quote( $region_name ).'
-				WHERE rgn_ctry_ID = '.$DB->quote( $country_ID ).'
-				  AND rgn_code = '.$DB->quote( $region_code ) );
-		}
-	}
+    if ($count_update_regions > 0) {	// Some regions should be updated:
+        foreach ($regions_update_values as $region_code => $region_name) {	// Update an existing region:
+            $DB->query('UPDATE T_regional__region
+				  SET rgn_name = ' . $DB->quote($region_name) . '
+				WHERE rgn_ctry_ID = ' . $DB->quote($country_ID) . '
+				  AND rgn_code = ' . $DB->quote($region_code));
+        }
+    }
 
-	$DB->commit();
+    $DB->commit();
 
-	return array(
-		'inserted' => $count_insert_regions,
-		'updated'  => $count_update_regions );
+    return [
+        'inserted' => $count_insert_regions,
+        'updated' => $count_update_regions,
+    ];
 }
 
 
@@ -336,135 +312,114 @@ function import_regions( $country_ID, $file_path )
  *   'inserted' => Count of inserted sub-regions,
  *   'updated'  => Count of updated sub-regions );
  */
-function import_subregions( $country_ID, $file_path, $auto_create_regions = false )
+function import_subregions($country_ID, $file_path, $auto_create_regions = false)
 {
-	global $DB;
+    global $DB;
 
-	$DB->begin();
+    $DB->begin();
 
-	// Get sub-regions of the requested country from DB:
-	$SQL = new SQL( 'Get sub-regions of the country #'.$country_ID.' before import' );
-	$SQL->SELECT( 'rgn_ID, rgn_code, subrg_code, subrg_name' );
-	$SQL->FROM( 'T_regional__region' );
-	$SQL->FROM_add( 'LEFT JOIN T_regional__subregion ON subrg_rgn_ID = rgn_ID' );
-	$SQL->WHERE( 'rgn_ctry_ID = '.$DB->quote( $country_ID ) );
-	$subregions_rows = $DB->get_results( $SQL );
+    // Get sub-regions of the requested country from DB:
+    $SQL = new SQL('Get sub-regions of the country #' . $country_ID . ' before import');
+    $SQL->SELECT('rgn_ID, rgn_code, subrg_code, subrg_name');
+    $SQL->FROM('T_regional__region');
+    $SQL->FROM_add('LEFT JOIN T_regional__subregion ON subrg_rgn_ID = rgn_ID');
+    $SQL->WHERE('rgn_ctry_ID = ' . $DB->quote($country_ID));
+    $subregions_rows = $DB->get_results($SQL);
 
-	$existing_regions = array();
-	$existing_subregions = array();
-	foreach( $subregions_rows as $data )
-	{
-		$existing_regions[ $data->rgn_code ] = $data->rgn_ID;
-		if( ! isset( $existing_subregions[ $data->rgn_code ] ) )
-		{
-			$existing_subregions[ $data->rgn_code ] = array();
-		}
-		if( $data->subrg_code === NULL )
-		{
-			continue;
-		}
-		$existing_subregions[ $data->rgn_code ][ $data->subrg_code ] = $data->subrg_name;
-	}
+    $existing_regions = [];
+    $existing_subregions = [];
+    foreach ($subregions_rows as $data) {
+        $existing_regions[$data->rgn_code] = $data->rgn_ID;
+        if (! isset($existing_subregions[$data->rgn_code])) {
+            $existing_subregions[$data->rgn_code] = [];
+        }
+        if ($data->subrg_code === null) {
+            continue;
+        }
+        $existing_subregions[$data->rgn_code][$data->subrg_code] = $data->subrg_name;
+    }
 
-	// Open file:
-	$file_handle = fopen( $file_path, 'r' );
+    // Open file:
+    $file_handle = fopen($file_path, 'r');
 
-	$s = 0;
-	$subregions_insert_values = array();
-	$subregions_update_values = array();
-	$count_insert_regions = 0;
-	while( $data = fgetcsv( $file_handle, 1024, ";" ) )
-	{
-		$s++;
-		if( $s == 1 )
-		{	// Skip first row with titles:
-			continue;
-		}
+    $s = 0;
+    $subregions_insert_values = [];
+    $subregions_update_values = [];
+    $count_insert_regions = 0;
+    while ($data = fgetcsv($file_handle, 1024, ";")) {
+        $s++;
+        if ($s == 1) {	// Skip first row with titles:
+            continue;
+        }
 
-		$region_code = trim( $data[0], " \xA0" ); // \xA0 - ASCII Non-breaking space
-		$code = trim( $data[1], " \xA0" );
-		$name = trim( $data[2], " \xA0" );
+        $region_code = trim($data[0], " \xA0"); // \xA0 - ASCII Non-breaking space
+        $code = trim($data[1], " \xA0");
+        $name = trim($data[2], " \xA0");
 
-		if( empty( $region_code ) || empty( $code ) || empty( $name ) )
-		{	// Skip empty row:
-			continue;
-		}
+        if (empty($region_code) || empty($code) || empty($name)) {	// Skip empty row:
+            continue;
+        }
 
-		if( ! isset( $existing_regions[ $region_code ] ) )
-		{	// Region is not found:
-			if( $auto_create_regions )
-			{	// Try to create new region:
-				$insert_region_result = $DB->query( 'INSERT INTO T_regional__region ( rgn_ctry_ID, rgn_code, rgn_name )
-					VALUES ( '.$DB->quote( $country_ID ).', '.$DB->quote( $region_code ).', '.$DB->quote( $region_code ).' )' );
-				if( $insert_region_result && $DB->insert_id )
-				{	// Use new inserted region:
-					$existing_regions[ $region_code ] = $DB->insert_id;
-					$count_insert_regions++;
-				}
-				else
-				{	// Skip when region could not be inserted:
-					continue;
-				}
-			}
-			else
-			{	// Skip sub-region without stored region in DB:
-				continue;
-			}
-		}
+        if (! isset($existing_regions[$region_code])) {	// Region is not found:
+            if ($auto_create_regions) {	// Try to create new region:
+                $insert_region_result = $DB->query('INSERT INTO T_regional__region ( rgn_ctry_ID, rgn_code, rgn_name )
+					VALUES ( ' . $DB->quote($country_ID) . ', ' . $DB->quote($region_code) . ', ' . $DB->quote($region_code) . ' )');
+                if ($insert_region_result && $DB->insert_id) {	// Use new inserted region:
+                    $existing_regions[$region_code] = $DB->insert_id;
+                    $count_insert_regions++;
+                } else {	// Skip when region could not be inserted:
+                    continue;
+                }
+            } else {	// Skip sub-region without stored region in DB:
+                continue;
+            }
+        }
 
-		if( isset( $existing_subregions[ $region_code ][ $code ] ) )
-		{	// Set new name for existing sub-region if it already exists in the requested country:
-			if( ! isset( $subregions_update_values[ $region_code ] ) )
-			{
-				$subregions_update_values[ $region_code ] = array();
-			}
-			$subregions_update_values[ $region_code ][ $code ] = $name;
-		}
-		else
-		{	// Insert a new sub-region:
-			$subregions_insert_values[] = '( '.$DB->quote( $existing_regions[ $region_code ] ).', '.$DB->quote( $code ).', '.$DB->quote( $name ).' )';
-			$existing_subregions[ $region_code ][ $code ] = $name;
-		}
-	}
+        if (isset($existing_subregions[$region_code][$code])) {	// Set new name for existing sub-region if it already exists in the requested country:
+            if (! isset($subregions_update_values[$region_code])) {
+                $subregions_update_values[$region_code] = [];
+            }
+            $subregions_update_values[$region_code][$code] = $name;
+        } else {	// Insert a new sub-region:
+            $subregions_insert_values[] = '( ' . $DB->quote($existing_regions[$region_code]) . ', ' . $DB->quote($code) . ', ' . $DB->quote($name) . ' )';
+            $existing_subregions[$region_code][$code] = $name;
+        }
+    }
 
-	// Close file pointer:
-	fclose( $file_handle );
+    // Close file pointer:
+    fclose($file_handle);
 
-	$count_insert_subregions = count( $subregions_insert_values );
+    $count_insert_subregions = count($subregions_insert_values);
 
-	if( $count_insert_subregions > 0 )
-	{	// New sub-regions are found to import:
-		$DB->query( 'INSERT INTO T_regional__subregion ( subrg_rgn_ID, subrg_code, subrg_name )
-			VALUES '.implode( ', ', $subregions_insert_values ) );
-	}
+    if ($count_insert_subregions > 0) {	// New sub-regions are found to import:
+        $DB->query('INSERT INTO T_regional__subregion ( subrg_rgn_ID, subrg_code, subrg_name )
+			VALUES ' . implode(', ', $subregions_insert_values));
+    }
 
-	$count_update_subregions = 0;
-	if( count( $subregions_update_values ) > 0 )
-	{	// Some sub-regions should be updated:
-		foreach( $subregions_update_values as $region_code => $subregions )
-		{
-			if( ! isset( $existing_regions[ $region_code ] ) )
-			{	// Skip sub-region without stored region in DB:
-				continue;
-			}
+    $count_update_subregions = 0;
+    if (count($subregions_update_values) > 0) {	// Some sub-regions should be updated:
+        foreach ($subregions_update_values as $region_code => $subregions) {
+            if (! isset($existing_regions[$region_code])) {	// Skip sub-region without stored region in DB:
+                continue;
+            }
 
-			foreach( $subregions as $subregion_code => $subregion_name )
-			{
-				$DB->query( 'UPDATE T_regional__subregion
-					  SET subrg_name = '.$DB->quote( $subregion_name ).'
-					WHERE subrg_rgn_ID = '.$DB->quote( $existing_regions[ $region_code ] ).'
-					  AND subrg_code = '.$DB->quote( $subregion_code ) );
-				$count_update_subregions++;
-			}
-		}
-	}
+            foreach ($subregions as $subregion_code => $subregion_name) {
+                $DB->query('UPDATE T_regional__subregion
+					  SET subrg_name = ' . $DB->quote($subregion_name) . '
+					WHERE subrg_rgn_ID = ' . $DB->quote($existing_regions[$region_code]) . '
+					  AND subrg_code = ' . $DB->quote($subregion_code));
+                $count_update_subregions++;
+            }
+        }
+    }
 
-	$DB->commit();
+    $DB->commit();
 
-	return array(
-		'inserted' => $count_insert_subregions,
-		'updated'  => $count_update_subregions,
-		'regions'  => $count_insert_regions );
+    return [
+        'inserted' => $count_insert_subregions,
+        'updated' => $count_update_subregions,
+        'regions' => $count_insert_regions,
+    ];
 }
 
 
@@ -477,149 +432,132 @@ function import_subregions( $country_ID, $file_path, $auto_create_regions = fals
  *   'inserted' => Count of inserted cities,
  *   'updated'  => Count of updated cities );
  */
-function import_cities( $country_ID, $file_path )
+function import_cities($country_ID, $file_path)
 {
-	global $DB;
+    global $DB;
 
-	// Begin transaction
-	$DB->begin();
+    // Begin transaction
+    $DB->begin();
 
-	// Get all regions of the requested country:
-	$SQL = new SQL( 'Get regions of country #'.$country_ID.' before importing cities' );
-	$SQL->SELECT( 'rgn_code, rgn_ID' );
-	$SQL->FROM( 'T_regional__region' );
-	$SQL->WHERE( 'rgn_ctry_ID = '.$DB->quote( $country_ID ) );
-	$regions = $DB->get_assoc( $SQL );
+    // Get all regions of the requested country:
+    $SQL = new SQL('Get regions of country #' . $country_ID . ' before importing cities');
+    $SQL->SELECT('rgn_code, rgn_ID');
+    $SQL->FROM('T_regional__region');
+    $SQL->WHERE('rgn_ctry_ID = ' . $DB->quote($country_ID));
+    $regions = $DB->get_assoc($SQL);
 
-	// Get all sub-regions of the requested country:
-	$SQL = new SQL( 'Get sub-regions of country #'.$country_ID.' before importing cities' );
-	$SQL->SELECT( 'subrg_ID, subrg_code, rgn_ID' );
-	$SQL->FROM( 'T_regional__subregion' );
-	$SQL->FROM_add( 'LEFT JOIN T_regional__region ON subrg_rgn_ID = rgn_ID' );
-	$SQL->WHERE( 'rgn_ctry_ID = '.$DB->quote( $country_ID ) );
-	$subregions_data = $DB->get_results( $SQL );
+    // Get all sub-regions of the requested country:
+    $SQL = new SQL('Get sub-regions of country #' . $country_ID . ' before importing cities');
+    $SQL->SELECT('subrg_ID, subrg_code, rgn_ID');
+    $SQL->FROM('T_regional__subregion');
+    $SQL->FROM_add('LEFT JOIN T_regional__region ON subrg_rgn_ID = rgn_ID');
+    $SQL->WHERE('rgn_ctry_ID = ' . $DB->quote($country_ID));
+    $subregions_data = $DB->get_results($SQL);
 
-	$subregions = array();
-	foreach( $subregions_data as $subregion )
-	{
-		$subregions[$subregion->subrg_code] = $subregion;
-	}
-	unset( $subregions_data );
+    $subregions = [];
+    foreach ($subregions_data as $subregion) {
+        $subregions[$subregion->subrg_code] = $subregion;
+    }
+    unset($subregions_data);
 
+    // Open file
+    $file_handle = fopen($file_path, 'r');
 
-	// Open file
-	$file_handle = fopen( $file_path, 'r' );
+    $c = 0;
+    $cities_insert_values = [];
+    $cities_update_values = [];
+    while ($data = fgetcsv($file_handle, 1024, ";")) {
+        if ($c == 0) {	// Skip first row with titles
+            $c++;
+            continue;
+        }
 
-	$c = 0;
-	$cities_insert_values = array();
-	$cities_update_values = array();
-	while( $data = fgetcsv( $file_handle, 1024, ";" ) )
-	{
-		if( $c == 0 )
-		{	// Skip first row with titles
-			$c++;
-			continue;
-		}
+        // Post code:
+        $postcode = trim($data[0], " \xA0"); // \xA0 - ASCII Non-breaking space
+        // City name:
+        $name = trim($data[1], " \xA0");
+        // Sub-region code (optional column; recommended):
+        $subregion_code = (isset($data[2]) ? trim($data[2], " \xA0") : '');
+        // Region code (optional column; provide only if no sub-region):
+        $region_code = (isset($data[3]) ? trim($data[3], " \xA0") : '');
 
-		// Post code:
-		$postcode = trim( $data[0], " \xA0" ); // \xA0 - ASCII Non-breaking space
-		// City name:
-		$name = trim( $data[1], " \xA0" );
-		// Sub-region code (optional column; recommended):
-		$subregion_code = ( isset( $data[2] ) ? trim( $data[2], " \xA0" ) : '' );
-		// Region code (optional column; provide only if no sub-region):
-		$region_code = ( isset( $data[3] ) ? trim( $data[3], " \xA0" ) : '' );
+        if (empty($postcode) && empty($name)) {	// Skip empty row
+            continue;
+        }
 
-		if( empty( $postcode ) && empty( $name ) )
-		{	// Skip empty row
-			continue;
-		}
+        $city = [
+            'ctry_ID' => $country_ID,
+            'postcode' => $DB->quote($postcode),
+            'name' => $DB->quote($name),
+        ];
 
-		$city = array(
-			'ctry_ID'  => $country_ID,
-			'postcode' => $DB->quote( $postcode ),
-			'name'     => $DB->quote( $name ),
-		);
+        if (! empty($subregion_code) && isset($subregions[$subregion_code])) {	// Set region ID & subregion ID for current city:
+            $city['rgn_ID'] = $subregions[$subregion_code]->rgn_ID;
+            $city['subrg_ID'] = $subregions[$subregion_code]->subrg_ID;
+        } elseif (! empty($region_code) && isset($regions[$region_code])) {	// Set region ID for current city:
+            $city['rgn_ID'] = $regions[$region_code];
+            $city['subrg_ID'] = 'NULL';
+        } else {	// Subregion and Region are not defined and not found in DB:
+            $city['rgn_ID'] = 'NULL';
+            $city['subrg_ID'] = 'NULL';
+        }
 
-		if( ! empty( $subregion_code ) && isset( $subregions[ $subregion_code ] ) )
-		{	// Set region ID & subregion ID for current city:
-			$city['rgn_ID'] = $subregions[ $subregion_code ]->rgn_ID;
-			$city['subrg_ID'] = $subregions[ $subregion_code ]->subrg_ID;
-		}
-		elseif( ! empty( $region_code ) && isset( $regions[ $region_code ] ) )
-		{	// Set region ID for current city:
-			$city['rgn_ID'] = $regions[ $region_code ];
-			$city['subrg_ID'] = 'NULL';
-		}
-		else
-		{	// Subregion and Region are not defined and not found in DB:
-			$city['rgn_ID'] = 'NULL';
-			$city['subrg_ID'] = 'NULL';
-		}
-
-		// Get city from DB with current country, postcode & name
-		$existing_city = $DB->get_row( '
+        // Get city from DB with current country, postcode & name
+        $existing_city = $DB->get_row('
 			SELECT city_ID, city_rgn_ID, city_subrg_ID
 			  FROM T_regional__city
-			 WHERE city_ctry_ID = '.$city['ctry_ID'].'
-			   AND city_postcode = '.$city['postcode'].'
-			   AND city_name = '.$city['name'] );
+			 WHERE city_ctry_ID = ' . $city['ctry_ID'] . '
+			   AND city_postcode = ' . $city['postcode'] . '
+			   AND city_name = ' . $city['name']);
 
-		if( !empty( $existing_city ) )
-		{	// City already exist with such country, postcode & name
-			if( $city['subrg_ID'] != $existing_city->city_subrg_ID )
-			{	// Set new sub-region & region for current city
-				$cities_update_values[] = 'city_rgn_ID = '.$city['rgn_ID'].', city_subrg_ID = '.$city['subrg_ID'].'
-					WHERE city_ID = '.$existing_city->city_ID;
-			}
-		}
-		else
-		{	// Insert a new city
-			$cities_insert_values[] = '( '.implode( ', ', $city ).' )';
-		}
+        if (! empty($existing_city)) {	// City already exist with such country, postcode & name
+            if ($city['subrg_ID'] != $existing_city->city_subrg_ID) {	// Set new sub-region & region for current city
+                $cities_update_values[] = 'city_rgn_ID = ' . $city['rgn_ID'] . ', city_subrg_ID = ' . $city['subrg_ID'] . '
+					WHERE city_ID = ' . $existing_city->city_ID;
+            }
+        } else {	// Insert a new city
+            $cities_insert_values[] = '( ' . implode(', ', $city) . ' )';
+        }
 
-		$c++;
-	}
+        $c++;
+    }
 
-	// Close file pointer
-	fclose( $file_handle );
+    // Close file pointer
+    fclose($file_handle);
 
-	$count_insert_cities = count( $cities_insert_values );
-	$count_update_cities = count( $cities_update_values );
+    $count_insert_cities = count($cities_insert_values);
+    $count_update_cities = count($cities_update_values);
 
-	if( $count_insert_cities > 0 )
-	{	// New cities are exist to import
-		// Split an insert data to avoid big sql queries
-		$cities_insert_values = array_chunk( $cities_insert_values, 1000 );
+    if ($count_insert_cities > 0) {	// New cities are exist to import
+        // Split an insert data to avoid big sql queries
+        $cities_insert_values = array_chunk($cities_insert_values, 1000);
 
-		foreach( $cities_insert_values as $insert_values )
-		{
-			$insert_values = implode( ', ', $insert_values );
+        foreach ($cities_insert_values as $insert_values) {
+            $insert_values = implode(', ', $insert_values);
 
-			// Insert new cities into DB
-			$DB->query( '
+            // Insert new cities into DB
+            $DB->query('
 				INSERT INTO T_regional__city
 				( city_ctry_ID, city_postcode, city_name, city_rgn_ID, city_subrg_ID )
-				VALUES '.$insert_values );
-		}
-	}
+				VALUES ' . $insert_values);
+        }
+    }
 
-	if( $count_update_cities > 0 )
-	{	// Cities to update
-		foreach( $cities_update_values as $update_sql )
-		{	// Update a existing city
-			$DB->query( '
+    if ($count_update_cities > 0) {	// Cities to update
+        foreach ($cities_update_values as $update_sql) {	// Update a existing city
+            $DB->query('
 				UPDATE T_regional__city
-				SET '.$update_sql );
-		}
-	}
+				SET ' . $update_sql);
+        }
+    }
 
-	// Commit transaction
-	$DB->commit();
+    // Commit transaction
+    $DB->commit();
 
-	return array(
-		'inserted' => $count_insert_cities,
-		'updated'  => $count_update_cities );
+    return [
+        'inserted' => $count_insert_cities,
+        'updated' => $count_update_cities,
+    ];
 }
 
 
@@ -629,18 +567,17 @@ function import_cities( $country_ID, $file_path )
  * @param string Prefix of fields group
  * @param boolean TRUE if region is visible (subregion & city also are visible)
  */
-function echo_regional_js( $prefix, $region_visible )
+function echo_regional_js($prefix, $region_visible)
 {
-	if( !$region_visible )
-	{	// If region is NOT visible we don't need in these ajax functions
-		return;
-	}
+    if (! $region_visible) {	// If region is NOT visible we don't need in these ajax functions
+        return;
+    }
 
-	$regional_config = array(
-			'prefix' => $prefix,
-		);
+    $regional_config = [
+        'prefix' => $prefix,
+    ];
 
-	expose_var_to_js( 'regional_'.$prefix, $regional_config, 'evo_regional_config' );
+    expose_var_to_js('regional_' . $prefix, $regional_config, 'evo_regional_config');
 }
 
 
@@ -649,9 +586,9 @@ function echo_regional_js( $prefix, $region_visible )
  *
  * @param string Prefix of fields group
  */
-function echo_regional_required_js( $prefix )
+function echo_regional_required_js($prefix)
 {
-?>
+    ?>
 <script>
 jQuery( 'input[name=<?php echo $prefix; ?>city][value=required]' ).click( function ()
 {	// when city is required make subregion is required
@@ -693,14 +630,14 @@ function set_country_required()
  */
 function countries_exist()
 {
-	global $DB;
+    global $DB;
 
-	$countries_count = $DB->get_var( '
+    $countries_count = $DB->get_var('
 		SELECT COUNT( ctry_ID )
 		  FROM T_regional__country
-		 WHERE ctry_enabled = 1' );
+		 WHERE ctry_enabled = 1');
 
-	return $countries_count > 0;
+    return $countries_count > 0;
 }
 
 
@@ -711,26 +648,23 @@ function countries_exist()
  * @param boolean TRUE - don't count regions from all countries (when $country_ID = 0)
  * @return boolean TRUE - regions exist
  */
-function regions_exist( $country_ID, $exact_existance = false )
+function regions_exist($country_ID, $exact_existance = false)
 {
-	global $DB;
+    global $DB;
 
-	$sql_where = '';
-	if( $country_ID > 0 )
-	{	// Restrict regions with selected country
-		$sql_where = ' AND rgn_ctry_ID = '.$DB->quote( $country_ID );
-	}
-	else if( $exact_existance )
-	{	// Don't count regions with not selected country
-		return false;
-	}
+    $sql_where = '';
+    if ($country_ID > 0) {	// Restrict regions with selected country
+        $sql_where = ' AND rgn_ctry_ID = ' . $DB->quote($country_ID);
+    } elseif ($exact_existance) {	// Don't count regions with not selected country
+        return false;
+    }
 
-	$regions_count = $DB->get_var( '
+    $regions_count = $DB->get_var('
 		SELECT COUNT( rgn_ID )
 		  FROM T_regional__region
-		 WHERE rgn_enabled = 1'.$sql_where );
+		 WHERE rgn_enabled = 1' . $sql_where);
 
-	return $regions_count > 0;
+    return $regions_count > 0;
 }
 
 
@@ -741,22 +675,21 @@ function regions_exist( $country_ID, $exact_existance = false )
  * @param boolean TRUE - don't count subregions from all regions (when $region_ID = 0)
  * @return boolean TRUE - subregions exist
  */
-function subregions_exist( $region_ID, $exact_existance = false )
+function subregions_exist($region_ID, $exact_existance = false)
 {
-	global $DB;
+    global $DB;
 
-	if( $region_ID == 0 && $exact_existance )
-	{	// Don't count subregions with not selected region
-		return false;
-	}
+    if ($region_ID == 0 && $exact_existance) {	// Don't count subregions with not selected region
+        return false;
+    }
 
-	$subregions_count = $DB->get_var( '
+    $subregions_count = $DB->get_var('
 		SELECT COUNT( subrg_ID )
 		  FROM T_regional__subregion
 		 WHERE subrg_enabled = 1
-		   AND subrg_rgn_ID = '.$DB->quote( $region_ID ) );
+		   AND subrg_rgn_ID = ' . $DB->quote($region_ID));
 
-	return $subregions_count > 0;
+    return $subregions_count > 0;
 }
 
 
@@ -767,46 +700,37 @@ function subregions_exist( $region_ID, $exact_existance = false )
  * @param boolean TRUE - don't count cities from all region (when $region_ID = 0)
  * @return boolean TRUE - cities exist
  */
-function cities_exist( $country_ID, $region_ID, $subregion_ID, $exact_existance = false )
+function cities_exist($country_ID, $region_ID, $subregion_ID, $exact_existance = false)
 {
-	global $DB;
+    global $DB;
 
-	$sql_where = array();
-	$sql_where[] = 'city_enabled = 1';
+    $sql_where = [];
+    $sql_where[] = 'city_enabled = 1';
 
-	if( $country_ID > 0 )
-	{	// Restrict cities with selected country
-		$sql_where[] = 'city_ctry_ID = '.$DB->quote( $country_ID );
-	}
-	else if( $exact_existance )
-	{	// Don't count cities with not selected country
-		return false;
-	}
+    if ($country_ID > 0) {	// Restrict cities with selected country
+        $sql_where[] = 'city_ctry_ID = ' . $DB->quote($country_ID);
+    } elseif ($exact_existance) {	// Don't count cities with not selected country
+        return false;
+    }
 
-	if( $region_ID > 0 )
-	{	// Restrict cities with selected region
-		$sql_where[] = 'city_rgn_ID = '.$DB->quote( $region_ID );
-	}
-	else if( $exact_existance )
-	{	// Restrict cities with not defined region
-		$sql_where[] = 'city_rgn_ID IS NULL';
-	}
+    if ($region_ID > 0) {	// Restrict cities with selected region
+        $sql_where[] = 'city_rgn_ID = ' . $DB->quote($region_ID);
+    } elseif ($exact_existance) {	// Restrict cities with not defined region
+        $sql_where[] = 'city_rgn_ID IS NULL';
+    }
 
-	if( $subregion_ID > 0 )
-	{	// Restrict cities with selected subregion
-		$sql_where[] = 'city_subrg_ID = '.$DB->quote( $subregion_ID );
-	}
-	else if( $exact_existance )
-	{	// Restrict cities with not defined subregion
-		$sql_where[] = 'city_subrg_ID IS NULL';
-	}
+    if ($subregion_ID > 0) {	// Restrict cities with selected subregion
+        $sql_where[] = 'city_subrg_ID = ' . $DB->quote($subregion_ID);
+    } elseif ($exact_existance) {	// Restrict cities with not defined subregion
+        $sql_where[] = 'city_subrg_ID IS NULL';
+    }
 
-	$cities_count = $DB->get_var( '
+    $cities_count = $DB->get_var('
 		SELECT COUNT(city_ID)
 		  FROM T_regional__city
-		 WHERE '.implode( ' AND ', $sql_where ) );
+		 WHERE ' . implode(' AND ', $sql_where));
 
-	return $cities_count > 0;
+    return $cities_count > 0;
 }
 
 /**
@@ -825,35 +749,32 @@ function cities_exist( $country_ID, $region_ID, $subregion_ID, $exact_existance 
  * @param boolean TRUE - to display even empty flag
  * @return string Country flag
  */
-function country_flag( $country_code, $country_name, $collection = 'w16px', $class = 'flag', $align = '', $disp = true, $absoluteurl = true, $flag_style = '', $display_empty = true )
+function country_flag($country_code, $country_name, $collection = 'w16px', $class = 'flag', $align = '', $disp = true, $absoluteurl = true, $flag_style = '', $display_empty = true)
 {
-	global $country_flags_bg;
+    global $country_flags_bg;
 
-	$flag_attribs = array(
-		'class' => 'flag',
-		'title' => $country_name,
-		'style' => $flag_style,
-	);
+    $flag_attribs = [
+        'class' => 'flag',
+        'title' => $country_name,
+        'style' => $flag_style,
+    ];
 
-	if( isset( $country_flags_bg[ $country_code ] ) )
-	{	// Set background-position from config
-		$flag_attribs['style'] .= 'background-position:'.$country_flags_bg[ $country_code ];
-	}
+    if (isset($country_flags_bg[$country_code])) {	// Set background-position from config
+        $flag_attribs['style'] .= 'background-position:' . $country_flags_bg[$country_code];
+    }
 
-	if( $display_empty || isset( $country_flags_bg[ $country_code ] ) )
-	{	// Init a country flag
-		$r = '<span'.get_field_attribs_as_string( $flag_attribs ).'>&nbsp;</span>';
-	}
-	else
-	{	// Don't display empty flag when bg-position is not defined in config by country code
-		$r = '';
-	}
+    if ($display_empty || isset($country_flags_bg[$country_code])) {	// Init a country flag
+        $r = '<span' . get_field_attribs_as_string($flag_attribs) . '>&nbsp;</span>';
+    } else {	// Don't display empty flag when bg-position is not defined in config by country code
+        $r = '';
+    }
 
-	if( $disp )
-		echo $r;   // echo it
-	else
-		return $r; // return it
-
+    if ($disp) {
+        echo $r;
+    }   // echo it
+    else {
+        return $r;
+    } // return it
 }
 
 
@@ -864,18 +785,17 @@ function country_flag( $country_code, $country_name, $collection = 'w16px', $cla
  * @param string Value for status "Unknown"
  * @return array Status titles
  */
-function ctry_status_titles( $include_false_statuses = true, $unknown_status_value = '' )
+function ctry_status_titles($include_false_statuses = true, $unknown_status_value = '')
 {
-	$status_titles = array();
-	if( $include_false_statuses )
-	{ // Include Unknown status
-		$status_titles[ $unknown_status_value ] = T_('Unknown');
-	}
-	$status_titles['trusted'] = T_('Trusted');
-	$status_titles['suspect'] = T_('Suspect');
-	$status_titles['blocked'] = T_('Blocked');
+    $status_titles = [];
+    if ($include_false_statuses) { // Include Unknown status
+        $status_titles[$unknown_status_value] = T_('Unknown');
+    }
+    $status_titles['trusted'] = T_('Trusted');
+    $status_titles['suspect'] = T_('Suspect');
+    $status_titles['blocked'] = T_('Blocked');
 
-	return $status_titles;
+    return $status_titles;
 }
 
 
@@ -886,12 +806,12 @@ function ctry_status_titles( $include_false_statuses = true, $unknown_status_val
  */
 function ctry_status_colors()
 {
-	return array(
-			''        => '999999',
-			'trusted' => '00CC00',
-			'suspect' => 'FFAA00',
-			'blocked' => 'FF0000',
-		);
+    return [
+        '' => '999999',
+        'trusted' => '00CC00',
+        'suspect' => 'FFAA00',
+        'blocked' => 'FF0000',
+    ];
 }
 
 
@@ -901,11 +821,11 @@ function ctry_status_colors()
  * @param string Status value
  * @return string Status title
  */
-function ctry_status_title( $status )
+function ctry_status_title($status)
 {
-	$statuses = ctry_status_titles();
+    $statuses = ctry_status_titles();
 
-	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+    return isset($statuses[$status]) ? $statuses[$status] : $status;
 }
 
 
@@ -915,16 +835,15 @@ function ctry_status_title( $status )
  * @param string Status value
  * @return string Color value
  */
-function ctry_status_color( $status )
+function ctry_status_color($status)
 {
-	if( $status == 'NULL' )
-	{
-		$status = '';
-	}
+    if ($status == 'NULL') {
+        $status = '';
+    }
 
-	$status_colors = ctry_status_colors();
+    $status_colors = ctry_status_colors();
 
-	return isset( $status_colors[ $status ] ) ? '#'.$status_colors[ $status ] : 'none';
+    return isset($status_colors[$status]) ? '#' . $status_colors[$status] : 'none';
 }
 
 ?>

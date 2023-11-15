@@ -11,9 +11,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache' );
+load_class('_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCache');
 
 /**
  * Blog Cache Class
@@ -22,75 +24,65 @@ load_class( '_core/model/dataobjects/_dataobjectcache.class.php', 'DataObjectCac
  */
 class SectionCache extends DataObjectCache
 {
-	/**
-	 * Cache available section for current user
-	 * @var array
-	 */
-	var $cache_available = NULL;
+    /**
+     * Cache available section for current user
+     * @var array
+     */
+    public $cache_available = null;
 
-	/**
-	 * Constructor
-	 *
-	 * @param string Name of the order field or NULL to use name field
-	 */
-	function __construct()
-	{
-		parent::__construct( 'Section', false, 'T_section', 'sec_', 'sec_ID', 'sec_name', 'sec_order' );
-	}
+    /**
+     * Constructor
+     *
+     * @param string Name of the order field or NULL to use name field
+     */
+    public function __construct()
+    {
+        parent::__construct('Section', false, 'T_section', 'sec_', 'sec_ID', 'sec_name', 'sec_order');
+    }
 
+    /**
+     * Load to cache the sections which are available only for current user
+     *
+     * @param array Additional section IDs which should be loaded
+     */
+    public function load_available($sec_IDs = null)
+    {
+        global $current_User;
 
-	/**
-	 * Load to cache the sections which are available only for current user
-	 *
-	 * @param array Additional section IDs which should be loaded
-	 */
-	function load_available( $sec_IDs = NULL )
-	{
-		global $current_User;
+        if ($this->cache_available !== null) {	// Get the available sections from cache array:
+            $this->all_loaded = false;
+            $this->cache = $this->cache_available;
+            return;
+        }
 
-		if( $this->cache_available !== NULL )
-		{	// Get the available sections from cache array:
-			$this->all_loaded = false;
-			$this->cache = $this->cache_available;
-			return;
-		}
+        if (is_logged_in()) {
+            if (check_user_perm('section', 'edit')) {	// Allow to select all sections if Current user can has a permission for this:
+                $this->load_all();
+            } else {	// Load only available sections:
+                // Clear main cache to get only available for current user:
+                $this->clear();
 
-		if( is_logged_in() )
-		{
-			if( check_user_perm( 'section', 'edit' ) )
-			{	// Allow to select all sections if Current user can has a permission for this:
-				$this->load_all();
-			}
-			else
-			{	// Load only available sections:
+                global $DB;
+                $where_sql = '';
 
-				// Clear main cache to get only available for current user:
-				$this->clear();
+                if (! empty($sec_IDs)) {	// Load additional sections by IDs:
+                    $where_sql .= 'sec_ID IN ( ' . $DB->quote($sec_IDs) . ' ) OR ';
+                }
 
-				global $DB;
-				$where_sql = '';
+                // Load allowed sections for current user group:
+                $user_Group = &$current_User->get_Group();
+                $where_sql .= 'sec_ID IN ( ' . $DB->quote(explode(',', $user_Group->get_setting('perm_allowed_sections'))) . ' ) OR ';
 
-				if( ! empty( $sec_IDs ) )
-				{	// Load additional sections by IDs:
-					$where_sql .= 'sec_ID IN ( '.$DB->quote( $sec_IDs ).' ) OR ';
-				}
+                // Load all sections where user is owner:
+                $where_sql .= 'sec_owner_user_ID = ' . $DB->quote($current_User->ID);
 
-				// Load allowed sections for current user group:
-				$user_Group = & $current_User->get_Group();
-				$where_sql .= 'sec_ID IN ( '.$DB->quote( explode( ',', $user_Group->get_setting( 'perm_allowed_sections' ) ) ).' ) OR ';
+                $this->load_where($where_sql);
+            }
+        } else {
+            $this->cache = [];
+        }
 
-				// Load all sections where user is owner:
-				$where_sql .= 'sec_owner_user_ID = '.$DB->quote( $current_User->ID );
-
-				$this->load_where( $where_sql );
-			}
-		}
-		else
-		{
-			$this->cache = array();
-		}
-
-		// Save the available sections in cache array:
-		$this->cache_available = $this->cache;
-	}
+        // Save the available sections in cache array:
+        $this->cache_available = $this->cache;
+    }
 }

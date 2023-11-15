@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
+load_class('widgets/model/_widget.class.php', 'ComponentWidget');
 
 /**
  * coll_avatar_Widget Class.
@@ -25,125 +27,117 @@ load_class( 'widgets/model/_widget.class.php', 'ComponentWidget' );
  */
 class coll_avatar_Widget extends ComponentWidget
 {
-	var $icon = 'user-circle';
+    public $icon = 'user-circle';
 
-	/**
-	 * Constructor
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( $db_row, 'core', 'coll_avatar' );
-	}
+    /**
+     * Constructor
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct($db_row, 'core', 'coll_avatar');
+    }
 
+    /**
+     * Get help URL
+     *
+     * @return string URL
+     */
+    public function get_help_url()
+    {
+        return get_manual_url('profile-picture-widget');
+    }
 
-	/**
-	 * Get help URL
-	 *
-	 * @return string URL
-	 */
-	function get_help_url()
-	{
-		return get_manual_url( 'profile-picture-widget' );
-	}
+    /**
+     * Get name of widget
+     */
+    public function get_name()
+    {
+        return T_('Profile picture (Avatar)');
+    }
 
+    /**
+     * Get short description
+     */
+    public function get_desc()
+    {
+        return T_('Display the profile picture of the blog owner.');
+    }
 
-	/**
-	 * Get name of widget
-	 */
-	function get_name()
-	{
-		return T_('Profile picture (Avatar)');
-	}
+    /**
+     * Get definitions for editable params
+     *
+     * @see Plugin::GetDefaultSettings()
+     * @param array local params
+     *  - 'size': Size definition, see {@link $thumbnail_sizes}. E.g. 'fit-160x160'.
+     */
+    public function get_param_definitions($params)
+    {
+        load_funcs('files/model/_image.funcs.php');
 
+        $r = array_merge([
+            'thumb_size' => [
+                'type' => 'select',
+                'label' => T_('Image size'),
+                'options' => get_available_thumb_sizes(),
+                'note' => sprintf( /* TRANS: %s is a config variable name */ T_('List of available image sizes is defined in %s.'), '$thumbnail_sizes'),
+                'defaultvalue' => 'fit-160x160',
+            ],
+        ], parent::get_param_definitions($params));
 
-	/**
-	 * Get short description
-	 */
-	function get_desc()
-	{
-		return T_('Display the profile picture of the blog owner.');
-	}
+        return $r;
+    }
 
+    /**
+     * Display the widget!
+     *
+     * @param array MUST contain at least the basic display params
+     */
+    public function display($params)
+    {
+        global $cat_modifier;
+        global $Collection, $Blog;
 
-	/**
-	 * Get definitions for editable params
-	 *
-	 * @see Plugin::GetDefaultSettings()
-	 * @param array local params
-	 *  - 'size': Size definition, see {@link $thumbnail_sizes}. E.g. 'fit-160x160'.
-	 */
-	function get_param_definitions( $params )
-	{
-		load_funcs( 'files/model/_image.funcs.php' );
+        $this->init_display($params);
 
-		$r = array_merge( array(
-			'thumb_size' => array(
-					'type' => 'select',
-					'label' => T_('Image size'),
-					'options' => get_available_thumb_sizes(),
-					'note' => sprintf( /* TRANS: %s is a config variable name */ T_('List of available image sizes is defined in %s.'), '$thumbnail_sizes' ),
-					'defaultvalue' => 'fit-160x160',
-				),
-			), parent::get_param_definitions( $params ) );
+        $owner_User = &$Blog->get_owner_User();
 
-		return $r;
-	}
+        // START DISPLAY:
+        echo $this->disp_params['block_start'];
 
+        // Display title if requested
+        $this->disp_title();
 
-	/**
-	 * Display the widget!
-	 *
-	 * @param array MUST contain at least the basic display params
-	 */
-	function display( $params )
-	{
-		global $cat_modifier;
-		global $Collection, $Blog;
+        echo $this->disp_params['block_body_start'];
 
-		$this->init_display( $params );
+        echo $owner_User->get_link([
+            'link_to' => 'userpage',  // TODO: make configurable $this->disp_params['link_to']
+            'link_text' => 'avatar',
+            'thumb_size' => $this->disp_params['thumb_size'],
+        ]);
 
-		$owner_User = & $Blog->get_owner_User();
+        echo $this->disp_params['block_body_end'];
 
-		// START DISPLAY:
-		echo $this->disp_params['block_start'];
+        echo $this->disp_params['block_end'];
 
-		// Display title if requested
-		$this->disp_title();
+        return true;
+    }
 
-		echo $this->disp_params['block_body_start'];
+    /**
+     * Maybe be overriden by some widgets, depending on what THEY depend on..
+     *
+     * @return array of keys this widget depends on
+     */
+    public function get_cache_keys()
+    {
+        global $Collection, $Blog;
 
-		echo $owner_User->get_link( array(
-				'link_to'		   => 'userpage',  // TODO: make configurable $this->disp_params['link_to']
-				'link_text'    => 'avatar',
-				'thumb_size'	 => $this->disp_params['thumb_size'],
-			) );
+        $owner_User = &$Blog->get_owner_User();
 
-		echo $this->disp_params['block_body_end'];
-
-		echo $this->disp_params['block_end'];
-
-		return true;
-	}
-
-
-	/**
-	 * Maybe be overriden by some widgets, depending on what THEY depend on..
-	 *
-	 * @return array of keys this widget depends on
-	 */
-	function get_cache_keys()
-	{
-		global $Collection, $Blog;
-
-		$owner_User = & $Blog->get_owner_User();
-
-		return array(
-				'wi_ID'   => $this->ID,					// Have the widget settings changed ?
-				'set_coll_ID' => $Blog->ID,			// Have the settings of the blog changed ? (ex: new owner, new skin)
-				'user_ID' => $owner_User->ID, 	// Has the owner User changed? (name, avatar, etc..)
-			);
-	}
+        return [
+            'wi_ID' => $this->ID,					// Have the widget settings changed ?
+            'set_coll_ID' => $Blog->ID,			// Have the settings of the blog changed ? (ex: new owner, new skin)
+            'user_ID' => $owner_User->ID, 	// Has the owner User changed? (name, avatar, etc..)
+        ];
+    }
 }
-
-?>

@@ -12,7 +12,9 @@
  * @package admin
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $display_mode, $Settings;
 
@@ -43,112 +45,108 @@ global $cropped_File;
 
 global $aspect_ratio, $content_width, $content_height;
 
-$aspect_ratio = param( 'aspect_ratio', 'double' );
-$content_width = param( 'content_width', 'integer' );
-$content_height = param( 'content_height', 'integer' );
+$aspect_ratio = param('aspect_ratio', 'double');
+$content_width = param('content_width', 'integer');
+$content_height = param('content_height', 'integer');
 
-$original_image_size = explode( 'x', $cropped_File->get_image_size() );
+$original_image_size = explode('x', $cropped_File->get_image_size());
 $image_height = $original_image_size[1];
-$image_width = $original_image_size[0];;
-$min_avatar_size = $Settings->get( 'min_picture_size' );
-$can_crop = ( $image_height >= $min_avatar_size && $image_width >= $min_avatar_size
-		&& ! ( $image_height == $min_avatar_size && $image_width == $min_avatar_size ) );
+$image_width = $original_image_size[0];
+;
+$min_avatar_size = $Settings->get('min_picture_size');
+$can_crop = ($image_height >= $min_avatar_size && $image_width >= $min_avatar_size
+        && ! ($image_height == $min_avatar_size && $image_width == $min_avatar_size));
 
-if( $display_mode != 'js' )
-{
-	// ------------------- PREV/NEXT USER LINKS -------------------
-	user_prevnext_links( array(
-			'user_tab' => 'avatar'
-		) );
-	// ------------- END OF PREV/NEXT USER LINKS -------------------
+if ($display_mode != 'js') {
+    // ------------------- PREV/NEXT USER LINKS -------------------
+    user_prevnext_links([
+        'user_tab' => 'avatar',
+    ]);
+    // ------------- END OF PREV/NEXT USER LINKS -------------------
 }
 
-$Form = new Form( $form_action, 'user_checkchanges' );
+$Form = new Form($form_action, 'user_checkchanges');
 
-if( is_admin_page() )
-{
-	$ctrl_param = '?ctrl=user&amp;user_tab=avatar&amp;user_ID='.$edited_User->ID;
-	$form_title = '';
-	$form_class = 'fform';
-}
-else
-{
-	global $Collection, $Blog;
-	$form_title = '';
-	$form_class = 'bComment';
-	$ctrl_param = url_add_param( $Blog->gen_blogurl(), 'disp='.$disp );
+if (is_admin_page()) {
+    $ctrl_param = '?ctrl=user&amp;user_tab=avatar&amp;user_ID=' . $edited_User->ID;
+    $form_title = '';
+    $form_class = 'fform';
+} else {
+    global $Collection, $Blog;
+    $form_title = '';
+    $form_class = 'bComment';
+    $ctrl_param = url_add_param($Blog->gen_blogurl(), 'disp=' . $disp);
 }
 
-if( $display_mode != 'js' && is_admin_page() )
-{
-	if( !$user_profile_only )
-	{
-		echo_user_actions( $Form, $edited_User, $action );
-	}
+if ($display_mode != 'js' && is_admin_page()) {
+    if (! $user_profile_only) {
+        echo_user_actions($Form, $edited_User, $action);
+    }
 
-	$form_text_title = TB_( 'Crop profile picture' ); // used for js confirmation message on leave the changed form
-	$form_title = get_usertab_header( $edited_User, '', $form_text_title );
+    $form_text_title = TB_('Crop profile picture'); // used for js confirmation message on leave the changed form
+    $form_title = get_usertab_header($edited_User, '', $form_text_title);
 }
 
-$cropped_image_tag = $cropped_File->get_tag( '', '', '', '', 'original', '', '', '', '', '', '', '', '', '', 'none' );
+$cropped_image_tag = $cropped_File->get_tag('', '', '', '', 'original', '', '', '', '', '', '', '', '', '', 'none');
 
 // Display this error when JS is not enabled
 echo '<noscript>'
-		.'<p class="error text-danger">'.TB_('Please activate Javascript in your browser in order to use this feature.').'</p>'
-		.'<style type="text/css">form#user_checkchanges { display:none }</style>'
-	.'</noscript>';
+        . '<p class="error text-danger">' . TB_('Please activate Javascript in your browser in order to use this feature.') . '</p>'
+        . '<style type="text/css">form#user_checkchanges { display:none }</style>'
+    . '</noscript>';
 
-$Form->begin_form( $form_class, $form_title, array( 'title' => ( isset( $form_text_title ) ? $form_text_title : $form_title ) ) );
+$Form->begin_form($form_class, $form_title, [
+    'title' => (isset($form_text_title) ? $form_text_title : $form_title),
+]);
 
-if( is_admin_page() )
-{
-	$Form->hidden_ctrl();
+if (is_admin_page()) {
+    $Form->hidden_ctrl();
+} else {
+    $Form->hidden('disp', $disp);
+    $Form->hidden('action', $action);
 }
-else
-{
-	$Form->hidden( 'disp', $disp );
-	$Form->hidden( 'action', $action );
-}
-$Form->add_crumb( 'user' );
-$Form->hidden( 'user_tab', param( 'user_tab_from', 'string', 'avatar' ) );
-$Form->hidden( 'user_ID', isset( $edited_User ) ? $edited_User->ID : $current_User->ID );
-$Form->hidden( 'file_ID', $cropped_File->ID );
-$Form->hidden( 'image_crop_data', '' );
-if( isset( $Blog ) )
-{
-	$Form->hidden( 'blog', $Blog->ID );
+$Form->add_crumb('user');
+$Form->hidden('user_tab', param('user_tab_from', 'string', 'avatar'));
+$Form->hidden('user_ID', isset($edited_User) ? $edited_User->ID : $current_User->ID);
+$Form->hidden('file_ID', $cropped_File->ID);
+$Form->hidden('image_crop_data', '');
+if (isset($Blog)) {
+    $Form->hidden('blog', $Blog->ID);
 }
 
 $close_icon = '';
-if( $display_mode == 'js' )
-{ // Display a close link for popup window
-	$close_icon = action_icon( TB_('Close this window'), 'close', '', '', 0, 0, array( 'id' => 'close_button', 'class' => 'floatright' ) );
+if ($display_mode == 'js') { // Display a close link for popup window
+    $close_icon = action_icon(TB_('Close this window'), 'close', '', '', 0, 0, [
+        'id' => 'close_button',
+        'class' => 'floatright',
+    ]);
 }
 
 // Start displaying content
 
-if( ! $can_crop )
-{
-	echo '<div style="height: '.$content_height.'px; width: '. $content_width.'px; position=relative; text-align: center;">';
-	echo '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">'.sprintf( TB_('Only images larger than %dx%d pixels can be cropped.'), $min_avatar_size, $min_avatar_size ).'</div>';
-	echo '</div>';
-}
-else
-{
-	echo '<div id="user_crop_content" style="height: '.$content_height.'px; width: '. $content_width.'px;">';
-	echo '</div>';
+if (! $can_crop) {
+    echo '<div style="height: ' . $content_height . 'px; width: ' . $content_width . 'px; position=relative; text-align: center;">';
+    echo '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">' . sprintf(TB_('Only images larger than %dx%d pixels can be cropped.'), $min_avatar_size, $min_avatar_size) . '</div>';
+    echo '</div>';
+} else {
+    echo '<div id="user_crop_content" style="height: ' . $content_height . 'px; width: ' . $content_width . 'px;">';
+    echo '</div>';
 
-	$Form->button( array( 'type' => 'submit', 'name'=>'actionArray[crop]', 'value'=> TB_('Apply'), 'class' => 'SaveButton btn-primary' ) );
+    $Form->button([
+        'type' => 'submit',
+        'name' => 'actionArray[crop]',
+        'value' => TB_('Apply'),
+        'class' => 'SaveButton btn-primary',
+    ]);
 }
 $Form->end_form();
-if( $can_crop )
-{
-?>
+if ($can_crop) {
+    ?>
 <style>
 	#user_crop_workarea img {
 		object-fit: contain;
-		width: <?php echo $content_width;?>;
-		height: <?php echo $content_height;?>;
+		width: <?php echo $content_width; ?>;
+		height: <?php echo $content_height; ?>;
 		visibility: hidden;
 	}
 
@@ -162,11 +160,11 @@ if( $can_crop )
 
 <script>
 	var jcrop_api;
-	var image_url = '<?php echo format_to_js( $cropped_File->get_url() ); ?>';
+	var image_url = '<?php echo format_to_js($cropped_File->get_url()); ?>';
 	var gutter = 10;
 	var padding = 0;
-	var content_height = <?php echo $content_height;?>;
-	var content_width = <?php echo $content_width;?>;
+	var content_height = <?php echo $content_height; ?>;
+	var content_width = <?php echo $content_width; ?>;
 	var show_large_preview = true;
 	var show_small_preview = true;
 	var large_preview_size = 128;
@@ -174,15 +172,15 @@ if( $can_crop )
 	var preview_size;
 	var preview_margin = 10;
 	var preview_orientation = 'portrait';
-	var aspect_ratio = <?php echo $aspect_ratio;?>;
+	var aspect_ratio = <?php echo $aspect_ratio; ?>;
 	var render_mode = 'landscape';
 
 	var workarea_height;
 	var workarea_width;
 	var workarea_aspect_ratio;
 
-	var original_image_height = <?php echo $image_height;?>;
-	var original_image_width = <?php echo $image_width;?>;
+	var original_image_height = <?php echo $image_height; ?>;
+	var original_image_width = <?php echo $image_width; ?>;
 	var original_image_aspect_ratio = original_image_height / original_image_width;
 
 	var size_ratio = 1;
@@ -654,7 +652,7 @@ if( $can_crop )
 
 	function init_jcrop_tool( image )
 	{
-		var min_avatar_size = <?php echo $min_avatar_size;?>;
+		var min_avatar_size = <?php echo $min_avatar_size; ?>;
 
 		options = {
 					boxWidth: working_image_width,

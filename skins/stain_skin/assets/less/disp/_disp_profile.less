@@ -1,0 +1,187 @@
+// Style Disp Profile
+// ======================================================================== /
+.disp_profile,
+.disp_avatar,
+.disp_pwdchange,
+.disp_userprefs,
+.disp_subs {
+
+    .main_content {
+        background-color: @w;
+        padding: 40px;
+        box-shadow: @box-shadow;
+
+        @media screen and ( max-width: @S ) {
+            padding: 15px;
+        }
+
+        // Title Content
+        // ======================================================================== /
+        .title__content {
+            margin-top: 0;
+        }
+
+        // Profile Tabs
+        // ======================================================================== /
+        .profile_tabs {
+            margin: 0;
+            border-color: @primary;
+
+            li {
+
+                &.active {
+
+                    a {
+                        border-radius: 0;
+                        border-top-color: @primary;
+                        border-left-color: @primary;
+                        border-right-color: @primary;
+                        cursor: pointer;
+                    }
+                }
+
+
+                @media screen and ( max-width: @S ) {
+                    float: none;
+                    margin-bottom: 2px;
+
+                    &.active {
+                        a {
+                            color: @w;
+                            border: 1px solid @primary;
+                            background-color: @primary;
+                        }
+                    }
+                }
+            }
+
+
+            a {
+                border-radius: 0;
+
+                &:hover, &:active, &:focus {
+                    background-color: @primary;
+                    border-color: @primary;
+                    color: @w;
+                }
+            }
+
+        }
+
+
+        // Panel
+        // ======================================================================== /
+        .panel {
+            border-radius: 0;
+
+            &:hover, &:active, &:focus {
+                box-shadow: @box-shadow;
+            }
+
+            .panel-heading,
+            .panel-body {
+                padding-left: 25px;
+                padding-right: 25px;
+
+                @media screen and ( max-width: @S ) {
+                    padding-left: 15px;
+                    padding-right: 15px;
+                }
+            }
+
+            .panel-heading {
+                border-radius: 0;
+                font-family: @font_heading;
+                font-weight: 700;
+                color: @c5;
+                letter-spacing: 0.2px;
+
+                .panel-title {
+                    font-family: @font_heading;
+                }
+            }
+
+            .panel-body {
+                #current_user_pass,
+                #edited_user_pass1,
+                #edited_user_pass2,
+                #p-container {
+                    width: 250px !important;
+
+                    @media screen and ( max-width: @S ) {
+                        width: 192px !important;
+                    }
+                }
+
+                #p-status {
+                    left: 255px;
+                }
+
+                .form_text_input {
+                    max-width: 90%;
+                    border-radius: 2px;
+                    border-color: @cd;
+
+                    &:hover, &:active, &:focus {
+                        box-shadow: none;
+                        border-color: @primary;
+                    }
+                }
+
+                .help-inline {
+                    .btn {
+                        padding: 8px 12px;
+                        line-height: 17px;
+                        border-radius: 2px;
+
+                        &:hover, &:active, &:focus {
+                            background-color: @primary;
+                            color: @w;
+                            border-color: @primary;
+                        }
+                    }
+                }
+
+            }
+
+            // PAGE AVATAR
+            // ======================================================================== /
+            .avatar_main_frame {
+                padding: 10px;
+                border-color: @cd;
+                border-radius: 2px;
+
+                .avatar {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+
+                .avatar_actions {
+                    padding-left: 3px;
+                }
+            }
+
+        }
+
+        .btn {
+            border-radius: 30px;
+        }
+
+    }
+
+}
+
+// ======================================================================== /
+// Dish Hub
+// ======================================================================== /
+.disp_subs {
+    .main_content {
+        .panel .panel-body {
+            .form_text_input {
+                @media screen and ( max-width: @S ) {
+                    max-width: 80%;
+                }
+            }
+        }
+    }
+}

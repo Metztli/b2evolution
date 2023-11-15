@@ -15,50 +15,48 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $xmlsrv_url, $Session, $Hit, $Skin, $app_version;
 
-$params = array_merge( array(
-	'auto_pilot'    => 'seo_title',
-	'html_tag'      => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n"
-	                  .'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.locale_lang( false ).'" lang="'.locale_lang( false ).'">'."\n",
-	'viewport_tag'  => NULL,
-	'generator_tag' => '<meta name="generator" content="b2evolution '.$app_version.'" /> <!-- Please leave this for stats -->'."\n",
-	'body_class'    => NULL,
-	'use_base_tag'  => true,
-), $params );
+$params = array_merge([
+    'auto_pilot' => 'seo_title',
+    'html_tag' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n"
+                      . '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . locale_lang(false) . '" lang="' . locale_lang(false) . '">' . "\n",
+    'viewport_tag' => null,
+    'generator_tag' => '<meta name="generator" content="b2evolution ' . $app_version . '" /> <!-- Please leave this for stats -->' . "\n",
+    'body_class' => null,
+    'use_base_tag' => true,
+], $params);
 
-init_bubbletip_js( 'blog', $Skin->get_template( 'tooltip_plugin' ) ); // Add jQuery bubbletip plugin
+init_bubbletip_js('blog', $Skin->get_template('tooltip_plugin')); // Add jQuery bubbletip plugin
 
 echo $params['html_tag'];
 ?>
 <head>
 	<?php
-	 	// Add viewport tag if provided:
-		if( $params['viewport_tag'] == '#responsive#' )
-		{	// We requested a responsive viewport:
-			echo '<meta name="viewport" content="width=device-width, initial-scale=1">'."\n";
-		}
-		else
-		{
-			echo $params['viewport_tag'];
-		}
-	?>
+        // Add viewport tag if provided:
+        if ($params['viewport_tag'] == '#responsive#') {	// We requested a responsive viewport:
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
+        } else {
+            echo $params['viewport_tag'];
+        }
+?>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<?php skin_content_meta(); /* Charset in case we can't trust the HTTP header or the page is saved to an .html file */ ?>
 	<?php
-	if( $params['use_base_tag'] )
-	{	// Base URL for this skin. You need this to fix relative links!
-		skin_base_tag();
-	}
-	?>
-	<?php $Plugins->trigger_event( 'SkinBeginHtmlHead' ); ?>
+if ($params['use_base_tag']) {	// Base URL for this skin. You need this to fix relative links!
+    skin_base_tag();
+}
+?>
+	<?php $Plugins->trigger_event('SkinBeginHtmlHead'); ?>
 	<title><?php
-		// ------------------------- TITLE FOR THE CURRENT REQUEST -------------------------
-		request_title( $params );
-		// ------------------------------ END OF REQUEST TITLE -----------------------------
-	?></title>
+    // ------------------------- TITLE FOR THE CURRENT REQUEST -------------------------
+    request_title($params);
+// ------------------------------ END OF REQUEST TITLE -----------------------------
+?></title>
 	<?php skin_favicon_tag(); ?>
 	<?php skin_description_tag(); ?>
 	<?php skin_keywords_tag(); ?>
@@ -66,63 +64,60 @@ echo $params['html_tag'];
 	<?php skin_twitter_tags(); ?>
 	<?php robots_tag(); ?>
 	<?php
-	$js_blog_id = "";
-	if( ! empty( $Blog ) )
-	{ // Set global js var "blog_id"
-		$js_blog_id = "\r\n		var blog_id = '".$Blog->ID."';";
-	}
+$js_blog_id = "";
+if (! empty($Blog)) { // Set global js var "blog_id"
+    $js_blog_id = "\r\n		var blog_id = '" . $Blog->ID . "';";
+}
 
-	add_js_headline( "// Paths and vars are used by JS functions:
-		var htsrv_url = '".get_htsrv_url()."';
-		var restapi_url = '".get_restapi_url()."';
-		var b2evo_icons_type = '".get_param( 'b2evo_icons_type' )."';"
-		.$js_blog_id );
+add_js_headline("// Paths and vars are used by JS functions:
+		var htsrv_url = '" . get_htsrv_url() . "';
+		var restapi_url = '" . get_restapi_url() . "';
+		var b2evo_icons_type = '" . get_param('b2evo_icons_type') . "';"
+    . $js_blog_id);
 
-	// Meta tag with generator info (Please leave this for stats)
-	echo $params['generator_tag'];
+// Meta tag with generator info (Please leave this for stats)
+echo $params['generator_tag'];
 
-	if( $Blog->get_setting( 'feed_content' ) != 'none' )
-	{ // auto-discovery urls
-		?>
-	<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="<?php $Blog->disp( 'rss2_url', 'raw' ) ?>" />
-	<link rel="alternate" type="application/atom+xml" title="Atom" href="<?php $Blog->disp( 'atom_url', 'raw' ) ?>" />
+if ($Blog->get_setting('feed_content') != 'none') { // auto-discovery urls
+    ?>
+	<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="<?php $Blog->disp('rss2_url', 'raw') ?>" />
+	<link rel="alternate" type="application/atom+xml" title="Atom" href="<?php $Blog->disp('atom_url', 'raw') ?>" />
 		<?php
-	}
-	?>
-	<link rel="EditURI" type="application/rsd+xml" title="RSD" href="<?php echo $Blog->disp( 'rsd_url', 'raw' ) ?>" />
+}
+?>
+	<link rel="EditURI" type="application/rsd+xml" title="RSD" href="<?php echo $Blog->disp('rsd_url', 'raw') ?>" />
 	<?php include_headlines() /* Add javascript and css files included by plugins and skin */ ?>
 	<?php
-		$Blog->disp( 'blog_css', 'raw');
-		$Blog->disp( 'user_css', 'raw');
-		$Blog->disp_setting( 'head_includes', 'raw');
-	?>
-	<?php $Plugins->trigger_event( 'SkinEndHtmlHead' ); ?>
+    $Blog->disp('blog_css', 'raw');
+$Blog->disp('user_css', 'raw');
+$Blog->disp_setting('head_includes', 'raw');
+?>
+	<?php $Plugins->trigger_event('SkinEndHtmlHead'); ?>
 </head>
 
-<body<?php skin_body_attrs( array( 'class' => $params['body_class'] ) ); ?>>
+<body<?php skin_body_attrs([
+    'class' => $params['body_class'],
+]); ?>>
 
 <?php
-$Blog->disp_setting( 'body_includes', 'raw' );
+$Blog->disp_setting('body_includes', 'raw');
 
-$Plugins->trigger_event( 'SkinBeginHtmlBody' );
+$Plugins->trigger_event('SkinBeginHtmlBody');
 
-modules_call_method( 'SkinBeginHtmlBody' );
+modules_call_method('SkinBeginHtmlBody');
 
 // ---------------------------- TOOLBAR INCLUDED HERE ----------------------------
-require skin_fallback_path( '_toolbar.inc.php' );
+require skin_fallback_path('_toolbar.inc.php');
 // ------------------------------- END OF TOOLBAR --------------------------------
 
 // Call BeforeSkinWrapper to display additional info:
-$Plugins->trigger_event( 'BeforeSkinWrapper' );
+$Plugins->trigger_event('BeforeSkinWrapper');
 
 echo "\n";
-if( show_toolbar() )
-{
-	echo '<div id="skin_wrapper" class="skin_wrapper_loggedin">';
-}
-else
-{
-	echo '<div id="skin_wrapper" class="skin_wrapper_anonymous">';
+if (show_toolbar()) {
+    echo '<div id="skin_wrapper" class="skin_wrapper_loggedin">';
+} else {
+    echo '<div id="skin_wrapper" class="skin_wrapper_anonymous">';
 }
 echo "\n";
 ?>

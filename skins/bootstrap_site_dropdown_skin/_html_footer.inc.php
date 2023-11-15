@@ -7,7 +7,9 @@
  * @package skins
  * @subpackage bootstrap_site_navbar_skin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 ?>
 <!-- End of skin_wrapper -->
 

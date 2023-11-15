@@ -12,167 +12,175 @@
  * @package evocore
  */
 
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Get params from request
-$user_login = param( 'user_login', 'string', '', true );
-$type = param( 'type', 'string', '', true );
-$origin = param( 'origin', 'string', '', true );
-$origin_ID = param( 'origin_ID', 'integer', '', true );
-$object = param( 'object', 'string', '', true );
-$object_ID = param( 'object_ID', 'integer', '', true );
+$user_login = param('user_login', 'string', '', true);
+$type = param('type', 'string', '', true);
+$origin = param('origin', 'string', '', true);
+$origin_ID = param('origin_ID', 'integer', '', true);
+$object = param('object', 'string', '', true);
+$object_ID = param('object_ID', 'integer', '', true);
 
 // Create query
 $SQL = new SQL();
-$SQL->SELECT( 'slg_timestamp, slg_type, slg_user_ID, slg_origin, slg_origin_ID, slg_object, slg_object_ID, slg_message' );
-$SQL->FROM( 'T_syslog' );
-$SQL->FROM_add( 'LEFT JOIN T_users ON slg_user_ID = user_ID' );
+$SQL->SELECT('slg_timestamp, slg_type, slg_user_ID, slg_origin, slg_origin_ID, slg_object, slg_object_ID, slg_message');
+$SQL->FROM('T_syslog');
+$SQL->FROM_add('LEFT JOIN T_users ON slg_user_ID = user_ID');
 
-if( !empty( $type ) )
-{ // Filter by log type:
-	$SQL->WHERE_and( 'slg_type = '.$DB->quote( $type ) );
+if (! empty($type)) { // Filter by log type:
+    $SQL->WHERE_and('slg_type = ' . $DB->quote($type));
 }
 
-if( !empty( $user_login ) )
-{ // Filter by user login:
-	$user_login = str_replace( '*', '%', $user_login );
-	$SQL->WHERE_and( 'user_login LIKE '.$DB->quote( $user_login ) );
+if (! empty($user_login)) { // Filter by user login:
+    $user_login = str_replace('*', '%', $user_login);
+    $SQL->WHERE_and('user_login LIKE ' . $DB->quote($user_login));
 }
 
-if( !empty( $origin ) )
-{ // Filter by origin type:
-	$SQL->WHERE_and( 'slg_origin = '.$DB->quote( $origin ) );
+if (! empty($origin)) { // Filter by origin type:
+    $SQL->WHERE_and('slg_origin = ' . $DB->quote($origin));
 
-	if( $origin == 'plugin' && !empty( $origin_ID ) )
-	{ // Filter by origin ID
-		$SQL->WHERE_and( 'slg_origin_ID = '.$DB->quote( $origin_ID ) );
-	}
+    if ($origin == 'plugin' && ! empty($origin_ID)) { // Filter by origin ID
+        $SQL->WHERE_and('slg_origin_ID = ' . $DB->quote($origin_ID));
+    }
 }
 
-if( !empty( $object ) )
-{ // Filter by object type:
-	$SQL->WHERE_and( 'slg_object = '.$DB->quote( $object ) );
+if (! empty($object)) { // Filter by object type:
+    $SQL->WHERE_and('slg_object = ' . $DB->quote($object));
 
-	if( !empty( $object_ID ) )
-	{ // Filter by object ID
-		$SQL->WHERE_and( 'slg_object_ID = '.$DB->quote( $object_ID ) );
-	}
+    if (! empty($object_ID)) { // Filter by object ID
+        $SQL->WHERE_and('slg_object_ID = ' . $DB->quote($object_ID));
+    }
 }
 
 // Create result set:
-$Results = new Results( $SQL->get(), 'slg_', 'D' );
+$Results = new Results($SQL->get(), 'slg_', 'D');
 
-$Results->title = T_('System log').get_manual_link( 'system-log-tab' );
+$Results->title = T_('System log') . get_manual_link('system-log-tab');
 
 /**
  * Callback to add filters on top of the result set
  *
  * @param Form
  */
-function filter_syslog_list( & $Form )
+function filter_syslog_list(&$Form)
 {
-	$Form->text_input( 'user_login', get_param( 'user_login' ), 10, 'User login', '', array( 'maxlength' => 20 ) );
+    $Form->text_input('user_login', get_param('user_login'), 10, 'User login', '', [
+        'maxlength' => 20,
+    ]);
 
-	$field_options = array (
-			'0'              => 'All',
-			'info'           => 'Info',
-			'warning'        => 'Warning',
-			'error'          => 'Error',
-			'critical_error' => 'Critical Error',
-		);
-	$Form->select_input_array( 'type', get_param( 'type' ), $field_options, 'Log type', '', array( 'force_keys_as_values' => true ) );
+    $field_options = [
+        '0' => 'All',
+        'info' => 'Info',
+        'warning' => 'Warning',
+        'error' => 'Error',
+        'critical_error' => 'Critical Error',
+    ];
+    $Form->select_input_array('type', get_param('type'), $field_options, 'Log type', '', [
+        'force_keys_as_values' => true,
+    ]);
 
-	$field_options = array (
-			'0'      => 'All',
-			'core'   => 'Core',
-			'plugin' => 'Plugin',
-		);
-	$Form->select_input_array( 'origin', get_param( 'origin' ), $field_options, 'Origin type', '', array( 'force_keys_as_values' => true ) );
+    $field_options = [
+        '0' => 'All',
+        'core' => 'Core',
+        'plugin' => 'Plugin',
+    ];
+    $Form->select_input_array('origin', get_param('origin'), $field_options, 'Origin type', '', [
+        'force_keys_as_values' => true,
+    ]);
 
-	$Form->text_input( 'origin_ID', get_param( 'origin_ID' ), 5, 'Origin ID', '', array( 'maxlength' => 11 ) );
+    $Form->text_input('origin_ID', get_param('origin_ID'), 5, 'Origin ID', '', [
+        'maxlength' => 11,
+    ]);
 
-	$field_options = array (
-			'0'       => 'All',
-			'comment' => 'Comment',
-			'item'    => 'Item',
-			'user'    => 'User',
-			'file'    => 'File'
-		);
-	$Form->select_input_array( 'object', get_param( 'object' ), $field_options, 'Object type', '', array( 'force_keys_as_values' => true ) );
+    $field_options = [
+        '0' => 'All',
+        'comment' => 'Comment',
+        'item' => 'Item',
+        'user' => 'User',
+        'file' => 'File',
+    ];
+    $Form->select_input_array('object', get_param('object'), $field_options, 'Object type', '', [
+        'force_keys_as_values' => true,
+    ]);
 
-	$Form->text_input( 'object_ID', get_param( 'object_ID' ), 5, 'Object ID', '', array( 'maxlength' => 11 ) );
+    $Form->text_input('object_ID', get_param('object_ID'), 5, 'Object ID', '', [
+        'maxlength' => 11,
+    ]);
 }
-$Results->filter_area = array(
-	'callback' => 'filter_syslog_list',
-	'url_ignore' => 'results_slg_per_page,results_slg_page',
-	);
+$Results->filter_area = [
+    'callback' => 'filter_syslog_list',
+    'url_ignore' => 'results_slg_per_page,results_slg_page',
+];
 
-$Results->register_filter_preset( 'all', T_('All'), '?ctrl=syslog' );
+$Results->register_filter_preset('all', T_('All'), '?ctrl=syslog');
 
 
-$Results->cols[] = array(
-		'th' => 'Date Time',
-		'order' => 'slg_ID',
-		'default_dir' => 'D',
-		'td' => '%mysql2localedatetime_spans( #slg_timestamp# )%',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'timestamp'
-	);
+$Results->cols[] = [
+    'th' => 'Date Time',
+    'order' => 'slg_ID',
+    'default_dir' => 'D',
+    'td' => '%mysql2localedatetime_spans( #slg_timestamp# )%',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'timestamp',
+];
 
-$Results->cols[] = array(
-		'th' => 'Type',
-		'order' => 'slg_type',
-		'td' => '$slg_type$',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'Type',
+    'order' => 'slg_type',
+    'td' => '$slg_type$',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'User',
-		'order' => 'user_login',
-		'td' => '%get_user_identity_link( 0, #slg_user_ID# )%',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'User',
+    'order' => 'user_login',
+    'td' => '%get_user_identity_link( 0, #slg_user_ID# )%',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'Origin',
-		'order' => 'slg_origin',
-		'td' => '$slg_origin$',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'Origin',
+    'order' => 'slg_origin',
+    'td' => '$slg_origin$',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'Origin ID',
-		'order' => 'slg_origin_ID',
-		'td' => '$slg_origin_ID$',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'Origin ID',
+    'order' => 'slg_origin_ID',
+    'td' => '$slg_origin_ID$',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'Object',
-		'order' => 'slg_object',
-		'td' => '$slg_object$',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'Object',
+    'order' => 'slg_object',
+    'td' => '$slg_object$',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'Object ID',
-		'order' => 'slg_object_ID',
-		'td' => '$slg_object_ID$',
-		'th_class' => 'shrinkwrap',
-		'td_class' => 'shrinkwrap'
-	);
+$Results->cols[] = [
+    'th' => 'Object ID',
+    'order' => 'slg_object_ID',
+    'td' => '$slg_object_ID$',
+    'th_class' => 'shrinkwrap',
+    'td_class' => 'shrinkwrap',
+];
 
-$Results->cols[] = array(
-		'th' => 'Message',
-		'order' => 'slg_message',
-		'td' => ' %format_to_output( #slg_message#, \'syslog\' )%' // Escape syslog messages because it may contain special characters
-	);
+$Results->cols[] = [
+    'th' => 'Message',
+    'order' => 'slg_message',
+    'td' => ' %format_to_output( #slg_message#, \'syslog\' )%', // Escape syslog messages because it may contain special characters
+];
 
 /**
  * Get a link to object of system log
@@ -181,94 +189,77 @@ $Results->cols[] = array(
  * @param integer Object ID
  * @return string
  */
-function syslog_object_link( $object_type, $object_ID )
+function syslog_object_link($object_type, $object_ID)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$link = '';
+    $link = '';
 
-	if( empty( $object_ID ) )
-	{ // Invalid object ID
-		return 'Empty object ID';
-	}
+    if (empty($object_ID)) { // Invalid object ID
+        return 'Empty object ID';
+    }
 
-	switch( $object_type )
-	{
-		case 'comment':
-			// Link to comment
-			$CommentCache = & get_CommentCache();
-			if( ( $Comment = & $CommentCache->get_by_ID( $object_ID, false, false ) ) !== false )
-			{
-				if( check_user_perm( 'comment!CURSTATUS', 'edit', false, $Comment ) )
-				{ // Current user has permission to edit this comment
-					$Item = & $Comment->get_Item();
-					$link = '<a href="'.$admin_url.'?ctrl=comments&action=edit&comment_ID='.$Comment->ID.'">'.$Item->get( 'title' ).' #'.$Comment->ID.'</a>';
-				}
-			}
-			else
-			{ // Comment was deleted or ID is incorrect
-				$link = 'No comment';
-			}
-			break;
+    switch ($object_type) {
+        case 'comment':
+            // Link to comment
+            $CommentCache = &get_CommentCache();
+            if (($Comment = &$CommentCache->get_by_ID($object_ID, false, false)) !== false) {
+                if (check_user_perm('comment!CURSTATUS', 'edit', false, $Comment)) { // Current user has permission to edit this comment
+                    $Item = &$Comment->get_Item();
+                    $link = '<a href="' . $admin_url . '?ctrl=comments&action=edit&comment_ID=' . $Comment->ID . '">' . $Item->get('title') . ' #' . $Comment->ID . '</a>';
+                }
+            } else { // Comment was deleted or ID is incorrect
+                $link = 'No comment';
+            }
+            break;
 
-		case 'item':
-			// Link to item
-			$ItemCache = & get_ItemCache();
-			if( ( $Item = & $ItemCache->get_by_ID( $object_ID, false, false ) ) !== false )
-			{
-				if( check_user_perm( 'item_post!CURSTATUS', 'edit', false, $Item ) )
-				{ // Current user has permission to edit this item
-					$link = '<a href="'.$Item->get_edit_url().'">'.$Item->get( 'title' ).'</a>';
-				}
-			}
-			else
-			{ // Item was deleted or ID is incorrect
-				$link = 'No item';
-			}
-			break;
+        case 'item':
+            // Link to item
+            $ItemCache = &get_ItemCache();
+            if (($Item = &$ItemCache->get_by_ID($object_ID, false, false)) !== false) {
+                if (check_user_perm('item_post!CURSTATUS', 'edit', false, $Item)) { // Current user has permission to edit this item
+                    $link = '<a href="' . $Item->get_edit_url() . '">' . $Item->get('title') . '</a>';
+                }
+            } else { // Item was deleted or ID is incorrect
+                $link = 'No item';
+            }
+            break;
 
-		case 'user':
-			// Link to user
-			if( check_user_perm( 'users', 'view' ) )
-			{ // Current user has permission to view users
-				$UserCache = get_UserCache();
-				if( ( $User = & $UserCache->get_by_ID( $object_ID, false, false ) ) !== false )
-				{ // User exists
-					$link = $User->get_identity_link();
-				}
-				else
-				{ // User was deleted or ID is incorrect
-					$link = 'No user';
-				}
-			}
-			break;
+        case 'user':
+            // Link to user
+            if (check_user_perm('users', 'view')) { // Current user has permission to view users
+                $UserCache = get_UserCache();
+                if (($User = &$UserCache->get_by_ID($object_ID, false, false)) !== false) { // User exists
+                    $link = $User->get_identity_link();
+                } else { // User was deleted or ID is incorrect
+                    $link = 'No user';
+                }
+            }
+            break;
 
-		case 'file':
-			// Link to file
-			$FileCache = & get_FileCache();
-			if( ( $File = & $FileCache->get_by_ID( $object_ID, false, false ) ) !== false )
-			{ // File exists
-				$link = $File->get_view_link();
-				$link .= ' '.$File->get_target_icon();
-			}
-			else
-			{ // User was deleted or ID is incorrect
-				$link = 'No file';
-			}
-			break;
+        case 'file':
+            // Link to file
+            $FileCache = &get_FileCache();
+            if (($File = &$FileCache->get_by_ID($object_ID, false, false)) !== false) { // File exists
+                $link = $File->get_view_link();
+                $link .= ' ' . $File->get_target_icon();
+            } else { // User was deleted or ID is incorrect
+                $link = 'No file';
+            }
+            break;
 
-		case 'email_log':
-			// Link to email log
-			$link = get_link_tag( $admin_url.'?ctrl=email&tab=sent&emlog_ID='.$object_ID, sprintf( T_('Mail log ID#%s'), $object_ID ) );
-			break;
-	}
+        case 'email_log':
+            // Link to email log
+            $link = get_link_tag($admin_url . '?ctrl=email&tab=sent&emlog_ID=' . $object_ID, sprintf(T_('Mail log ID#%s'), $object_ID));
+            break;
+    }
 
-	return $link;
+    return $link;
 }
-$Results->cols[] = array(
-		'th' => 'Object Link',
-		'td' => '%syslog_object_link( #slg_object#, #slg_object_ID# )%',
-	);
+$Results->cols[] = [
+    'th' => 'Object Link',
+    'td' => '%syslog_object_link( #slg_object#, #slg_object_ID# )%',
+];
 
 $Results->display();
 

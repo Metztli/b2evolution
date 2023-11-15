@@ -17,7 +17,9 @@
  *
  * @author blueyed: Daniel HAHLER
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -27,81 +29,78 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class ping_b2evonet_plugin extends Plugin
 {
-	/**
-	 * Variables below MUST be overriden by plugin implementations,
-	 * either in the subclass declaration or in the subclass constructor.
-	 */
-	var $code = 'ping_b2evonet';
-	var $priority = 50;
-	var $version = '7.2.5';
-	var $author = 'The b2evo Group';
+    /**
+     * Variables below MUST be overriden by plugin implementations,
+     * either in the subclass declaration or in the subclass constructor.
+     */
+    public $code = 'ping_b2evonet';
 
-	/*
-	 * These variables MAY be overriden.
-	 */
-	var $group = 'ping';
-	var $number_of_installs = 1;
+    public $priority = 50;
 
+    public $version = '7.2.5';
 
-	/**
-	 * Init
-	 */
-	function PluginInit( & $params )
-	{
-		$this->name = T_('Ping b2evolution.net');
-		$this->short_desc = T_('Ping the b2evolution.net site');
-		$this->long_desc = T_('Pings the b2evolution.net site to include your post in the list of recently updated blogs.');
+    public $author = 'The b2evo Group';
 
-		$this->ping_service_name = 'b2evolution.net';
-		$this->ping_service_note = $this->long_desc;
-	}
+    /*
+     * These variables MAY be overriden.
+     */
+    public $group = 'ping';
 
+    public $number_of_installs = 1;
 
-	/**
-	 * Ping the b2evonet RPC service.
-	 */
-	function ItemSendPing( & $params )
-	{
-		global $evonetsrv_protocol, $evonetsrv_host, $evonetsrv_port, $evonetsrv_uri;
-		global $debug, $baseurl, $instance_name, $evo_charset;
-		global $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password;
+    /**
+     * Init
+     */
+    public function PluginInit(&$params)
+    {
+        $this->name = T_('Ping b2evolution.net');
+        $this->short_desc = T_('Ping the b2evolution.net site');
+        $this->long_desc = T_('Pings the b2evolution.net site to include your post in the list of recently updated blogs.');
 
-		if( ! defined( 'CANUSEXMLRPC' ) || CANUSEXMLRPC !== true )
-		{	// Could not use xmlrpc client because server has no the requested extensions:
-			$params['xmlrpcresp'] = CANUSEXMLRPC;
-			return false;
-		}
+        $this->ping_service_name = 'b2evolution.net';
+        $this->ping_service_note = $this->long_desc;
+    }
 
-		/**
-		 * @var Blog
-		 */
-		$item_Blog = $params['Item']->get_Blog();
+    /**
+     * Ping the b2evonet RPC service.
+     */
+    public function ItemSendPing(&$params)
+    {
+        global $evonetsrv_protocol, $evonetsrv_host, $evonetsrv_port, $evonetsrv_uri;
+        global $debug, $baseurl, $instance_name, $evo_charset;
+        global $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password;
 
-		$client = new xmlrpc_client( $evonetsrv_uri, $evonetsrv_host, $evonetsrv_port, $evonetsrv_protocol );
-		$client->debug = ( $debug == 2 );
+        if (! defined('CANUSEXMLRPC') || CANUSEXMLRPC !== true) {	// Could not use xmlrpc client because server has no the requested extensions:
+            $params['xmlrpcresp'] = CANUSEXMLRPC;
+            return false;
+        }
 
-		// Set proxy for outgoing connections:
-		if( ! empty( $outgoing_proxy_hostname ) )
-		{
-			$client->setProxy( $outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password );
-		}
+        /**
+         * @var Blog
+         */
+        $item_Blog = $params['Item']->get_Blog();
 
-		$message = new xmlrpcmsg( 'b2evo.ping', array(
-				new xmlrpcval($item_Blog->ID),    // id
-				new xmlrpcval($baseurl),		      // user -- is this unique enough?
-				new xmlrpcval($instance_name),		// pass -- fp> TODO: do we actually want randomly generated instance names?
-				new xmlrpcval(convert_charset( $item_Blog->get('name'), 'utf-8', $evo_charset ) ),
-				new xmlrpcval(convert_charset( $item_Blog->get('url'), 'utf-8', $evo_charset ) ),
-				new xmlrpcval($item_Blog->locale),
-				new xmlrpcval(convert_charset( $params['Item']->get('title'), 'utf-8', $evo_charset ) ),
-			)  );
-		$result = $client->send($message);
+        $client = new xmlrpc_client($evonetsrv_uri, $evonetsrv_host, $evonetsrv_port, $evonetsrv_protocol);
+        $client->debug = ($debug == 2);
 
-		$params['xmlrpcresp'] = $result;
+        // Set proxy for outgoing connections:
+        if (! empty($outgoing_proxy_hostname)) {
+            $client->setProxy($outgoing_proxy_hostname, $outgoing_proxy_port, $outgoing_proxy_username, $outgoing_proxy_password);
+        }
 
-		return true;
-	}
+        $message = new xmlrpcmsg('b2evo.ping', [
+            new xmlrpcval($item_Blog->ID),    // id
+            new xmlrpcval($baseurl),		      // user -- is this unique enough?
+            new xmlrpcval($instance_name),		// pass -- fp> TODO: do we actually want randomly generated instance names?
+            new xmlrpcval(convert_charset($item_Blog->get('name'), 'utf-8', $evo_charset)),
+            new xmlrpcval(convert_charset($item_Blog->get('url'), 'utf-8', $evo_charset)),
+            new xmlrpcval($item_Blog->locale),
+            new xmlrpcval(convert_charset($params['Item']->get('title'), 'utf-8', $evo_charset)),
+        ]);
+        $result = $client->send($message);
 
+        $params['xmlrpcresp'] = $result;
+
+        return true;
+    }
 }
-
-?>

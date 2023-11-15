@@ -11,144 +11,134 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( 'slugs/model/_slug.class.php', 'Slug' );
+load_class('slugs/model/_slug.class.php', 'Slug');
 
 // Check minimum permission:
-check_user_perm( 'slugs', 'view', true );
+check_user_perm('slugs', 'view', true);
 
-$AdminUI->set_path( 'site', 'slugs' );
+$AdminUI->set_path('site', 'slugs');
 
-param_action( 'list' );
+param_action('list');
 
-param( 'slug_filter', 'string', '', true );
-param( 'slug_item_ID', 'string', '', true );
+param('slug_filter', 'string', '', true);
+param('slug_item_ID', 'string', '', true);
 // other slug object type IDs come here
 
-if( param( 'slug_ID', 'integer', '', true) )
-{// Load file type:
-	$SlugCache = & get_SlugCache();
-	if( ($edited_Slug = & $SlugCache->get_by_ID( $slug_ID, false )) === false )
-	{	// We could not find the goal to edit:
-		unset( $edited_Slug );
-		forget_param( 'slug_ID' );
-		$Messages->add( sprintf( TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Slug') ), 'error' );
-		$action = 'nil';
-	}
+if (param('slug_ID', 'integer', '', true)) {// Load file type:
+    $SlugCache = &get_SlugCache();
+    if (($edited_Slug = &$SlugCache->get_by_ID($slug_ID, false)) === false) {	// We could not find the goal to edit:
+        unset($edited_Slug);
+        forget_param('slug_ID');
+        $Messages->add(sprintf(TB_('Requested &laquo;%s&raquo; object does not exist any longer.'), TB_('Slug')), 'error');
+        $action = 'nil';
+    }
 }
 
-switch( $action )
-{
-	case 'list':
-		break;
+switch ($action) {
+    case 'list':
+        break;
 
-	case 'new':
-		$edited_Slug = new Slug();
-		break;
+    case 'new':
+        $edited_Slug = new Slug();
+        break;
 
-	case 'edit':
-		// Slug edit form...:
-		// Make sure we got a slug_ID:
-		param( 'slug_ID', 'string', true );
- 		break;
+    case 'edit':
+        // Slug edit form...:
+        // Make sure we got a slug_ID:
+        param('slug_ID', 'string', true);
+        break;
 
-	case 'create':
-		// Create new slug...
-		$edited_Slug = new Slug();
+    case 'create':
+        // Create new slug...
+        $edited_Slug = new Slug();
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'slug' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('slug');
 
-		// Check that current user has permission to create slugs:
-		check_user_perm( 'slugs', 'edit', true );
+        // Check that current user has permission to create slugs:
+        check_user_perm('slugs', 'edit', true);
 
-		// load data from request
-		if( $edited_Slug->load_from_Request() )
-		{	// We could load data from form without errors:
-			// Insert in DB:
-			$edited_Slug->dbinsert();
-			$Messages->add( TB_('New slug created.'), 'success' );
+        // load data from request
+        if ($edited_Slug->load_from_Request()) {	// We could load data from form without errors:
+            // Insert in DB:
+            $edited_Slug->dbinsert();
+            $Messages->add(TB_('New slug created.'), 'success');
 
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=slugs', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		$action = 'new';
-		break;
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=slugs', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        $action = 'new';
+        break;
 
-	case 'update':
-		// Update slug...
+    case 'update':
+        // Update slug...
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'slug' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('slug');
 
-		// Check that current user has permission to edit slugs:
-		check_user_perm( 'slugs', 'edit', true );
+        // Check that current user has permission to edit slugs:
+        check_user_perm('slugs', 'edit', true);
 
-		// Make sure we got an slug_ID:
-		param( 'slug_ID', 'integer', true );
+        // Make sure we got an slug_ID:
+        param('slug_ID', 'integer', true);
 
-		// load data from request
-		if( $edited_Slug->load_from_Request() )
-		{	// We could load data from form without errors:
-			// Update slug in DB:
-			$edited_Slug->dbupdate();
-			$Messages->add( TB_('Slug updated.'), 'success' );
+        // load data from request
+        if ($edited_Slug->load_from_Request()) {	// We could load data from form without errors:
+            // Update slug in DB:
+            $edited_Slug->dbupdate();
+            $Messages->add(TB_('Slug updated.'), 'success');
 
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( '?ctrl=slugs', 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		$action = 'edit';
-		break;
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect('?ctrl=slugs', 303); // Will EXIT
+            // We have EXITed already at this point!!
+        }
+        $action = 'edit';
+        break;
 
-	case 'delete':
-		// Delete slug:
+    case 'delete':
+        // Delete slug:
 
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'slug' );
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('slug');
 
-		// Check that current user has permission to edit slugs:
-		check_user_perm( 'slugs', 'edit', true );
+        // Check that current user has permission to edit slugs:
+        check_user_perm('slugs', 'edit', true);
 
-		// Make sure we got an slug_ID:
-		param( 'slug_ID', 'integer', true );
+        // Make sure we got an slug_ID:
+        param('slug_ID', 'integer', true);
 
-		if( param( 'confirm', 'integer', 0 ) )
-		{ // confirmed, Delete from DB:
-			$msg = sprintf( TB_('Slug &laquo;%s&raquo; deleted.'), $edited_Slug->dget('title') );
-			$edited_Slug->dbdelete();
-			unset( $edited_Slug );
-			forget_param( 'slug_ID' );
-			$Messages->add( $msg, 'success' );
-			// Redirect so that a reload doesn't write to the DB twice:
-			header_redirect( regenerate_url( 'action', '', '', '&' ), 303 ); // Will EXIT
-			// We have EXITed already at this point!!
-		}
-		else
-		{	// not confirmed, Check for restrictions:
-			if( ! $edited_Slug->check_delete( sprintf( TB_('Cannot delete slug &laquo;%s&raquo;'), $edited_Slug->dget('title') ), array(), true ) )
-			{	// There are restrictions:
-				$action = 'list';
-			}
-		}
-		break;
+        if (param('confirm', 'integer', 0)) { // confirmed, Delete from DB:
+            $msg = sprintf(TB_('Slug &laquo;%s&raquo; deleted.'), $edited_Slug->dget('title'));
+            $edited_Slug->dbdelete();
+            unset($edited_Slug);
+            forget_param('slug_ID');
+            $Messages->add($msg, 'success');
+            // Redirect so that a reload doesn't write to the DB twice:
+            header_redirect(regenerate_url('action', '', '', '&'), 303); // Will EXIT
+            // We have EXITed already at this point!!
+        } else {	// not confirmed, Check for restrictions:
+            if (! $edited_Slug->check_delete(sprintf(TB_('Cannot delete slug &laquo;%s&raquo;'), $edited_Slug->dget('title')), [], true)) {	// There are restrictions:
+                $action = 'list';
+            }
+        }
+        break;
 }
 
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( TB_('Site'), $admin_url.'?ctrl=dashboard' );
-$AdminUI->breadcrumbpath_add( TB_('Slugs'), $admin_url.'?ctrl=slugs' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add(TB_('Site'), $admin_url . '?ctrl=dashboard');
+$AdminUI->breadcrumbpath_add(TB_('Slugs'), $admin_url . '?ctrl=slugs');
 
 // Set an url for manual page:
-if( $action == 'new' || $action == 'edit' )
-{
-	$AdminUI->set_page_manual_link( 'slug-form' );
-}
-else
-{
-	$AdminUI->set_page_manual_link( 'slugs-list' );
+if ($action == 'new' || $action == 'edit') {
+    $AdminUI->set_page_manual_link('slug-form');
+} else {
+    $AdminUI->set_page_manual_link('slugs-list');
 }
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -162,33 +152,33 @@ $AdminUI->disp_payload_begin();
 /**
  * Display payload:
  */
-switch( $action )
-{
-	case 'nil':
-		// Do nothing
-		break;
+switch ($action) {
+    case 'nil':
+        // Do nothing
+        break;
 
-	case 'new':
-	case 'edit':
-		// Display slug form
-		$AdminUI->disp_view( 'slugs/views/_slug.form.php' );
-		break;
+    case 'new':
+    case 'edit':
+        // Display slug form
+        $AdminUI->disp_view('slugs/views/_slug.form.php');
+        break;
 
-	case 'delete':
-		// We need to ask for confirmation:
-		$edited_Slug->confirm_delete(
-				sprintf( TB_('Delete slug &laquo;%s&raquo;?'), $edited_Slug->dget('title') ),
-				'slug', $action, get_memorized( 'action' ) );
-		// NO BREAK
-	case 'list':
-		// list slugs:
-		$AdminUI->disp_view( 'slugs/views/_slug_list.view.php' );
-		break;
+    case 'delete':
+        // We need to ask for confirmation:
+        $edited_Slug->confirm_delete(
+            sprintf(TB_('Delete slug &laquo;%s&raquo;?'), $edited_Slug->dget('title')),
+            'slug',
+            $action,
+            get_memorized('action')
+        );
+        // no break
+    case 'list':
+        // list slugs:
+        $AdminUI->disp_view('slugs/views/_slug_list.view.php');
+        break;
 }
 
 $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

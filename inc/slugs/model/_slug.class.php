@@ -13,9 +13,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 
 /**
@@ -25,278 +27,253 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class Slug extends DataObject
 {
-	var $title;
+    public $title;
 
-	var $type;
+    public $type;
 
-	var $itm_ID;
+    public $itm_ID;
 
-	/**
-	 * Constructor
-	 *
-	 * @param object table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_slug', 'slug_', 'slug_ID' );
+    /**
+     * Constructor
+     *
+     * @param object table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_slug', 'slug_', 'slug_ID');
 
-		if( $db_row != NULL )
-		{
-			$this->ID = $db_row->slug_ID;
-			$this->title = $db_row->slug_title;
-			$this->type = $db_row->slug_type;
-			$this->itm_ID = $db_row->slug_itm_ID;
-		}
-	}
+        if ($db_row != null) {
+            $this->ID = $db_row->slug_ID;
+            $this->title = $db_row->slug_title;
+            $this->type = $db_row->slug_type;
+            $this->itm_ID = $db_row->slug_itm_ID;
+        }
+    }
 
+    /**
+     * Get delete restriction settings
+     *
+     * @return array
+     */
+    public static function get_delete_restrictions()
+    {
+        return [
+            [
+                'table' => 'T_items__item',
+                'fk' => 'post_canonical_slug_ID',
+                'fk_short' => 'canonical_slug_ID',
+                'msg' => T_('%d related post'),
+            ],
+            [
+                'table' => 'T_items__item',
+                'fk' => 'post_tiny_slug_ID',
+                'fk_short' => 'tiny_slug_ID',
+                'msg' => T_('%d related post'),
+            ],
+        ];
+    }
 
-	/**
-	 * Get delete restriction settings
-	 *
-	 * @return array
-	 */
-	static function get_delete_restrictions()
-	{
-		return array(
-				array( 'table'=>'T_items__item', 'fk'=>'post_canonical_slug_ID', 'fk_short'=>'canonical_slug_ID', 'msg'=>T_('%d related post') ),
-				array( 'table'=>'T_items__item', 'fk'=>'post_tiny_slug_ID', 'fk_short'=>'tiny_slug_ID', 'msg'=>T_('%d related post') ),
-			);
-	}
+    /**
+     * Get a member param by its name
+     *
+     * @param mixed Name of parameter
+     * @return mixed Value of parameter
+     */
+    public function get($parname)
+    {
+        return parent::get($parname);
+    }
 
+    /**
+     * Set param value
+     *
+     * @param string parameter name
+     * @param mixed parameter value
+     * @param boolean true to set to NULL if empty value
+     * @return boolean true, if a value has been set; false if it has not changed
+     */
+    public function set($parname, $parvalue, $make_null = false)
+    {
+        return $this->set_param($parname, 'string', $parvalue, $make_null);
+    }
 
-	/**
-	 * Get a member param by its name
-	 *
-	 * @param mixed Name of parameter
-	 * @return mixed Value of parameter
-	 */
-	function get( $parname )
-	{
-		return parent::get( $parname );
-	}
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        global $Messages;
+        // title
+        $slug_title = param('slug_title', 'string', true);
+        if (empty($this->ID) || $slug_title != $this->get('title')) {	// Check unique slug title only for new creating slug and if title was really changed:
+            $slug_title = urltitle_validate($slug_title, $slug_title, 0, true, 'slug_title', 'slug_ID', 'T_slug');
+            // Update the submitted param with validated value in order to correct checking by regexp below:
+            set_param('slug_title', $slug_title);
+        }
+        if ($this->dbexists('slug_title', $slug_title)) {
+            $Messages->add(sprintf(T_('The slug &laquo;%s&raquo; already exists.'), $slug_title), 'error');
+        }
+        // Added in May 2017; but old slugs are not converted yet.
+        else {	// Display error if slug title doesn't contain at least 1 non-numeric character:
+            param_check_regexp('slug_title', '#^[^a-z0-9]*[0-9]*[^a-z0-9]*$#i', T_('All slugs must contain at least 1 non-numeric character.'), null, false, false);
+        }
+        $this->set('title', $slug_title);
 
+        // type
+        $this->set_string_from_param('type', true);
 
-	/**
-	 * Set param value
-	 *
-	 * @param string parameter name
-	 * @param mixed parameter value
-	 * @param boolean true to set to NULL if empty value
-	 * @return boolean true, if a value has been set; false if it has not changed
-	 */
-	function set( $parname, $parvalue, $make_null = false )
-	{
-		return $this->set_param( $parname, 'string', $parvalue, $make_null );
-	}
+        // object ID:
+        $object_id = param('slug_object_ID', 'string');
+        // All DataObject ID must be a number
+        if (! is_number($object_id) && $this->type != 'help') { // not a number
+            $Messages->add(T_('Object ID must be a number!'), 'error');
+            return false;
+        }
 
+        switch ($this->type) {
+            case 'item':
+                $ItemCache = &get_ItemCache();
+                if ($ItemCache->get_by_ID($object_id, false, false)) {
+                    $this->set_from_Request('itm_ID', 'slug_object_ID', true);
+                } else {
+                    $Messages->add(T_('Object ID must be a valid Post ID!'), 'error');
+                }
+                break;
+        }
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		global $Messages;
-		// title
-		$slug_title = param( 'slug_title', 'string', true );
-		if( empty( $this->ID ) || $slug_title != $this->get( 'title' ) )
-		{	// Check unique slug title only for new creating slug and if title was really changed:
-			$slug_title = urltitle_validate( $slug_title, $slug_title, 0, true, 'slug_title', 'slug_ID', 'T_slug' );
-			// Update the submitted param with validated value in order to correct checking by regexp below:
-			set_param( 'slug_title', $slug_title );
-		}
-		if( $this->dbexists( 'slug_title', $slug_title ) )
-		{
-			$Messages->add( sprintf( T_('The slug &laquo;%s&raquo; already exists.'), $slug_title ), 'error' );
-		}
-		// Added in May 2017; but old slugs are not converted yet.
-		else
-		{	// Display error if slug title doesn't contain at least 1 non-numeric character:
-			param_check_regexp( 'slug_title', '#^[^a-z0-9]*[0-9]*[^a-z0-9]*$#i', T_('All slugs must contain at least 1 non-numeric character.'), NULL, false, false );
-		}
-		$this->set( 'title', $slug_title );
+        return ! param_errors_detected();
+    }
 
-		// type
-		$this->set_string_from_param( 'type', true );
+    /**
+     * Create a link to the related oject.
+     *
+     * @param string Display text - if NULL, will get the object title
+     * @param string type values:
+     * 		- 'admin_view': link to this object admin interface view
+     * 		- 'public_view': link to this object public interface view (on blog)
+     * 		- 'edit': link to this object edit screen
+     * @return string link to related object, or empty if no related object, or url does not exist.
+     */
+    public function get_link_to_object($link_text = null, $type = 'admin_view')
+    {
+        if ($object = $this->get_object()) {
+            if (! isset($link_text)) { // link_text is not set -> get object title for link text
+                $link_text = $object->get('title');
+            }
+            // get respective url
+            $link_url = $this->get_url_to_object($type);
+            if ($link_url != '') { // URL exists
+                // add link title
+                if ($type == 'public_view' || $type == 'admin_view') {
+                    $link_title = ' title="' . sprintf(T_('View this %s...'), $this->get('type')) . '"';
+                } elseif ($type == 'edit') {
+                    $link_title = ' title="' . sprintf(T_('Edit this %s...'), $this->get('type')) . '"';
+                } else {
+                    $link_title = '';
+                }
+                // return created link
+                return '<a href="' . $link_url . '"' . $link_title . '>' . $link_text . '</a>';
+            }
+        }
+        return '';
+    }
 
-		// object ID:
-		$object_id = param( 'slug_object_ID', 'string' );
-		// All DataObject ID must be a number
-		if( ! is_number( $object_id ) && $this->type != 'help' )
-		{ // not a number
-			$Messages->add( T_('Object ID must be a number!'), 'error' );
-			return false;
-		}
+    /**
+     * Create a link to the related oject (in the admin!).
+     *
+     * @param string type values:
+     * 		- 'admin_view': url to this item admin interface view
+     * 		- 'public_view': url to this item public interface view (on blog)
+     * 		- 'edit': url to this item edit screen
+     * @return string URL to related object, or empty if no related object or URL does not exist.
+     */
+    public function get_url_to_object($type = 'admin_view')
+    {
+        if ($object = $this->get_object()) { // related object exists
+            // asimo> Every slug target class need to have get_url() function
+            return $object->get_url($type);
+        }
+        return '';
+    }
 
-		switch( $this->type )
-		{
-			case 'item':
-				$ItemCache = & get_ItemCache();
-				if( $ItemCache->get_by_ID( $object_id, false, false ) )
-				{
-					$this->set_from_Request( 'itm_ID', 'slug_object_ID', true );
-				}
-				else
-				{
-					$Messages->add( T_('Object ID must be a valid Post ID!'), 'error' );
-				}
-				break;
-		}
+    /**
+     * Get link to restricted object
+     *
+     * Used when try to delete a slug, which is another object slug
+     *
+     * @param array restriction
+     * @return string|boolean Message with link to objects,
+     *                        Empty string if no restriction for current table,
+     *                        FALSE - if no rule for current table
+     */
+    public function get_restriction_link($restriction)
+    {
+        if ($object = $this->get_object()) { // object exists
+            // check if this is a restriction for this slug or not!
+            if ($object->get($restriction['fk_short']) == $this->ID) {
+                $restriction_link = $this->get_link_to_object();
+            }
+        }
+        if (isset($restriction_link)) { // there are restrictions
+            return sprintf($restriction['msg'] . '<br/>' . str_replace('%', '%%', $restriction_link), 1);
+        }
+        // no restriction
+        return '';
+    }
 
-		return ! param_errors_detected();
-	}
+    /**
+     * Get linked object.
+     * @return object
+     */
+    public function &get_object()
+    {
+        global $DB, $admin_url;
 
+        switch ($this->type) { // can be different type of object
+            case 'item':
+                // TODO: dh> should use ItemCache altogether
+                // was: $object_query = 'SELECT post_ID, post_title FROM T_items__item WHERE '.$fk.' = '.$this->ID;
+                $ItemCache = &get_ItemCache();
+                return $ItemCache->get_by_ID($this->itm_ID, false, false);
 
-	/**
-	 * Create a link to the related oject.
-	 *
-	 * @param string Display text - if NULL, will get the object title
-	 * @param string type values:
-	 * 		- 'admin_view': link to this object admin interface view
-	 * 		- 'public_view': link to this object public interface view (on blog)
-	 * 		- 'edit': link to this object edit screen
-	 * @return string link to related object, or empty if no related object, or url does not exist.
-	 */
-	function get_link_to_object( $link_text = NULL, $type = 'admin_view' )
-	{
-		if( $object = $this->get_object() )
-		{
-			if( ! isset($link_text ) )
-			{ // link_text is not set -> get object title for link text
-				$link_text = $object->get( 'title' );
-			}
-			// get respective url
-			$link_url = $this->get_url_to_object( $type );
-			if( $link_url != '' )
-			{ // URL exists
-				// add link title
-				if( $type == 'public_view' || $type == 'admin_view' )
-				{
-					$link_title = ' title="'.sprintf( T_('View this %s...'), $this->get( 'type') ).'"';
-				}
-				elseif( $type == 'edit' )
-				{
-					$link_title = ' title="'.sprintf( T_('Edit this %s...'), $this->get( 'type') ).'"';
-				}
-				else
-				{
-					$link_title = '';
-				}
-				// return created link
-				return '<a href="'.$link_url.'"'.$link_title.'>'.$link_text.'</a>';
-			}
-		}
-		return '';
-	}
+            case 'help':
+                $r = false;
+                return $r;
 
+            default:
+                // not defined restriction
+                debug_die('Slug::get_object: Unhandled object type: ' . htmlspecialchars($this->type));
+        }
+    }
 
-	/**
-	 * Create a link to the related oject (in the admin!).
-	 *
-	 * @param string type values:
-	 * 		- 'admin_view': url to this item admin interface view
-	 * 		- 'public_view': url to this item public interface view (on blog)
-	 * 		- 'edit': url to this item edit screen
-	 * @return string URL to related object, or empty if no related object or URL does not exist.
-	 */
-	function get_url_to_object( $type = 'admin_view' )
-	{
-		if( $object = $this->get_object() )
-		{ // related object exists
-			// asimo> Every slug target class need to have get_url() function
-			return $object->get_url( $type );
-		}
-		return '';
-	}
+    /**
+     * Update the DB based on previously recorded changes.
+     *
+     * @todo dh> this is very Item specific, and should get fixed probably.
+     *
+     * @return boolean true on success
+     */
+    public function dbupdate()
+    {
+        global $DB, $Messages;
+        $ItemCache = &get_ItemCache();
+        $Item = &$ItemCache->get_by_id($this->itm_ID);
 
+        $DB->begin();
+        if ($Item->get('canonical_slug_ID') == $this->ID) {
+            $Item->set('urltitle', $this->title);
+            if (! $Item->dbupdate(true, false, false)) {
+                $DB->rollback();
+                return false;
+            }
+            $Messages->add(sprintf(T_('Warning: this change also changed the canonical slug of the post! (%s)'), $this->get_link_to_object()), 'warning');
+        }
 
-	/**
-	 * Get link to restricted object
-	 *
-	 * Used when try to delete a slug, which is another object slug
-	 *
-	 * @param array restriction
-	 * @return string|boolean Message with link to objects,
-	 *                        Empty string if no restriction for current table,
-	 *                        FALSE - if no rule for current table
-	 */
-	function get_restriction_link( $restriction )
-	{
-		if( $object = $this->get_object() )
-		{ // object exists
-			// check if this is a restriction for this slug or not!
-			if( $object->get( $restriction['fk_short'] ) == $this->ID )
-			{
-				$restriction_link = $this->get_link_to_object();
-			}
-		}
-		if( isset( $restriction_link ) )
-		{ // there are restrictions
-			return sprintf( $restriction['msg'].'<br/>'.str_replace('%', '%%', $restriction_link), 1 );
-		}
-		// no restriction
-		return '';
-	}
-
-
-	/**
-	 * Get linked object.
-	 * @return object
-	 */
-	function & get_object()
-	{
-		global $DB, $admin_url;
-
-		switch( $this->type )
-		{ // can be different type of object
-			case 'item':
-				// TODO: dh> should use ItemCache altogether
-				// was: $object_query = 'SELECT post_ID, post_title FROM T_items__item WHERE '.$fk.' = '.$this->ID;
-				$ItemCache = & get_ItemCache();
-				return $ItemCache->get_by_ID( $this->itm_ID, false, false );
-
-			case 'help':
-				$r = false;
-				return $r;
-
-			default:
-				// not defined restriction
-				debug_die('Slug::get_object: Unhandled object type: '.htmlspecialchars($this->type));
-		}
-	}
-
-
-	/**
-	 * Update the DB based on previously recorded changes.
-	 *
-	 * @todo dh> this is very Item specific, and should get fixed probably.
-	 *
-	 * @return boolean true on success
-	 */
-	function dbupdate()
-	{
-		global $DB, $Messages;
-		$ItemCache = & get_ItemCache();
-		$Item = & $ItemCache->get_by_id( $this->itm_ID );
-
-		$DB->begin();
-		if( $Item->get( 'canonical_slug_ID' ) == $this->ID )
-		{
-			$Item->set( 'urltitle', $this->title );
-			if( ! $Item->dbupdate( true, false, false ) )
-			{
-				$DB->rollback();
-				return false;
-			}
-			$Messages->add( sprintf(T_('Warning: this change also changed the canonical slug of the post! (%s)'), $this->get_link_to_object()), 'warning' );
-		}
-
-		parent::dbupdate();
-		$DB->commit();
-		return true;
-	}
+        parent::dbupdate();
+        $DB->commit();
+        return true;
+    }
 }
-
-?>

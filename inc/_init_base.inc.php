@@ -16,7 +16,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 /**
  * @global boolean Are we running on Command Line Interface instead of a web request?
@@ -26,22 +28,18 @@ $is_web = ! $is_cli;
 // echo ($is_cli ? 'cli' : 'web' );
 
 
-if( $maintenance_mode )
-{ // Maintenance mode with a conf switch
-	header('HTTP/1.0 503 Service Unavailable');
-	echo '<h1>503 Service Unavailable</h1>';
-	die( 'The site is temporarily down for maintenance.' );
-}
-elseif( file_exists( $conf_path.'imaintenance.html' ) )
-{ // Maintenance mode with a file - "imaintenance.html" with an "i" prevents access to the site but NOT to install
-	header('HTTP/1.0 503 Service Unavailable');
-	readfile( $conf_path.'imaintenance.html' );
-	die();
+if ($maintenance_mode) { // Maintenance mode with a conf switch
+    header('HTTP/1.0 503 Service Unavailable');
+    echo '<h1>503 Service Unavailable</h1>';
+    die('The site is temporarily down for maintenance.');
+} elseif (file_exists($conf_path . 'imaintenance.html')) { // Maintenance mode with a file - "imaintenance.html" with an "i" prevents access to the site but NOT to install
+    header('HTTP/1.0 503 Service Unavailable');
+    readfile($conf_path . 'imaintenance.html');
+    die();
 }
 
-if( ! empty( $access_control_allow_origin ) )
-{	// Allow access from origin if it is enabled in config:
-	header( 'Access-Control-Allow-Origin: '.$access_control_allow_origin );
+if (! empty($access_control_allow_origin)) {	// Allow access from origin if it is enabled in config:
+    header('Access-Control-Allow-Origin: ' . $access_control_allow_origin);
 }
 
 /**
@@ -56,19 +54,17 @@ $servertimenow = time();
  * Contributed by counterpoint / MAMBO team
  */
 {
-	$protects = array( '_REQUEST', '_GET', '_POST', '_COOKIE', '_FILES', '_SERVER', '_ENV', 'GLOBALS', '_SESSION' );
-	foreach( $protects as $protect )
-	{
-		if(  in_array( $protect, array_keys($_REQUEST) )
-			|| in_array( $protect, array_keys($_GET) )
-			|| in_array( $protect, array_keys($_POST) )
-			|| in_array( $protect, array_keys($_COOKIE) )
-			|| in_array( $protect, array_keys($_FILES) ) )
-		{
-			require_once $inc_path.'/_core/_misc.funcs.php';
-			bad_request_die( 'Unacceptable params.' );
-		}
-	}
+    $protects = ['_REQUEST', '_GET', '_POST', '_COOKIE', '_FILES', '_SERVER', '_ENV', 'GLOBALS', '_SESSION'];
+    foreach ($protects as $protect) {
+        if (in_array($protect, array_keys($_REQUEST))
+            || in_array($protect, array_keys($_GET))
+            || in_array($protect, array_keys($_POST))
+            || in_array($protect, array_keys($_COOKIE))
+            || in_array($protect, array_keys($_FILES))) {
+            require_once $inc_path . '/_core/_misc.funcs.php';
+            bad_request_die('Unacceptable params.');
+        }
+    }
 }
 
 /**
@@ -77,44 +73,38 @@ $servertimenow = time();
 $request_transaction_name = '';
 
 
-if( !$config_is_done )
-{ // base config is not done!
-	$error_title = 'Base configuration is not done!';
-	$error_message = 'Base configuration is not done! (see /conf/_basic_config.php)';
+if (! $config_is_done) { // base config is not done!
+    $error_title = 'Base configuration is not done!';
+    $error_message = 'Base configuration is not done! (see /conf/_basic_config.php)';
+} elseif (! isset($locales[$default_locale])) {
+    $error_title = 'The default locale does not exist!';
+    $error_message = 'The default locale ' . var_export($default_locale, true) . ' does not exist! (see /conf/_locales.php)';
 }
-elseif( !isset( $locales[$default_locale] ) )
-{
-	$error_title = 'The default locale does not exist!';
-	$error_message = 'The default locale '.var_export( $default_locale, true ).' does not exist! (see /conf/_locales.php)';
-}
-if( isset( $error_message ) )
-{ // error & exit
-	require dirname(__FILE__).'/../skins_adm/conf_error.main.php';
+if (isset($error_message)) { // error & exit
+    require dirname(__FILE__) . '/../skins_adm/conf_error.main.php';
 }
 
 
-/**
- * Class loader.
- */
-require_once $inc_path.'_core/_class_loader.funcs.php';
+
+require_once $inc_path . '_core/_class_loader.funcs.php';
 
 
 /**
  * Locale related functions
  */
-require_once $inc_path.'locales/_locale.funcs.php';
+require_once $inc_path . 'locales/_locale.funcs.php';
 
 
 /**
  * Miscellaneous functions
  */
-require_once $inc_path.'_core/_misc.funcs.php';
+require_once $inc_path . '_core/_misc.funcs.php';
 
 
 /**
  * Parameter handling functions
  */
-load_funcs( '_core/_param.funcs.php' );
+load_funcs('_core/_param.funcs.php');
 
 
 /**
@@ -122,40 +112,37 @@ load_funcs( '_core/_param.funcs.php' );
  *
  * @global Log|Log_noop $Debuglog
  */
-if( $debug )
-{
-	load_class( '_core/model/_log.class.php', 'Log' );
-	$Debuglog = new Log();
-}
-else
-{
-	load_class( '_core/model/_log.class.php', 'Log_noop' );
-	$Debuglog = new Log_noop();
+if ($debug) {
+    load_class('_core/model/_log.class.php', 'Log');
+    $Debuglog = new Log();
+} else {
+    load_class('_core/model/_log.class.php', 'Log_noop');
+    $Debuglog = new Log_noop();
 }
 
 
 /**
  * System log
  */
-load_class( 'tools/model/_syslog.class.php', 'Syslog' );
+load_class('tools/model/_syslog.class.php', 'Syslog');
 
 
 /**
  * Info & error message log for end user (initialized here)
  * @global Log $Messages
  */
-load_class( '_core/model/_messages.class.php', 'Messages' );
+load_class('_core/model/_messages.class.php', 'Messages');
 $Messages = new Messages();
 
 
 /*
  * Start timer:
  */
-load_class( '_core/model/_timer.class.php', 'Timer' );
+load_class('_core/model/_timer.class.php', 'Timer');
 $Timer = new Timer('total');
-$Timer->resume( '_init_base' );
-$Timer->resume( 'first_flush' );
-$Timer->resume( '_MAIN.inc' );
+$Timer->resume('_init_base');
+$Timer->resume('first_flush');
+$Timer->resume('_MAIN.inc');
 
 
 
@@ -248,12 +235,9 @@ $month_abbrev['12'] = NT_('Dec');
  *
  * This initializes table name aliases and is required before trying to connect to the DB.
  */
-load_class( '_core/model/_module.class.php', 'Module' );
-foreach( $modules as $module )
-{
-	require_once $inc_path.$module.'/_'.$module.'.init.php';
+load_class('_core/model/_module.class.php', 'Module');
+foreach ($modules as $module) {
+    require_once $inc_path . $module . '/_' . $module . '.init.php';
 }
 
-$Timer->pause( '_init_base' );
-
-?>
+$Timer->pause('_init_base');

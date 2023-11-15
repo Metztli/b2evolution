@@ -12,20 +12,24 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-if( ! function_exists('fnmatch') )
-{
-	/**
-	 * A replacement for fnmatch() which needs PHP 4.3 and a POSIX compliant system (Windows is not).
-	 *
-	 * @author jk at ricochetsolutions dot com {@link http://php.net/manual/function.fnmatch.php#71725}
-	 */
-	function fnmatch($pattern, $string)
-	{
-	   return preg_match( '#^'.strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.')).'$#i', $string);
-	}
+if (! function_exists('fnmatch')) {
+    /**
+     * A replacement for fnmatch() which needs PHP 4.3 and a POSIX compliant system (Windows is not).
+     *
+     * @author jk at ricochetsolutions dot com {@link http://php.net/manual/function.fnmatch.php#71725}
+     */
+    function fnmatch($pattern, $string)
+    {
+        return preg_match('#^' . strtr(preg_quote($pattern, '#'), [
+            '\*' => '.*',
+            '\?' => '.',
+        ]) . '$#i', $string);
+    }
 }
 
 
@@ -37,42 +41,54 @@ if( ! function_exists('fnmatch') )
  * @param boolean Display full text of size type when $htmlabbr == false
  * @return string bytes made readable
  */
-function bytesreadable( $bytes, $htmlabbr = true, $display_size_type = true )
+function bytesreadable($bytes, $htmlabbr = true, $display_size_type = true)
 {
-	static $types = NULL;
+    static $types = null;
 
-	if( empty($bytes) )
-	{
-		return T_('Empty');
-	}
+    if (empty($bytes)) {
+        return T_('Empty');
+    }
 
-	if( !isset($types) )
-	{ // generate once:
-		$types = array(
-			0 => array( 'abbr' => /* TRANS: Abbr. for "Bytes" */ T_('B.'), 'text' => T_('Bytes') ),
-			1 => array( 'abbr' => /* TRANS: Abbr. for "Kilobytes" */ T_('KB'), 'text' => T_('Kilobytes') ),
-			2 => array( 'abbr' => /* TRANS: Abbr. for Megabytes */ T_('MB'), 'text' => T_('Megabytes') ),
-			3 => array( 'abbr' => /* TRANS: Abbr. for Gigabytes */ T_('GB'), 'text' => T_('Gigabytes') ),
-			4 => array( 'abbr' => /* TRANS: Abbr. for Terabytes */ T_('TB'), 'text' => T_('Terabytes') )
-		);
-	}
+    if (! isset($types)) { // generate once:
+        $types = [
+            0 => [
+                'abbr' => /* TRANS: Abbr. for "Bytes" */ T_('B.'),
+                'text' => T_('Bytes'),
+            ],
+            1 => [
+                'abbr' => /* TRANS: Abbr. for "Kilobytes" */ T_('KB'),
+                'text' => T_('Kilobytes'),
+            ],
+            2 => [
+                'abbr' => /* TRANS: Abbr. for Megabytes */ T_('MB'),
+                'text' => T_('Megabytes'),
+            ],
+            3 => [
+                'abbr' => /* TRANS: Abbr. for Gigabytes */ T_('GB'),
+                'text' => T_('Gigabytes'),
+            ],
+            4 => [
+                'abbr' => /* TRANS: Abbr. for Terabytes */ T_('TB'),
+                'text' => T_('Terabytes'),
+            ],
+        ];
+    }
 
-	for( $i = 0; $bytes > 1024; $i++ )
-	{
-		$bytes /= 1024;
-	}
+    for ($i = 0; $bytes > 1024; $i++) {
+        $bytes /= 1024;
+    }
 
-	// Format to maximum of 1 digit after .
-	$precision = max( 0, ( 1 -floor(log($bytes)/log(10))) );
-	$r = sprintf( '%.'.$precision.'f', $bytes );
+    // Format to maximum of 1 digit after .
+    $precision = max(0, (1 - floor(log($bytes) / log(10))));
+    $r = sprintf('%.' . $precision . 'f', $bytes);
 
-	$r .= $htmlabbr ? ( '&nbsp;<abbr title="'.$types[$i]['text'].'">' ) : ' ';
-	$r .= $types[$i]['abbr'];
-	$r .= $htmlabbr ? '</abbr>' : ( $display_size_type ? ' ('.$types[$i]['text'].')' : '' );
+    $r .= $htmlabbr ? ('&nbsp;<abbr title="' . $types[$i]['text'] . '">') : ' ';
+    $r .= $types[$i]['abbr'];
+    $r .= $htmlabbr ? '</abbr>' : ($display_size_type ? ' (' . $types[$i]['text'] . ')' : '');
 
-	// $r .= ' '.$precision;
+    // $r .= ' '.$precision;
 
-	return $r;
+    return $r;
 }
 
 
@@ -82,37 +98,38 @@ function bytesreadable( $bytes, $htmlabbr = true, $display_size_type = true )
  * @param string readable bytes
  * @return integer bytes
  */
-function return_bytes( $val ) {
-    $val = trim( $val );
-		$re = '/([0-9]+)([a-zA-Z]*)/';
-		preg_match( $re, $val, $matches );
+function return_bytes($val)
+{
+    $val = trim($val);
+    $re = '/([0-9]+)([a-zA-Z]*)/';
+    preg_match($re, $val, $matches);
 
-		if( $matches )
-		{
-			$last = strtolower( $matches[2] );
+    if ($matches) {
+        $last = strtolower($matches[2]);
 
-			$val = intval( $matches[1] );
-			switch( $last ) {
-				// The 'G' modifier is available since PHP 5.1.0
-				case 'tb':
-					$val *= 1024;
-				case 'g':
-				case 'gb':
-					$val *= 1024;
-				case 'm':
-				case 'mb':
-					$val *= 1024;
-				case 'k':
-				case 'kb':
-					$val *= 1024;
-			}
+        $val = intval($matches[1]);
+        switch ($last) {
+            // The 'G' modifier is available since PHP 5.1.0
+            case 'tb':
+                $val *= 1024;
+                // no break
+            case 'g':
+            case 'gb':
+                $val *= 1024;
+                // no break
+            case 'm':
+            case 'mb':
+                $val *= 1024;
+                // no break
+            case 'k':
+            case 'kb':
+                $val *= 1024;
+        }
 
-    	return $val;
-		}
-		else
-		{
-			return false;
-		}
+        return $val;
+    } else {
+        return false;
+    }
 }
 
 
@@ -128,94 +145,76 @@ function return_bytes( $val ) {
  * @return false|array false if the first directory could not be accessed,
  *                     array of entries otherwise
  */
-function get_filenames( $path, $params = array() )
+function get_filenames($path, $params = [])
 {
-	global $Settings;
+    global $Settings;
 
-	$params = array_merge( array(
-			'inc_files'      => true,  // include files (not only directories)
-			'inc_dirs'       => true,  // include directories (not the directory itself!)
-			'flat'           => true,  // return a one-dimension-array
-			'recurse'        => true,  // recurse into subdirectories
-			'basename'       => false, // get the basename only
-			'trailing_slash' => false, // add trailing slash
-			'inc_hidden'     => true,  // inlcude hidden files, directories and content
-			'inc_evocache'   => false, // exclude evocache directories and content
-			'inc_temp'       => true,  // include temporary files and directories
-		), $params );
+    $params = array_merge([
+        'inc_files' => true,  // include files (not only directories)
+        'inc_dirs' => true,  // include directories (not the directory itself!)
+        'flat' => true,  // return a one-dimension-array
+        'recurse' => true,  // recurse into subdirectories
+        'basename' => false, // get the basename only
+        'trailing_slash' => false, // add trailing slash
+        'inc_hidden' => true,  // inlcude hidden files, directories and content
+        'inc_evocache' => false, // exclude evocache directories and content
+        'inc_temp' => true,  // include temporary files and directories
+    ], $params);
 
-	$r = array();
+    $r = [];
 
-	$path = trailing_slash( $path );
+    $path = trailing_slash($path);
 
-	if( $dir = @opendir( $path ) )
-	{
-		while( ( $file = readdir( $dir ) ) !== false )
-		{
-			if( $file == '.' || $file == '..' )
-			{ // Skip these reserved names
-				continue;
-			}
+    if ($dir = @opendir($path)) {
+        while (($file = readdir($dir)) !== false) {
+            if ($file == '.' || $file == '..') { // Skip these reserved names
+                continue;
+            }
 
-			// asimo> Also check if $Settings is not empty because this function is called from the install srcipt too, where $Settings is not initialized yet
-			if( ! $params['inc_evocache'] && ! empty( $Settings ) && $file == $Settings->get( 'evocache_foldername' ) )
-			{ // Do not load evocache directories
-				continue;
-			}
+            // asimo> Also check if $Settings is not empty because this function is called from the install srcipt too, where $Settings is not initialized yet
+            if (! $params['inc_evocache'] && ! empty($Settings) && $file == $Settings->get('evocache_foldername')) { // Do not load evocache directories
+                continue;
+            }
 
-			// Check for hidden status...
-			if( ( ! $params['inc_hidden'] ) && ( substr( $file, 0, 1 ) == '.' ) )
-			{ // Do not load & show hidden files and folders (prefixed with .)
-				continue;
-			}
+            // Check for hidden status...
+            if ((! $params['inc_hidden']) && (substr($file, 0, 1) == '.')) { // Do not load & show hidden files and folders (prefixed with .)
+                continue;
+            }
 
-			// Check for temp directories/files
-			if( ! $params['inc_temp'] && $file == 'upload-tmp' )
-			{ // Do not load temporary files and directories
-				continue;
-			}
+            // Check for temp directories/files
+            if (! $params['inc_temp'] && $file == 'upload-tmp') { // Do not load temporary files and directories
+                continue;
+            }
 
-			if( is_dir( $path.$file ) )
-			{
-				if( $params['flat'] )
-				{
-					if( $params['inc_dirs'] )
-					{
-						$directory_name = $params['basename'] ? $file : $path.$file;
-						if( $params['trailing_slash'] )
-						{
-							$directory_name = trailing_slash( $directory_name );
-						}
+            if (is_dir($path . $file)) {
+                if ($params['flat']) {
+                    if ($params['inc_dirs']) {
+                        $directory_name = $params['basename'] ? $file : $path . $file;
+                        if ($params['trailing_slash']) {
+                            $directory_name = trailing_slash($directory_name);
+                        }
 
-						$r[] = $directory_name;
-					}
-					if( $params['recurse'] )
-					{
-						$rSub = get_filenames( $path.$file, $params );
-						if( $rSub )
-						{
-							$r = array_merge( $r, $rSub );
-						}
-					}
-				}
-				else
-				{
-					$r[ $file ] = get_filenames( $path.$file, $params );
-				}
-			}
-			elseif( $params['inc_files'] )
-			{
-				$r[] = $params['basename'] ? $file : $path.$file;
-			}
-		}
-		closedir( $dir );
-	}
-	else
-	{
-		return false;
-	}
+                        $r[] = $directory_name;
+                    }
+                    if ($params['recurse']) {
+                        $rSub = get_filenames($path . $file, $params);
+                        if ($rSub) {
+                            $r = array_merge($r, $rSub);
+                        }
+                    }
+                } else {
+                    $r[$file] = get_filenames($path . $file, $params);
+                }
+            } elseif ($params['inc_files']) {
+                $r[] = $params['basename'] ? $file : $path . $file;
+            }
+        }
+        closedir($dir);
+    } else {
+        return false;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -228,33 +227,29 @@ function get_filenames( $path, $params = array() )
  */
 function get_admin_skins()
 {
-	global $adminskins_path, $admin_subdir, $adminskins_subdir;
+    global $adminskins_path, $admin_subdir, $adminskins_subdir;
 
-	$filename_params = array(
-			'inc_files'		=> false,
-			'recurse'		=> false,
-			'basename'      => true,
-		);
-	$dirs_in_adminskins_dir = get_filenames( $adminskins_path, $filename_params );
+    $filename_params = [
+        'inc_files' => false,
+        'recurse' => false,
+        'basename' => true,
+    ];
+    $dirs_in_adminskins_dir = get_filenames($adminskins_path, $filename_params);
 
-	if( $dirs_in_adminskins_dir === false )
-	{
-		return false;
-	}
+    if ($dirs_in_adminskins_dir === false) {
+        return false;
+    }
 
-	$r = array();
-	if( $dirs_in_adminskins_dir )
-	{
-		foreach( $dirs_in_adminskins_dir as $l_dir )
-		{
-			if( !file_exists($adminskins_path.$l_dir.'/_adminUI.class.php') )
-			{
-				continue;
-			}
-			$r[] = $l_dir;
-		}
-	}
-	return $r;
+    $r = [];
+    if ($dirs_in_adminskins_dir) {
+        foreach ($dirs_in_adminskins_dir as $l_dir) {
+            if (! file_exists($adminskins_path . $l_dir . '/_adminUI.class.php')) {
+                continue;
+            }
+            $r[] = $l_dir;
+        }
+    }
+    return $r;
 }
 
 
@@ -263,20 +258,18 @@ function get_admin_skins()
  *
  * @param string the dir's full path
  */
-function get_dirsize_recursive( $path )
+function get_dirsize_recursive($path)
 {
-	$files = get_filenames( $path );
-	$total = 0;
+    $files = get_filenames($path);
+    $total = 0;
 
-	if( !empty( $files ) )
-	{
-		foreach( $files as $lFile )
-		{
-			$total += filesize($lFile);
-		}
-	}
+    if (! empty($files)) {
+        foreach ($files as $lFile) {
+            $total += filesize($lFile);
+        }
+    }
 
-	return $total;
+    return $total;
 }
 
 
@@ -286,23 +279,21 @@ function get_dirsize_recursive( $path )
  * @param string The dir
  * @return boolean False on failure
  */
-function rmdir_r( $path )
+function rmdir_r($path)
 {
-	$path = trailing_slash( $path );
+    $path = trailing_slash($path);
 
-	$r = true;
+    $r = true;
 
-	if( ! cleardir_r( $path ) )
-	{
-		$r = false;
-	}
+    if (! cleardir_r($path)) {
+        $r = false;
+    }
 
-	if( ! @rmdir( $path ) )
-	{
-		$r = false;
-	}
+    if (! @rmdir($path)) {
+        $r = false;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -312,49 +303,41 @@ function rmdir_r( $path )
  * @param string the directory path
  * @return boolean False on failure (may be only partial), true on success.
  */
-function cleardir_r( $path )
+function cleardir_r($path)
 {
-	$path = trailing_slash( $path );
-	// echo "<br>rmdir_r($path)";
+    $path = trailing_slash($path);
+    // echo "<br>rmdir_r($path)";
 
-	$r = true; // assume success
+    $r = true; // assume success
 
-	if( $dir = @opendir($path) )
-	{
-		while( ( $file = readdir($dir) ) !== false )
-		{
-			if( $file == '.' || $file == '..' )
-				continue;
+    if ($dir = @opendir($path)) {
+        while (($file = readdir($dir)) !== false) {
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
 
-			$adfp_filepath = $path.$file;
+            $adfp_filepath = $path . $file;
 
-			// echo "<br> - $os_filepath ";
+            // echo "<br> - $os_filepath ";
 
-			if( is_dir( $adfp_filepath ) && ! is_link($adfp_filepath) )
-			{ // Note: we do NOT follow symlinks
-				// echo 'D';
-				if( ! rmdir_r( $adfp_filepath ) )
-				{
-					$r = false;
-				}
-			}
-			else
-			{ // File or symbolic link
-				//echo 'F/S';
-				if( ! @unlink( $adfp_filepath ) )
-				{
-					$r = false;
-				}
-			}
-		}
-		closedir($dir);
-	}
-	else
-	{
-		$r = false;
-	}
+            if (is_dir($adfp_filepath) && ! is_link($adfp_filepath)) { // Note: we do NOT follow symlinks
+                // echo 'D';
+                if (! rmdir_r($adfp_filepath)) {
+                    $r = false;
+                }
+            } else { // File or symbolic link
+                //echo 'F/S';
+                if (! @unlink($adfp_filepath)) {
+                    $r = false;
+                }
+            }
+        }
+        closedir($dir);
+    } else {
+        $r = false;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -364,22 +347,20 @@ function cleardir_r( $path )
  * @param string File path
  * @return boolean TRUE - if file is image
  */
-function is_image_file( $file_path )
+function is_image_file($file_path)
 {
-	if( ! file_exists( $file_path ) )
-	{
-		return false;
-	}
+    if (! file_exists($file_path)) {
+        return false;
+    }
 
-	if( substr( $file_path, -4 ) == '.svg' )
-	{	// Consider all SVG file is image, because not SVG files has a mime type as 'image/svg':
-		return true;
-	}
+    if (substr($file_path, -4) == '.svg') {	// Consider all SVG file is image, because not SVG files has a mime type as 'image/svg':
+        return true;
+    }
 
-	$file_info = finfo_open( FILEINFO_MIME_TYPE );
-	$file_type = finfo_file( $file_info, $file_path );
+    $file_info = finfo_open(FILEINFO_MIME_TYPE);
+    $file_type = finfo_file($file_info, $file_path);
 
-	return in_array( $file_type, array( 'image/png', 'image/jpeg', 'image/gif', 'image/svg', 'image/svg+xml' ) );
+    return in_array($file_type, ['image/png', 'image/jpeg', 'image/gif', 'image/svg', 'image/svg+xml']);
 }
 
 /**
@@ -391,62 +372,47 @@ function is_image_file( $file_path )
  *               with keys "width" and "height", else 'widthheight' (numeric array)
  * @return mixed false if no image, otherwise what was requested through $param
  */
-function imgsize( $path, $param = 'widthheight' )
+function imgsize($path, $param = 'widthheight')
 {
-	/**
-	 * Cache image sizes
-	 */
-	global $cache_imgsize;
+    /**
+     * Cache image sizes
+     */
+    global $cache_imgsize;
 
-	if( isset($cache_imgsize[$path]) )
-	{
-		$size = $cache_imgsize[$path];
-	}
-	elseif( ! is_image_file( $path ) || // Fast check for image file
-	        ! ( $size = @getimagesize( $path ) ) ) // Try to get size of image file
-	{	// If file is not image, or size could not get by some reason:
-		return false;
-	}
-	else
-	{
-		$cache_imgsize[$path] = $size;
-	}
+    if (isset($cache_imgsize[$path])) {
+        $size = $cache_imgsize[$path];
+    } elseif (! is_image_file($path) || // Fast check for image file
+            ! ($size = @getimagesize($path))) { // Try to get size of image file
+        // If file is not image, or size could not get by some reason:
+        return false;
+    } else {
+        $cache_imgsize[$path] = $size;
+    }
 
-	if( $param == 'width' )
-	{
-		return $size[0];
-	}
-	elseif( $param == 'height' )
-	{
-		return $size[1];
-	}
-	elseif( $param == 'widthxheight' )
-	{
-		return $size[0].'x'.$size[1];
-	}
-	elseif( $param == 'type' )
-	{
-		switch( $size[2] )
-		{
-			case 1: return 'gif';
-			case 2: return 'jpg';
-			case 3: return 'png';
-			case 4: return 'swf';
-			default: return 'unknown';
-		}
-	}
-	elseif( $param == 'string' )
-	{
-		return $size[3];
-	}
-	elseif( $param == 'widthheight_assoc' )
-	{
-		return array( 'width' => $size[0], 'height' => $size[1] );
-	}
-	else
-	{ // default: 'widthheight'
-		return array( $size[0], $size[1] );
-	}
+    if ($param == 'width') {
+        return $size[0];
+    } elseif ($param == 'height') {
+        return $size[1];
+    } elseif ($param == 'widthxheight') {
+        return $size[0] . 'x' . $size[1];
+    } elseif ($param == 'type') {
+        switch ($size[2]) {
+            case 1: return 'gif';
+            case 2: return 'jpg';
+            case 3: return 'png';
+            case 4: return 'swf';
+            default: return 'unknown';
+        }
+    } elseif ($param == 'string') {
+        return $size[3];
+    } elseif ($param == 'widthheight_assoc') {
+        return [
+            'width' => $size[0],
+            'height' => $size[1],
+        ];
+    } else { // default: 'widthheight'
+        return [$size[0], $size[1]];
+    }
 }
 
 
@@ -456,16 +422,13 @@ function imgsize( $path, $param = 'widthheight' )
  * @param string
  * @return string
  */
-function no_leading_slash( $path )
+function no_leading_slash($path)
 {
-	if( isset($path[0]) && $path[0] == '/' )
-	{
-		return substr( $path, 1 );
-	}
-	else
-	{
-		return $path;
-	}
+    if (isset($path[0]) && $path[0] == '/') {
+        return substr($path, 1);
+    } else {
+        return $path;
+    }
 }
 
 
@@ -475,56 +438,49 @@ function no_leading_slash( $path )
  * @param string absolute path to be reduced ending with slash
  * @return string absolute reduced path, slash terminated or NULL if the path could not get canonicalized.
  */
-function get_canonical_path( $ads_path )
+function get_canonical_path($ads_path)
 {
-	// We probably don't need the windows backslashes replacing any more but leave it for safety because it doesn't hurt:
-	$ads_path = str_replace( '\\', '/', $ads_path );
+    // We probably don't need the windows backslashes replacing any more but leave it for safety because it doesn't hurt:
+    $ads_path = str_replace('\\', '/', $ads_path);
 
-	$is_absolute = is_absolute_pathname($ads_path);
+    $is_absolute = is_absolute_pathname($ads_path);
 
-	// Make sure there's a trailing slash
-	$ads_path = trailing_slash($ads_path);
+    // Make sure there's a trailing slash
+    $ads_path = trailing_slash($ads_path);
 
-	while( strpos($ads_path, '//') !== false )
-	{
-		$ads_path = str_replace( '//', '/', $ads_path );
-	}
-	while( strpos($ads_path, '/./') !== false )
-	{
-		$ads_path = str_replace( '/./', '/', $ads_path );
-	}
-	$parts = explode('/', $ads_path);
-	for( $i = 0; $i < count($parts); $i++ )
-	{
-		if( $parts[$i] != '..' )
-		{
-			continue;
-		}
-		if( $i <= 0 || $parts[$i-1] == '' || substr($parts[$i-1], -1) == ':' /* windows drive letter */ )
-		{
-			return NULL;
-		}
-		// Remove ".." and the part before it
-		unset($parts[$i-1], $parts[$i]);
-		// Respin array
-		$parts = array_values($parts);
-		$i = $i-2;
-	}
-	$ads_realpath = implode('/', $parts);
+    while (strpos($ads_path, '//') !== false) {
+        $ads_path = str_replace('//', '/', $ads_path);
+    }
+    while (strpos($ads_path, '/./') !== false) {
+        $ads_path = str_replace('/./', '/', $ads_path);
+    }
+    $parts = explode('/', $ads_path);
+    for ($i = 0; $i < count($parts); $i++) {
+        if ($parts[$i] != '..') {
+            continue;
+        }
+        if ($i <= 0 || $parts[$i - 1] == '' || substr($parts[$i - 1], -1) == ':' /* windows drive letter */) {
+            return null;
+        }
+        // Remove ".." and the part before it
+        unset($parts[$i - 1], $parts[$i]);
+        // Respin array
+        $parts = array_values($parts);
+        $i = $i - 2;
+    }
+    $ads_realpath = implode('/', $parts);
 
-	// pre_dump( 'get_canonical_path()', $ads_path, $ads_realpath );
+    // pre_dump( 'get_canonical_path()', $ads_path, $ads_realpath );
 
-	if( strpos( $ads_realpath, '..' ) !== false )
-	{	// Path malformed:
-		return NULL;
-	}
+    if (strpos($ads_realpath, '..') !== false) {	// Path malformed:
+        return null;
+    }
 
-	if( $is_absolute && ! strlen($ads_realpath) )
-	{
-		return NULL;
-	}
+    if ($is_absolute && ! strlen($ads_realpath)) {
+        return null;
+    }
 
-	return $ads_realpath;
+    return $ads_realpath;
 }
 
 
@@ -535,20 +491,18 @@ function get_canonical_path( $ads_path )
  * @param string the index before we should remove the over characters
  * @return string the modified filename if the length was above the max length and the $remove_before_index param was correct. The original filename otherwie.
  */
-function fix_filename_length( $filename, $remove_before_index )
+function fix_filename_length($filename, $remove_before_index)
 {
-	global $filename_max_length;
+    global $filename_max_length;
 
-	$filename_length = strlen( $filename );
-	if( $filename_length > $filename_max_length )
-	{
-		$difference = $filename_length - $filename_max_length;
-		if( $remove_before_index > $difference )
-		{ // Fix file name length only if the filename part before the 'remove index' contains more characters then what we have to remove
-			$filename = substr_replace( $filename, '', $remove_before_index - $difference, $difference );
-		}
-	}
-	return $filename;
+    $filename_length = strlen($filename);
+    if ($filename_length > $filename_max_length) {
+        $difference = $filename_length - $filename_max_length;
+        if ($remove_before_index > $difference) { // Fix file name length only if the filename part before the 'remove index' contains more characters then what we have to remove
+            $filename = substr_replace($filename, '', $remove_before_index - $difference, $difference);
+        }
+    }
+    return $filename;
 }
 
 
@@ -566,59 +520,52 @@ function fix_filename_length( $filename, $remove_before_index )
  * @param string Path in the FileRoot
  * @return error message if the file name is not valid, false otherwise
  */
-function process_filename( & $filename, $force_validation = false, $autocrop_long_file = false, $FileRoot = NULL, $path = '' )
+function process_filename(&$filename, $force_validation = false, $autocrop_long_file = false, $FileRoot = null, $path = '')
 {
-	if( empty( $filename ) )
-	{
-		return T_( 'Empty file name is not valid.' );
-	}
+    if (empty($filename)) {
+        return T_('Empty file name is not valid.');
+    }
 
-	if( $autocrop_long_file && ! empty( $FileRoot ) )
-	{ // Crop long file names
-		global $filename_max_length, $Messages;
+    if ($autocrop_long_file && ! empty($FileRoot)) { // Crop long file names
+        global $filename_max_length, $Messages;
 
-		if( ! empty( $filename_max_length ) &&
-				$filename_max_length > 8 &&
-				strlen( $filename ) > $filename_max_length )
-		{ // Limit file name by $filename_max_length
-			$new_file_ext_pos = strrpos( $filename, '.' );
-			$new_file_name = substr( $filename, 0, $new_file_ext_pos );
-			$new_file_name = trim( substr( $new_file_name, 0, $filename_max_length - 8 ) );
-			$new_file_ext = substr( $filename, $new_file_ext_pos - strlen( $filename ) + 1 );
+        if (! empty($filename_max_length) &&
+                $filename_max_length > 8 &&
+                strlen($filename) > $filename_max_length) { // Limit file name by $filename_max_length
+            $new_file_ext_pos = strrpos($filename, '.');
+            $new_file_name = substr($filename, 0, $new_file_ext_pos);
+            $new_file_name = trim(substr($new_file_name, 0, $filename_max_length - 8));
+            $new_file_ext = substr($filename, $new_file_ext_pos - strlen($filename) + 1);
 
-			$fnum = 1;
-			$FileCache = & get_FileCache();
-			do
-			{ // Make file name unique
-				$filename = $new_file_name.'-'.$fnum.'.'.$new_file_ext;
-				$newFile = & $FileCache->get_by_root_and_path( $FileRoot->type, $FileRoot->in_type_ID, trailing_slash( $path ).$filename, true );
-				$fnum++;
-			}
-			while( $newFile->exists() );
-			$filename = $newFile->get( 'name' );
+            $fnum = 1;
+            $FileCache = &get_FileCache();
+            do { // Make file name unique
+                $filename = $new_file_name . '-' . $fnum . '.' . $new_file_ext;
+                $newFile = &$FileCache->get_by_root_and_path($FileRoot->type, $FileRoot->in_type_ID, trailing_slash($path) . $filename, true);
+                $fnum++;
+            } while ($newFile->exists());
+            $filename = $newFile->get('name');
 
-			$Messages->add( T_('The filename was too long. It has been shortened.'), 'warning' );
-		}
-	}
+            $Messages->add(T_('The filename was too long. It has been shortened.'), 'warning');
+        }
+    }
 
-	if( $force_validation )
-	{ // replace every not valid characters
-		$filename = preg_replace( '/[^a-z0-9\-_.]+/i', '_', $filename );
-		// Make sure the filename length doesn't exceed the maximum allowed. Remove characters from the end of the filename ( before the extension ) if required.
-		$extension_pos = strrpos( $filename, '.' );
-		$filename = fix_filename_length( $filename, strrpos( $filename, '.', ( $extension_pos ? $extension_pos : strlen( $filename ) ) ) );
-	}
+    if ($force_validation) { // replace every not valid characters
+        $filename = preg_replace('/[^a-z0-9\-_.]+/i', '_', $filename);
+        // Make sure the filename length doesn't exceed the maximum allowed. Remove characters from the end of the filename ( before the extension ) if required.
+        $extension_pos = strrpos($filename, '.');
+        $filename = fix_filename_length($filename, strrpos($filename, '.', ($extension_pos ? $extension_pos : strlen($filename))));
+    }
 
-	// check if the file name contains consecutive dots, and replace them with one dot without warning ( keep only one dot '.' instead of '...' )
-	$filename = preg_replace( '/\.(\.)+/', '.', utf8_strtolower( $filename ) );
+    // check if the file name contains consecutive dots, and replace them with one dot without warning ( keep only one dot '.' instead of '...' )
+    $filename = preg_replace('/\.(\.)+/', '.', utf8_strtolower($filename));
 
-	if( $error_filename = validate_filename( $filename ) )
-	{ // invalid file name
-		return $error_filename;
-	}
+    if ($error_filename = validate_filename($filename)) { // invalid file name
+        return $error_filename;
+    }
 
-	// on success
-	return false;
+    // on success
+    return false;
 }
 
 
@@ -631,61 +578,48 @@ function process_filename( & $filename, $force_validation = false, $autocrop_lon
  * @param mixed true/false to allow locked filetypes. NULL means that FileType will decide
  * @return nothing if the filename is valid according to the regular expression and the extension too, error message if not
  */
-function validate_filename( $filename, $allow_locked_filetypes = NULL )
+function validate_filename($filename, $allow_locked_filetypes = null)
 {
-	global $Settings, $force_regexp_filename, $filename_max_length;
+    global $Settings, $force_regexp_filename, $filename_max_length;
 
-	if( strpos( $filename, '..' ) !== false )
-	{ // consecutive dots are not allowed in file name
-		return sprintf( T_('&laquo;%s&raquo; is not a valid filename.').' '.T_( 'Consecutive dots are not allowed.' ), $filename );
-	}
+    if (strpos($filename, '..') !== false) { // consecutive dots are not allowed in file name
+        return sprintf(T_('&laquo;%s&raquo; is not a valid filename.') . ' ' . T_('Consecutive dots are not allowed.'), $filename);
+    }
 
-	if( strlen( $filename ) > $filename_max_length )
-	{ // filename is longer then the maximum allowed
-		return sprintf( T_('&laquo;%s&raquo; is not a valid filename.').' '.sprintf( T_( 'Max %d characters are allowed on filenames.' ), $filename_max_length ), $filename );
-	}
+    if (strlen($filename) > $filename_max_length) { // filename is longer then the maximum allowed
+        return sprintf(T_('&laquo;%s&raquo; is not a valid filename.') . ' ' . sprintf(T_('Max %d characters are allowed on filenames.'), $filename_max_length), $filename);
+    }
 
-	// Check filename
-	if( $force_regexp_filename )
-	{ // Use the regexp from _advanced.php
-		if( !preg_match( ':'.str_replace( ':', '\:', $force_regexp_filename ).':', $filename ) )
-		{ // Invalid filename
-			return sprintf( T_('&laquo;%s&raquo; is not a valid filename.'), $filename );
-		}
-	}
-	else
-	{	// Use the regexp from SETTINGS
-		if( !preg_match( ':'.str_replace( ':', '\:', $Settings->get( 'regexp_filename' ) ).':', $filename ) )
-		{ // Invalid filename
-			return sprintf( T_('&laquo;%s&raquo; is not a valid filename.'), $filename );
-		}
-	}
+    // Check filename
+    if ($force_regexp_filename) { // Use the regexp from _advanced.php
+        if (! preg_match(':' . str_replace(':', '\:', $force_regexp_filename) . ':', $filename)) { // Invalid filename
+            return sprintf(T_('&laquo;%s&raquo; is not a valid filename.'), $filename);
+        }
+    } else {	// Use the regexp from SETTINGS
+        if (! preg_match(':' . str_replace(':', '\:', $Settings->get('regexp_filename')) . ':', $filename)) { // Invalid filename
+            return sprintf(T_('&laquo;%s&raquo; is not a valid filename.'), $filename);
+        }
+    }
 
-	// Check extension filename
-	if( preg_match( '#\.([a-zA-Z0-9\-_]+)$#', $filename, $match ) )
-	{ // Filename has a valid extension
-		$FiletypeCache = & get_FiletypeCache();
-		if( $Filetype = & $FiletypeCache->get_by_extension( strtolower( $match[1] ) , false ) )
-		{
-			if( $Filetype->is_allowed( $allow_locked_filetypes ) )
-			{ // Filename has an unlocked extension or we allow locked extensions
-				return;
-			}
-			else
-			{	// Filename hasn't an allowed extension
-				return sprintf( T_('Admins can upload/rename/edit this file type only if %s in the <a %s>configuration files</a>'),
-						'<code>$admins_can_manipulate_sensitive_files = true</code>', 'href="'.get_manual_url( 'advanced-php' ).'"' );
-			}
-		}
-		else
-		{ // Filename hasn't an allowed extension
-			return sprintf( T_('&laquo;%s&raquo; has an unrecognized extension.'), $filename );
-		}
-	}
-	else
-	{ // Filename hasn't a valid extension
-		return sprintf( T_('&laquo;%s&raquo; has not a valid extension.'), $filename );
-	}
+    // Check extension filename
+    if (preg_match('#\.([a-zA-Z0-9\-_]+)$#', $filename, $match)) { // Filename has a valid extension
+        $FiletypeCache = &get_FiletypeCache();
+        if ($Filetype = &$FiletypeCache->get_by_extension(strtolower($match[1]), false)) {
+            if ($Filetype->is_allowed($allow_locked_filetypes)) { // Filename has an unlocked extension or we allow locked extensions
+                return;
+            } else {	// Filename hasn't an allowed extension
+                return sprintf(
+                    T_('Admins can upload/rename/edit this file type only if %s in the <a %s>configuration files</a>'),
+                    '<code>$admins_can_manipulate_sensitive_files = true</code>',
+                    'href="' . get_manual_url('advanced-php') . '"'
+                );
+            }
+        } else { // Filename hasn't an allowed extension
+            return sprintf(T_('&laquo;%s&raquo; has an unrecognized extension.'), $filename);
+        }
+    } else { // Filename hasn't a valid extension
+        return sprintf(T_('&laquo;%s&raquo; has not a valid extension.'), $filename);
+    }
 }
 
 
@@ -696,34 +630,27 @@ function validate_filename( $filename, $allow_locked_filetypes = NULL )
  * @param string dirname to test
  * @return nothing if the dirname is valid according to the regular expression, error message if not
  */
-function validate_dirname( $dirname )
+function validate_dirname($dirname)
 {
-	global $Settings, $force_regexp_dirname, $filename_max_length;
+    global $Settings, $force_regexp_dirname, $filename_max_length;
 
-	if( $dirname != '..' )
-	{
-		if( strlen( $dirname ) > $filename_max_length )
-		{ // Don't allow longer directory names then the max file name length
-			return sprintf( T_('&laquo;%s&raquo; is not a valid directory name.'), $dirname ).' '.sprintf( T_( 'Max %d characters are allowed.' ), $filename_max_length );
-		}
+    if ($dirname != '..') {
+        if (strlen($dirname) > $filename_max_length) { // Don't allow longer directory names then the max file name length
+            return sprintf(T_('&laquo;%s&raquo; is not a valid directory name.'), $dirname) . ' ' . sprintf(T_('Max %d characters are allowed.'), $filename_max_length);
+        }
 
-		if( !empty( $force_regexp_dirname ) )
-		{ // Use the regexp from _advanced.php
-			if( preg_match( ':'.str_replace( ':', '\:', $force_regexp_dirname ).':', $dirname ) )
-			{ // Valid dirname
-				return;
-			}
-		}
-		else
-		{ // Use the regexp from SETTINGS
-			if( preg_match( ':'.str_replace( ':', '\:', $Settings->get( 'regexp_dirname' ) ).':', $dirname ) )
-			{ // Valid dirname
-				return;
-			}
-		}
-	}
+        if (! empty($force_regexp_dirname)) { // Use the regexp from _advanced.php
+            if (preg_match(':' . str_replace(':', '\:', $force_regexp_dirname) . ':', $dirname)) { // Valid dirname
+                return;
+            }
+        } else { // Use the regexp from SETTINGS
+            if (preg_match(':' . str_replace(':', '\:', $Settings->get('regexp_dirname')) . ':', $dirname)) { // Valid dirname
+                return;
+            }
+        }
+    }
 
-	return sprintf( T_('&laquo;%s&raquo; is not a valid directory name.'), $dirname );
+    return sprintf(T_('&laquo;%s&raquo; is not a valid directory name.'), $dirname);
 }
 
 
@@ -738,33 +665,28 @@ function validate_dirname( $dirname )
  * @param boolean true if user has permission to all kind of fill types, false otherwise
  * @return mixed NULL if the rename is acceptable, error message if not
  */
-function check_rename( & $newname, $is_dir, $dir_path, $allow_locked_filetypes )
+function check_rename(&$newname, $is_dir, $dir_path, $allow_locked_filetypes)
 {
-	global $dirpath_max_length;
+    global $dirpath_max_length;
 
-	// Check if provided name is okay:
-	$newname = trim( strip_tags($newname) );
+    // Check if provided name is okay:
+    $newname = trim(strip_tags($newname));
 
-	if( $is_dir )
-	{
-		if( $error_dirname = validate_dirname( $newname ) )
-		{ // invalid directory name
-			syslog_insert( sprintf( 'Invalid name is detected for folder %s', '[['.$newname.']]' ), 'warning', 'file' );
-			return $error_dirname;
-		}
-		if( $dirpath_max_length < ( strlen( $dir_path ) + strlen( $newname ) ) )
-		{ // The new path length would be too long
-			syslog_insert( sprintf( 'The renamed file %s is too long for the folder', '[['.$newname.']]' ), 'warning', 'file' );
-			return T_('The new name is too long for this folder.');
-		}
-	}
-	elseif( $error_filename = validate_filename( $newname, $allow_locked_filetypes ) )
-	{ // Not a file name or not an allowed extension
-		syslog_insert( sprintf( 'The renamed file %s has an unrecognized extension', '[['.$newname.']]' ), 'warning', 'file' );
-		return $error_filename;
-	}
+    if ($is_dir) {
+        if ($error_dirname = validate_dirname($newname)) { // invalid directory name
+            syslog_insert(sprintf('Invalid name is detected for folder %s', '[[' . $newname . ']]'), 'warning', 'file');
+            return $error_dirname;
+        }
+        if ($dirpath_max_length < (strlen($dir_path) + strlen($newname))) { // The new path length would be too long
+            syslog_insert(sprintf('The renamed file %s is too long for the folder', '[[' . $newname . ']]'), 'warning', 'file');
+            return T_('The new name is too long for this folder.');
+        }
+    } elseif ($error_filename = validate_filename($newname, $allow_locked_filetypes)) { // Not a file name or not an allowed extension
+        syslog_insert(sprintf('The renamed file %s has an unrecognized extension', '[[' . $newname . ']]'), 'warning', 'file');
+        return $error_filename;
+    }
 
-	return NULL;
+    return null;
 }
 
 
@@ -773,52 +695,47 @@ function check_rename( & $newname, $is_dir, $dir_path, $allow_locked_filetypes )
  *
  * @param array Params
  */
-function get_upload_restriction( $params = array() )
+function get_upload_restriction($params = [])
 {
-	$params = array_merge( array(
-			'block_before'       => '',
-			'block_after'        => '<br />',
-			'block_separator'    => '<br />',
-			'title_before'       => '<strong>',
-			'title_after'        => '</strong>: ',
-			'ext_separator'      => ', ',
-			'ext_last_separator' => ' &amp; ',
-		), $params );
+    $params = array_merge([
+        'block_before' => '',
+        'block_after' => '<br />',
+        'block_separator' => '<br />',
+        'title_before' => '<strong>',
+        'title_after' => '</strong>: ',
+        'ext_separator' => ', ',
+        'ext_last_separator' => ' &amp; ',
+    ], $params);
 
-	global $DB, $Settings;
-	$restrictNotes = array();
+    global $DB, $Settings;
+    $restrictNotes = [];
 
-	if( is_logged_in( false ) )
-	{
-		$condition = ( check_user_perm( 'files', 'all' ) && !empty( $admins_can_manipulate_sensitive_files ) ) ? '' : 'ftyp_allowed <> "admin"';
-	}
-	else
-	{
-		$condition = 'ftyp_allowed = "any"';
-	}
+    if (is_logged_in(false)) {
+        $condition = (check_user_perm('files', 'all') && ! empty($admins_can_manipulate_sensitive_files)) ? '' : 'ftyp_allowed <> "admin"';
+    } else {
+        $condition = 'ftyp_allowed = "any"';
+    }
 
-	if( !empty( $condition ) )
-	{
-		$condition = ' WHERE '.$condition;
-	}
+    if (! empty($condition)) {
+        $condition = ' WHERE ' . $condition;
+    }
 
-	// Get list of recognized file types (others are not allowed to get uploaded)
-	// dh> because FiletypeCache/DataObjectCache has no interface for getting a list, this dirty query seems less dirty to me.
-	$allowed_extensions = $DB->get_col( 'SELECT ftyp_extensions FROM T_filetypes'.$condition );
-	$allowed_extensions = implode( ' ', $allowed_extensions ); // implode with space, ftyp_extensions can hold many, separated by space
-	// into array:
-	$allowed_extensions = preg_split( '~\s+~', $allowed_extensions, -1, PREG_SPLIT_NO_EMPTY );
-	// readable:
-	$allowed_extensions = implode_with_and( $allowed_extensions, $params['ext_separator'], $params['ext_last_separator'] );
+    // Get list of recognized file types (others are not allowed to get uploaded)
+    // dh> because FiletypeCache/DataObjectCache has no interface for getting a list, this dirty query seems less dirty to me.
+    $allowed_extensions = $DB->get_col('SELECT ftyp_extensions FROM T_filetypes' . $condition);
+    $allowed_extensions = implode(' ', $allowed_extensions); // implode with space, ftyp_extensions can hold many, separated by space
+    // into array:
+    $allowed_extensions = preg_split('~\s+~', $allowed_extensions, -1, PREG_SPLIT_NO_EMPTY);
+    // readable:
+    $allowed_extensions = implode_with_and($allowed_extensions, $params['ext_separator'], $params['ext_last_separator']);
 
-	$restrictNotes[] = $params['title_before'].T_('Allowed file extensions').$params['title_after'].$allowed_extensions;
+    $restrictNotes[] = $params['title_before'] . T_('Allowed file extensions') . $params['title_after'] . $allowed_extensions;
 
-	if( $Settings->get( 'upload_maxkb' ) )
-	{ // We want to restrict on file size:
-		$restrictNotes[] = $params['title_before'].T_('Maximum allowed file size').$params['title_after'].bytesreadable( $Settings->get( 'upload_maxkb' ) * 1024 );
-	}
+    if ($Settings->get('upload_maxkb')) { // We want to restrict on file size:
+        $restrictNotes[] = $params['title_before'] . T_('Maximum allowed file size') . $params['title_after'] . bytesreadable($Settings->get('upload_maxkb') * 1024);
+    }
 
-	return $params['block_before'].implode( $params['block_separator'], $restrictNotes ).$params['block_after'];
+    return $params['block_before'] . implode($params['block_separator'], $restrictNotes) . $params['block_after'];
 }
 
 
@@ -832,28 +749,25 @@ function get_upload_restriction( $params = array() )
  * @return string Relative path or even base name.
  *   NOTE: when $debug, the real path gets appended.
  */
-function rel_path_to_base( $path )
+function rel_path_to_base($path)
 {
-	global $basepath, $debug;
+    global $basepath, $debug;
 
-	// Remove basepath prefix:
-	if( preg_match( '~^('.preg_quote($basepath, '~').')(.+)$~', $path, $match ) )
-	{
-		$r = $match[2];
-	}
-	else
-	{
-		$r = basename($path).( is_dir($path) ? '/' : '' );
-	}
+    // Remove basepath prefix:
+    if (preg_match('~^(' . preg_quote($basepath, '~') . ')(.+)$~', $path, $match)) {
+        $r = $match[2];
+    } else {
+        $r = basename($path) . (is_dir($path) ? '/' : '');
+    }
 
-	/* fp> The following MUST be moved to the caller if needed:
-	if( $debug )
-	{
-		$r .= ' [DEBUG: '.$path.']';
-	}
-	*/
+    /* fp> The following MUST be moved to the caller if needed:
+    if( $debug )
+    {
+        $r .= ' [DEBUG: '.$path.']';
+    }
+    */
 
-	return $r;
+    return $r;
 }
 
 
@@ -871,144 +785,120 @@ function rel_path_to_base( $path )
  * 			asimo>fp : on the _file_upload.view, we must show only those roots where current user has permission to add files
  * @return string
  */
-function get_directory_tree( $Root = NULL, $ads_full_path = NULL, $ads_selected_full_path = NULL, $radios = false, $rds_rel_path = NULL, $is_recursing = false, $action = 'view' )
+function get_directory_tree($Root = null, $ads_full_path = null, $ads_selected_full_path = null, $radios = false, $rds_rel_path = null, $is_recursing = false, $action = 'view')
 {
-	static $instance_ID = 0;
-	static $fm_highlight;
+    static $instance_ID = 0;
+    static $fm_highlight;
 
-	// A folder might be highlighted (via "Locate this directory!")
-	if( ! isset($fm_highlight) )
-	{
-		$fm_highlight = param('fm_highlight', 'string', '');
-	}
+    // A folder might be highlighted (via "Locate this directory!")
+    if (! isset($fm_highlight)) {
+        $fm_highlight = param('fm_highlight', 'string', '');
+    }
 
+    if (! $is_recursing) {	// This is not a recursive call (yet):
+        // Init:
+        $instance_ID++;
+        $ret = '<ul class="clicktree">';
+    } else {
+        $ret = '';
+    }
 
-	if( ! $is_recursing )
-	{	// This is not a recursive call (yet):
-		// Init:
-		$instance_ID++;
-		$ret = '<ul class="clicktree">';
-	}
-	else
-	{
-		$ret = '';
-	}
+    // ________________________ Handle Roots ______________________
+    if ($Root === null) { // We want to list all roots:
+        $_roots = FileRootCache::get_available_FileRoots();
 
-	// ________________________ Handle Roots ______________________
-	if( $Root === NULL )
-	{ // We want to list all roots:
-		$_roots = FileRootCache::get_available_FileRoots();
+        foreach ($_roots as $l_Root) {
+            if (! check_user_perm('files', $action, false, $l_Root)) {	// current user does not have permission to "view" (or other $action) this root
+                continue;
+            }
+            $subR = get_directory_tree($l_Root, $l_Root->ads_path, $ads_selected_full_path, $radios, '', true);
+            if (! empty($subR['string'])) {
+                $ret .= '<li>' . $subR['string'] . '</li>';
+            }
+        }
+    } else {
+        // We'll go through files in current dir:
+        $Nodelist = new Filelist($Root, trailing_slash($ads_full_path));
+        check_showparams($Nodelist);
+        $Nodelist->load();
+        $Nodelist->sort('name');
+        $has_sub_dirs = $Nodelist->count_dirs();
 
-		foreach( $_roots as $l_Root )
-		{
-			if( ! check_user_perm( 'files', $action, false, $l_Root ) )
-			{	// current user does not have permission to "view" (or other $action) this root
-				continue;
-			}
-			$subR = get_directory_tree( $l_Root, $l_Root->ads_path, $ads_selected_full_path, $radios, '', true );
-			if( !empty( $subR['string'] ) )
-			{
-				$ret .= '<li>'.$subR['string'].'</li>';
-			}
-		}
-	}
-	else
-	{
-		// We'll go through files in current dir:
-		$Nodelist = new Filelist( $Root, trailing_slash($ads_full_path) );
-		check_showparams( $Nodelist );
-		$Nodelist->load();
-		$Nodelist->sort( 'name' );
-		$has_sub_dirs = $Nodelist->count_dirs();
+        $id_path = 'id_path_' . $instance_ID . md5($ads_full_path);
 
-		$id_path = 'id_path_'.$instance_ID.md5( $ads_full_path );
+        $r = '<span class="folder_in_tree"';
 
-		$r = '<span class="folder_in_tree"';
+        if (strpos($ads_selected_full_path, $ads_full_path) === 0) { // This is the current or parent open path
+            $dir_is_opened = true;
 
-		if( strpos( $ads_selected_full_path, $ads_full_path ) === 0 )
-		{ // This is the current or parent open path
-			$dir_is_opened = true;
+            if ($fm_highlight && $fm_highlight == substr($rds_rel_path, 0, -1)) {
+                $r .= ' id="fm_highlighted"';
+                unset($fm_highlight);
+            }
+        } else {
+            $dir_is_opened = false;
+        }
 
-			if( $fm_highlight && $fm_highlight == substr($rds_rel_path, 0, -1) )
-			{
-				$r .= ' id="fm_highlighted"';
-				unset($fm_highlight);
-			}
-		}
-		else
-		{
-			$dir_is_opened = false;
-		}
+        $r .= '>';
 
-		$r .= '>';
+        if ($radios) { // Optional radio input to select this path:
+            $root_and_path = format_to_output(implode('::', [$Root->ID, $rds_rel_path]), 'formvalue');
 
-		if( $radios )
-		{ // Optional radio input to select this path:
-			$root_and_path = format_to_output( implode( '::', array($Root->ID, $rds_rel_path) ), 'formvalue' );
+            $r .= '<input type="radio" name="root_and_path" value="' . $root_and_path . '" id="radio_' . $id_path . '"';
 
-			$r .= '<input type="radio" name="root_and_path" value="'.$root_and_path.'" id="radio_'.$id_path.'"';
+            if ($dir_is_opened) {	// This is the current open path
+                $r .= ' checked="checked"';
+            }
 
-			if( $dir_is_opened )
-			{	// This is the current open path
-				$r .= ' checked="checked"';
-			}
+            //.( ! $has_sub_dirs ? ' style="margin-right:'.get_icon( 'collapse', 'size', array( 'size' => 'width' ) ).'px"' : '' )
+            $r .= ' /> &nbsp; &nbsp;';
+        }
 
-			//.( ! $has_sub_dirs ? ' style="margin-right:'.get_icon( 'collapse', 'size', array( 'size' => 'width' ) ).'px"' : '' )
-			$r .= ' /> &nbsp; &nbsp;';
-		}
+        // Folder Icon + Name:
+        $url = regenerate_url('root,path', 'root=' . $Root->ID . '&amp;path=' . rawurlencode($rds_rel_path));
+        $label = action_icon(T_('Open this directory in the file manager'), 'folder', $url)
+            . '<a href="' . $url . '"
+			title="' . T_('Open this directory in the file manager') . '">'
+            . (empty($rds_rel_path) ? $Root->name : basename($ads_full_path))
+            . '</a>';
 
-		// Folder Icon + Name:
-		$url = regenerate_url( 'root,path', 'root='.$Root->ID.'&amp;path='.rawurlencode( $rds_rel_path ) );
-		$label = action_icon( T_('Open this directory in the file manager'), 'folder', $url )
-			.'<a href="'.$url.'"
-			title="'.T_('Open this directory in the file manager').'">'
-			.( empty($rds_rel_path) ? $Root->name : basename( $ads_full_path ) )
-			.'</a>';
+        // Handle potential subdir:
+        if (! $has_sub_dirs) {	// No subdirs
+            $r .= get_icon('expand', 'noimg', [
+                'class' => '',
+            ]) . $label . '</span>';
+        } else { // Process subdirs
+            $r .= get_icon($dir_is_opened ? 'collapse' : 'expand', 'imgtag', [
+                'data-dir-path' => $Root->ID . ':' . $rds_rel_path,
+                'style' => 'margin:0 2px',
+            ])
+                . $label . '</span>';
 
-		// Handle potential subdir:
-		if( ! $has_sub_dirs )
-		{	// No subdirs
-			$r .= get_icon( 'expand', 'noimg', array( 'class'=>'' ) ).$label.'</span>';
-		}
-		else
-		{ // Process subdirs
-			$r .= get_icon( $dir_is_opened ? 'collapse' : 'expand', 'imgtag', array(
-						'data-dir-path' => $Root->ID.':'.$rds_rel_path,
-						'style'=>'margin:0 2px'
-					) )
-				.$label.'</span>';
+            if ($dir_is_opened) {	// Load sub-directories only of currently opened directory:
+                $r .= //'<br>- '.$ads_full_path.'<br>- '.$ads_selected_full_path.'<br>- '.$rds_rel_path
+                            '<ul class="clicktree">' . "\n";
 
-			if( $dir_is_opened )
-			{	// Load sub-directories only of currently opened directory:
-				$r .= //'<br>- '.$ads_full_path.'<br>- '.$ads_selected_full_path.'<br>- '.$rds_rel_path
-							'<ul class="clicktree">'."\n";
+                while ($l_File = &$Nodelist->get_next('dir')) {
+                    $r_sub = get_directory_tree($Root, $l_File->get_full_path(), $ads_selected_full_path, $radios, $l_File->get_rdfs_rel_path(), true);
 
-				while( $l_File = & $Nodelist->get_next( 'dir' ) )
-				{
-					$r_sub = get_directory_tree( $Root, $l_File->get_full_path(), $ads_selected_full_path, $radios, $l_File->get_rdfs_rel_path(), true );
+                    $r .= '<li>' . $r_sub . '</li>';
+                }
+                $r .= '</ul>';
+            }
+        }
 
-					$r .= '<li>'.$r_sub.'</li>';
-				}
-				$r .= '</ul>';
-			}
-		}
+        if ($is_recursing) {
+            return $r;
+        } else {
+            $ret .= '<li>' . $r . '</li>';
+        }
+    }
 
-		if( $is_recursing )
-		{
-			return $r;
-		}
-		else
-		{
-			$ret .= '<li>'.$r.'</li>';
-		}
-	}
+    if (! $is_recursing) {
+        $ret .= '</ul>';
+    }
 
-	if( ! $is_recursing )
-	{
-		$ret .= '</ul>';
-	}
-
-	return $ret;
+    return $ret;
 }
 
 
@@ -1021,9 +911,9 @@ function get_directory_tree( $Root = NULL, $ads_full_path = NULL, $ads_selected_
  * @param integer permissions
  * @return boolean
  */
-function mkdir_r( $dirName, $chmod = NULL )
+function mkdir_r($dirName, $chmod = null)
 {
-	return evo_mkdir( $dirName, $chmod, true );
+    return evo_mkdir($dirName, $chmod, true);
 }
 
 
@@ -1035,30 +925,26 @@ function mkdir_r( $dirName, $chmod = NULL )
  * @param boolean Create a dir recursively
  * @return boolean TRUE on success
  */
-function evo_mkdir( $dir_path, $chmod = NULL, $recursive = false )
+function evo_mkdir($dir_path, $chmod = null, $recursive = false)
 {
-	if( is_dir( $dir_path ) )
-	{ // already exists:
-		return true;
-	}
+    if (is_dir($dir_path)) { // already exists:
+        return true;
+    }
 
-	if( @mkdir( $dir_path, 0777, $recursive ) )
-	{ // Directory is created succesfully
-		if( $chmod === NULL )
-		{ // Get default permissions
-			global $Settings;
-			$chmod = $Settings->get( 'fm_default_chmod_dir' );
-		}
+    if (@mkdir($dir_path, 0777, $recursive)) { // Directory is created succesfully
+        if ($chmod === null) { // Get default permissions
+            global $Settings;
+            $chmod = $Settings->get('fm_default_chmod_dir');
+        }
 
-		if( ! empty( $chmod ) )
-		{ // Set the dir rights by chmod() function because mkdir() doesn't provide this operation correctly
-			chmod( $dir_path, is_string( $chmod ) ? octdec( $chmod ) : $chmod );
-		}
+        if (! empty($chmod)) { // Set the dir rights by chmod() function because mkdir() doesn't provide this operation correctly
+            chmod($dir_path, is_string($chmod) ? octdec($chmod) : $chmod);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -1071,56 +957,43 @@ function evo_mkdir( $dir_path, $chmod = NULL, $recursive = false )
  * @param array What directories should be excluded
  * @return boolean TRUE on success, FALSE when no permission
  */
-function copy_r( $source, $dest, $new_folder_name = NULL, $exclude_dirs = array() )
+function copy_r($source, $dest, $new_folder_name = null, $exclude_dirs = [])
 {
-	$result = true;
+    $result = true;
 
-	if( is_dir( $source ) )
-	{ // Copy directory recusively
-		if( in_array( basename( $source ), $exclude_dirs ) )
-		{ // Don't copy this folder
-			return true;
-		}
-		if( ! ( $dir_handle = @opendir( $source ) ) )
-		{ // Unable to open dir
-			return false;
-		}
-		$source_folder = is_null( $new_folder_name ) ? basename( $source ) : $new_folder_name;
-		if( ! mkdir_r( $dest.'/'.$source_folder ) )
-		{ // No rights to create a dir
-			return false;
-		}
-		while( $file = readdir( $dir_handle ) )
-		{
-			if( $file != '.' && $file != '..' )
-			{
-				if( is_dir( $source.'/'.$file ) )
-				{ // Copy the files of subdirectory
-					$result = copy_r( $source.'/'.$file, $dest.'/'.$source_folder, NULL, $exclude_dirs ) && $result;
-				}
-				else
-				{ // Copy one file of the directory
-					$result = @copy( $source.'/'.$file, $dest.'/'.$source_folder.'/'.$file ) && $result;
-				}
-			}
-		}
-		closedir( $dir_handle );
-	}
-	else
-	{ // Copy a file and check destination folder for existing
-		$dest_folder = preg_replace( '#(.+)/[^/]+$#', '$1', $dest );
-		if( ! file_exists( $dest_folder ) )
-		{ // Create destination folder recursively if it doesn't exist
-			if( ! mkdir_r( $dest_folder ) )
-			{ // Unable to create a destination folder
-				return false;
-			}
-		}
-		// Copy a file
-		$result = @copy( $source, $dest );
-	}
+    if (is_dir($source)) { // Copy directory recusively
+        if (in_array(basename($source), $exclude_dirs)) { // Don't copy this folder
+            return true;
+        }
+        if (! ($dir_handle = @opendir($source))) { // Unable to open dir
+            return false;
+        }
+        $source_folder = is_null($new_folder_name) ? basename($source) : $new_folder_name;
+        if (! mkdir_r($dest . '/' . $source_folder)) { // No rights to create a dir
+            return false;
+        }
+        while ($file = readdir($dir_handle)) {
+            if ($file != '.' && $file != '..') {
+                if (is_dir($source . '/' . $file)) { // Copy the files of subdirectory
+                    $result = copy_r($source . '/' . $file, $dest . '/' . $source_folder, null, $exclude_dirs) && $result;
+                } else { // Copy one file of the directory
+                    $result = @copy($source . '/' . $file, $dest . '/' . $source_folder . '/' . $file) && $result;
+                }
+            }
+        }
+        closedir($dir_handle);
+    } else { // Copy a file and check destination folder for existing
+        $dest_folder = preg_replace('#(.+)/[^/]+$#', '$1', $dest);
+        if (! file_exists($dest_folder)) { // Create destination folder recursively if it doesn't exist
+            if (! mkdir_r($dest_folder)) { // Unable to create a destination folder
+                return false;
+            }
+        }
+        // Copy a file
+        $result = @copy($source, $dest);
+    }
 
-	return $result;
+    return $result;
 }
 
 
@@ -1131,42 +1004,36 @@ function copy_r( $source, $dest, $new_folder_name = NULL, $exclude_dirs = array(
  * @param string Destination folder path
  * @return boolean TRUE on success, FALSE when no permission
  */
-function move_files_r( $source_dir_path, $dest_dir_path )
+function move_files_r($source_dir_path, $dest_dir_path)
 {
-	$result = false;
+    $result = false;
 
-	if( ! ( $dir_handle = @opendir( $source_dir_path ) ) )
-	{	// Unable to open dir:
-		return $result;
-	}
+    if (! ($dir_handle = @opendir($source_dir_path))) {	// Unable to open dir:
+        return $result;
+    }
 
-	$source_dir_path = rtrim( $source_dir_path, '/' );
-	$dest_dir_path = rtrim( $dest_dir_path, '/' );
+    $source_dir_path = rtrim($source_dir_path, '/');
+    $dest_dir_path = rtrim($dest_dir_path, '/');
 
-	while( $file = readdir( $dir_handle ) )
-	{
-		if( $file == '.' || $file == '..' )
-		{	// Skip reserved folders:
-			continue;
-		}
-		if( is_dir( $source_dir_path.'/'.$file ) )
-		{	// Copy a folder recursively:
-			$result = copy_r( $source_dir_path.'/'.$file, $dest_dir_path ) && $result;
-			// Remove a folder recursively:
-			$result = rmdir_r( $source_dir_path.'/'.$file ) && $result;
-		}
-		else
-		{	// Copy a file:
-			$result = @copy( $source_dir_path.'/'.$file, $dest_dir_path.'/'.$file ) && $result;
-			// Remove a file:
-			$result = @unlink( $source_dir_path.'/'.$file ) && $result;
-		}
-	}
+    while ($file = readdir($dir_handle)) {
+        if ($file == '.' || $file == '..') {	// Skip reserved folders:
+            continue;
+        }
+        if (is_dir($source_dir_path . '/' . $file)) {	// Copy a folder recursively:
+            $result = copy_r($source_dir_path . '/' . $file, $dest_dir_path) && $result;
+            // Remove a folder recursively:
+            $result = rmdir_r($source_dir_path . '/' . $file) && $result;
+        } else {	// Copy a file:
+            $result = @copy($source_dir_path . '/' . $file, $dest_dir_path . '/' . $file) && $result;
+            // Remove a file:
+            $result = @unlink($source_dir_path . '/' . $file) && $result;
+        }
+    }
 
-	// Close the folder handler:
-	$result = closedir( $dir_handle ) && $result;
+    // Close the folder handler:
+    $result = closedir($dir_handle) && $result;
 
-	return $result;
+    return $result;
 }
 
 
@@ -1178,51 +1045,43 @@ function move_files_r( $source_dir_path, $dest_dir_path )
  * @param integer Permissions for files, NULL - to use general setting "Permissions for new files"
  * @return boolean TRUE on success
  */
-function chmod_r( $dir_path, $chmod_dir = NULL, $chmod_file = NULL )
+function chmod_r($dir_path, $chmod_dir = null, $chmod_file = null)
 {
-	global $Settings;
+    global $Settings;
 
-	$result = false;
+    $result = false;
 
-	if( ! is_dir( $dir_path ) )
-	{	// Skip not directory path:
-		return $result;
-	}
+    if (! is_dir($dir_path)) {	// Skip not directory path:
+        return $result;
+    }
 
-	if( ! ( $dir_handle = @opendir( $dir_path ) ) )
-	{	// Unable to open dir:
-		return $result;
-	}
+    if (! ($dir_handle = @opendir($dir_path))) {	// Unable to open dir:
+        return $result;
+    }
 
-	// Get default permissions:
-	$chmod_dir = ( $chmod_dir === NULL ? $Settings->get( 'fm_default_chmod_dir' ) : $chmod_dir );
-	$chmod_file = ( $chmod_file === NULL ? $Settings->get( 'fm_default_chmod_file' ) : $chmod_file );
+    // Get default permissions:
+    $chmod_dir = ($chmod_dir === null ? $Settings->get('fm_default_chmod_dir') : $chmod_dir);
+    $chmod_file = ($chmod_file === null ? $Settings->get('fm_default_chmod_file') : $chmod_file);
 
-	if( ! empty( $chmod_dir ) )
-	{	// Change permissions for directory:
-		$result = @chmod( $dir_path, is_string( $chmod_dir ) ? octdec( $chmod_dir ) : $chmod_dir ) && $result;
-	}
+    if (! empty($chmod_dir)) {	// Change permissions for directory:
+        $result = @chmod($dir_path, is_string($chmod_dir) ? octdec($chmod_dir) : $chmod_dir) && $result;
+    }
 
-	while( $file = readdir( $dir_handle ) )
-	{
-		if( $file == '.' || $file == '..' )
-		{	// Skip reserved folders:
-			continue;
-		}
-		if( is_dir( $dir_path.'/'.$file ) )
-		{	// Change permissions for directory and all files inside:
-			$result = chmod_r( $dir_path.'/'.$file, $chmod_dir, $chmod_file ) && $result;
-		}
-		elseif( ! empty( $chmod_file ) )
-		{	// Change permissions for file:
-			$result = @chmod( $dir_path.'/'.$file, is_string( $chmod_file ) ? octdec( $chmod_file ) : $chmod_file ) && $result;
-		}
-	}
+    while ($file = readdir($dir_handle)) {
+        if ($file == '.' || $file == '..') {	// Skip reserved folders:
+            continue;
+        }
+        if (is_dir($dir_path . '/' . $file)) {	// Change permissions for directory and all files inside:
+            $result = chmod_r($dir_path . '/' . $file, $chmod_dir, $chmod_file) && $result;
+        } elseif (! empty($chmod_file)) {	// Change permissions for file:
+            $result = @chmod($dir_path . '/' . $file, is_string($chmod_file) ? octdec($chmod_file) : $chmod_file) && $result;
+        }
+    }
 
-	// Close the folder handler:
-	$result = closedir( $dir_handle ) && $result;
+    // Close the folder handler:
+    $result = closedir($dir_handle) && $result;
 
-	return $result;
+    return $result;
 }
 
 
@@ -1233,20 +1092,16 @@ function chmod_r( $dir_path, $chmod_dir = NULL, $chmod_file = NULL )
  */
 function is_absolute_pathname($path)
 {
-	$pathlen = strlen($path);
-	if( ! $pathlen )
-	{
-		return false;
-	}
+    $pathlen = strlen($path);
+    if (! $pathlen) {
+        return false;
+    }
 
-	if( is_windows() )
-	{ // windows e-g: (note: "XY:" can actually happen as a drive ID in windows; I have seen it once in 2009 on MY XP sp3 after plugin in & plugin out an USB stick like 26 times over 26 days! (with sleep/hibernate in between)
-		return ( $pathlen > 1 && $path[1] == ':' );
-	}
-	else
-	{ // unix
-		return ( $path[0] == '/' );
-	}
+    if (is_windows()) { // windows e-g: (note: "XY:" can actually happen as a drive ID in windows; I have seen it once in 2009 on MY XP sp3 after plugin in & plugin out an USB stick like 26 times over 26 days! (with sleep/hibernate in between)
+        return ($pathlen > 1 && $path[1] == ':');
+    } else { // unix
+        return ($path[0] == '/');
+    }
 }
 
 
@@ -1255,66 +1110,69 @@ function is_absolute_pathname($path)
  */
 function file_controller_build_tabs()
 {
-	global $AdminUI, $blog, $admin_url;
+    global $AdminUI, $blog, $admin_url;
 
-	$AdminUI->add_menu_entries(
-			'files',
-			array(
-					'browse' => array(
-						'text' => T_('Browse'),
-						'href' => $admin_url.'?ctrl=files' ),
-					)
-				);
+    $AdminUI->add_menu_entries(
+        'files',
+        [
+            'browse' => [
+                'text' => T_('Browse'),
+                'href' => $admin_url . '?ctrl=files',
+            ],
+        ]
+    );
 
-	if( check_user_perm( 'options', 'view' ) )
-	{	// Permission to view settings:
-		$AdminUI->add_menu_entries(
-			'files',
-			array(
-				'settings' => array(
-					'text' => T_('Settings'),
-					'href' => $admin_url.'?ctrl=fileset',
-					)
-				)
-			);
+    if (check_user_perm('options', 'view')) {	// Permission to view settings:
+        $AdminUI->add_menu_entries(
+            'files',
+            [
+                'settings' => [
+                    'text' => T_('Settings'),
+                    'href' => $admin_url . '?ctrl=fileset',
+                ],
+            ]
+        );
 
-		$AdminUI->add_menu_entries(
-			array('files', 'settings'),
-			array(
-					'settings' => array(
-						'text' => T_('Settings'),
-						'href' => $admin_url.'?ctrl=fileset' ),
-					'filetypes' => array(
-						'text' => T_('File types'),
-						'href' => $admin_url.'?ctrl=filetypes' ),
-				)
-			);
-	}
+        $AdminUI->add_menu_entries(
+            ['files', 'settings'],
+            [
+                'settings' => [
+                    'text' => T_('Settings'),
+                    'href' => $admin_url . '?ctrl=fileset',
+                ],
+                'filetypes' => [
+                    'text' => T_('File types'),
+                    'href' => $admin_url . '?ctrl=filetypes',
+                ],
+            ]
+        );
+    }
 
-	if( check_user_perm( 'options', 'edit' ) )
-	{ // Permission to edit settings:
-		$AdminUI->add_menu_entries(
-			'files',
-			array(
-				'moderation' => array(
-					'text' => T_('Moderation'),
-					'href' => $admin_url.'?ctrl=filemod',
-					'entries' => array(
-						'likes' => array(
-							'text' => T_('Likes'),
-							'href' => $admin_url.'?ctrl=filemod&amp;tab=likes' ),
-						'suspicious' => array(
-							'text' => T_('Suspicious'),
-							'href' => $admin_url.'?ctrl=filemod&amp;tab=suspicious' ),
-						'duplicates' => array(
-							'text' => T_('Duplicates'),
-							'href' => $admin_url.'?ctrl=filemod&amp;tab=duplicates' ),
-						)
-					)
-				)
-			);
-	}
-
+    if (check_user_perm('options', 'edit')) { // Permission to edit settings:
+        $AdminUI->add_menu_entries(
+            'files',
+            [
+                'moderation' => [
+                    'text' => T_('Moderation'),
+                    'href' => $admin_url . '?ctrl=filemod',
+                    'entries' => [
+                        'likes' => [
+                            'text' => T_('Likes'),
+                            'href' => $admin_url . '?ctrl=filemod&amp;tab=likes',
+                        ],
+                        'suspicious' => [
+                            'text' => T_('Suspicious'),
+                            'href' => $admin_url . '?ctrl=filemod&amp;tab=suspicious',
+                        ],
+                        'duplicates' => [
+                            'text' => T_('Duplicates'),
+                            'href' => $admin_url . '?ctrl=filemod&amp;tab=duplicates',
+                        ],
+                    ],
+                ],
+            ]
+        );
+    }
 }
 
 
@@ -1325,41 +1183,37 @@ function file_controller_build_tabs()
  * @param string new evocache folder name
  * @return bool true on success
  */
-function rename_cachefolders( $oldname, $newname )
+function rename_cachefolders($oldname, $newname)
 {
-	load_class( 'files/model/_filerootcache.class.php', 'FileRootCache' );
+    load_class('files/model/_filerootcache.class.php', 'FileRootCache');
 
-	$available_Roots = FileRootCache::get_available_FileRoots();
+    $available_Roots = FileRootCache::get_available_FileRoots();
 
-	$slash_oldname = '/'.$oldname;
+    $slash_oldname = '/' . $oldname;
 
-	$result = true;
-	foreach( $available_Roots as $fileRoot )
-	{
-		$filename_params = array(
-				'inc_files'		=> false,
-				'inc_evocache'	=> true,
-			);
-		$dirpaths = get_filenames( $fileRoot->ads_path, $filename_params );
+    $result = true;
+    foreach ($available_Roots as $fileRoot) {
+        $filename_params = [
+            'inc_files' => false,
+            'inc_evocache' => true,
+        ];
+        $dirpaths = get_filenames($fileRoot->ads_path, $filename_params);
 
-		foreach( $dirpaths as $dirpath )
-		{ // search ?evocache folders
-			$dirpath_length = strlen( $dirpath );
-			if( $dirpath_length < 10 )
-			{ // The path is to short, can not contains ?evocache folder name
-				continue;
-			}
-			// searching at the end of the path -> '/' character + ?evocache, length = 1 + 9
-			$path_end = substr( $dirpath, $dirpath_length - 10 );
-			if( $path_end == $slash_oldname )
-			{ // this is a ?evocache folder
-				$new_dirpath = substr_replace( $dirpath, $newname, $dirpath_length - 9 );
-				// result is true only if all rename call return true (success)
-				$result = $result && @rename( $dirpath, $new_dirpath );
-			}
-		}
-	}
-	return $result;
+        foreach ($dirpaths as $dirpath) { // search ?evocache folders
+            $dirpath_length = strlen($dirpath);
+            if ($dirpath_length < 10) { // The path is to short, can not contains ?evocache folder name
+                continue;
+            }
+            // searching at the end of the path -> '/' character + ?evocache, length = 1 + 9
+            $path_end = substr($dirpath, $dirpath_length - 10);
+            if ($path_end == $slash_oldname) { // this is a ?evocache folder
+                $new_dirpath = substr_replace($dirpath, $newname, $dirpath_length - 9);
+                // result is true only if all rename call return true (success)
+                $result = $result && @rename($dirpath, $new_dirpath);
+            }
+        }
+    }
+    return $result;
 }
 
 
@@ -1369,60 +1223,52 @@ function rename_cachefolders( $oldname, $newname )
  * @param Log Pass a Log object here to have error messages added to it.
  * @return integer Number of deleted dirs.
  */
-function delete_cachefolders( $Log = NULL )
+function delete_cachefolders($Log = null)
 {
-	global $media_path, $Settings;
+    global $media_path, $Settings;
 
-	if( !isset( $Settings ) )
-	{	// This function can be called on install process before initialization of $Settings, Exit here
-		return false;
-	}
+    if (! isset($Settings)) {	// This function can be called on install process before initialization of $Settings, Exit here
+        return false;
+    }
 
-	// Get this, just in case someone comes up with a different naming:
-	$evocache_foldername = $Settings->get( 'evocache_foldername' );
+    // Get this, just in case someone comes up with a different naming:
+    $evocache_foldername = $Settings->get('evocache_foldername');
 
-	$filename_params = array(
-			'inc_files'		=> false,
-			'inc_evocache'	=> true,
-		);
-	$dirs = get_filenames( $media_path, $filename_params );
+    $filename_params = [
+        'inc_files' => false,
+        'inc_evocache' => true,
+    ];
+    $dirs = get_filenames($media_path, $filename_params);
 
-	$deleted_dirs = 0;
-	foreach( $dirs as $dir )
-	{
-		$basename = basename($dir);
-		if( $basename == '.evocache' || $basename == '_evocache' || $basename == $evocache_foldername )
-		{	// Delete .evocache directory recursively
-			if( rmdir_r( $dir ) )
-			{
-				$deleted_dirs++;
-			}
-			elseif( $Log )
-			{
-				$Log->add( sprintf( T_('Could not delete directory: %s'), $dir ), 'error' );
-			}
-		}
-	}
-	return $deleted_dirs;
+    $deleted_dirs = 0;
+    foreach ($dirs as $dir) {
+        $basename = basename($dir);
+        if ($basename == '.evocache' || $basename == '_evocache' || $basename == $evocache_foldername) {	// Delete .evocache directory recursively
+            if (rmdir_r($dir)) {
+                $deleted_dirs++;
+            } elseif ($Log) {
+                $Log->add(sprintf(T_('Could not delete directory: %s'), $dir), 'error');
+            }
+        }
+    }
+    return $deleted_dirs;
 }
 
 
 /**
  * Check and set the given FileList object fm_showhidden and fm_showevocache params
  */
-function check_showparams( & $Filelist )
+function check_showparams(&$Filelist)
 {
-	global $UserSettings;
+    global $UserSettings;
 
-	if( $UserSettings->param_Request( 'fm_showhidden', 'fm_showhidden', 'integer', 0 ) )
-	{
-		$Filelist->_show_hidden_files = true;
-	}
+    if ($UserSettings->param_Request('fm_showhidden', 'fm_showhidden', 'integer', 0)) {
+        $Filelist->_show_hidden_files = true;
+    }
 
-	if( $UserSettings->param_Request( 'fm_showevocache', 'fm_showevocache', 'integer', 0 ) )
-	{
-		$Filelist->_show_evocache = true;
-	}
+    if ($UserSettings->param_Request('fm_showevocache', 'fm_showevocache', 'integer', 0)) {
+        $Filelist->_show_evocache = true;
+    }
 }
 
 
@@ -1439,292 +1285,270 @@ function check_showparams( & $Filelist )
  * @return mixed NULL if upload was impossible to complete for some reason (wrong fileroot ID, insufficient user permission, etc.)
  * 				       array, which contains uploadedFiles, failedFiles, renamedFiles and renamedMessages
  */
-function process_upload( $root_ID, $path, $create_path_dirs = false, $check_perms = true, $upload_quickmode = true, $warn_invalid_filenames = true, $min_size = 0 )
+function process_upload($root_ID, $path, $create_path_dirs = false, $check_perms = true, $upload_quickmode = true, $warn_invalid_filenames = true, $min_size = 0)
 {
-	global $Settings, $Plugins, $Messages, $current_User, $force_upload_forbiddenext, $admins_can_manipulate_sensitive_files;
+    global $Settings, $Plugins, $Messages, $current_User, $force_upload_forbiddenext, $admins_can_manipulate_sensitive_files;
 
-	if( empty($_FILES) )
-	{	// We have NO uploaded files to process...
-		return NULL;
-	}
+    if (empty($_FILES)) {	// We have NO uploaded files to process...
+        return null;
+    }
 
-	/**
-	 * Remember failed files (and the error messages)
-	 * @var array
-	 */
-	$failedFiles = array();
-	/**
-	 * Remember uploaded files
-	 * @var array
-	 */
-	$uploadedFiles = array();
-	/**
-	 * Remember renamed files
-	 * @var array
-	 */
-	$renamedFiles = array();
-	/**
-	 * Remember renamed Messages
-	 * @var array
-	 */
-	$renamedMessages = array();
+    /**
+     * Remember failed files (and the error messages)
+     * @var array
+     */
+    $failedFiles = [];
+    /**
+     * Remember uploaded files
+     * @var array
+     */
+    $uploadedFiles = [];
+    /**
+     * Remember renamed files
+     * @var array
+     */
+    $renamedFiles = [];
+    /**
+     * Remember renamed Messages
+     * @var array
+     */
+    $renamedMessages = [];
 
-	$FileRootCache = & get_FileRootCache();
-	$fm_FileRoot = & $FileRootCache->get_by_ID($root_ID, true);
-	if( !$fm_FileRoot )
-	{ // fileRoot not found:
-		return NULL;
-	}
+    $FileRootCache = &get_FileRootCache();
+    $fm_FileRoot = &$FileRootCache->get_by_ID($root_ID, true);
+    if (! $fm_FileRoot) { // fileRoot not found:
+        return null;
+    }
 
-	if( $check_perms && ( !isset( $current_User ) || check_user_perm( 'files', 'add', false, $fm_FileRoot ) ) )
-	{ // Permission check required but current User has no permission to upload:
-		return NULL;
-	}
+    if ($check_perms && (! isset($current_User) || check_user_perm('files', 'add', false, $fm_FileRoot))) { // Permission check required but current User has no permission to upload:
+        return null;
+    }
 
-	// Let's get into requested list dir...
-	$non_canonical_list_path = $fm_FileRoot->ads_path.$path;
-	// Dereference any /../ just to make sure, and CHECK if directory exists:
-	$ads_list_path = get_canonical_path( $non_canonical_list_path );
+    // Let's get into requested list dir...
+    $non_canonical_list_path = $fm_FileRoot->ads_path . $path;
+    // Dereference any /../ just to make sure, and CHECK if directory exists:
+    $ads_list_path = get_canonical_path($non_canonical_list_path);
 
-	// check if the upload dir exists
-	if( !is_dir( $ads_list_path ) )
-	{
-		if( $create_path_dirs )
-		{ // Create path
-			mkdir_r( $ads_list_path );
-		}
-		else
-		{ // This case should not happen! If it happens then there is a bug in the code where this function was called!
-			return NULL;
-		}
-	}
+    // check if the upload dir exists
+    if (! is_dir($ads_list_path)) {
+        if ($create_path_dirs) { // Create path
+            mkdir_r($ads_list_path);
+        } else { // This case should not happen! If it happens then there is a bug in the code where this function was called!
+            return null;
+        }
+    }
 
-	// Get param arrays for all uploaded files:
-	$uploadfile_title = param( 'uploadfile_title', 'array:string', array() );
-	$uploadfile_alt = param( 'uploadfile_alt', 'array:string', array() );
-	$uploadfile_desc = param( 'uploadfile_desc', 'array:string', array() );
-	$uploadfile_name = param( 'uploadfile_name', 'array:string', array() );
+    // Get param arrays for all uploaded files:
+    $uploadfile_title = param('uploadfile_title', 'array:string', []);
+    $uploadfile_alt = param('uploadfile_alt', 'array:string', []);
+    $uploadfile_desc = param('uploadfile_desc', 'array:string', []);
+    $uploadfile_name = param('uploadfile_name', 'array:string', []);
 
-	// LOOP THROUGH ALL UPLOADED FILES AND PROCESS EACH ONE:
-	foreach( $_FILES['uploadfile']['name'] as $lKey => $lName )
-	{
-		if( empty( $lName ) )
-		{ // No file name:
-			if( $upload_quickmode
-				 || !empty( $uploadfile_title[$lKey] )
-				 || !empty( $uploadfile_alt[$lKey] )
-				 || !empty( $uploadfile_desc[$lKey] )
-				 || !empty( $uploadfile_name[$lKey] ) )
-			{ // User specified params but NO file! Warn the user:
-				$failedFiles[$lKey] = T_( 'Please select a local file to upload.' );
-				param_error( 'uploadfile[]', NULL, $failedFiles[$lKey] );
-			}
-			// Abort upload for this file:
-			continue;
-		}
+    // LOOP THROUGH ALL UPLOADED FILES AND PROCESS EACH ONE:
+    foreach ($_FILES['uploadfile']['name'] as $lKey => $lName) {
+        if (empty($lName)) { // No file name:
+            if ($upload_quickmode
+                 || ! empty($uploadfile_title[$lKey])
+                 || ! empty($uploadfile_alt[$lKey])
+                 || ! empty($uploadfile_desc[$lKey])
+                 || ! empty($uploadfile_name[$lKey])) { // User specified params but NO file! Warn the user:
+                $failedFiles[$lKey] = T_('Please select a local file to upload.');
+                param_error('uploadfile[]', null, $failedFiles[$lKey]);
+            }
+            // Abort upload for this file:
+            continue;
+        }
 
-		if( $Settings->get( 'upload_maxkb' )
-				&& $_FILES['uploadfile']['size'][$lKey] > $Settings->get( 'upload_maxkb' )*1024 )
-		{ // File is larger than allowed in settings:
-			$failedFiles[$lKey] = sprintf(
-					T_('The file is too large: %s but the maximum allowed is %s.'),
-					bytesreadable( $_FILES['uploadfile']['size'][$lKey] ),
-					bytesreadable($Settings->get( 'upload_maxkb' )*1024) );
-			// Abort upload for this file:
-			continue;
-		}
+        if ($Settings->get('upload_maxkb')
+                && $_FILES['uploadfile']['size'][$lKey] > $Settings->get('upload_maxkb') * 1024) { // File is larger than allowed in settings:
+            $failedFiles[$lKey] = sprintf(
+                T_('The file is too large: %s but the maximum allowed is %s.'),
+                bytesreadable($_FILES['uploadfile']['size'][$lKey]),
+                bytesreadable($Settings->get('upload_maxkb') * 1024)
+            );
+            // Abort upload for this file:
+            continue;
+        }
 
-		if( ( !( $_FILES['uploadfile']['error'][$lKey] ) ) && ( !empty( $min_size ) ) )
-		{ // If there is no error and a minimum size is required, check if the uploaded picture satisfies the "minimum size" criteria
-			$image_sizes = imgsize( $_FILES['uploadfile']['tmp_name'][$lKey], 'widthheight' );
-			if( $image_sizes[0] < $min_size || $image_sizes[1] < $min_size )
-			{	// Abort upload for this file:
-				$failedFiles[$lKey] = sprintf(
-					T_( 'Your profile picture must have a minimum size of %dx%d pixels.' ),
-					$min_size,
-					$min_size );
-				continue;
-			}
-		}
+        if ((! ($_FILES['uploadfile']['error'][$lKey])) && (! empty($min_size))) { // If there is no error and a minimum size is required, check if the uploaded picture satisfies the "minimum size" criteria
+            $image_sizes = imgsize($_FILES['uploadfile']['tmp_name'][$lKey], 'widthheight');
+            if ($image_sizes[0] < $min_size || $image_sizes[1] < $min_size) {	// Abort upload for this file:
+                $failedFiles[$lKey] = sprintf(
+                    T_('Your profile picture must have a minimum size of %dx%d pixels.'),
+                    $min_size,
+                    $min_size
+                );
+                continue;
+            }
+        }
 
-		if( $_FILES['uploadfile']['error'][$lKey] )
-		{ // PHP itself has detected an error!:
-			switch( $_FILES['uploadfile']['error'][$lKey] )
-			{
-				case UPLOAD_ERR_FORM_SIZE:
-					// The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form.
-					// This can easily be edited by the user/hacker, so we do not use it.. file size gets checked for real just above.
-					break;
+        if ($_FILES['uploadfile']['error'][$lKey]) { // PHP itself has detected an error!:
+            switch ($_FILES['uploadfile']['error'][$lKey]) {
+                case UPLOAD_ERR_FORM_SIZE:
+                    // The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form.
+                    // This can easily be edited by the user/hacker, so we do not use it.. file size gets checked for real just above.
+                    break;
 
-				case UPLOAD_ERR_INI_SIZE:
-					// File is larger than allowed in php.ini:
-					$failedFiles[$lKey] = 'The file exceeds the upload_max_filesize directive in php.ini.'; // Configuration error, no translation
-					break;
+                case UPLOAD_ERR_INI_SIZE:
+                    // File is larger than allowed in php.ini:
+                    $failedFiles[$lKey] = 'The file exceeds the upload_max_filesize directive in php.ini.'; // Configuration error, no translation
+                    break;
 
-				case UPLOAD_ERR_PARTIAL:
-					$failedFiles[$lKey] = T_('The file was only partially uploaded.');
-					break;
+                case UPLOAD_ERR_PARTIAL:
+                    $failedFiles[$lKey] = T_('The file was only partially uploaded.');
+                    break;
 
-				case UPLOAD_ERR_NO_FILE:
-					// Is probably the same as empty($lName) before.
-					$failedFiles[$lKey] = T_('No file was uploaded.');
-					break;
+                case UPLOAD_ERR_NO_FILE:
+                    // Is probably the same as empty($lName) before.
+                    $failedFiles[$lKey] = T_('No file was uploaded.');
+                    break;
 
-				case 6: // numerical value of UPLOAD_ERR_NO_TMP_DIR
-				# (min_php: 4.3.10, 5.0.3) case UPLOAD_ERR_NO_TMP_DIR:
-					// Missing a temporary folder.
-					$failedFiles[$lKey] = 'Temporary upload dir is missing! (upload_tmp_dir in php.ini)'; // Configuration error, no translation
-					break;
+                case 6: // numerical value of UPLOAD_ERR_NO_TMP_DIR
+                    # (min_php: 4.3.10, 5.0.3) case UPLOAD_ERR_NO_TMP_DIR:
+                    // Missing a temporary folder.
+                    $failedFiles[$lKey] = 'Temporary upload dir is missing! (upload_tmp_dir in php.ini)'; // Configuration error, no translation
+                    break;
 
-				default:
-					$failedFiles[$lKey] = T_('An unknown error has occurred!').' Error code #'.$_FILES['uploadfile']['error'][$lKey];
-					break;
-			}
-			// Abort upload for this file:
-			continue;
-		}
+                default:
+                    $failedFiles[$lKey] = T_('An unknown error has occurred!') . ' Error code #' . $_FILES['uploadfile']['error'][$lKey];
+                    break;
+            }
+            // Abort upload for this file:
+            continue;
+        }
 
-		if( ! isset($_FILES['uploadfile']['_evo_fetched_url'][$lKey]) // skip check for fetched URLs
-			&& ! is_uploaded_file( $_FILES['uploadfile']['tmp_name'][$lKey] ) )
-		{ // Ensure that a malicious user hasn't tried to trick the script into working on files upon which it should not be working.
-			$failedFiles[$lKey] = T_('The file does not seem to be a valid upload! It may exceed the upload_max_filesize directive in php.ini.');
-			// Abort upload for this file:
-			continue;
-		}
+        if (! isset($_FILES['uploadfile']['_evo_fetched_url'][$lKey]) // skip check for fetched URLs
+            && ! is_uploaded_file($_FILES['uploadfile']['tmp_name'][$lKey])) { // Ensure that a malicious user hasn't tried to trick the script into working on files upon which it should not be working.
+            $failedFiles[$lKey] = T_('The file does not seem to be a valid upload! It may exceed the upload_max_filesize directive in php.ini.');
+            // Abort upload for this file:
+            continue;
+        }
 
-		// Use new name on server if specified:
-		$newName = !empty( $uploadfile_name[ $lKey ] ) ? $uploadfile_name[ $lKey ] : $lName;
-		// validate file name
-		if( $error_filename = process_filename( $newName, !$warn_invalid_filenames, true, $fm_FileRoot, $path ) )
-		{ // Not a valid file name or not an allowed extension:
-			$failedFiles[$lKey] = $error_filename;
-			syslog_insert( sprintf( 'The uploaded file %s has an unrecognized extension', '[['.$newName.']]' ), 'warning', 'file' );
-			// Abort upload for this file:
-			continue;
-		}
+        // Use new name on server if specified:
+        $newName = ! empty($uploadfile_name[$lKey]) ? $uploadfile_name[$lKey] : $lName;
+        // validate file name
+        if ($error_filename = process_filename($newName, ! $warn_invalid_filenames, true, $fm_FileRoot, $path)) { // Not a valid file name or not an allowed extension:
+            $failedFiles[$lKey] = $error_filename;
+            syslog_insert(sprintf('The uploaded file %s has an unrecognized extension', '[[' . $newName . ']]'), 'warning', 'file');
+            // Abort upload for this file:
+            continue;
+        }
 
-		// Check if the uploaded file type is an image, and if is an image then try to fix the file extension based on mime type
-		// If the mime type is a known mime type and user has right to upload files with this kind of file type,
-		// this part of code will check if the file extension is the same as admin defined for this file type, and will fix it if it isn't the same
-		// Note: it will also change the jpeg extensions to jpg.
-		$uploadfile_path = $_FILES['uploadfile']['tmp_name'][$lKey];
-		// this image_info variable will be used again to get file thumb
-		$image_info = getimagesize($uploadfile_path);
-		if( $image_info )
-		{ // This is an image, validate mimetype vs. extension:
-			$image_mimetype = $image_info['mime'];
-			$FiletypeCache = & get_FiletypeCache();
-			// Get correct file type based on mime type
-			$correct_Filetype = $FiletypeCache->get_by_mimetype( $image_mimetype, false, false );
+        // Check if the uploaded file type is an image, and if is an image then try to fix the file extension based on mime type
+        // If the mime type is a known mime type and user has right to upload files with this kind of file type,
+        // this part of code will check if the file extension is the same as admin defined for this file type, and will fix it if it isn't the same
+        // Note: it will also change the jpeg extensions to jpg.
+        $uploadfile_path = $_FILES['uploadfile']['tmp_name'][$lKey];
+        // this image_info variable will be used again to get file thumb
+        $image_info = getimagesize($uploadfile_path);
+        if ($image_info) { // This is an image, validate mimetype vs. extension:
+            $image_mimetype = $image_info['mime'];
+            $FiletypeCache = &get_FiletypeCache();
+            // Get correct file type based on mime type
+            $correct_Filetype = $FiletypeCache->get_by_mimetype($image_mimetype, false, false);
 
-			// Check if file type is known by us, and if it is allowed for upload.
-			// If we don't know this file type or if it isn't allowed we don't change the extension! The current extension is allowed for sure.
-			if( $correct_Filetype && $correct_Filetype->is_allowed() )
-			{ // A FileType with the given mime type exists in database and it is an allowed file type for current User
-				// The "correct" extension is a plausible one, proceed...
-				$correct_extension = $correct_Filetype->get_extensions();
-				$correct_extension = array_shift( $correct_extension );
-				$path_info = pathinfo($newName);
-				$current_extension = $path_info['extension'];
+            // Check if file type is known by us, and if it is allowed for upload.
+            // If we don't know this file type or if it isn't allowed we don't change the extension! The current extension is allowed for sure.
+            if ($correct_Filetype && $correct_Filetype->is_allowed()) { // A FileType with the given mime type exists in database and it is an allowed file type for current User
+                // The "correct" extension is a plausible one, proceed...
+                $correct_extension = $correct_Filetype->get_extensions();
+                $correct_extension = array_shift($correct_extension);
+                $path_info = pathinfo($newName);
+                $current_extension = $path_info['extension'];
 
-				// change file extension to the correct extension, but only if the correct extension is not restricted, this is an extra security check!
-				if( strtolower($current_extension) != strtolower($correct_extension) && ( !in_array( $correct_extension, $force_upload_forbiddenext ) ) )
-				{ // change the file extension to the correct extension
-					$old_name = $newName;
-					$newName = $path_info['filename'].'.'.$correct_extension;
-					$Messages->add( sprintf(T_('The extension of the file &laquo;%s&raquo; has been corrected. The new filename is &laquo;%s&raquo;.'), $old_name, $newName), 'warning' );
-				}
-			}
-		}
+                // change file extension to the correct extension, but only if the correct extension is not restricted, this is an extra security check!
+                if (strtolower($current_extension) != strtolower($correct_extension) && (! in_array($correct_extension, $force_upload_forbiddenext))) { // change the file extension to the correct extension
+                    $old_name = $newName;
+                    $newName = $path_info['filename'] . '.' . $correct_extension;
+                    $Messages->add(sprintf(T_('The extension of the file &laquo;%s&raquo; has been corrected. The new filename is &laquo;%s&raquo;.'), $old_name, $newName), 'warning');
+                }
+            }
+        }
 
-		// Get File object for requested target location:
-		$oldName = strtolower( $newName );
-		list( $newFile, $oldFile_thumb ) = check_file_exists( $fm_FileRoot, $path, $newName, $image_info );
-		$newName = $newFile->get( 'name' );
+        // Get File object for requested target location:
+        $oldName = strtolower($newName);
+        list($newFile, $oldFile_thumb) = check_file_exists($fm_FileRoot, $path, $newName, $image_info);
+        $newName = $newFile->get('name');
 
-		// Trigger plugin event
-		if( $Plugins->trigger_event_first_false( 'AfterFileUpload', array(
-					'File' => & $newFile,
-					'name' => & $_FILES['uploadfile']['name'][$lKey],
-					'type' => & $_FILES['uploadfile']['type'][$lKey],
-					'tmp_name' => & $_FILES['uploadfile']['tmp_name'][$lKey],
-					'size' => & $_FILES['uploadfile']['size'][$lKey],
-				) ) )
-		{
-			// Plugin returned 'false'.
-			// Abort upload for this file:
-			continue;
-		}
+        // Trigger plugin event
+        if ($Plugins->trigger_event_first_false('AfterFileUpload', [
+            'File' => &$newFile,
+            'name' => &$_FILES['uploadfile']['name'][$lKey],
+            'type' => &$_FILES['uploadfile']['type'][$lKey],
+            'tmp_name' => &$_FILES['uploadfile']['tmp_name'][$lKey],
+            'size' => &$_FILES['uploadfile']['size'][$lKey],
+        ])) {
+            // Plugin returned 'false'.
+            // Abort upload for this file:
+            continue;
+        }
 
-		// Attempt to move the uploaded file to the requested target location:
-		if( isset($_FILES['uploadfile']['_evo_fetched_url'][$lKey]) )
-		{ // fetched remotely
-			if( ! rename( $_FILES['uploadfile']['tmp_name'][$lKey], $newFile->get_full_path() ) )
-			{
-				$failedFiles[$lKey] = T_('An unknown error occurred when moving the uploaded file on the server.');
-				// Abort upload for this file:
-				continue;
-			}
-		}
-		elseif( ! move_uploaded_file( $_FILES['uploadfile']['tmp_name'][$lKey], $newFile->get_full_path() ) )
-		{
-			syslog_insert( sprintf( 'File %s could not be uploaded', '[['.$newFile->get_name().']]' ), 'warning', 'file', $newFile->ID );
-			$failedFiles[$lKey] = T_('An unknown error occurred when moving the uploaded file on the server.');
-			// Abort upload for this file:
-			continue;
-		}
+        // Attempt to move the uploaded file to the requested target location:
+        if (isset($_FILES['uploadfile']['_evo_fetched_url'][$lKey])) { // fetched remotely
+            if (! rename($_FILES['uploadfile']['tmp_name'][$lKey], $newFile->get_full_path())) {
+                $failedFiles[$lKey] = T_('An unknown error occurred when moving the uploaded file on the server.');
+                // Abort upload for this file:
+                continue;
+            }
+        } elseif (! move_uploaded_file($_FILES['uploadfile']['tmp_name'][$lKey], $newFile->get_full_path())) {
+            syslog_insert(sprintf('File %s could not be uploaded', '[[' . $newFile->get_name() . ']]'), 'warning', 'file', $newFile->ID);
+            $failedFiles[$lKey] = T_('An unknown error occurred when moving the uploaded file on the server.');
+            // Abort upload for this file:
+            continue;
+        }
 
-		// change to default chmod settings
-		if( $newFile->chmod( NULL ) === false )
-		{ // add a note, this is no error!
-			$Messages->add( sprintf( T_('Could not change permissions of &laquo;%s&raquo; to default chmod setting.'), $newFile->dget('name') ), 'note' );
-		}
+        // change to default chmod settings
+        if ($newFile->chmod(null) === false) { // add a note, this is no error!
+            $Messages->add(sprintf(T_('Could not change permissions of &laquo;%s&raquo; to default chmod setting.'), $newFile->dget('name')), 'note');
+        }
 
-		// Refreshes file properties (type, size, perms...)
-		$newFile->load_properties();
+        // Refreshes file properties (type, size, perms...)
+        $newFile->load_properties();
 
-		if( ! empty( $oldFile_thumb ) )
-		{ // The file name was changed!
-			if( $image_info )
-			{
-				$newFile_thumb = $newFile->get_preview_thumb( 'fulltype' );
-			}
-			else
-			{
-				$newFile_thumb = $newFile->get_size_formatted();
-			}
-			//$newFile_size = bytesreadable ($_FILES['uploadfile']['size'][$lKey]);
-			$renamedMessages[$lKey]['message'] = sprintf( T_('"%s was renamed to %s. Would you like to replace %s with the new version instead?'),
-														 '&laquo;'.$oldName.'&raquo;', '&laquo;'.$newName.'&raquo;', '&laquo;'.$oldName.'&raquo;' );
-			$renamedMessages[$lKey]['oldThumb'] = $oldFile_thumb;
-			$renamedMessages[$lKey]['newThumb'] = $newFile_thumb;
-			$renamedFiles[$lKey]['oldName'] = $oldName;
-			$renamedFiles[$lKey]['newName'] = $newName;
-		}
+        if (! empty($oldFile_thumb)) { // The file name was changed!
+            if ($image_info) {
+                $newFile_thumb = $newFile->get_preview_thumb('fulltype');
+            } else {
+                $newFile_thumb = $newFile->get_size_formatted();
+            }
+            //$newFile_size = bytesreadable ($_FILES['uploadfile']['size'][$lKey]);
+            $renamedMessages[$lKey]['message'] = sprintf(
+                T_('"%s was renamed to %s. Would you like to replace %s with the new version instead?'),
+                '&laquo;' . $oldName . '&raquo;',
+                '&laquo;' . $newName . '&raquo;',
+                '&laquo;' . $oldName . '&raquo;'
+            );
+            $renamedMessages[$lKey]['oldThumb'] = $oldFile_thumb;
+            $renamedMessages[$lKey]['newThumb'] = $newFile_thumb;
+            $renamedFiles[$lKey]['oldName'] = $oldName;
+            $renamedFiles[$lKey]['newName'] = $newName;
+        }
 
-		// Store extra info about the file into File Object:
-		if( isset( $uploadfile_title[$lKey] ) )
-		{ // If a title text has been passed... (does not happen in quick upload mode)
-			$newFile->set( 'title', trim( strip_tags($uploadfile_title[$lKey])) );
-		}
-		if( isset( $uploadfile_alt[$lKey] ) )
-		{ // If an alt text has been passed... (does not happen in quick upload mode)
-			$newFile->set( 'alt', trim( strip_tags($uploadfile_alt[$lKey])) );
-		}
-		if( isset( $uploadfile_desc[$lKey] ) )
-		{ // If a desc text has been passed... (does not happen in quick upload mode)
-			$newFile->set( 'desc', trim( strip_tags($uploadfile_desc[$lKey])) );
-		}
+        // Store extra info about the file into File Object:
+        if (isset($uploadfile_title[$lKey])) { // If a title text has been passed... (does not happen in quick upload mode)
+            $newFile->set('title', trim(strip_tags($uploadfile_title[$lKey])));
+        }
+        if (isset($uploadfile_alt[$lKey])) { // If an alt text has been passed... (does not happen in quick upload mode)
+            $newFile->set('alt', trim(strip_tags($uploadfile_alt[$lKey])));
+        }
+        if (isset($uploadfile_desc[$lKey])) { // If a desc text has been passed... (does not happen in quick upload mode)
+            $newFile->set('desc', trim(strip_tags($uploadfile_desc[$lKey])));
+        }
 
-		// Store File object into DB:
-		$newFile->dbsave();
-		report_user_upload( $newFile );
-		$uploadedFiles[] = $newFile;
-	}
+        // Store File object into DB:
+        $newFile->dbsave();
+        report_user_upload($newFile);
+        $uploadedFiles[] = $newFile;
+    }
 
-	prepare_uploaded_files( $uploadedFiles );
+    prepare_uploaded_files($uploadedFiles);
 
-	return array( 'uploadedFiles' => $uploadedFiles, 'failedFiles' => $failedFiles, 'renamedFiles' => $renamedFiles, 'renamedMessages' => $renamedMessages );
+    return [
+        'uploadedFiles' => $uploadedFiles,
+        'failedFiles' => $failedFiles,
+        'renamedFiles' => $renamedFiles,
+        'renamedMessages' => $renamedMessages,
+    ];
 }
 
 
@@ -1733,24 +1557,20 @@ function process_upload( $root_ID, $path, $create_path_dirs = false, $check_perm
  *
  * @param array Uploaded files
  */
-function prepare_uploaded_files( $uploadedFiles )
+function prepare_uploaded_files($uploadedFiles)
 {
-	if( count( $uploadedFiles ) == 0 )
-	{	// No uploaded files
-		return;
-	}
+    if (count($uploadedFiles) == 0) {	// No uploaded files
+        return;
+    }
 
-	foreach( $uploadedFiles as $File )
-	{
-		$Filetype = & $File->get_Filetype();
-		if( $Filetype )
-		{
-			if( in_array( $Filetype->mimetype, array( 'image/jpeg', 'image/gif', 'image/png' ) ) )
-			{	// Image file
-				prepare_uploaded_image( $File, $Filetype->mimetype );
-			}
-		}
-	}
+    foreach ($uploadedFiles as $File) {
+        $Filetype = &$File->get_Filetype();
+        if ($Filetype) {
+            if (in_array($Filetype->mimetype, ['image/jpeg', 'image/gif', 'image/png'])) {	// Image file
+                prepare_uploaded_image($File, $Filetype->mimetype);
+            }
+        }
+    }
 }
 
 
@@ -1760,39 +1580,33 @@ function prepare_uploaded_files( $uploadedFiles )
  * @param object File
  * @param string mimetype
  */
-function prepare_uploaded_image( $File, $mimetype )
+function prepare_uploaded_image($File, $mimetype)
 {
-	global $Settings, $Messages;
+    global $Settings, $Messages;
 
-	$thumb_width = $Settings->get( 'fm_resize_width' );
-	$thumb_height = $Settings->get( 'fm_resize_height' );
-	$thumb_quality = $Settings->get( 'fm_resize_quality' );
+    $thumb_width = $Settings->get('fm_resize_width');
+    $thumb_height = $Settings->get('fm_resize_height');
+    $thumb_quality = $Settings->get('fm_resize_quality');
 
-	$do_resize = false;
-	if( $Settings->get( 'fm_resize_enable' ) &&
-	    $thumb_width > 0 && $thumb_height > 0 )
-	{	// Image resizing is enabled
-		list( $image_width, $image_height ) = explode( 'x', $File->get_image_size() );
-		if( $image_width > $thumb_width || $image_height > $thumb_height )
-		{	// This image should be resized
-			$do_resize = true;
-		}
-	}
+    $do_resize = false;
+    if ($Settings->get('fm_resize_enable') &&
+        $thumb_width > 0 && $thumb_height > 0) {	// Image resizing is enabled
+        list($image_width, $image_height) = explode('x', $File->get_image_size());
+        if ($image_width > $thumb_width || $image_height > $thumb_height) {	// This image should be resized
+            $do_resize = true;
+        }
+    }
 
-	load_funcs( 'files/model/_image.funcs.php' );
+    load_funcs('files/model/_image.funcs.php');
 
-	$resized_imh = null;
-	if( $do_resize )
-	{ // Resize image
-		resize_image( $File, $thumb_width, $thumb_height, $mimetype, $thumb_quality );
-	}
-	else
-	{
-		if( $mimetype == 'image/jpeg' )
-		{	// JPEG, do autorotate if EXIF Orientation tag is defined
-			exif_orientation( $File->get_full_path(), $resized_imh, true );
-		}
-	}
+    $resized_imh = null;
+    if ($do_resize) { // Resize image
+        resize_image($File, $thumb_width, $thumb_height, $mimetype, $thumb_quality);
+    } else {
+        if ($mimetype == 'image/jpeg') {	// JPEG, do autorotate if EXIF Orientation tag is defined
+            exif_orientation($File->get_full_path(), $resized_imh, true);
+        }
+    }
 }
 
 
@@ -1801,34 +1615,36 @@ function prepare_uploaded_image( $File, $mimetype )
  *
  * @param object File uploaded by user
  */
-function report_user_upload( $File )
+function report_user_upload($File)
 {
-	global $current_User;
+    global $current_User;
 
-	load_funcs( 'files/model/_file.funcs.php' );
+    load_funcs('files/model/_file.funcs.php');
 
-	syslog_insert( sprintf( '%s has uploaded the file %s -- Size: %s',
-		( is_logged_in() ? 'User #'.$current_User->ID.'([['.$current_User->login.']])' : 'Anonymous user' ),
-		'[['.$File->get_full_path().']]', bytesreadable( $File->get_size(), false ) ), 'info', 'file', $File->ID );
+    syslog_insert(sprintf(
+        '%s has uploaded the file %s -- Size: %s',
+        (is_logged_in() ? 'User #' . $current_User->ID . '([[' . $current_User->login . ']])' : 'Anonymous user'),
+        '[[' . $File->get_full_path() . ']]',
+        bytesreadable($File->get_size(), false)
+    ), 'info', 'file', $File->ID);
 }
 
 
 /**
  * Handles warnings and errors when attempting to read EXIF data
  */
-function exif_read_data_error_handler( $errno, $errstr )
+function exif_read_data_error_handler($errno, $errstr)
 {
-	global $Messages;
+    global $Messages;
 
-	switch( $errno )
-	{
-		case E_WARNING:
-			$Messages->add( T_('Unable to read EXIF data'), 'warning' );
-			break;
+    switch ($errno) {
+        case E_WARNING:
+            $Messages->add(T_('Unable to read EXIF data'), 'warning');
+            break;
 
-		default:
-			$Messages->add( T_('Unknown error').': <code>'.$errstr.'</code>', 'error' );
-	}
+        default:
+            $Messages->add(T_('Unknown error') . ': <code>' . $errstr . '</code>', 'error');
+    }
 }
 
 
@@ -1839,75 +1655,65 @@ function exif_read_data_error_handler( $errno, $errstr )
  * @param resource Image resource ( result of the function imagecreatefromjpeg() ) (by reference)
  * @param boolean TRUE - to save the rotated image in the end of this function
  */
-function exif_orientation( $file_name, & $imh/* = null*/, $save_image = false )
+function exif_orientation($file_name, &$imh/* = null*/, $save_image = false)
 {
-	global $Settings;
+    global $Settings;
 
-	if( !$Settings->get( 'exif_orientation' ) )
-	{ // Autorotate is disabled
-		return;
-	}
+    if (! $Settings->get('exif_orientation')) { // Autorotate is disabled
+        return;
+    }
 
-	if( ! function_exists('exif_read_data') )
-	{ // Exif extension is not loaded
-		return;
-	}
+    if (! function_exists('exif_read_data')) { // Exif extension is not loaded
+        return;
+    }
 
-	$image_info = array();
-	getimagesize( $file_name, $image_info );
-	if( ! isset( $image_info['APP1'] ) || ( strpos( $image_info['APP1'], 'Exif' ) !== 0 ) )
-	{ // This file format is not an 'Exchangeable image file format' so there are no Exif data to read
-		return;
-	}
+    $image_info = [];
+    getimagesize($file_name, $image_info);
+    if (! isset($image_info['APP1']) || (strpos($image_info['APP1'], 'Exif') !== 0)) { // This file format is not an 'Exchangeable image file format' so there are no Exif data to read
+        return;
+    }
 
-	set_error_handler( 'exif_read_data_error_handler' );
-	if( ( $exif_data = exif_read_data( $file_name ) ) === false )
-	{ // Could not read Exif data
-		return;
-	}
-	restore_error_handler();
+    set_error_handler('exif_read_data_error_handler');
+    if (($exif_data = exif_read_data($file_name)) === false) { // Could not read Exif data
+        return;
+    }
+    restore_error_handler();
 
-	if( !( isset( $exif_data['Orientation'] ) && in_array( $exif_data['Orientation'], array( 3, 6, 8 ) ) ) )
-	{ // Exif Orientation tag is not defined OR we don't interested in current value
-		return;
-	}
+    if (! (isset($exif_data['Orientation']) && in_array($exif_data['Orientation'], [3, 6, 8]))) { // Exif Orientation tag is not defined OR we don't interested in current value
+        return;
+    }
 
-	load_funcs( 'files/model/_image.funcs.php' );
+    load_funcs('files/model/_image.funcs.php');
 
-	if( is_null( $imh ) )
-	{ // Create image resource from file name
-		$imh = imagecreatefromjpeg( $file_name );
-	}
+    if (is_null($imh)) { // Create image resource from file name
+        $imh = imagecreatefromjpeg($file_name);
+    }
 
-	if( !$imh )
-	{ // Image resource is incorrect
-		return;
-	}
+    if (! $imh) { // Image resource is incorrect
+        return;
+    }
 
-	switch( $exif_data['Orientation'] )
-	{
-		case 3:	// Rotate for 180 degrees
-			$imh = @imagerotate( $imh, 180, 0 );
-			break;
+    switch ($exif_data['Orientation']) {
+        case 3:	// Rotate for 180 degrees
+            $imh = @imagerotate($imh, 180, 0);
+            break;
 
-		case 6:	// Rotate for 90 degrees to the right
-			$imh = @imagerotate( $imh, 270, 0 );
-			break;
+        case 6:	// Rotate for 90 degrees to the right
+            $imh = @imagerotate($imh, 270, 0);
+            break;
 
-		case 8:	// Rotate for 90 degrees to the left
-			$imh = @imagerotate( $imh, 90, 0 );
-			break;
-	}
+        case 8:	// Rotate for 90 degrees to the left
+            $imh = @imagerotate($imh, 90, 0);
+            break;
+    }
 
-	if( !$imh )
-	{	// Image resource is incorrect
-		return;
-	}
+    if (! $imh) {	// Image resource is incorrect
+        return;
+    }
 
-	if( $save_image )
-	{	// Save rotated image
-		save_image( $imh, $file_name, 'image/jpeg' );
-	}
+    if ($save_image) {	// Save rotated image
+        save_image($imh, $file_name, 'image/jpeg');
+    }
 }
 
 
@@ -1922,70 +1728,56 @@ function exif_orientation( $file_name, & $imh/* = null*/, $save_image = false )
  * 			first elements is a new File object
  * 			second element is the existing file thumb, or empty string, if the file doesn't exists
  */
-function check_file_exists( $fm_FileRoot, $path, $newName, $image_info = NULL )
+function check_file_exists($fm_FileRoot, $path, $newName, $image_info = null)
 {
-	global $filename_max_length;
+    global $filename_max_length;
 
-	// Get File object for requested target location:
-	$FileCache = & get_FileCache();
-	$newFile = & $FileCache->get_by_root_and_path( $fm_FileRoot->type, $fm_FileRoot->in_type_ID, trailing_slash($path).$newName, true );
+    // Get File object for requested target location:
+    $FileCache = &get_FileCache();
+    $newFile = &$FileCache->get_by_root_and_path($fm_FileRoot->type, $fm_FileRoot->in_type_ID, trailing_slash($path) . $newName, true);
 
-	// Unset this flag to check for each file even if it is the same from cache:
-	unset( $newFile->_exists );
+    // Unset this flag to check for each file even if it is the same from cache:
+    unset($newFile->_exists);
 
-	$num_ext = 0;
-	$oldName = $newName;
+    $num_ext = 0;
+    $oldName = $newName;
 
-	$oldFile_thumb = "";
-	while( $newFile->exists() )
-	{ // The file already exists in the target location!
-		$num_ext++;
-		$ext_pos = strrpos( $newName, '.' );
-		if( $num_ext == 1 )
-		{
-			if( $newFile->is_image() && $image_info == NULL )
-			{	// Get image info only for real image files:
-				$image_info = getimagesize( $newFile->get_full_path() );
-			}
-			if( $ext_pos === false )
-			{	// If file/folder name has no '.' dot:
-				$newName .= '-'.$num_ext;
-			}
-			else
-			{
-				$newName = substr_replace( $newName, '-'.$num_ext.'.', $ext_pos, 1 );
-			}
-			if( $image_info )
-			{	// Get thumbnail of old image:
-				$oldFile_thumb = $newFile->get_preview_thumb( 'fulltype' );
-			}
-			else
-			{	// Get formatted file of not image file:
-				$oldFile_thumb = $newFile->get_size_formatted();
-			}
-		}
-		else
-		{
-			if( $ext_pos === false )
-			{	// If file/folder name has no '.' dot:
-				$ext_pos = strlen( $newName );
-			}
-			$replace_length = strlen( '-'.($num_ext-1) );
-			$newName = substr_replace( $newName, '-'.$num_ext, $ext_pos-$replace_length, $replace_length );
-		}
-		if( strlen( $newName ) > $filename_max_length )
-		{
-			$newName = fix_filename_length( $newName, strrpos( $newName, '-' ) );
-			if( $error_filename = process_filename( $newName, true ) )
-			{ // The file name is still not valid
-				syslog_insert( sprintf( 'Invalid file name %s has found during file exists check', '[['.$newName.']]' ), 'warning', 'file' );
-				debug_die( 'Invalid file name has found during file exists check: '.$error_filename );
-			}
-		}
-		$newFile = & $FileCache->get_by_root_and_path( $fm_FileRoot->type, $fm_FileRoot->in_type_ID, trailing_slash($path).$newName, true );
-	}
+    $oldFile_thumb = "";
+    while ($newFile->exists()) { // The file already exists in the target location!
+        $num_ext++;
+        $ext_pos = strrpos($newName, '.');
+        if ($num_ext == 1) {
+            if ($newFile->is_image() && $image_info == null) {	// Get image info only for real image files:
+                $image_info = getimagesize($newFile->get_full_path());
+            }
+            if ($ext_pos === false) {	// If file/folder name has no '.' dot:
+                $newName .= '-' . $num_ext;
+            } else {
+                $newName = substr_replace($newName, '-' . $num_ext . '.', $ext_pos, 1);
+            }
+            if ($image_info) {	// Get thumbnail of old image:
+                $oldFile_thumb = $newFile->get_preview_thumb('fulltype');
+            } else {	// Get formatted file of not image file:
+                $oldFile_thumb = $newFile->get_size_formatted();
+            }
+        } else {
+            if ($ext_pos === false) {	// If file/folder name has no '.' dot:
+                $ext_pos = strlen($newName);
+            }
+            $replace_length = strlen('-' . ($num_ext - 1));
+            $newName = substr_replace($newName, '-' . $num_ext, $ext_pos - $replace_length, $replace_length);
+        }
+        if (strlen($newName) > $filename_max_length) {
+            $newName = fix_filename_length($newName, strrpos($newName, '-'));
+            if ($error_filename = process_filename($newName, true)) { // The file name is still not valid
+                syslog_insert(sprintf('Invalid file name %s has found during file exists check', '[[' . $newName . ']]'), 'warning', 'file');
+                debug_die('Invalid file name has found during file exists check: ' . $error_filename);
+            }
+        }
+        $newFile = &$FileCache->get_by_root_and_path($fm_FileRoot->type, $fm_FileRoot->in_type_ID, trailing_slash($path) . $newName, true);
+    }
 
-	return array( $newFile, $oldFile_thumb );
+    return [$newFile, $oldFile_thumb];
 }
 
 
@@ -1996,12 +1788,12 @@ function check_file_exists( $fm_FileRoot, $path, $newName, $image_info = NULL )
  * @param integer remove files older than the given hour, default NULL will remove all
  * @return integer the number of removed files
  */
-function remove_orphan_files( $file_ids = NULL, $older_than = NULL, $remove_empty_comment_folders = false )
+function remove_orphan_files($file_ids = null, $older_than = null, $remove_empty_comment_folders = false)
 {
-	global $DB, $localtimenow;
-	// asimo> This SQL query should use file class delete_restrictions array (currently T_links and T_users is explicitly used)
-	// select orphan comment attachment file ids
-	$sql = 'SELECT file_ID FROM T_files
+    global $DB, $localtimenow;
+    // asimo> This SQL query should use file class delete_restrictions array (currently T_links and T_users is explicitly used)
+    // select orphan comment attachment file ids
+    $sql = 'SELECT file_ID FROM T_files
 				WHERE file_ID NOT IN (
 					SELECT * FROM (
 						( SELECT DISTINCT link_file_ID FROM T_links
@@ -2009,70 +1801,58 @@ function remove_orphan_files( $file_ids = NULL, $older_than = NULL, $remove_empt
 						( SELECT DISTINCT user_avatar_file_ID FROM T_users
 							WHERE user_avatar_file_ID IS NOT NULL ) ) AS linked_files )';
 
-	if( $file_ids !== NULL )
-	{ // Remove only from the given files
-		$sql .= ' AND file_ID IN ( '.implode( ',', $file_ids ).' )';
-	}
-	else
-	{ // Remove only the files in the comment folders
-		$sql .= ' AND ( file_path LIKE "comments/p%" OR file_path LIKE "anonymous_comments/p%" )';
-	}
+    if ($file_ids !== null) { // Remove only from the given files
+        $sql .= ' AND file_ID IN ( ' . implode(',', $file_ids) . ' )';
+    } else { // Remove only the files in the comment folders
+        $sql .= ' AND ( file_path LIKE "comments/p%" OR file_path LIKE "anonymous_comments/p%" )';
+    }
 
-	if( $remove_empty_comment_folders )
-	{ // init "folders to delete" array
-		$delete_folders = array();
-	}
+    if ($remove_empty_comment_folders) { // init "folders to delete" array
+        $delete_folders = [];
+    }
 
-	$result = $DB->get_col( $sql );
-	$FileCache = & get_FileCache();
-	$FileCache->load_list( $result );
-	$count = 0;
-	foreach( $result as $file_ID )
-	{
-		$File = $FileCache->get_by_ID( $file_ID, false, false );
-		if( $older_than != NULL && $File->exists() )
-		{ // we have to check if the File is older than the given value
-			$datediff = $localtimenow - filemtime( $File->_adfp_full_path );
-			if( $datediff > $older_than * 3600 ) // convert hours to seconds
-			{ // not older
-				continue;
-			}
-		}
+    $result = $DB->get_col($sql);
+    $FileCache = &get_FileCache();
+    $FileCache->load_list($result);
+    $count = 0;
+    foreach ($result as $file_ID) {
+        $File = $FileCache->get_by_ID($file_ID, false, false);
+        if ($older_than != null && $File->exists()) { // we have to check if the File is older than the given value
+            $datediff = $localtimenow - filemtime($File->_adfp_full_path);
+            if ($datediff > $older_than * 3600) { // convert hours to seconds
+                // not older
+                continue;
+            }
+        }
 
-		if( $remove_empty_comment_folders )
-		{
-			$rel_path = $File->get_rdfp_rel_path();
-			$folder_path = dirname( $File->get_full_path() );
-		}
+        if ($remove_empty_comment_folders) {
+            $rel_path = $File->get_rdfp_rel_path();
+            $folder_path = dirname($File->get_full_path());
+        }
 
-		// delete the file
-		if( $File->unlink() )
-		{
-			$count++;
-			if( $remove_empty_comment_folders && ! in_array( $folder_path, $delete_folders )
-				&& preg_match( '/^(anonymous_)?comments\/p(\d+)\/.*$/', $rel_path ) )
-			{ // Collect comment attachments folders to delete the empty folders later
-				$delete_folders[] = $folder_path;
-			}
-		}
-	}
+        // delete the file
+        if ($File->unlink()) {
+            $count++;
+            if ($remove_empty_comment_folders && ! in_array($folder_path, $delete_folders)
+                && preg_match('/^(anonymous_)?comments\/p(\d+)\/.*$/', $rel_path)) { // Collect comment attachments folders to delete the empty folders later
+                $delete_folders[] = $folder_path;
+            }
+        }
+    }
 
-	// Delete the empty folders
-	if( $remove_empty_comment_folders && count( $delete_folders ) )
-	{
-		foreach( $delete_folders as $delete_folder )
-		{
-			if( file_exists( $delete_folder ) )
-			{ // Delete folder only if it is empty, Hide an error if folder is not empty
-				@rmdir( $delete_folder );
-			}
-		}
-	}
+    // Delete the empty folders
+    if ($remove_empty_comment_folders && count($delete_folders)) {
+        foreach ($delete_folders as $delete_folder) {
+            if (file_exists($delete_folder)) { // Delete folder only if it is empty, Hide an error if folder is not empty
+                @rmdir($delete_folder);
+            }
+        }
+    }
 
-	// Clear FileCache to save memory
-	$FileCache->clear();
+    // Clear FileCache to save memory
+    $FileCache->clear();
 
-	return $count;
+    return $count;
 }
 
 
@@ -2083,30 +1863,30 @@ function remove_orphan_files( $file_ids = NULL, $older_than = NULL, $remove_empt
  */
 function get_available_filetype_icons()
 {
-	$icons = array(
-		''               => T_('Unknown'),
-		'file_empty'     => T_('Empty'),
-		'file_image'     => T_('Image'),
-		'file_document'  => T_('Document'),
-		'file_www'       => T_('Web file'),
-		'file_log'       => T_('Log file'),
-		'file_sound'     => T_('Audio file'),
-		'file_video'     => T_('Video file'),
-		'file_message'   => T_('Message'),
-		'file_pdf'       => T_('PDF'),
-		'file_php'       => T_('PHP script'),
-		'file_encrypted' => T_('Encrypted file'),
-		'file_zip'       => T_('Zip archive'),
-		'file_tar'       => T_('Tar archive'),
-		'file_tgz'       => T_('Tgz archive'),
-		'file_pk'        => T_('Archive'),
-		'file_doc'       => T_('Microsoft Word'),
-		'file_xls'       => T_('Microsoft Excel'),
-		'file_ppt'       => T_('Microsoft PowerPoint'),
-		'file_pps'       => T_('Microsoft PowerPoint Slideshow'),
-	);
+    $icons = [
+        '' => T_('Unknown'),
+        'file_empty' => T_('Empty'),
+        'file_image' => T_('Image'),
+        'file_document' => T_('Document'),
+        'file_www' => T_('Web file'),
+        'file_log' => T_('Log file'),
+        'file_sound' => T_('Audio file'),
+        'file_video' => T_('Video file'),
+        'file_message' => T_('Message'),
+        'file_pdf' => T_('PDF'),
+        'file_php' => T_('PHP script'),
+        'file_encrypted' => T_('Encrypted file'),
+        'file_zip' => T_('Zip archive'),
+        'file_tar' => T_('Tar archive'),
+        'file_tgz' => T_('Tgz archive'),
+        'file_pk' => T_('Archive'),
+        'file_doc' => T_('Microsoft Word'),
+        'file_xls' => T_('Microsoft Excel'),
+        'file_ppt' => T_('Microsoft PowerPoint'),
+        'file_pps' => T_('Microsoft PowerPoint Slideshow'),
+    ];
 
-	return $icons;
+    return $icons;
 }
 
 
@@ -2120,100 +1900,89 @@ function get_available_filetype_icons()
  * @return mixed NULL if import was impossible to complete for some reason (wrong fileroot ID, insufficient user permission, etc.)
  *               file ID of new inserted file in DB
  */
-function copy_file( $file_path, $root_ID, $path, $check_perms = true )
+function copy_file($file_path, $root_ID, $path, $check_perms = true)
 {
-	global $current_User, $force_upload_forbiddenext;
+    global $current_User, $force_upload_forbiddenext;
 
-	$FileRootCache = & get_FileRootCache();
-	$fm_FileRoot = & $FileRootCache->get_by_ID($root_ID, true);
-	if( !$fm_FileRoot )
-	{	// fileRoot not found:
-		return NULL;
-	}
+    $FileRootCache = &get_FileRootCache();
+    $fm_FileRoot = &$FileRootCache->get_by_ID($root_ID, true);
+    if (! $fm_FileRoot) {	// fileRoot not found:
+        return null;
+    }
 
-	if( $check_perms && ( !isset( $current_User ) || check_user_perm( 'files', 'add', false, $fm_FileRoot ) ) )
-	{	// Permission check required but current User has no permission to upload:
-		return NULL;
-	}
+    if ($check_perms && (! isset($current_User) || check_user_perm('files', 'add', false, $fm_FileRoot))) {	// Permission check required but current User has no permission to upload:
+        return null;
+    }
 
-	// Let's get into requested list dir...
-	$non_canonical_list_path = $fm_FileRoot->ads_path.$path;
-	// Dereference any /../ just to make sure, and CHECK if directory exists:
-	$ads_list_path = get_canonical_path( $non_canonical_list_path );
+    // Let's get into requested list dir...
+    $non_canonical_list_path = $fm_FileRoot->ads_path . $path;
+    // Dereference any /../ just to make sure, and CHECK if directory exists:
+    $ads_list_path = get_canonical_path($non_canonical_list_path);
 
-	// check if the upload dir exists
-	if( !is_dir( $ads_list_path ) )
-	{	// Create path
-		mkdir_r( $ads_list_path );
-	}
+    // check if the upload dir exists
+    if (! is_dir($ads_list_path)) {	// Create path
+        mkdir_r($ads_list_path);
+    }
 
-	// Get file name from full path:
-	$newName = basename( $file_path );
-	// validate file name
-	if( $error_filename = process_filename( $newName, true ) )
-	{	// Not a valid file name or not an allowed extension:
-		syslog_insert( sprintf( 'File %s is not valid or not an allowed extension', '[['.$newName.']]' ), 'warning', 'file' );
-		// Abort import for this file:
-		return NULL;
-	}
+    // Get file name from full path:
+    $newName = basename($file_path);
+    // validate file name
+    if ($error_filename = process_filename($newName, true)) {	// Not a valid file name or not an allowed extension:
+        syslog_insert(sprintf('File %s is not valid or not an allowed extension', '[[' . $newName . ']]'), 'warning', 'file');
+        // Abort import for this file:
+        return null;
+    }
 
-	// Check if the imported file type is an image, and if is an image then try to fix the file extension based on mime type
-	// If the mime type is a known mime type and user has right to import files with this kind of file type,
-	// this part of code will check if the file extension is the same as admin defined for this file type, and will fix it if it isn't the same
-	// Note: it will also change the jpeg extensions to jpg.
-	// this image_info variable will be used again to get file thumb
-	$image_info = getimagesize( $file_path );
-	if( $image_info )
-	{	// This is an image, validate mimetype vs. extension:
-		$image_mimetype = $image_info['mime'];
-		$FiletypeCache = & get_FiletypeCache();
-		// Get correct file type based on mime type
-		$correct_Filetype = $FiletypeCache->get_by_mimetype( $image_mimetype, false, false );
+    // Check if the imported file type is an image, and if is an image then try to fix the file extension based on mime type
+    // If the mime type is a known mime type and user has right to import files with this kind of file type,
+    // this part of code will check if the file extension is the same as admin defined for this file type, and will fix it if it isn't the same
+    // Note: it will also change the jpeg extensions to jpg.
+    // this image_info variable will be used again to get file thumb
+    $image_info = getimagesize($file_path);
+    if ($image_info) {	// This is an image, validate mimetype vs. extension:
+        $image_mimetype = $image_info['mime'];
+        $FiletypeCache = &get_FiletypeCache();
+        // Get correct file type based on mime type
+        $correct_Filetype = $FiletypeCache->get_by_mimetype($image_mimetype, false, false);
 
-		// Check if file type is known by us, and if it is allowed for upload.
-		// If we don't know this file type or if it isn't allowed we don't change the extension! The current extension is allowed for sure.
-		if( $correct_Filetype && $correct_Filetype->is_allowed() )
-		{	// A FileType with the given mime type exists in database and it is an allowed file type for current User
-			// The "correct" extension is a plausible one, proceed...
-			$correct_extensions = $correct_Filetype->get_extensions();
-			$correct_extension = array_shift( $correct_extensions );
-			$path_info = pathinfo($newName);
-			$current_extension = $path_info['extension'];
+        // Check if file type is known by us, and if it is allowed for upload.
+        // If we don't know this file type or if it isn't allowed we don't change the extension! The current extension is allowed for sure.
+        if ($correct_Filetype && $correct_Filetype->is_allowed()) {	// A FileType with the given mime type exists in database and it is an allowed file type for current User
+            // The "correct" extension is a plausible one, proceed...
+            $correct_extensions = $correct_Filetype->get_extensions();
+            $correct_extension = array_shift($correct_extensions);
+            $path_info = pathinfo($newName);
+            $current_extension = $path_info['extension'];
 
-			// change file extension to the correct extension, but only if the correct extension is not restricted, this is an extra security check!
-			if( strtolower($current_extension) != strtolower($correct_extension) && ( !in_array( $correct_extension, $force_upload_forbiddenext ) ) )
-			{	// change the file extension to the correct extension
-				$old_name = $newName;
-				$newName = $path_info['filename'].'.'.$correct_extension;
-			}
-		}
-	}
+            // change file extension to the correct extension, but only if the correct extension is not restricted, this is an extra security check!
+            if (strtolower($current_extension) != strtolower($correct_extension) && (! in_array($correct_extension, $force_upload_forbiddenext))) {	// change the file extension to the correct extension
+                $old_name = $newName;
+                $newName = $path_info['filename'] . '.' . $correct_extension;
+            }
+        }
+    }
 
-	// Get File object for requested target location:
-	$oldName = strtolower( $newName );
-	list( $newFile, $oldFile_thumb ) = check_file_exists( $fm_FileRoot, $path, $newName, $image_info );
-	$newName = $newFile->get( 'name' );
+    // Get File object for requested target location:
+    $oldName = strtolower($newName);
+    list($newFile, $oldFile_thumb) = check_file_exists($fm_FileRoot, $path, $newName, $image_info);
+    $newName = $newFile->get('name');
 
-	if( ! copy( $file_path, $newFile->get_full_path() ) )
-	{	// Abort import for this file:
-		return NULL;
-	}
+    if (! copy($file_path, $newFile->get_full_path())) {	// Abort import for this file:
+        return null;
+    }
 
-	// change to default chmod settings
-	$newFile->chmod( NULL );
+    // change to default chmod settings
+    $newFile->chmod(null);
 
-	// Refreshes file properties (type, size, perms...)
-	$newFile->load_properties();
+    // Refreshes file properties (type, size, perms...)
+    $newFile->load_properties();
 
-	// Store File object into DB:
-	if( $newFile->dbsave() )
-	{	// Success
-		return $newFile->ID;
-	}
-	else
-	{	// Failure
-		return NULL;
-	}
+    // Store File object into DB:
+    if ($newFile->dbsave()) {	// Success
+        return $newFile->ID;
+    } else {	// Failure
+        return null;
+    }
 }
 
 
@@ -2222,77 +1991,69 @@ function copy_file( $file_path, $root_ID, $path, $check_perms = true )
  */
 function create_profile_picture_links()
 {
-	global $DB;
+    global $DB;
 
-	load_class( 'files/model/_filelist.class.php', 'Filelist' );
-	load_class( 'files/model/_fileroot.class.php', 'FileRoot' );
-	$path = 'profile_pictures';
+    load_class('files/model/_filelist.class.php', 'Filelist');
+    load_class('files/model/_fileroot.class.php', 'FileRoot');
+    $path = 'profile_pictures';
 
-	$FileRootCache = & get_FileRootCache();
-	$UserCache = & get_UserCache();
+    $FileRootCache = &get_FileRootCache();
+    $UserCache = &get_UserCache();
 
-	// SQL query to get all users and limit by page below
-	$users_SQL = new SQL();
-	$users_SQL->SELECT( '*' );
-	$users_SQL->FROM( 'T_users' );
-	$users_SQL->ORDER_BY( 'user_ID' );
+    // SQL query to get all users and limit by page below
+    $users_SQL = new SQL();
+    $users_SQL->SELECT('*');
+    $users_SQL->FROM('T_users');
+    $users_SQL->ORDER_BY('user_ID');
 
-	$page = 0;
-	$page_size = 100;
-	while( count( $UserCache->cache ) > 0 || $page == 0 )
-	{ // Load users by 100 at one time to avoid errors about memory exhausting
-		$users_SQL->LIMIT( ( $page * $page_size ).', '.$page_size );
-		$UserCache->clear();
-		$UserCache->load_by_sql( $users_SQL );
+    $page = 0;
+    $page_size = 100;
+    while (count($UserCache->cache) > 0 || $page == 0) { // Load users by 100 at one time to avoid errors about memory exhausting
+        $users_SQL->LIMIT(($page * $page_size) . ', ' . $page_size);
+        $UserCache->clear();
+        $UserCache->load_by_sql($users_SQL);
 
-		while( ( $iterator_User = & $UserCache->get_next(/* $user_ID, false, false */) ) != NULL )
-		{ // Iterate through UserCache)
-			$FileRootCache->clear();
-			$user_FileRoot = & $FileRootCache->get_by_type_and_ID( 'user', $iterator_User->ID );
-			if( !$user_FileRoot )
-			{ // User FileRoot doesn't exist
-				continue;
-			}
+        while (($iterator_User = &$UserCache->get_next(/* $user_ID, false, false */)) != null) { // Iterate through UserCache)
+            $FileRootCache->clear();
+            $user_FileRoot = &$FileRootCache->get_by_type_and_ID('user', $iterator_User->ID);
+            if (! $user_FileRoot) { // User FileRoot doesn't exist
+                continue;
+            }
 
-			$ads_list_path = get_canonical_path( $user_FileRoot->ads_path.$path );
-			// Previously uploaded avatars
-			if( !is_dir( $ads_list_path ) )
-			{ // profile_picture folder doesn't exists in the user root dir
-				continue;
-			}
+            $ads_list_path = get_canonical_path($user_FileRoot->ads_path . $path);
+            // Previously uploaded avatars
+            if (! is_dir($ads_list_path)) { // profile_picture folder doesn't exists in the user root dir
+                continue;
+            }
 
-			$user_avatar_Filelist = new Filelist( $user_FileRoot, $ads_list_path );
-			$user_avatar_Filelist->load();
+            $user_avatar_Filelist = new Filelist($user_FileRoot, $ads_list_path);
+            $user_avatar_Filelist->load();
 
-			if( $user_avatar_Filelist->count() > 0 )
-			{	// profile_pictures folder is not empty
-				$info_content = '';
-				$LinkOwner = new LinkUser( $iterator_User );
-				while( $lFile = & $user_avatar_Filelist->get_next() )
-				{ // Loop through all Files:
-					$fileName = $lFile->get_name();
-					if( process_filename( $fileName ) )
-					{ // The file has invalid file name, don't create in the database
-						syslog_insert( sprintf( 'Invalid file name %s has been found in a user folder', '[['.$fileName.']]' ), 'info', 'user', $iterator_User->ID );
-						// TODO: asimo> we should collect each invalid file name here, and send an email to the admin
-						continue;
-					}
-					$lFile->load_meta( true );
-					if( $lFile->is_image() )
-					{
-						$lFile->link_to_Object( $LinkOwner );
-					}
-				}
-			}
-		}
+            if ($user_avatar_Filelist->count() > 0) {	// profile_pictures folder is not empty
+                $info_content = '';
+                $LinkOwner = new LinkUser($iterator_User);
+                while ($lFile = &$user_avatar_Filelist->get_next()) { // Loop through all Files:
+                    $fileName = $lFile->get_name();
+                    if (process_filename($fileName)) { // The file has invalid file name, don't create in the database
+                        syslog_insert(sprintf('Invalid file name %s has been found in a user folder', '[[' . $fileName . ']]'), 'info', 'user', $iterator_User->ID);
+                        // TODO: asimo> we should collect each invalid file name here, and send an email to the admin
+                        continue;
+                    }
+                    $lFile->load_meta(true);
+                    if ($lFile->is_image()) {
+                        $lFile->link_to_Object($LinkOwner);
+                    }
+                }
+            }
+        }
 
-		// Increase page number to get next portion of users
-		$page++;
-	}
+        // Increase page number to get next portion of users
+        $page++;
+    }
 
-	// Clear cache data
-	$UserCache->clear();
-	$FileRootCache->clear();
+    // Clear cache data
+    $UserCache->clear();
+    $FileRootCache->clear();
 }
 
 
@@ -2302,41 +2063,37 @@ function create_profile_picture_links()
  * @param string Directory path
  * @return boolean TRUE if files have been created successfully
  */
-function create_htaccess_deny( $dir )
+function create_htaccess_deny($dir)
 {
-	if( ! mkdir_r( $dir, NULL ) )
-	{
-		return false;
-	}
+    if (! mkdir_r($dir, null)) {
+        return false;
+    }
 
-	$htaccess_files = array(
-			$dir.'.htaccess',
-			$dir.'sample.htaccess'
-		);
+    $htaccess_files = [
+        $dir . '.htaccess',
+        $dir . 'sample.htaccess',
+    ];
 
-	$htaccess_content = '# We don\'t want web users to access any file in this directory'."\r\n".
-		'Order Deny,Allow'."\r\n".
-		'Deny from All';
+    $htaccess_content = '# We don\'t want web users to access any file in this directory' . "\r\n" .
+        'Order Deny,Allow' . "\r\n" .
+        'Deny from All';
 
-	foreach( $htaccess_files as $htaccess_file )
-	{
-		if( file_exists( $htaccess_file ) )
-		{ // File already exists
-			continue;
-		}
+    foreach ($htaccess_files as $htaccess_file) {
+        if (file_exists($htaccess_file)) { // File already exists
+            continue;
+        }
 
-		$handle = @fopen( $htaccess_file, 'w' );
+        $handle = @fopen($htaccess_file, 'w');
 
-		if( !$handle )
-		{ // File cannot be created
-			return false;
-		}
+        if (! $handle) { // File cannot be created
+            return false;
+        }
 
-		fwrite( $handle, $htaccess_content );
-		fclose( $handle );
-	}
+        fwrite($handle, $htaccess_content);
+        fclose($handle);
+    }
 
-	return true;
+    return true;
 }
 
 
@@ -2345,19 +2102,19 @@ function create_htaccess_deny( $dir )
  *
  * @param integer ID of FileRoot object
  */
-function display_dragdrop_upload_button( $params = array() )
+function display_dragdrop_upload_button($params = [])
 {
-	global $blog, $Settings, $b2evo_icons_type, $DB, $admins_can_manipulate_sensitive_files;
+    global $blog, $Settings, $b2evo_icons_type, $DB, $admins_can_manipulate_sensitive_files;
 
-	$params = array_merge( array(
-			'before'                 => '',
-			'after'                  => '',
-			'fileroot_ID'            => 0, // Root type and ID, e.g. collection_1
-			'path'                   => '', // Subpath for the file/folder
-			'listElement'            => 'null',
-			'list_element'           => NULL, //jQuery selector of list element
-			'list_style'             => 'list',  // 'list' or 'table'
-			'template'               => '<div class="qq-uploader-selector qq-uploader" qq-drop-area-text="'.TS_('Drop files here').'">
+    $params = array_merge([
+        'before' => '',
+        'after' => '',
+        'fileroot_ID' => 0, // Root type and ID, e.g. collection_1
+        'path' => '', // Subpath for the file/folder
+        'listElement' => 'null',
+        'list_element' => null, //jQuery selector of list element
+        'list_style' => 'list',  // 'list' or 'table'
+        'template' => '<div class="qq-uploader-selector qq-uploader" qq-drop-area-text="' . TS_('Drop files here') . '">
 																<div class="qq-total-progress-bar-container-selector qq-total-progress-bar-container">
 																		<div role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="qq-total-progress-bar-selector qq-progress-bar qq-total-progress-bar"></div>
 																</div>
@@ -2365,10 +2122,10 @@ function display_dragdrop_upload_button( $params = array() )
 																		<span class="qq-upload-drop-area-text-selector"></span>
 																</div>
 																<div class="qq-upload-button-selector qq-upload-button">
-																		<div>'.TS_('Upload a file').'</div>
+																		<div>' . TS_('Upload a file') . '</div>
 																</div>
 																<span class="qq-drop-processing-selector qq-drop-processing">
-																		<span>'.TS_('Processing dropped files...').'</span>
+																		<span>' . TS_('Processing dropped files...') . '</span>
 																		<span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
 																</span>
 																<ul class="qq-upload-list-selector qq-upload-list" aria-live="polite" aria-relevant="additions removals">
@@ -2382,9 +2139,9 @@ function display_dragdrop_upload_button( $params = array() )
 																				<span class="qq-edit-filename-icon-selector qq-edit-filename-icon" aria-label="Edit filename"></span>
 																				<input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
 																				<span class="qq-upload-size-selector qq-upload-size"></span>
-																				<button type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">'.TS_('Cancel').'</button>
-																				<button type="button" class="qq-btn qq-upload-retry-selector qq-upload-retry">'.TS_('Retry').'</button>
-																				<button type="button" class="qq-btn qq-upload-delete-selector qq-upload-delete">'.TS_('Delete').'</button>
+																				<button type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">' . TS_('Cancel') . '</button>
+																				<button type="button" class="qq-btn qq-upload-retry-selector qq-upload-retry">' . TS_('Retry') . '</button>
+																				<button type="button" class="qq-btn qq-upload-delete-selector qq-upload-delete">' . TS_('Delete') . '</button>
 																				<span role="status" class="qq-upload-status-text-selector qq-upload-status-text"></span>
 																		</li>
 																</ul>
@@ -2392,15 +2149,15 @@ function display_dragdrop_upload_button( $params = array() )
 																<dialog class="qq-alert-dialog-selector">
 																		<div class="qq-dialog-message-selector"></div>
 																		<div class="qq-dialog-buttons">
-																				<button type="button" class="qq-cancel-button-selector">'.TS_('Close').'</button>
+																				<button type="button" class="qq-cancel-button-selector">' . TS_('Close') . '</button>
 																		</div>
 																</dialog>
 
 																<dialog class="qq-confirm-dialog-selector">
 																		<div class="qq-dialog-message-selector"></div>
 																		<div class="qq-dialog-buttons">
-																				<button type="button" class="qq-cancel-button-selector">'.TS_('No').'</button>
-																				<button type="button" class="qq-ok-button-selector">'.TS_('Yes').'</button>
+																				<button type="button" class="qq-cancel-button-selector">' . TS_('No') . '</button>
+																				<button type="button" class="qq-ok-button-selector">' . TS_('Yes') . '</button>
 																		</div>
 																</dialog>
 
@@ -2408,76 +2165,70 @@ function display_dragdrop_upload_button( $params = array() )
 																		<div class="qq-dialog-message-selector"></div>
 																		<input type="text">
 																		<div class="qq-dialog-buttons">
-																				<button type="button" class="qq-cancel-button-selector">'.TS_('Cancel').'</button>
-																				<button type="button" class="qq-ok-button-selector">'.TS_('Ok').'</button>
+																				<button type="button" class="qq-cancel-button-selector">' . TS_('Cancel') . '</button>
+																				<button type="button" class="qq-ok-button-selector">' . TS_('Ok') . '</button>
 																		</div>
 																</dialog>
 														</div>',
-			'display_support_msg'    => true, // Display info under button about that current supports drag&drop
-			'additional_dropzone'    => '', // jQuery selector of additional drop zone
-			'filename_before'        => '', // Append this text before file name on success uploading of new file,
-																	 // Used a mask $file_path$ to replace it with File->get_rdfp_rel_path()
-			'LinkOwner'              => NULL, // Use it if you want to link a file to Item/Comment right after uploading
-			'display_status_success' => true, // Display status text about successful uploading
-			'status_conflict_place'  => 'default', // Where we should write a message about conflict:
-																						 //    'default' - in the element ".qq-upload-status"
-																						 //    'before_button' - before button to solve a conflict
-			'conflict_file_format'   => 'simple', // 'simple' - file name text, 'full_path_link' - a link with text as full file path
-			'resize_frame'           => false, // Resize frame on upload new image
-			'table_headers'          => '', // Use this html text as table headers when first file is loaded
-			'noresults'              => '',
-			'fieldset_prefix'        => '', // Fieldset prefix, Use different prefix to display several fieldset on same page, e.g. for normal and internal comments
-			'table_id'               => 'attachments_fieldset_table', // ID of table with files (without 'fieldset_prefix')
-		), $params );
+        'display_support_msg' => true, // Display info under button about that current supports drag&drop
+        'additional_dropzone' => '', // jQuery selector of additional drop zone
+        'filename_before' => '', // Append this text before file name on success uploading of new file,
+        // Used a mask $file_path$ to replace it with File->get_rdfp_rel_path()
+        'LinkOwner' => null, // Use it if you want to link a file to Item/Comment right after uploading
+        'display_status_success' => true, // Display status text about successful uploading
+        'status_conflict_place' => 'default', // Where we should write a message about conflict:
+        //    'default' - in the element ".qq-upload-status"
+        //    'before_button' - before button to solve a conflict
+        'conflict_file_format' => 'simple', // 'simple' - file name text, 'full_path_link' - a link with text as full file path
+        'resize_frame' => false, // Resize frame on upload new image
+        'table_headers' => '', // Use this html text as table headers when first file is loaded
+        'noresults' => '',
+        'fieldset_prefix' => '', // Fieldset prefix, Use different prefix to display several fieldset on same page, e.g. for normal and internal comments
+        'table_id' => 'attachments_fieldset_table', // ID of table with files (without 'fieldset_prefix')
+    ], $params);
 
-	$LinkOwner = & $params['LinkOwner'];
+    $LinkOwner = &$params['LinkOwner'];
 
-	$FileRootCache = & get_FileRootCache();
-	$fm_FileRoot = $FileRootCache->get_by_ID( $params['fileroot_ID'] );
+    $FileRootCache = &get_FileRootCache();
+    $fm_FileRoot = $FileRootCache->get_by_ID($params['fileroot_ID']);
 
-	if( ! check_perm_upload_files( $LinkOwner, $fm_FileRoot ) )
-	{	// Don't display the button if current user has no permission to upload to the selected file root:
-		return;
-	}
+    if (! check_perm_upload_files($LinkOwner, $fm_FileRoot)) {	// Don't display the button if current user has no permission to upload to the selected file root:
+        return;
+    }
 
-	// Initialize quick uploader:
-	init_fileuploader_js( ( is_admin_page() ? 'rsc_url' : 'blog' ), ( $LinkOwner !== NULL /* Sortable only attached files */ ) );
+    // Initialize quick uploader:
+    init_fileuploader_js((is_admin_page() ? 'rsc_url' : 'blog'), ($LinkOwner !== null /* Sortable only attached files */));
 
-	$root_and_path = $params['fileroot_ID'].'::'.$params['path'];
-	$quick_upload_url = get_htsrv_url().'quick_upload.php'
-		.'?b2evo_icons_type='.$b2evo_icons_type
-		.( empty( $blog ) ? '' : '&blog='.$blog )
-		.'&prefix='.$params['fieldset_prefix'];
+    $root_and_path = $params['fileroot_ID'] . '::' . $params['path'];
+    $quick_upload_url = get_htsrv_url() . 'quick_upload.php'
+        . '?b2evo_icons_type=' . $b2evo_icons_type
+        . (empty($blog) ? '' : '&blog=' . $blog)
+        . '&prefix=' . $params['fieldset_prefix'];
 
-	echo $params['before'];
+    echo $params['before'];
 
-	if( $LinkOwner !== NULL && $LinkOwner->is_temp() )
-	{	// Use this field to know a form is submitted with temporary link owner(when object is creating and still doesn't exist in DB):
-		echo '<input type="hidden" name="temp_link_owner_ID_nojs" value="'.$LinkOwner->get_ID().'" />';
-		// Set correct name only when JS is enabled:
-		echo '<script>document.querySelector( "input[name=temp_link_owner_ID_nojs]" ).setAttribute( "name", "temp_link_owner_ID" )</script>';
-	}
+    if ($LinkOwner !== null && $LinkOwner->is_temp()) {	// Use this field to know a form is submitted with temporary link owner(when object is creating and still doesn't exist in DB):
+        echo '<input type="hidden" name="temp_link_owner_ID_nojs" value="' . $LinkOwner->get_ID() . '" />';
+        // Set correct name only when JS is enabled:
+        echo '<script>document.querySelector( "input[name=temp_link_owner_ID_nojs]" ).setAttribute( "name", "temp_link_owner_ID" )</script>';
+    }
 
-	// Get list of allowed filetype extensions
-	if( is_logged_in( false ) )
-	{
-		$condition = ( check_user_perm( 'files', 'all' ) && !empty($admins_can_manipulate_sensitive_files) ) ? '' : 'ftyp_allowed <> "admin"';
-	}
-	else
-	{
-		$condition = 'ftyp_allowed = "any"';
-	}
+    // Get list of allowed filetype extensions
+    if (is_logged_in(false)) {
+        $condition = (check_user_perm('files', 'all') && ! empty($admins_can_manipulate_sensitive_files)) ? '' : 'ftyp_allowed <> "admin"';
+    } else {
+        $condition = 'ftyp_allowed = "any"';
+    }
 
-	if( !empty( $condition ) )
-	{
-		$condition = ' WHERE '.$condition;
-	}
-	$allowed_extensions = $DB->get_col( 'SELECT ftyp_extensions FROM T_filetypes'.$condition );
-	$allowed_extensions = implode( ' ', $allowed_extensions );
-	$allowed_extensions = explode( ' ', $allowed_extensions );
-	sort( $allowed_extensions );
+    if (! empty($condition)) {
+        $condition = ' WHERE ' . $condition;
+    }
+    $allowed_extensions = $DB->get_col('SELECT ftyp_extensions FROM T_filetypes' . $condition);
+    $allowed_extensions = implode(' ', $allowed_extensions);
+    $allowed_extensions = explode(' ', $allowed_extensions);
+    sort($allowed_extensions);
 
-	?>
+    ?>
 	<div id="<?php echo $params['fieldset_prefix']; ?>file-uploader" style="width:100%">
 		<noscript>
 			<p><?php echo T_('Please enable JavaScript to use file uploader.'); ?></p>
@@ -2486,90 +2237,87 @@ function display_dragdrop_upload_button( $params = array() )
 	<input id="saveBtn" type="submit" style="display:none" name="saveBtn" value="<?php echo T_('Save modified files'); ?>" class="ActionButton" />
 	
 	<?php
-	$dragdrop_upload_button_config = array(
-			'fieldset_prefix'          => $params['fieldset_prefix'],
-			'draggable_button_text'    => T_('Drag & Drop files to upload here <br /><span>or click to manually select files...</span>'),
-			'draggable_note_text'      => T_('Your browser supports full upload functionality.'),
-			'nondraggable_button_text' => T_('Click to manually select files...'),
-			'nondraggable_note_text'   => T_('Your browser does not support full upload functionality: You can only upload files one by one and you cannot use Drag & Drop.'),
+    $dragdrop_upload_button_config = [
+        'fieldset_prefix' => $params['fieldset_prefix'],
+        'draggable_button_text' => T_('Drag & Drop files to upload here <br /><span>or click to manually select files...</span>'),
+        'draggable_note_text' => T_('Your browser supports full upload functionality.'),
+        'nondraggable_button_text' => T_('Click to manually select files...'),
+        'nondraggable_note_text' => T_('Your browser does not support full upload functionality: You can only upload files one by one and you cannot use Drag & Drop.'),
 
-			'quickupload_url' => $quick_upload_url.'&'.url_crumb( 'file' ),
-			'root_and_path'   => $root_and_path,
-			'crumb_file'      => url_crumb( 'file' ),
-			'link_owner'      => $LinkOwner !== NULL ? $LinkOwner->type.'_'.$LinkOwner->get_ID().'_'.intval( $LinkOwner->is_temp() ) : NULL,
-			'fm_mode'         => isset( $params['fm_mode'] ) ? $params['fm_mode'] : NULL,
-			'list_element'    => $params['list_element'],
-			'extra_dropzones' => empty( $params['additional_dropzone'] ) ? '[]' : $params['additional_dropzone'],
-			'list_style'      => $params['list_style'],
-			'size_limit'      => $Settings->get( 'upload_maxkb' ) * 1024,
+        'quickupload_url' => $quick_upload_url . '&' . url_crumb('file'),
+        'root_and_path' => $root_and_path,
+        'crumb_file' => url_crumb('file'),
+        'link_owner' => $LinkOwner !== null ? $LinkOwner->type . '_' . $LinkOwner->get_ID() . '_' . intval($LinkOwner->is_temp()) : null,
+        'fm_mode' => isset($params['fm_mode']) ? $params['fm_mode'] : null,
+        'list_element' => $params['list_element'],
+        'extra_dropzones' => empty($params['additional_dropzone']) ? '[]' : $params['additional_dropzone'],
+        'list_style' => $params['list_style'],
+        'size_limit' => $Settings->get('upload_maxkb') * 1024,
 
-			'msg_type_error'         => /* TRANS: strings in {} must NOT be translated */ T_('{file} has an invalid extension. Only {extensions} are allowed.'),
-			'msg_size_error'         => /* TRANS: strings in {} must NOT be translated */ T_('{file} cannot be uploaded because it is too large ({fileSize}). The maximum allowed upload size is {sizeLimit}.'),
-			'msg_min_size_error'     => /* TRANS: strings in {} must NOT be translated */ T_('{file} is too small. The minimum file size is {minSizeLimit}.'),
-			'msg_empty_error'        => /* TRANS: strings in {} must NOT be translated */ T_('{file} is empty. Please select non-empty files.'),
-			'msg_on_leave'           => T_('Files are currently being uploaded. If you leave this page now, the upload will be cancelled.'),
-			'msg_format_progress'    => /* TRANS: strings in {} must NOT be translated */ T_('Uploading {total_size}...'),
-			'msg_upload_error'       => T_('Upload ERROR'),
-			'msg_dropped_connection' => T_('Server dropped the connection.'),
-			'msg_upload_ok'          => T_('Upload OK'),
-			'msg_upload_conflict'    => T_('Upload Conflict'),
-			'msg_replace_file'       => T_('Use this new file to replace the old file'),
-			'msg_revert'             => T_('Revert'),
-			'msg_old_file'           => T_('(Old File)'),
+        'msg_type_error' => /* TRANS: strings in {} must NOT be translated */ T_('{file} has an invalid extension. Only {extensions} are allowed.'),
+        'msg_size_error' => /* TRANS: strings in {} must NOT be translated */ T_('{file} cannot be uploaded because it is too large ({fileSize}). The maximum allowed upload size is {sizeLimit}.'),
+        'msg_min_size_error' => /* TRANS: strings in {} must NOT be translated */ T_('{file} is too small. The minimum file size is {minSizeLimit}.'),
+        'msg_empty_error' => /* TRANS: strings in {} must NOT be translated */ T_('{file} is empty. Please select non-empty files.'),
+        'msg_on_leave' => T_('Files are currently being uploaded. If you leave this page now, the upload will be cancelled.'),
+        'msg_format_progress' => /* TRANS: strings in {} must NOT be translated */ T_('Uploading {total_size}...'),
+        'msg_upload_error' => T_('Upload ERROR'),
+        'msg_dropped_connection' => T_('Server dropped the connection.'),
+        'msg_upload_ok' => T_('Upload OK'),
+        'msg_upload_conflict' => T_('Upload Conflict'),
+        'msg_replace_file' => T_('Use this new file to replace the old file'),
+        'msg_revert' => T_('Revert'),
+        'msg_old_file' => T_('(Old File)'),
 
-			'size_symbol_kb' => /* TRANS: Abbr. for Kilobytes */ T_('KB'),
-			'size_symbol_mb' =>  /* TRANS: Abbr. for Megabytes */ T_('MB'),
-			'size_symbol_gb' =>  /* TRANS: Abbr. for Gigabytes */ T_('GB'),
-			'size_symbol_tb' =>  /* TRANS: Abbr. for Terabytes */ T_('TB'),
-			'size_symbol_pb' =>  /* TRANS: Abbr. for Petabytes */ T_('PB'),
-			'size_symbol_eb' =>  /* TRANS: Abbr. for Exabytes  */ T_('EB'),
+        'size_symbol_kb' => /* TRANS: Abbr. for Kilobytes */ T_('KB'),
+        'size_symbol_mb' =>  /* TRANS: Abbr. for Megabytes */ T_('MB'),
+        'size_symbol_gb' =>  /* TRANS: Abbr. for Gigabytes */ T_('GB'),
+        'size_symbol_tb' =>  /* TRANS: Abbr. for Terabytes */ T_('TB'),
+        'size_symbol_pb' =>  /* TRANS: Abbr. for Petabytes */ T_('PB'),
+        'size_symbol_eb' =>  /* TRANS: Abbr. for Exabytes  */ T_('EB'),
 
-			'validation_size_limit'   => min( array( return_bytes( ini_get('post_max_size') ), return_bytes( ini_get('upload_max_filesize') ), $Settings->get( 'upload_maxkb') * 1024 ) ),
-			'allowed_extensions'      => $allowed_extensions,
-			'table_headers'           => format_to_js( $params['table_headers'] ),
-			'table_id'                => $params['table_id'],
-			'resize_frame'            => $params['resize_frame'] ? true : false,
-			'warning_icon'            => get_icon( 'warning_yellow' ),
-			'filename_before'         => str_replace( "'", "\'", $params['filename_before'] ),
-			'display_status_success'  => $params['display_status_success'] ? true : false,
-			'display_support_message' => $params['display_support_msg'] ? true : false,
-			'status_conflict_place'   => $params['status_conflict_place'],
-			'button_class'            => button_class( 'text' ),
-			'no_results'              => preg_replace( "/\s+/", " ", $params['noresults'] ),
-			'fileroot_ID'             => $params['fileroot_ID'],
-			'path'                    => $params['path'],
-			'conflict_file_format'    => $params['conflict_file_format'],
-			'crumb_conflictfiles'     => get_crumb( 'conflictfiles' ),
-		);
-	
-	if( is_ajax_request() )
-	{
-		?>
+        'validation_size_limit' => min([return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')), $Settings->get('upload_maxkb') * 1024]),
+        'allowed_extensions' => $allowed_extensions,
+        'table_headers' => format_to_js($params['table_headers']),
+        'table_id' => $params['table_id'],
+        'resize_frame' => $params['resize_frame'] ? true : false,
+        'warning_icon' => get_icon('warning_yellow'),
+        'filename_before' => str_replace("'", "\'", $params['filename_before']),
+        'display_status_success' => $params['display_status_success'] ? true : false,
+        'display_support_message' => $params['display_support_msg'] ? true : false,
+        'status_conflict_place' => $params['status_conflict_place'],
+        'button_class' => button_class('text'),
+        'no_results' => preg_replace("/\s+/", " ", $params['noresults']),
+        'fileroot_ID' => $params['fileroot_ID'],
+        'path' => $params['path'],
+        'conflict_file_format' => $params['conflict_file_format'],
+        'crumb_conflictfiles' => get_crumb('conflictfiles'),
+    ];
+
+    if (is_ajax_request()) {
+        ?>
 		<script>
 		jQuery( document ).ready( function() {
 			if( typeof( window.evo_init_dragdrop_button_config ) == 'undefined' )
 			{
 				window.evo_init_dragdrop_button_config = {};
 			}
-			window.evo_init_dragdrop_button_config['fieldset_<?php echo $params['fieldset_prefix'];?>'] = <?php echo evo_json_encode( $dragdrop_upload_button_config );?>;
-			window.init_uploader( evo_init_dragdrop_button_config['fieldset_<?php echo $params['fieldset_prefix'];?>'] );
+			window.evo_init_dragdrop_button_config['fieldset_<?php echo $params['fieldset_prefix']; ?>'] = <?php echo evo_json_encode($dragdrop_upload_button_config); ?>;
+			window.init_uploader( evo_init_dragdrop_button_config['fieldset_<?php echo $params['fieldset_prefix']; ?>'] );
 		} );
 		</script>
 		<?php
-	}
-	else
-	{
-		expose_var_to_js( 'fieldset_'.$params['fieldset_prefix'], $dragdrop_upload_button_config, 'evo_init_dragdrop_button_config' );
-	}
-	?>
+    } else {
+        expose_var_to_js('fieldset_' . $params['fieldset_prefix'], $dragdrop_upload_button_config, 'evo_init_dragdrop_button_config');
+    }
+    ?>
 
 	<script type="text/template" id="<?php echo $params['fieldset_prefix']; ?>qq-template">
-	<?php echo $params['template'];?>
+	<?php echo $params['template']; ?>
 	</script>
 
 	<?php
 
-	echo $params['after'];
+    echo $params['after'];
 }
 
 
@@ -2584,70 +2332,58 @@ function display_dragdrop_upload_button( $params = array() )
  * @param boolean TRUE to display message
  * @return boolean|string TRUE on success, otherwise an error message
  */
-function replace_old_file_with_new( $root_type, $root_in_type_ID, $path, $new_name, $old_name, $display_message = true )
+function replace_old_file_with_new($root_type, $root_in_type_ID, $path, $new_name, $old_name, $display_message = true)
 {
-	$error_message = '';
+    $error_message = '';
 
-	if( empty( $new_name ) )
-	{
-		$error_message = T_( 'The new file name is empty!' );
-	}
-	elseif( empty( $old_name ) )
-	{
-		$error_message = T_( 'The old file name is empty!' );
-	}
+    if (empty($new_name)) {
+        $error_message = T_('The new file name is empty!');
+    } elseif (empty($old_name)) {
+        $error_message = T_('The old file name is empty!');
+    }
 
-	if( empty( $error_message ) )
-	{
-		$FileCache = & get_FileCache();
-		$newFile = & $FileCache->get_by_root_and_path( $root_type, $root_in_type_ID, trailing_slash( $path ).$new_name, true );
-		$oldFile = & $FileCache->get_by_root_and_path( $root_type, $root_in_type_ID, trailing_slash( $path ).$old_name, true );
-		$new_filename = $newFile->get_name();
-		$old_filename = $oldFile->get_name();
-		$dir = $newFile->get_dir();
-		$oldFile->rm_cache();
-		$newFile->rm_cache();
+    if (empty($error_message)) {
+        $FileCache = &get_FileCache();
+        $newFile = &$FileCache->get_by_root_and_path($root_type, $root_in_type_ID, trailing_slash($path) . $new_name, true);
+        $oldFile = &$FileCache->get_by_root_and_path($root_type, $root_in_type_ID, trailing_slash($path) . $old_name, true);
+        $new_filename = $newFile->get_name();
+        $old_filename = $oldFile->get_name();
+        $dir = $newFile->get_dir();
+        $oldFile->rm_cache();
+        $newFile->rm_cache();
 
-		// rename new uploaded file to temp file name
-		$index = 0;
-		$temp_filename = 'temp'.$index.'-'.$new_filename;
-		while( file_exists( $dir.$temp_filename ) )
-		{ // find an unused filename
-			$index++;
-			$temp_filename = 'temp'.$index.'-'.$new_filename;
-		}
-	}
+        // rename new uploaded file to temp file name
+        $index = 0;
+        $temp_filename = 'temp' . $index . '-' . $new_filename;
+        while (file_exists($dir . $temp_filename)) { // find an unused filename
+            $index++;
+            $temp_filename = 'temp' . $index . '-' . $new_filename;
+        }
+    }
 
-	// @rename will overwrite a file with the same name if exists. In this case it shouldn't be a problem.
-	if( empty( $error_message ) && ( ! @rename( $newFile->get_full_path(), $dir.$temp_filename ) ) )
-	{ // rename new file to temp file name failed
-		$error_message = sprintf( T_( 'The new file could not be renamed to %s' ), $temp_filename );
-	}
+    // @rename will overwrite a file with the same name if exists. In this case it shouldn't be a problem.
+    if (empty($error_message) && (! @rename($newFile->get_full_path(), $dir . $temp_filename))) { // rename new file to temp file name failed
+        $error_message = sprintf(T_('The new file could not be renamed to %s'), $temp_filename);
+    }
 
-	if( empty( $error_message ) && ( ! @rename( $oldFile->get_full_path(), $dir.$new_filename ) ) )
-	{ // rename original file to the new file name failed
-		$error_message = sprintf( T_( 'The original file could not be renamed to %s. The new file is now named %s.' ), $new_filename, $temp_filename );
-	}
+    if (empty($error_message) && (! @rename($oldFile->get_full_path(), $dir . $new_filename))) { // rename original file to the new file name failed
+        $error_message = sprintf(T_('The original file could not be renamed to %s. The new file is now named %s.'), $new_filename, $temp_filename);
+    }
 
-	if( empty( $error_message ) && ( ! @rename( $dir.$temp_filename, $dir.$old_filename ) ) )
-	{ // rename new file to the original file name failed
-		$error_message = sprintf( T_( 'The new file could not be renamed to %s. It is now named %s.' ), $old_filename, $temp_filename );
-	}
+    if (empty($error_message) && (! @rename($dir . $temp_filename, $dir . $old_filename))) { // rename new file to the original file name failed
+        $error_message = sprintf(T_('The new file could not be renamed to %s. It is now named %s.'), $old_filename, $temp_filename);
+    }
 
-	if( $display_message )
-	{
-		global $Messages;
-		if( empty( $error_message ) )
-		{
-			$Messages->add( sprintf( T_( '%s has been replaced with the new version!' ), $old_filename ), 'success' );
-		}
-		else
-		{
-			$Messages->add( $error_message, 'error' );
-		}
-	}
+    if ($display_message) {
+        global $Messages;
+        if (empty($error_message)) {
+            $Messages->add(sprintf(T_('%s has been replaced with the new version!'), $old_filename), 'success');
+        } else {
+            $Messages->add($error_message, 'error');
+        }
+    }
 
-	return empty( $error_message ) ? true : $error_message;
+    return empty($error_message) ? true : $error_message;
 }
 
 
@@ -2659,41 +2395,34 @@ function replace_old_file_with_new( $root_type, $root_in_type_ID, $path, $new_na
  *                FALSE - to decide - if dir contains even only empty subdirectories
  * @return boolean TRUE if directory is empty
  */
-function is_empty_directory( $dir, $recursive = true )
+function is_empty_directory($dir, $recursive = true)
 {
-	$result = true;
+    $result = true;
 
-	if( empty( $dir ) || ! file_exists( $dir ) || ! is_readable( $dir ) )
-	{ // Return TRUE if dir doesn't exist or it is not readbale
-		return $result;
-	}
+    if (empty($dir) || ! file_exists($dir) || ! is_readable($dir)) { // Return TRUE if dir doesn't exist or it is not readbale
+        return $result;
+    }
 
-	// Fix dir path if slash is missed at the end
-	$dir = rtrim( $dir, '/' ).'/';
+    // Fix dir path if slash is missed at the end
+    $dir = rtrim($dir, '/') . '/';
 
-	$handle = opendir( $dir );
-	while( ( $file = readdir( $handle ) ) !== false )
-	{
-		if( $file != '.' && $file != '..' )
-		{ // Check what is it, dir or file?
-			if( $recursive && is_dir( $dir.$file ) )
-			{ // It is a directory - try to find the files inside
-				$result = is_empty_directory( $dir.$file, $recursive );
-				if( $result === false )
-				{ // A file was found inside the directory
-					break;
-				}
-			}
-			else
-			{ // It is a file then directory is not empty
-				$result = false;
-				break; // Stop here
-			}
-		}
-	}
-	closedir( $handle );
+    $handle = opendir($dir);
+    while (($file = readdir($handle)) !== false) {
+        if ($file != '.' && $file != '..') { // Check what is it, dir or file?
+            if ($recursive && is_dir($dir . $file)) { // It is a directory - try to find the files inside
+                $result = is_empty_directory($dir . $file, $recursive);
+                if ($result === false) { // A file was found inside the directory
+                    break;
+                }
+            } else { // It is a file then directory is not empty
+                $result = false;
+                break; // Stop here
+            }
+        }
+    }
+    closedir($handle);
 
-	return $result;
+    return $result;
 }
 
 
@@ -2703,49 +2432,45 @@ function is_empty_directory( $dir, $recursive = true )
  * @param string Name of the temporary file (changed by reference)
  * @return resource|string File handle OR Error text
  */
-function open_temp_file( & $temp_file_name )
+function open_temp_file(&$temp_file_name)
 {
-	$temp_handle = tmpfile();
+    $temp_handle = tmpfile();
 
-	if( $temp_handle === false )
-	{ // Error on create a temp file on system temp dir
-		global $media_path;
+    if ($temp_handle === false) { // Error on create a temp file on system temp dir
+        global $media_path;
 
-		$temp_path = $media_path.'upload-tmp/';
+        $temp_path = $media_path . 'upload-tmp/';
 
-		$temp_folder_exists = file_exists( $temp_path );
-		if( ! $temp_folder_exists )
-		{ // Temp folder doesn't exist yet
-			// Try to create it
-			$temp_folder_exists = @mkdir( $temp_path, 0755 );
-			if( $temp_folder_exists )
-			{ // If temp folder has been created try to create .htaccess to prevent listing
-				if( $htaccess_handle = @fopen( $temp_path.'.htaccess', 'w+' ) )
-				{
-					fwrite( $htaccess_handle, 'deny from all' );
-					fclose( $htaccess_handle );
-				}
-			}
-		}
+        $temp_folder_exists = file_exists($temp_path);
+        if (! $temp_folder_exists) { // Temp folder doesn't exist yet
+            // Try to create it
+            $temp_folder_exists = @mkdir($temp_path, 0755);
+            if ($temp_folder_exists) { // If temp folder has been created try to create .htaccess to prevent listing
+                if ($htaccess_handle = @fopen($temp_path . '.htaccess', 'w+')) {
+                    fwrite($htaccess_handle, 'deny from all');
+                    fclose($htaccess_handle);
+                }
+            }
+        }
 
-		if( $temp_folder_exists )
-		{ // Try to create a temp file on media temp path
-			$temp_file_name = tempnam( $temp_path, 'qck_' );
-		}
+        if ($temp_folder_exists) { // Try to create a temp file on media temp path
+            $temp_file_name = tempnam($temp_path, 'qck_');
+        }
 
-		if( ! $temp_folder_exists || $temp_file_name === false )
-		{ // Error on create a temp file on media temp path
-			return sprintf( T_( 'Unable to create temporary upload file. PHP needs write permissions on %s or %s.' ),
-				'<b>'.sys_get_temp_dir().'</b>',
-				'<b>'.$temp_path.'</b>' );
-		}
+        if (! $temp_folder_exists || $temp_file_name === false) { // Error on create a temp file on media temp path
+            return sprintf(
+                T_('Unable to create temporary upload file. PHP needs write permissions on %s or %s.'),
+                '<b>' . sys_get_temp_dir() . '</b>',
+                '<b>' . $temp_path . '</b>'
+            );
+        }
 
-		// Create a file handle for new temp file on media path
-		$temp_handle = fopen( $temp_file_name, 'r+' );
-	}
+        // Create a file handle for new temp file on media path
+        $temp_handle = fopen($temp_file_name, 'r+');
+    }
 
-	// File handle
-	return $temp_handle;
+    // File handle
+    return $temp_handle;
 }
 
 
@@ -2756,11 +2481,11 @@ function open_temp_file( & $temp_file_name )
  */
 function echo_file_properties()
 {
-	global $admin_url;
+    global $admin_url;
 
-	// Initialize JavaScript to build and open window:
-	echo_modalwindow_js();
-?>
+    // Initialize JavaScript to build and open window:
+    echo_modalwindow_js();
+    ?>
 <script>
 	//<![CDATA[
 	// Window to edit file
@@ -2785,7 +2510,7 @@ function echo_file_properties()
 				'link_owner_type': typeof( link_owner_type ) == 'undefined' ? '' : link_owner_type,
 				'link_owner_ID': typeof( link_owner_ID ) == 'undefined' ? '' : link_owner_ID,
 				'from': typeof( from ) == 'undefined' ? '' : from,
-				'crumb_file': '<?php echo get_crumb( 'file' ); ?>',
+				'crumb_file': '<?php echo get_crumb('file'); ?>',
 			},
 			success: function( result )
 			{
@@ -2850,97 +2575,87 @@ function echo_file_properties()
  * get_root_path_by_abspath( 'users/admin/_evocache/admin.jpg/crop-top-320x320.jpg?mtime=1486119491', true ) => array( root => 'user_1', path => 'admin.jpg' )
  * get_root_path_by_abspath( 'blogs/home/_evocache/image.jpg/fit-80x80.jpg?mtime=1486969646', true ) => array( root => 'collection_1', path => 'image.jpg' )
  * get_root_path_by_abspath( 'skins/bootstrap_main_skin/_evocache/skinshot.png/fit-80x80.png?mtime=1486969005', true ) => array( root => 'skins_0', path => 'bootstrap_main_skin/skinshot.png' )
- *
  */
-function get_root_path_by_abspath( $abspath, $is_cache_path = false )
+function get_root_path_by_abspath($abspath, $is_cache_path = false)
 {
-	if( empty( $abspath ) )
-	{	// If absolute path is empty do NOT try to decode it:
-		return false;
-	}
+    if (empty($abspath)) {	// If absolute path is empty do NOT try to decode it:
+        return false;
+    }
 
-	load_class( 'files/model/_fileroot.class.php', 'FileRoot' );
+    load_class('files/model/_fileroot.class.php', 'FileRoot');
 
-	$abspath = preg_split( '#[/\\\\]#', $abspath );
+    $abspath = preg_split('#[/\\\\]#', $abspath);
 
-	switch( $abspath[0] )
-	{
-		case 'users':
-			// User media dir:
-			$UserCache = & get_UserCache();
-			if( $file_User = & $UserCache->get_by_login( $abspath[1] ) )
-			{	// User is found by login:
-				$root = FileRoot::gen_ID( 'user', $file_User->ID );
-				$start_relpath = 2;
-			}
-			break;
+    switch ($abspath[0]) {
+        case 'users':
+            // User media dir:
+            $UserCache = &get_UserCache();
+            if ($file_User = &$UserCache->get_by_login($abspath[1])) {	// User is found by login:
+                $root = FileRoot::gen_ID('user', $file_User->ID);
+                $start_relpath = 2;
+            }
+            break;
 
-		case 'blogs':
-			// Collection media dir:
-			$BlogCache = & get_BlogCache();
-			if( $file_Blog = & $BlogCache->get_by_urlname( $abspath[1], false ) )
-			{	// Blog is found by urlname:
-				$root = FileRoot::gen_ID( 'collection', $file_Blog->ID );
-				$start_relpath = 2;
-			}
-			break;
+        case 'blogs':
+            // Collection media dir:
+            $BlogCache = &get_BlogCache();
+            if ($file_Blog = &$BlogCache->get_by_urlname($abspath[1], false)) {	// Blog is found by urlname:
+                $root = FileRoot::gen_ID('collection', $file_Blog->ID);
+                $start_relpath = 2;
+            }
+            break;
 
-		case 'skins':
-			// Skins dir:
-			$root = FileRoot::gen_ID( 'skins', 0 );
-			$start_relpath = 1;
-			break;
+        case 'skins':
+            // Skins dir:
+            $root = FileRoot::gen_ID('skins', 0);
+            $start_relpath = 1;
+            break;
 
-		case 'shared':
-			// Shared media dir:
-			$root = FileRoot::gen_ID( 'shared', 0 );
-			$start_relpath = 2;
-			break;
+        case 'shared':
+            // Shared media dir:
+            $root = FileRoot::gen_ID('shared', 0);
+            $start_relpath = 2;
+            break;
 
-		case 'import':
-			// Import media dir:
-			$root = FileRoot::gen_ID( 'import', 0 );
-			$start_relpath = 1;
-			break;
+        case 'import':
+            // Import media dir:
+            $root = FileRoot::gen_ID('import', 0);
+            $start_relpath = 1;
+            break;
 
-		case 'emailcampaign':
-			// Email campaign media dir:
-			$EmailCampaignCache = & get_EmailCampaignCache();
-			if( $file_EmailCampaign = & $EmailCampaignCache->get_by_ID( $abspath[1], false ) )
-			{	// Email campaign is found by ID:
-				$root = FileRoot::gen_ID( 'emailcampaign', $file_EmailCampaign->ID );
-				$start_relpath = 1;
-			}
-			break;
-	}
+        case 'emailcampaign':
+            // Email campaign media dir:
+            $EmailCampaignCache = &get_EmailCampaignCache();
+            if ($file_EmailCampaign = &$EmailCampaignCache->get_by_ID($abspath[1], false)) {	// Email campaign is found by ID:
+                $root = FileRoot::gen_ID('emailcampaign', $file_EmailCampaign->ID);
+                $start_relpath = 1;
+            }
+            break;
+    }
 
-	if( ! empty( $root ) )
-	{	// Get relative path only if root is detected:
-		$relpath = '';
-		$abspath_length = count( $abspath );
-		// For cache path like 'blogs/home/_evocache/image.jpg/fit-80x80.jpg' exclude the last because it is a not path part and just a size info:
-		$last_path_index = ( $is_cache_path ? $abspath_length - 1 : $abspath_length );
+    if (! empty($root)) {	// Get relative path only if root is detected:
+        $relpath = '';
+        $abspath_length = count($abspath);
+        // For cache path like 'blogs/home/_evocache/image.jpg/fit-80x80.jpg' exclude the last because it is a not path part and just a size info:
+        $last_path_index = ($is_cache_path ? $abspath_length - 1 : $abspath_length);
 
-		for( $f = $start_relpath; $f < $last_path_index; $f++ )
-		{
-			if( $is_cache_path && $f == $abspath_length - 3 )
-			{	// Skip this because it is a evocache folder in the abspath like 'blogs/home/_evocache/image.jpg/fit-80x80.jpg':
-				continue;
-			}
-			$relpath .= $abspath[ $f ].( $f < $last_path_index - 1 ? DIRECTORY_SEPARATOR : '' );
-		}
+        for ($f = $start_relpath; $f < $last_path_index; $f++) {
+            if ($is_cache_path && $f == $abspath_length - 3) {	// Skip this because it is a evocache folder in the abspath like 'blogs/home/_evocache/image.jpg/fit-80x80.jpg':
+                continue;
+            }
+            $relpath .= $abspath[$f] . ($f < $last_path_index - 1 ? DIRECTORY_SEPARATOR : '');
+        }
 
-		if( ! empty( $relpath ) )
-		{	// Return data only if they both are detected:
-			return array(
-					'root' => $root,
-					'path' => $relpath,
-				);
-		}
-	}
+        if (! empty($relpath)) {	// Return data only if they both are detected:
+            return [
+                'root' => $root,
+                'path' => $relpath,
+            ];
+        }
+    }
 
-	// Data are not found correctly:
-	return false;
+    // Data are not found correctly:
+    return false;
 }
 
 
@@ -2951,25 +2666,22 @@ function get_root_path_by_abspath( $abspath, $is_cache_path = false )
  * @param boolean create meta data in DB if it doesn't exist yet? (generates a $File->ID)
  * @return mixed File a {@link File} object OR NULL if file does not exist
  */
-function & get_file_by_abspath( $abspath, $force_create_meta = false )
+function &get_file_by_abspath($abspath, $force_create_meta = false)
 {
-	$root_path = get_root_path_by_abspath( $abspath );
-	if( $root_path )
-	{
-		$FileRootCache = & get_FileRootCache();
-		if( $FileRoot = $FileRootCache->get_by_ID( $root_path['root'] ) )
-		{
-			$FileCache = & get_FileCache();
-			if( $File = & $FileCache->get_by_root_and_path( $FileRoot->type, $FileRoot->in_type_ID, $root_path['path'] ) && $File->exists() )
-			{
-				$File->load_meta( $force_create_meta );
-				return $File;
-			}
-		}
-	}
+    $root_path = get_root_path_by_abspath($abspath);
+    if ($root_path) {
+        $FileRootCache = &get_FileRootCache();
+        if ($FileRoot = $FileRootCache->get_by_ID($root_path['root'])) {
+            $FileCache = &get_FileCache();
+            if ($File = &$FileCache->get_by_root_and_path($FileRoot->type, $FileRoot->in_type_ID, $root_path['path']) && $File->exists()) {
+                $File->load_meta($force_create_meta);
+                return $File;
+            }
+        }
+    }
 
-	$r = NULL;
-	return $r;
+    $r = null;
+    return $r;
 }
 
 
@@ -2980,78 +2692,68 @@ function & get_file_by_abspath( $abspath, $force_create_meta = false )
  * @param boolean Force to look through attachments
  * @return obj File object
  */
-function get_social_tag_image_file( $disp )
+function get_social_tag_image_file($disp)
 {
-	global $Settings;
+    global $Settings;
 
-	$social_tag_image_File = NULL;
+    $social_tag_image_File = null;
 
-	switch( $disp )
-	{
-		case 'single':
-		case 'page':
-			global $MainList;
+    switch ($disp) {
+        case 'single':
+        case 'page':
+            global $MainList;
 
-			$Item = & $MainList->get_by_idx( 0 );
-			// Get info for og:image tag
-			if( ! is_null( $Item ) )
-			{
-				$social_tag_image_File = get_social_media_image( $Item );
-			}
-			break;
+            $Item = &$MainList->get_by_idx(0);
+            // Get info for og:image tag
+            if (! is_null($Item)) {
+                $social_tag_image_File = get_social_media_image($Item);
+            }
+            break;
 
-		case 'posts':
-			$intro_Item = & get_featured_Item( $disp, NULL, true );
-			if( $intro_Item && $intro_Item->is_intro() )
-			{
-				$social_tag_image_File = get_social_media_image( $intro_Item, array(
-						'use_item_cat_fallback' => false,
-						'use_coll_fallback' => false,
-						'use_site_fallback' => false ) );
-			}
+        case 'posts':
+            $intro_Item = &get_featured_Item($disp, null, true);
+            if ($intro_Item && $intro_Item->is_intro()) {
+                $social_tag_image_File = get_social_media_image($intro_Item, [
+                    'use_item_cat_fallback' => false,
+                    'use_coll_fallback' => false,
+                    'use_site_fallback' => false,
+                ]);
+            }
 
-			if( empty( $social_tag_image_File ) )
-			{
-				global $disp_detail;
+            if (empty($social_tag_image_File)) {
+                global $disp_detail;
 
-				if( in_array( $disp_detail, array( 'posts-cat', 'posts-topcat-nointro', 'posts-subcat-nointro' ) ) )
-				{ // No intro post or intro post has no image, use current category's social media boiler plate or category image as fallback:
-					global $MainList;
-					// Get current category ID:
-					$cat_ID = $MainList->filters['cat_single'];
-					$ChapterCache = & get_ChapterCache();
-					$FileCache = & get_FileCache();
-					if( $cat_ID && $current_Chapter = & $ChapterCache->get_by_ID( $cat_ID ) )
-					{ // Try social media boilerplate image first:
-						$social_media_image_file_ID = $current_Chapter->get( 'social_media_image_file_ID', false );
-						if( $social_media_image_file_ID > 0 && $File = & $FileCache->get_by_ID( $social_media_image_file_ID  ) && $File->is_image() )
-						{
-							$social_tag_image_File = $File;
-						}
-						else
-						{ // Try category image:
-							$cat_image_file_ID = $current_Chapter->get( 'image_file_ID', false );
-							if( $cat_image_file_ID > 0 && $File = & $FileCache->get_by_ID( $cat_image_file_ID ) && $File->is_image() )
-							{
-								$social_tag_image_File = $File;
-							}
-						}
-					}
-				}
-			}
+                if (in_array($disp_detail, ['posts-cat', 'posts-topcat-nointro', 'posts-subcat-nointro'])) { // No intro post or intro post has no image, use current category's social media boiler plate or category image as fallback:
+                    global $MainList;
+                    // Get current category ID:
+                    $cat_ID = $MainList->filters['cat_single'];
+                    $ChapterCache = &get_ChapterCache();
+                    $FileCache = &get_FileCache();
+                    if ($cat_ID && $current_Chapter = &$ChapterCache->get_by_ID($cat_ID)) { // Try social media boilerplate image first:
+                        $social_media_image_file_ID = $current_Chapter->get('social_media_image_file_ID', false);
+                        if ($social_media_image_file_ID > 0 && $File = &$FileCache->get_by_ID($social_media_image_file_ID) && $File->is_image()) {
+                            $social_tag_image_File = $File;
+                        } else { // Try category image:
+                            $cat_image_file_ID = $current_Chapter->get('image_file_ID', false);
+                            if ($cat_image_file_ID > 0 && $File = &$FileCache->get_by_ID($cat_image_file_ID) && $File->is_image()) {
+                                $social_tag_image_File = $File;
+                            }
+                        }
+                    }
+                }
+            }
 
-			if( empty( $social_tag_image_File ) )
-			{ // Use site social media boiler plate or logo:
-				$social_tag_image_File = get_social_media_image();
-			}
+            if (empty($social_tag_image_File)) { // Use site social media boiler plate or logo:
+                $social_tag_image_File = get_social_media_image();
+            }
 
-			break;
+            break;
 
-		default:
-			// Other disps
-	}
+        default:
+            // Other disps
+    }
 
-	return $social_tag_image_File;
+    return $social_tag_image_File;
 }
 
 
@@ -3063,20 +2765,16 @@ function get_social_tag_image_file( $disp )
  * @param boolean TRUE to assert if user dosn't have the required permission
  * @return boolean
  */
-function check_perm_upload_files( $LinkOwner, $FileRoot, $assert = false )
+function check_perm_upload_files($LinkOwner, $FileRoot, $assert = false)
 {
-	if( empty( $LinkOwner ) )
-	{	// Check perm when we upload new files by file manager without linking to any object:
-		if( ! is_logged_in() && $assert )
-		{	// Halt the denied access:
-			debug_die( 'You have no permission to upload new files!' );
-		}
-		return check_user_perm( 'files', 'add', $assert, $FileRoot );
-	}
-	else
-	{	// Check perm when we upload new files for the object like Item, Comment, Message or EmailCampaign:
-		return $LinkOwner->check_perm( 'add', $assert, $FileRoot );
-	}
+    if (empty($LinkOwner)) {	// Check perm when we upload new files by file manager without linking to any object:
+        if (! is_logged_in() && $assert) {	// Halt the denied access:
+            debug_die('You have no permission to upload new files!');
+        }
+        return check_user_perm('files', 'add', $assert, $FileRoot);
+    } else {	// Check perm when we upload new files for the object like Item, Comment, Message or EmailCampaign:
+        return $LinkOwner->check_perm('add', $assert, $FileRoot);
+    }
 }
 
 
@@ -3087,34 +2785,31 @@ function check_perm_upload_files( $LinkOwner, $FileRoot, $assert = false )
  * @param string File extensions, separated by |
  * @return boolean
  */
-function check_folder_with_extensions( $folder_path, $extensions )
+function check_folder_with_extensions($folder_path, $extensions)
 {
-	$folder_files = get_filenames( $folder_path );
+    $folder_files = get_filenames($folder_path);
 
-	foreach( $folder_files as $folder_file )
-	{
-		if( preg_match( '/\.('.$extensions.')$/i', $folder_file ) )
-		{	// First file with requested extension is found:
-			return true;
-		}
-	}
+    foreach ($folder_files as $folder_file) {
+        if (preg_match('/\.(' . $extensions . ')$/i', $folder_file)) {	// First file with requested extension is found:
+            return true;
+        }
+    }
 
-	// Folder has no file with requested extension
-	return false;
+    // Folder has no file with requested extension
+    return false;
 }
 
 
 /**
  * Callback function to sort thumbnail sizes array by width and height
  */
-function sort_thumbnail_sizes_callback( $a, $b )
+function sort_thumbnail_sizes_callback($a, $b)
 {
-	if( $a[1] == $b[1] )
-	{
-		return $a[2] < $b[2] ? -1 : 1;
-	}
+    if ($a[1] == $b[1]) {
+        return $a[2] < $b[2] ? -1 : 1;
+    }
 
-	return ( $a[1] < $b[1] ? -1 : 1 );
+    return ($a[1] < $b[1] ? -1 : 1);
 }
 
 
@@ -3124,19 +2819,16 @@ function sort_thumbnail_sizes_callback( $a, $b )
  * @param object File
  * @return string
  */
-function file_td_lastmod( & $File )
+function file_td_lastmod(&$File)
 {
-	global $UserSettings;
+    global $UserSettings;
 
-	if( $UserSettings->get( 'fm_showdate' ) == 'long' )
-	{	// Full format:
-		return '<span class="date">'.$File->get_lastmod_formatted( 'date' ).'</span> '
-			.'<span class="time">'.$File->get_lastmod_formatted( 'time' ).'</span>';
-	}
-	else
-	{	// Compact format:
-		return $File->get_lastmod_formatted( 'compact' );
-	}
+    if ($UserSettings->get('fm_showdate') == 'long') {	// Full format:
+        return '<span class="date">' . $File->get_lastmod_formatted('date') . '</span> '
+            . '<span class="time">' . $File->get_lastmod_formatted('time') . '</span>';
+    } else {	// Compact format:
+        return $File->get_lastmod_formatted('compact');
+    }
 }
 
 
@@ -3146,46 +2838,38 @@ function file_td_lastmod( & $File )
  * @param object File
  * @return string
  */
-function file_td_name( & $File )
+function file_td_name(&$File)
 {
-	global $UserSettings;
+    global $UserSettings;
 
-	$r = '';
+    $r = '';
 
-	// Filename:
-	if( $File->is_dir() )
-	{ // Directory
-		// Link to open the directory in the current window
-		$r .= '<a href="'.$File->get_view_url().'">'.$File->dget( 'name' ).'</a>';
-	}
-	else
-	{	// File
-		if( $view_link = $File->get_view_link( $File->get_name(), NULL, NULL ) )
-		{
-			$r .= '<span class="fname">'.$view_link.'</span>';
-		}
-		else
-		{	// File extension unrecognized
-			$r .= $File->dget( 'name' );
-		}
-	}
+    // Filename:
+    if ($File->is_dir()) { // Directory
+        // Link to open the directory in the current window
+        $r .= '<a href="' . $File->get_view_url() . '">' . $File->dget('name') . '</a>';
+    } else {	// File
+        if ($view_link = $File->get_view_link($File->get_name(), null, null)) {
+            $r .= '<span class="fname">' . $view_link . '</span>';
+        } else {	// File extension unrecognized
+            $r .= $File->dget('name');
+        }
+    }
 
-	// File meta data:
-	$r .= '<span class="filemeta">';
-	// Optionally display IMAGE pixel size:
-	if( $UserSettings->get( 'fm_getimagesizes' ) &&
-	    ( $file_image_size = $File->get_image_size( 'widthxheight' ) ) !== false )
-	{
-		$r .= ' ('.$file_image_size.')';
-	}
-	// Optionally display meta data title:
-	if( $File->meta == 'loaded' )
-	{	// We have loaded meta data for this file:
-		$r .= ' - '.$File->title;
-	}
-	$r .= '</span>';
+    // File meta data:
+    $r .= '<span class="filemeta">';
+    // Optionally display IMAGE pixel size:
+    if ($UserSettings->get('fm_getimagesizes') &&
+        ($file_image_size = $File->get_image_size('widthxheight')) !== false) {
+        $r .= ' (' . $file_image_size . ')';
+    }
+    // Optionally display meta data title:
+    if ($File->meta == 'loaded') {	// We have loaded meta data for this file:
+        $r .= ' - ' . $File->title;
+    }
+    $r .= '</span>';
 
-	return $r;
+    return $r;
 }
 
 
@@ -3195,55 +2879,55 @@ function file_td_name( & $File )
  * @param object File
  * @return string
  */
-function file_td_actions( & $File, $except = array() )
+function file_td_actions(&$File, $except = [])
 {
-	global $admin_url;
+    global $admin_url;
 
-	if( ! is_logged_in() ||
-			! ( $FileRoot = & $File->get_FileRoot() ) ||
-			! check_user_perm( 'files', 'edit_allowed', false, $FileRoot ) )
-	{	// User cannot edit files in the File Root:
-		return '';
-	}
+    if (! is_logged_in() ||
+            ! ($FileRoot = &$File->get_FileRoot()) ||
+            ! check_user_perm('files', 'edit_allowed', false, $FileRoot)) {	// User cannot edit files in the File Root:
+        return '';
+    }
 
-	$action_url = $admin_url.'?ctrl=files&amp;root='.$FileRoot->ID
-		.'&amp;path='.rawurlencode( $File->get_dir_rel_path() )
-		.'&amp;fm_selected[]='.rawurlencode( $File->get_rdfp_rel_path() )
-		.'&amp;';
-	$action_crumb_url = $action_url.url_crumb( 'file' ).'&amp;';
+    $action_url = $admin_url . '?ctrl=files&amp;root=' . $FileRoot->ID
+        . '&amp;path=' . rawurlencode($File->get_dir_rel_path())
+        . '&amp;fm_selected[]=' . rawurlencode($File->get_rdfp_rel_path())
+        . '&amp;';
+    $action_crumb_url = $action_url . url_crumb('file') . '&amp;';
 
-	$r = '';
-	if( $File->is_editable( check_user_perm( 'files', 'all', false ) ) )
-	{
-		$r .= action_icon( T_('Edit file...'), 'edit', $action_crumb_url.'action=edit_file' );
-	}
-	else
-	{
-		$r .= get_icon( 'edit', 'noimg' );
-	}
+    $r = '';
+    if ($File->is_editable(check_user_perm('files', 'all', false))) {
+        $r .= action_icon(T_('Edit file...'), 'edit', $action_crumb_url . 'action=edit_file');
+    } else {
+        $r .= get_icon('edit', 'noimg');
+    }
 
-	if( $File->can_be_manipulated() )
-	{
-		if( !in_array( 'edit', $except ) )
-		{
-			$r .= action_icon( T_('Edit properties...'), 'properties', $action_crumb_url.'action=edit_properties', NULL, NULL, NULL,
-				array( 'onclick' => 'return file_properties( \''.$FileRoot->ID.'\', \''.$File->get_dir_rel_path().'\', \''.$File->get_rdfp_rel_path().'\' )' ) );
-		}
-		if( !in_array( 'move', $except ) )
-		{
-			$r .= action_icon( T_('Move'), 'file_move', $action_url.'action=file_move&amp;fm_sources_root='.$FileRoot->ID );
-		}
-		if( !in_array( 'copy', $except ) )
-		{
-			$r .= action_icon( T_('Copy'), 'file_copy', $action_url.'action=file_copy&amp;fm_sources_root='.$FileRoot->ID );
-		}
-		if( !in_array( 'delete', $except ) )
-		{
-			$r .= action_icon( T_('Delete'), 'file_delete', $action_crumb_url.'action=delete' );
-		}
-	}
+    if ($File->can_be_manipulated()) {
+        if (! in_array('edit', $except)) {
+            $r .= action_icon(
+                T_('Edit properties...'),
+                'properties',
+                $action_crumb_url . 'action=edit_properties',
+                null,
+                null,
+                null,
+                [
+                    'onclick' => 'return file_properties( \'' . $FileRoot->ID . '\', \'' . $File->get_dir_rel_path() . '\', \'' . $File->get_rdfp_rel_path() . '\' )',
+                ]
+            );
+        }
+        if (! in_array('move', $except)) {
+            $r .= action_icon(T_('Move'), 'file_move', $action_url . 'action=file_move&amp;fm_sources_root=' . $FileRoot->ID);
+        }
+        if (! in_array('copy', $except)) {
+            $r .= action_icon(T_('Copy'), 'file_copy', $action_url . 'action=file_copy&amp;fm_sources_root=' . $FileRoot->ID);
+        }
+        if (! in_array('delete', $except)) {
+            $r .= action_icon(T_('Delete'), 'file_delete', $action_crumb_url . 'action=delete');
+        }
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -3253,72 +2937,58 @@ function file_td_actions( & $File, $except = array() )
  * @param string Top/root folder path
  * @return boolean
  */
-function move_single_dir_to_top_level( $root_folder_path )
+function move_single_dir_to_top_level($root_folder_path)
 {
-	$root_folder_path = rtrim( $root_folder_path, '/' );
+    $root_folder_path = rtrim($root_folder_path, '/');
 
-	$folders_num = 1;
-	$files_num = 0;
-	$check_folder_path = $root_folder_path;
-	$top_empty_folder_path = NULL;
-	while( $folders_num == 1 && $files_num == 0 )
-	{
-		if( ! ( $dir_handle = @opendir( $check_folder_path ) ) )
-		{	// Unable to open dir:
-			break;
-		}
+    $folders_num = 1;
+    $files_num = 0;
+    $check_folder_path = $root_folder_path;
+    $top_empty_folder_path = null;
+    while ($folders_num == 1 && $files_num == 0) {
+        if (! ($dir_handle = @opendir($check_folder_path))) {	// Unable to open dir:
+            break;
+        }
 
-		$folders_num = 0;
-		$files_num = 0;
-		while( $file = readdir( $dir_handle ) )
-		{
-			if( $file == '.' || $file == '..' )
-			{	// Skip reserved folders:
-				continue;
-			}
+        $folders_num = 0;
+        $files_num = 0;
+        while ($file = readdir($dir_handle)) {
+            if ($file == '.' || $file == '..') {	// Skip reserved folders:
+                continue;
+            }
 
-			if( is_dir( $check_folder_path.'/'.$file ) )
-			{	// Count folders:
-				$folders_num++;
-				$single_folder_name = $file;
-			}
-			else
-			{	// Count files:
-				$files_num++;
-			}
+            if (is_dir($check_folder_path . '/' . $file)) {	// Count folders:
+                $folders_num++;
+                $single_folder_name = $file;
+            } else {	// Count files:
+                $files_num++;
+            }
 
-			if( $files_num == 2 )
-			{	// Stop if the folder already contains more 1 files or folder:
-				break;
-			}
-		}
+            if ($files_num == 2) {	// Stop if the folder already contains more 1 files or folder:
+                break;
+            }
+        }
 
-		// Close the folder handler:
-		closedir( $dir_handle );
+        // Close the folder handler:
+        closedir($dir_handle);
 
-		if( $folders_num == 1 && $files_num == 0 )
-		{	// The current folder has only single folder, go to search next level down:
-			$check_folder_path = $check_folder_path.'/'.$single_folder_name;
-			if( $top_empty_folder_path === NULL )
-			{	// Store top empty folder in order to clear this below:
-				$top_empty_folder_path = $check_folder_path;
-			}
-		}
-	}
+        if ($folders_num == 1 && $files_num == 0) {	// The current folder has only single folder, go to search next level down:
+            $check_folder_path = $check_folder_path . '/' . $single_folder_name;
+            if ($top_empty_folder_path === null) {	// Store top empty folder in order to clear this below:
+                $top_empty_folder_path = $check_folder_path;
+            }
+        }
+    }
 
-	if( $check_folder_path != $root_folder_path )
-	{	// Move contens of single root folder to top/root folder:
-		$result = move_files_r( $check_folder_path, $root_folder_path );
-		if( $top_empty_folder_path !== NULL && is_empty_directory( $top_empty_folder_path ) )
-		{	// Remove the single empty folder:
-			rmdir_r( $top_empty_folder_path );
-		}
-	}
-	else
-	{	// No need to move because root folder has not only single folder:
-		$result = true;
-	}
+    if ($check_folder_path != $root_folder_path) {	// Move contens of single root folder to top/root folder:
+        $result = move_files_r($check_folder_path, $root_folder_path);
+        if ($top_empty_folder_path !== null && is_empty_directory($top_empty_folder_path)) {	// Remove the single empty folder:
+            rmdir_r($top_empty_folder_path);
+        }
+    } else {	// No need to move because root folder has not only single folder:
+        $result = true;
+    }
 
-	return $result;
+    return $result;
 }
 ?>

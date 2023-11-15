@@ -15,7 +15,9 @@
  *
  * @todo Allow applying / re-checking of the known data, not just after an update!
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 global $Settings, $display_mode, $antispamsrv_host, $antispamsrv_tos_url;
 global $keyword;
@@ -23,79 +25,77 @@ global $keyword;
 global $row_stats;	// for hit functions
 
 
-$Form = new Form( NULL, 'antispam_add', 'post', 'compact' );
-$Form->begin_form( 'fform', $display_mode == 'js' ? '' : TB_('Add a banned keyword') );
-	$Form->add_crumb('antispam');
-	$Form->hidden_ctrl();
-	$Form->hidden( 'action', 'ban' );
-	$Form->hidden( 'display_mode', $display_mode );
-	$Form->hidden( 'mode', get_param( 'mode' ) );
+$Form = new Form(null, 'antispam_add', 'post', 'compact');
+$Form->begin_form('fform', $display_mode == 'js' ? '' : TB_('Add a banned keyword'));
+$Form->add_crumb('antispam');
+$Form->hidden_ctrl();
+$Form->hidden('action', 'ban');
+$Form->hidden('display_mode', $display_mode);
+$Form->hidden('mode', get_param('mode'));
 
-	$button = array( 'submit', 'submit', TB_('Check & ban...'), 'SaveButton', 'addSpinner( this )' );
-	if( $display_mode == 'js' )
-	{
-		$Form->output = false;
-		$button_html = $Form->button( $button );
-		$Form->output = true;
-	}
-	else
-	{
-		$button_html = '';
-	}
+$button = ['submit', 'submit', TB_('Check & ban...'), 'SaveButton', 'addSpinner( this )'];
+if ($display_mode == 'js') {
+    $Form->output = false;
+    $button_html = $Form->button($button);
+    $Form->output = true;
+} else {
+    $button_html = '';
+}
 
-	$Form->text_input( 'keyword', $keyword, 50, TB_('Keyword/phrase to ban'), '', array( 'maxlength' => 80, 'input_suffix' => ' '.$button_html ) ); // TODO: add note
-	/*
-	 * TODO: explicitly add a domain?
-	 * $add_Form->text( 'domain', $domain, 30, TB_('Add a banned domain'), 'note..', 80 ); // TODO: add note
-	 */
-	if( $display_mode != 'js' )
-	{
-		$Form->buttons( array( $button ) );
-	}
+$Form->text_input('keyword', $keyword, 50, TB_('Keyword/phrase to ban'), '', [
+    'maxlength' => 80,
+    'input_suffix' => ' ' . $button_html,
+]); // TODO: add note
+/*
+ * TODO: explicitly add a domain?
+ * $add_Form->text( 'domain', $domain, 30, TB_('Add a banned domain'), 'note..', 80 ); // TODO: add note
+ */
+if ($display_mode != 'js') {
+    $Form->buttons([$button]);
+}
 $Form->end_form();
 
 
-$Form = new Form( NULL, 'antispam_ban', 'post', 'compact' );
+$Form = new Form(null, 'antispam_ban', 'post', 'compact');
 
-$redirect_to = param( 'redirect_to', 'url', NULL );
-if( $redirect_to == NULL )
-{
-	$redirect_to = regenerate_url( 'action' );
+$redirect_to = param('redirect_to', 'url', null);
+if ($redirect_to == null) {
+    $redirect_to = regenerate_url('action');
 }
 
-$Form->global_icon( TB_('Cancel').'!', 'close', $redirect_to, '', 3, 2, array( 'class'=>'action_icon', 'id'=>'close_button' ) );
+$Form->global_icon(TB_('Cancel') . '!', 'close', $redirect_to, '', 3, 2, [
+    'class' => 'action_icon',
+    'id' => 'close_button',
+]);
 
-$Form->begin_form( 'fform', $display_mode == 'js' ? '' : TB_('Confirm ban & delete') );
+$Form->begin_form('fform', $display_mode == 'js' ? '' : TB_('Confirm ban & delete'));
 
-	$Form->add_crumb( 'antispam' );
-	$Form->hidden_ctrl();
-	$Form->hiddens_by_key( get_memorized() );
-	$Form->hidden( 'confirm', 'confirm' );
-	$Form->hidden( 'display_mode', $display_mode );
-	$Form->hidden( 'mode', get_param( 'mode' ) );
+$Form->add_crumb('antispam');
+$Form->hidden_ctrl();
+$Form->hiddens_by_key(get_memorized());
+$Form->hidden('confirm', 'confirm');
+$Form->hidden('display_mode', $display_mode);
+$Form->hidden('mode', get_param('mode'));
 
-	// Check for junk:
+// Check for junk:
 
-	// Check for potentially affected logged hits:
-	$sql = 'SELECT SQL_NO_CACHE hit_ID, UNIX_TIMESTAMP(hit_datetime) as hit_datetime, hit_uri, hit_referer, dom_name,
+// Check for potentially affected logged hits:
+$sql = 'SELECT SQL_NO_CACHE hit_ID, UNIX_TIMESTAMP(hit_datetime) as hit_datetime, hit_uri, hit_referer, dom_name,
 									hit_coll_ID, hit_remote_addr, blog_shortname
 					 FROM T_hitlog INNER JOIN T_basedomains ON hit_referer_dom_ID = dom_ID
 					 LEFT JOIN T_blogs ON hit_coll_ID = blog_ID
-					WHERE hit_referer LIKE '.$DB->quote('%'.$keyword.'%').'
+					WHERE hit_referer LIKE ' . $DB->quote('%' . $keyword . '%') . '
 					ORDER BY dom_name ASC
 					LIMIT 500';
-	$res_affected_hits = $DB->get_results( $sql, ARRAY_A );
-	if( $DB->num_rows == 0 )
-	{ // No matching hits.
-		printf( '<p>'.TB_('No <strong>log-hits</strong> match the keyword %s.').'</p>', '<code>'.htmlspecialchars($keyword).'</code>' );
-	}
-	else
-	{
-	?>
+$res_affected_hits = $DB->get_results($sql, ARRAY_A);
+if ($DB->num_rows == 0) { // No matching hits.
+    printf('<p>' . TB_('No <strong>log-hits</strong> match the keyword %s.') . '</p>', '<code>' . htmlspecialchars($keyword) . '</code>');
+} else {
+    ?>
 		<p>
 			<input type="checkbox" name="delhits" id="delhits_cb" value="1" checked="checked" />
 			<label for="delhits_cb">
-			<?php printf ( TB_('Delete the following %s <strong>referer hits</strong>:'), $DB->num_rows == 500 ? '500+' : $DB->num_rows ) ?>
+			<?php printf(TB_('Delete the following %s <strong>referer hits</strong>:'), $DB->num_rows == 500 ? '500+' : $DB->num_rows) ?>
 			</label>
 		</p>
 		<table class="grouped table table-striped table-bordered table-hover table-condensed" cellspacing="0">
@@ -110,184 +110,175 @@ $Form->begin_form( 'fform', $display_mode == 'js' ? '' : TB_('Confirm ban & dele
 			</thead>
 			<tbody>
 			<?php
-			load_funcs('sessions/model/_hitlog.funcs.php');
-			$count = 0;
-			foreach( $res_affected_hits as $row_stats )
-			{
-				?>
-				<tr class="<?php echo ($count%2 == 1) ? 'odd' : 'even' ?>">
-					<td class="firstcol"><?php echo date_i18n( locale_datefmt().' '.locale_timefmt(), $row_stats['hit_datetime'] ); ?></td>
-					<td><a href="<?php echo htmlentities( trim( $row_stats['hit_referer'] ) ); ?>"><?php echo htmlentities( $row_stats['dom_name'] ); ?></a></td>
+            load_funcs('sessions/model/_hitlog.funcs.php');
+    $count = 0;
+    foreach ($res_affected_hits as $row_stats) {
+        ?>
+				<tr class="<?php echo ($count % 2 == 1) ? 'odd' : 'even' ?>">
+					<td class="firstcol"><?php echo date_i18n(locale_datefmt() . ' ' . locale_timefmt(), $row_stats['hit_datetime']); ?></td>
+					<td><a href="<?php echo htmlentities(trim($row_stats['hit_referer'])); ?>"><?php echo htmlentities($row_stats['dom_name']); ?></a></td>
 					<td class="center"><?php echo $row_stats['hit_remote_addr']; ?></td>
-					<td><?php echo format_to_output( $row_stats['blog_shortname'], 'htmlbody' ); ?></td>
-					<td><?php disp_url( $row_stats['hit_uri'], 50 ); ?></td>
+					<td><?php echo format_to_output($row_stats['blog_shortname'], 'htmlbody'); ?></td>
+					<td><?php disp_url($row_stats['hit_uri'], 50); ?></td>
 				</tr>
 				<?php
-				$count++;
-			} ?>
+        $count++;
+    } ?>
 			</tbody>
 		</table>
 	<?php
-	}
-	evo_flush();
+}
+evo_flush();
 
-	// Check for potentially affected comments:
-	$sql = 'SELECT *
+// Check for potentially affected comments:
+$sql = 'SELECT *
 			  FROM T_comments
-			 WHERE comment_author LIKE '.$DB->quote('%'.$keyword.'%').'
-			    OR comment_author_email LIKE '.$DB->quote('%'.utf8_strtolower( $keyword ).'%').'
-			    OR comment_author_url LIKE '.$DB->quote('%'.$keyword.'%').'
-			    OR comment_content LIKE '.$DB->quote('%'.$keyword.'%').'
+			 WHERE comment_author LIKE ' . $DB->quote('%' . $keyword . '%') . '
+			    OR comment_author_email LIKE ' . $DB->quote('%' . utf8_strtolower($keyword) . '%') . '
+			    OR comment_author_url LIKE ' . $DB->quote('%' . $keyword . '%') . '
+			    OR comment_content LIKE ' . $DB->quote('%' . $keyword . '%') . '
 			 ORDER BY comment_date ASC
 			 LIMIT 500';
-	$res_affected_comments = $DB->get_results( $sql, OBJECT, 'Find matching comments' );
-	if( $DB->num_rows == 0 )
-	{ // No matching hits.
-		printf( '<p>'.TB_('No <strong>comments</strong> match the keyword %s.').'</p>', '<code>'.htmlspecialchars($keyword).'</code>' );
-	}
-	else
-	{ // create comment arrays
-		$comments_by_status = array( 'published' => array(), 'community' => array(), 'protected' => array(), 'private' => array(), 'draft' => array(), 'review' => array(), 'deprecated' => array() );
-		$no_perms_count = array( 'published' => 0, 'community' => 0, 'protected' => 0, 'private' => 0, 'draft' => 0, 'review' => 0, 'deprecated' => 0 );
-		foreach( $res_affected_comments as $row_stats )
-		{ // select comments
-			$affected_Comment = new Comment($row_stats);
-			$comment_status = $affected_Comment->get( 'status' );
-			if( $comment_status == 'trash' )
-			{ // This comment was already deleted
-				continue;
-			}
-			if( ! check_user_perm( 'comment!CURSTATUS', 'edit', false, $affected_Comment ) )
-			{ // no permission to delete
-				$no_perms_count[$comment_status] = $no_perms_count[$comment_status] + 1;
-				continue;
-			}
-			// Add comment to the corresponding list
-			$comments_by_status[$comment_status][] = $affected_Comment;
-		}
+$res_affected_comments = $DB->get_results($sql, OBJECT, 'Find matching comments');
+if ($DB->num_rows == 0) { // No matching hits.
+    printf('<p>' . TB_('No <strong>comments</strong> match the keyword %s.') . '</p>', '<code>' . htmlspecialchars($keyword) . '</code>');
+} else { // create comment arrays
+    $comments_by_status = [
+        'published' => [],
+        'community' => [],
+        'protected' => [],
+        'private' => [],
+        'draft' => [],
+        'review' => [],
+        'deprecated' => [],
+    ];
+    $no_perms_count = [
+        'published' => 0,
+        'community' => 0,
+        'protected' => 0,
+        'private' => 0,
+        'draft' => 0,
+        'review' => 0,
+        'deprecated' => 0,
+    ];
+    foreach ($res_affected_comments as $row_stats) { // select comments
+        $affected_Comment = new Comment($row_stats);
+        $comment_status = $affected_Comment->get('status');
+        if ($comment_status == 'trash') { // This comment was already deleted
+            continue;
+        }
+        if (! check_user_perm('comment!CURSTATUS', 'edit', false, $affected_Comment)) { // no permission to delete
+            $no_perms_count[$comment_status] = $no_perms_count[$comment_status] + 1;
+            continue;
+        }
+        // Add comment to the corresponding list
+        $comments_by_status[$comment_status][] = $affected_Comment;
+    }
 
-		// show comments
-		foreach( $comments_by_status as $status => $comments )
-		{
-			echo_affected_comments( $comments, $status, $keyword, $no_perms_count[$status] );
-			evo_flush();
-		}
-	}
+    // show comments
+    foreach ($comments_by_status as $status => $comments) {
+        echo_affected_comments($comments, $status, $keyword, $no_perms_count[$status]);
+        evo_flush();
+    }
+}
 
-	// Check for potentially affected users:
-	$quoted_keyword = $DB->quote('%'.$keyword.'%');
-	$sql = 'SELECT DISTINCT T_users.*
+// Check for potentially affected users:
+$quoted_keyword = $DB->quote('%' . $keyword . '%');
+$sql = 'SELECT DISTINCT T_users.*
 				FROM T_users
 					LEFT JOIN T_users__fields ON user_ID = uf_user_ID
 					LEFT JOIN T_users__usersettings user_domain_setting ON user_ID = user_domain_setting.uset_user_ID AND user_domain_setting.uset_name = "user_domain"
-			 WHERE user_url LIKE '.$quoted_keyword.'
-				 OR user_email LIKE '.$quoted_keyword.'
-				 OR user_domain_setting.uset_value LIKE '.$quoted_keyword.'
-				 OR user_nickname LIKE '.$quoted_keyword.'
-				 OR user_firstname LIKE '.$quoted_keyword.'
-				 OR user_lastname LIKE '.$quoted_keyword.'
-				 OR user_login LIKE '.$quoted_keyword.'
-				 OR uf_varchar LIKE '.$quoted_keyword.'
+			 WHERE user_url LIKE ' . $quoted_keyword . '
+				 OR user_email LIKE ' . $quoted_keyword . '
+				 OR user_domain_setting.uset_value LIKE ' . $quoted_keyword . '
+				 OR user_nickname LIKE ' . $quoted_keyword . '
+				 OR user_firstname LIKE ' . $quoted_keyword . '
+				 OR user_lastname LIKE ' . $quoted_keyword . '
+				 OR user_login LIKE ' . $quoted_keyword . '
+				 OR uf_varchar LIKE ' . $quoted_keyword . '
 			 ORDER BY user_login ASC
 			 LIMIT 500';
-	$res_affected_users = $DB->get_results( $sql, OBJECT, 'Find matching users' );
-	if( $DB->num_rows != 0 )
-	{
-		if( ! check_user_perm( 'users', 'view', false ) )
-		{ // current user has no permission to view users
-			printf( '<p>'.TB_('There are %d matching <strong>users</strong> but you have no permission to see them.').'</p>', $DB->num_rows );
-		}
-		else
-		{ // matching found, and current user has permission to view -> display users table
-			?>
-			<p><label><strong><?php echo( TB_('Affected users').':' )?></strong></label></p>
+$res_affected_users = $DB->get_results($sql, OBJECT, 'Find matching users');
+if ($DB->num_rows != 0) {
+    if (! check_user_perm('users', 'view', false)) { // current user has no permission to view users
+        printf('<p>' . TB_('There are %d matching <strong>users</strong> but you have no permission to see them.') . '</p>', $DB->num_rows);
+    } else { // matching found, and current user has permission to view -> display users table
+        ?>
+			<p><label><strong><?php echo(TB_('Affected users') . ':')?></strong></label></p>
 			<table class="grouped table table-striped table-bordered table-hover table-condensed" cellspacing="0">
 				<thead><tr>
-				<th class="firstcol"><?php printf( /* TRANS: noun */ TB_('Login') )?></th>
-				<th><?php echo( TB_('First name') )?></th>
-				<th><?php echo( TB_('Last name') )?></th>
-				<th><?php echo( TB_('Nickname') )?></th>
-				<th><?php echo( TB_('URL') )?></th>
+				<th class="firstcol"><?php printf( /* TRANS: noun */ TB_('Login'))?></th>
+				<th><?php echo(TB_('First name'))?></th>
+				<th><?php echo(TB_('Last name'))?></th>
+				<th><?php echo(TB_('Nickname'))?></th>
+				<th><?php echo(TB_('URL'))?></th>
 				</tr></thead>
 			 	<?php
-			 	$count = 0;
-				$current_user_edit_perm = check_user_perm( 'users', 'edit', false );
-				foreach( $res_affected_users as $row_stats )
-				{ // Display affected users
-					$affected_User = new User($row_stats);
-					?>
-					<tr class="<?php echo ($count%2 == 1) ? 'odd' : 'even' ?>">
+            $count = 0;
+        $current_user_edit_perm = check_user_perm('users', 'edit', false);
+        foreach ($res_affected_users as $row_stats) { // Display affected users
+            $affected_User = new User($row_stats);
+            ?>
+					<tr class="<?php echo ($count % 2 == 1) ? 'odd' : 'even' ?>">
 					<td class="firstcol">
 						<?php
-						if( $current_user_edit_perm )
-						{
-							echo '<a href="?ctrl=user&amp;user_tab=profile&amp;user_ID='
-								.$affected_User->ID.'"><strong>'.$affected_User->login.'</strong></a>';
-						}
-						else
-						{
-							echo '<strong>'.$affected_User->login.'</strong>';
-						}
-						?>
+                if ($current_user_edit_perm) {
+                    echo '<a href="?ctrl=user&amp;user_tab=profile&amp;user_ID='
+                        . $affected_User->ID . '"><strong>' . $affected_User->login . '</strong></a>';
+                } else {
+                    echo '<strong>' . $affected_User->login . '</strong>';
+                }
+            ?>
 					</td>
 					<td><?php echo $affected_User->first_name() ?></td>
 					<td><?php echo $affected_User->last_name() ?></td>
 					<td><?php echo $affected_User->nick_name() ?></td>
-					<td><?php echo '<strong>'.$affected_User->get('url').'</strong>' ?></td>
+					<td><?php echo '<strong>' . $affected_User->get('url') . '</strong>' ?></td>
 					</tr>
 					<?php
-					$count++;
-				}
-			 	?>
+                    $count++;
+        }
+        ?>
 			</table>
 			<?php
-		}
-	}
-	else
-	{ // There is no affected users
-		printf( '<p>'.TB_('No <strong>users</strong> match the keyword %s').'</p>', '<code>'.$keyword.'</code>' );
-	}
-	evo_flush();
+    }
+} else { // There is no affected users
+    printf('<p>' . TB_('No <strong>users</strong> match the keyword %s') . '</p>', '<code>' . $keyword . '</code>');
+}
+evo_flush();
 
-	// Check if the string is already in the blacklist:
-	if( antispam_check($keyword) )
-	{ // Already there:
-		printf( '<p>'.TB_('The keyword [%s] is <strong>already handled</strong> by the blacklist.').'</p>', htmlspecialchars($keyword) );
-	}
-	else
-	{ // Not in blacklist
-		?>
+// Check if the string is already in the blacklist:
+if (antispam_check($keyword)) { // Already there:
+    printf('<p>' . TB_('The keyword [%s] is <strong>already handled</strong> by the blacklist.') . '</p>', htmlspecialchars($keyword));
+} else { // Not in blacklist
+    ?>
 		<p>
 		<input type="checkbox" name="blacklist_locally" id="blacklist_locally_cb" value="1" checked="checked" />
 		<label for="blacklist_locally_cb">
-			<?php printf ( TB_('<strong>Blacklist</strong> the keyword %s locally.'), '<code>'.htmlspecialchars($keyword).'</code>' ) ?>
+			<?php printf(TB_('<strong>Blacklist</strong> the keyword %s locally.'), '<code>' . htmlspecialchars($keyword) . '</code>') ?>
 		</label>
 		</p>
 
 		<?php
-		if( $Settings->get('antispam_report_to_central') )
-		{
-			?>
+    if ($Settings->get('antispam_report_to_central')) {
+        ?>
 			<p>
 			<input type="checkbox" name="report" id="report_cb" value="1" checked="checked" />
 			<label for="report_cb">
-				<?php printf ( TB_('<strong>Report</strong> the keyword %s as abuse to Central Antispam Server (%s).'), '<code>'.htmlspecialchars( $keyword ).'</code>', $antispamsrv_host ) ?>
+				<?php printf(TB_('<strong>Report</strong> the keyword %s as abuse to Central Antispam Server (%s).'), '<code>' . htmlspecialchars($keyword) . '</code>', $antispamsrv_host) ?>
 			</label>
 			[<a href="<?php echo $antispamsrv_tos_url; ?>"><?php echo TB_('Terms of service') ?></a>]
 			</p>
 			<?php
-		}
-	}
+    }
+}
 
-	$button = array( '', 'actionArray[ban]', TB_('Perform selected operations'), 'DeleteButton btn-danger', 'addSpinner( this )' );
-	if( $display_mode == 'js' )
-	{
-		$Form->button( $button );
-	}
-	else
-	{
-		$Form->buttons( array( $button ) );
-	}
+$button = ['', 'actionArray[ban]', TB_('Perform selected operations'), 'DeleteButton btn-danger', 'addSpinner( this )'];
+if ($display_mode == 'js') {
+    $Form->button($button);
+} else {
+    $Form->buttons([$button]);
+}
 
 $Form->end_form();
 

@@ -12,7 +12,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -24,42 +26,33 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  * @param string Collection owner user ID
  * @return boolean
  */
-function is_always_coll_perm_enabled( $row, $prefix, $perm, $coll_owner_user_ID )
+function is_always_coll_perm_enabled($row, $prefix, $perm, $coll_owner_user_ID)
 {
-	if( $prefix == 'bloguser_' && $perm != 'perm_admin' && $coll_owner_user_ID == $row->user_ID )
-	{	// Collection owner has almost all permissions by default (One exception is "admin" perm to edit advanced/administrative coll properties):
-		return true;
-	}
+    if ($prefix == 'bloguser_' && $perm != 'perm_admin' && $coll_owner_user_ID == $row->user_ID) {	// Collection owner has almost all permissions by default (One exception is "admin" perm to edit advanced/administrative coll properties):
+        return true;
+    }
 
-	// Check if permission is always enabled by group setting:
-	if( ! empty( $row->user_ID ) )
-	{	// User perm:
-		$UserCache = & get_UserCache();
-		if( $User = & $UserCache->get_by_ID( $row->user_ID, false, false ) )
-		{	// Get user group:
-			$perm_Group = & $User->get_Group();
-		}
-	}
-	elseif( ! empty( $row->grp_ID ) )
-	{	// Group perm:
-		$GroupCache = & get_GroupCache();
-		$perm_Group = & $GroupCache->get_by_ID( $row->grp_ID, false, false );
-	}
+    // Check if permission is always enabled by group setting:
+    if (! empty($row->user_ID)) {	// User perm:
+        $UserCache = &get_UserCache();
+        if ($User = &$UserCache->get_by_ID($row->user_ID, false, false)) {	// Get user group:
+            $perm_Group = &$User->get_Group();
+        }
+    } elseif (! empty($row->grp_ID)) {	// Group perm:
+        $GroupCache = &get_GroupCache();
+        $perm_Group = &$GroupCache->get_by_ID($row->grp_ID, false, false);
+    }
 
-	if( ! empty( $perm_Group ) )
-	{	// Check global group setting permission:
-		$group_perm_blogs = $perm_Group->get( 'perm_blogs' );
-		if( $group_perm_blogs == 'editall' )
-		{	// If the group has a global permission to edit ALL collections:
-			return true;
-		}
-		elseif( $perm == 'ismember' && $group_perm_blogs == 'viewall' )
-		{	// If the group has a global permission to view or edit ALL collections:
-			return true;
-		}
-	}
+    if (! empty($perm_Group)) {	// Check global group setting permission:
+        $group_perm_blogs = $perm_Group->get('perm_blogs');
+        if ($group_perm_blogs == 'editall') {	// If the group has a global permission to edit ALL collections:
+            return true;
+        } elseif ($perm == 'ismember' && $group_perm_blogs == 'viewall') {	// If the group has a global permission to view or edit ALL collections:
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -69,207 +62,214 @@ function is_always_coll_perm_enabled( $row, $prefix, $perm, $coll_owner_user_ID 
  * @param integer Blog ID or Group ID
  * @param string 'user', 'group' or 'coll'
  */
-function blog_update_perms( $object_ID, $context = 'user' )
+function blog_update_perms($object_ID, $context = 'user')
 {
-	global $DB;
+    global $DB;
 
-	// Get affected user/group IDs:
-	$IDs = param( $context.'_IDs', '/^[0-9]+(,[0-9]+)*$/', '' );
-	$ID_array = explode( ',', $IDs );
+    // Get affected user/group IDs:
+    $IDs = param($context . '_IDs', '/^[0-9]+(,[0-9]+)*$/', '');
+    $ID_array = explode(',', $IDs);
 
-	switch( $context )
-	{
-		case 'user':
-			$table = 'T_coll_user_perms';
-			$prefix = 'bloguser_';
-			$ID_field_main = 'bloguser_blog_ID';
-			$ID_field_edit = 'bloguser_user_ID';
-			$blog = $object_ID;
-			$coll_IDs = array( $blog );
-			break;
+    switch ($context) {
+        case 'user':
+            $table = 'T_coll_user_perms';
+            $prefix = 'bloguser_';
+            $ID_field_main = 'bloguser_blog_ID';
+            $ID_field_edit = 'bloguser_user_ID';
+            $blog = $object_ID;
+            $coll_IDs = [$blog];
+            break;
 
-		case 'coll':
-			$table = 'T_coll_group_perms';
-			$prefix = 'bloggroup_';
-			$ID_field_main = 'bloggroup_group_ID';
-			$ID_field_edit = 'bloggroup_blog_ID';
-			$group_ID = $object_ID;
-			$coll_IDs = $ID_array;
-			break;
+        case 'coll':
+            $table = 'T_coll_group_perms';
+            $prefix = 'bloggroup_';
+            $ID_field_main = 'bloggroup_group_ID';
+            $ID_field_edit = 'bloggroup_blog_ID';
+            $group_ID = $object_ID;
+            $coll_IDs = $ID_array;
+            break;
 
-		case 'group':
-		default:
-			$table = 'T_coll_group_perms';
-			$prefix = 'bloggroup_';
-			$ID_field_main = 'bloggroup_blog_ID';
-			$ID_field_edit = 'bloggroup_group_ID';
-			$blog = $object_ID;
-			$coll_IDs = array( $blog );
-			break;
-	}
+        case 'group':
+        default:
+            $table = 'T_coll_group_perms';
+            $prefix = 'bloggroup_';
+            $ID_field_main = 'bloggroup_blog_ID';
+            $ID_field_edit = 'bloggroup_group_ID';
+            $blog = $object_ID;
+            $coll_IDs = [$blog];
+            break;
+    }
 
-	foreach( $coll_IDs as $coll_ID )
-	{
-		// Can the current user touch advanced admin permissions?
-		if( ! check_user_perm( 'blog_admin', 'edit', false, $coll_ID ) )
-		{ // We have no permission to touch advanced admins!
-
-			// Get the users/groups which are advanced admins
-			$admins_ID_array = $DB->get_col( "SELECT {$ID_field_edit}
+    foreach ($coll_IDs as $coll_ID) {
+        // Can the current user touch advanced admin permissions?
+        if (! check_user_perm('blog_admin', 'edit', false, $coll_ID)) { // We have no permission to touch advanced admins!
+            // Get the users/groups which are advanced admins
+            $admins_ID_array = $DB->get_col("SELECT {$ID_field_edit}
 																					FROM $table
-																				 WHERE {$ID_field_edit} IN (".implode( ',',$ID_array ).")
+																				 WHERE {$ID_field_edit} IN (" . implode(',', $ID_array) . ")
 																								AND {$ID_field_main} = $object_ID
-																								AND {$prefix}perm_admin <> 0" );
+																								AND {$prefix}perm_admin <> 0");
 
-			// Take the admins out of the list:
-			$ID_array = array_diff( $ID_array, $admins_ID_array );
-		}
-	}
+            // Take the admins out of the list:
+            $ID_array = array_diff($ID_array, $admins_ID_array);
+        }
+    }
 
-	if( empty( $ID_array ) )
-	{
-		return;
-	}
+    if (empty($ID_array)) {
+        return;
+    }
 
-	$BlogCache = & get_BlogCache();
-	$BlogCache->load_list( $coll_IDs );
+    $BlogCache = &get_BlogCache();
+    $BlogCache->load_list($coll_IDs);
 
-	// Delete old perms for the edited collection/group:
-	$DB->query( "DELETE FROM $table
-								WHERE {$ID_field_edit} IN (".implode( ',',$ID_array ).")
-											AND {$ID_field_main} = ".$object_ID );
+    // Delete old perms for the edited collection/group:
+    $DB->query("DELETE FROM $table
+								WHERE {$ID_field_edit} IN (" . implode(',', $ID_array) . ")
+											AND {$ID_field_main} = " . $object_ID);
 
-	$inserted_values = array();
-	foreach( $ID_array as $loop_ID )
-	{	// Check new permissions per each user or group or collection:
+    $inserted_values = [];
+    foreach ($ID_array as $loop_ID) {	// Check new permissions per each user or group or collection:
+        // Get collection/object ID depedning on request:
+        $coll_ID = ($context == 'coll' ? $loop_ID : $blog);
+        $main_object_ID = ($context == 'coll' ? $group_ID : $blog);
 
-		// Get collection/object ID depedning on request:
-		$coll_ID = ( $context == 'coll' ? $loop_ID : $blog );
-		$main_object_ID = ( $context == 'coll' ? $group_ID : $blog );
+        // Use checkboxes
+        $perm_post = [];
 
-		// Use checkboxes
-		$perm_post = array();
+        $ismember = param('blog_ismember_' . $loop_ID, 'integer', 0);
+        $can_be_assignee = param('blog_can_be_assignee_' . $loop_ID, 'integer', 0);
+        $workflow_status = param('blog_workflow_status_' . $loop_ID, 'integer', 0);
+        $workflow_user = param('blog_workflow_user_' . $loop_ID, 'integer', 0);
+        $workflow_priority = param('blog_workflow_priority_' . $loop_ID, 'integer', 0);
 
-		$ismember = param( 'blog_ismember_'.$loop_ID, 'integer', 0 );
-		$can_be_assignee = param( 'blog_can_be_assignee_'.$loop_ID, 'integer', 0 );
-		$workflow_status = param( 'blog_workflow_status_'.$loop_ID, 'integer', 0 );
-		$workflow_user = param( 'blog_workflow_user_'.$loop_ID, 'integer', 0 );
-		$workflow_priority = param( 'blog_workflow_priority_'.$loop_ID, 'integer', 0 );
+        $perm_item_propose = param('blog_perm_item_propose_' . $loop_ID, 'integer', 0);
 
-		$perm_item_propose = param( 'blog_perm_item_propose_'.$loop_ID, 'integer', 0 );
+        $perm_published = param('blog_perm_published_' . $loop_ID, 'string', '');
+        if (! empty($perm_published)) {
+            $perm_post[] = 'published';
+        }
 
-		$perm_published = param( 'blog_perm_published_'.$loop_ID, 'string', '' );
-		if( !empty($perm_published) ) $perm_post[] = 'published';
+        $perm_community = param('blog_perm_community_' . $loop_ID, 'string', '');
+        if (! empty($perm_community)) {
+            $perm_post[] = 'community';
+        }
 
-		$perm_community = param( 'blog_perm_community_'.$loop_ID, 'string', '' );
-		if( !empty($perm_community) ) $perm_post[] = 'community';
+        $perm_protected = param('blog_perm_protected_' . $loop_ID, 'string', '');
+        if (! empty($perm_protected)) {
+            $perm_post[] = 'protected';
+        }
 
-		$perm_protected = param( 'blog_perm_protected_'.$loop_ID, 'string', '' );
-		if( !empty($perm_protected) ) $perm_post[] = 'protected';
+        $perm_private = param('blog_perm_private_' . $loop_ID, 'string', '');
+        if (! empty($perm_private)) {
+            $perm_post[] = 'private';
+        }
 
-		$perm_private = param( 'blog_perm_private_'.$loop_ID, 'string', '' );
-		if( !empty($perm_private) ) $perm_post[] = 'private';
+        $perm_review = param('blog_perm_review_' . $loop_ID, 'string', '');
+        if (! empty($perm_review)) {
+            $perm_post[] = 'review';
+        }
 
-		$perm_review = param( 'blog_perm_review_'.$loop_ID, 'string', '' );
-		if( !empty($perm_review) ) $perm_post[] = 'review';
+        $perm_draft = param('blog_perm_draft_' . $loop_ID, 'string', '');
+        if (! empty($perm_draft)) {
+            $perm_post[] = 'draft';
+        }
 
-		$perm_draft = param( 'blog_perm_draft_'.$loop_ID, 'string', '' );
-		if( !empty($perm_draft) ) $perm_post[] = 'draft';
+        $perm_deprecated = param('blog_perm_deprecated_' . $loop_ID, 'string', '');
+        if (! empty($perm_deprecated)) {
+            $perm_post[] = 'deprecated';
+        }
 
-		$perm_deprecated = param( 'blog_perm_deprecated_'.$loop_ID, 'string', '' );
-		if( !empty($perm_deprecated) ) $perm_post[] = 'deprecated';
+        $perm_redirected = param('blog_perm_redirected_' . $loop_ID, 'string', '');
+        if (! empty($perm_redirected)) {
+            $perm_post[] = 'redirected';
+        }
 
-		$perm_redirected = param( 'blog_perm_redirected_'.$loop_ID, 'string', '' );
-		if( !empty($perm_redirected) ) $perm_post[] = 'redirected';
+        $perm_item_type = param('blog_perm_item_type_' . $loop_ID, 'string', 'standard');
+        $perm_edit = param('blog_perm_edit_' . $loop_ID, 'string', 'no');
 
-		$perm_item_type = param( 'blog_perm_item_type_'.$loop_ID, 'string', 'standard' );
-		$perm_edit = param( 'blog_perm_edit_'.$loop_ID, 'string', 'no' );
+        $perm_delpost = param('blog_perm_delpost_' . $loop_ID, 'integer', 0);
+        $perm_edit_ts = param('blog_perm_edit_ts_' . $loop_ID, 'integer', 0);
 
-		$perm_delpost = param( 'blog_perm_delpost_'.$loop_ID, 'integer', 0 );
-		$perm_edit_ts = param( 'blog_perm_edit_ts_'.$loop_ID, 'integer', 0 );
+        $perm_delcmts = param('blog_perm_delcmts_' . $loop_ID, 'integer', 0);
+        $perm_recycle_owncmts = param('blog_perm_recycle_owncmts_' . $loop_ID, 'integer', 0);
+        $perm_vote_spam_comments = param('blog_perm_vote_spam_cmts_' . $loop_ID, 'integer', 0);
+        $perm_cmtstatuses = 0;
+        $perm_cmtstatuses += param('blog_perm_published_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('published') : 0;
+        $perm_cmtstatuses += param('blog_perm_community_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('community') : 0;
+        $perm_cmtstatuses += param('blog_perm_protected_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('protected') : 0;
+        $perm_cmtstatuses += param('blog_perm_private_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('private') : 0;
+        $perm_cmtstatuses += param('blog_perm_review_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('review') : 0;
+        $perm_cmtstatuses += param('blog_perm_draft_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('draft') : 0;
+        $perm_cmtstatuses += param('blog_perm_deprecated_cmt_' . $loop_ID, 'integer', 0) ? get_status_permvalue('deprecated') : 0;
+        $perm_edit_cmt = param('blog_perm_edit_cmt_' . $loop_ID, 'string', 'no');
 
-		$perm_delcmts = param( 'blog_perm_delcmts_'.$loop_ID, 'integer', 0 );
-		$perm_recycle_owncmts = param( 'blog_perm_recycle_owncmts_'.$loop_ID, 'integer', 0 );
-		$perm_vote_spam_comments = param( 'blog_perm_vote_spam_cmts_'.$loop_ID, 'integer', 0 );
-		$perm_cmtstatuses = 0;
-		$perm_cmtstatuses += param( 'blog_perm_published_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'published' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_community_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'community' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_protected_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'protected' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_private_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'private' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_review_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'review' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_draft_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'draft' ) : 0;
-		$perm_cmtstatuses += param( 'blog_perm_deprecated_cmt_'.$loop_ID, 'integer', 0 ) ? get_status_permvalue( 'deprecated' ) : 0;
-		$perm_edit_cmt = param( 'blog_perm_edit_cmt_'.$loop_ID, 'string', 'no' );
+        $perm_meta_comments = param('blog_perm_meta_comment_' . $loop_ID, 'integer', 0);
+        $perm_cats = param('blog_perm_cats_' . $loop_ID, 'integer', 0);
+        $perm_properties = param('blog_perm_properties_' . $loop_ID, 'integer', 0);
 
-		$perm_meta_comments = param( 'blog_perm_meta_comment_'.$loop_ID, 'integer', 0 );
-		$perm_cats = param( 'blog_perm_cats_'.$loop_ID, 'integer', 0 );
-		$perm_properties = param( 'blog_perm_properties_'.$loop_ID, 'integer', 0 );
+        if (check_user_perm('blog_admin', 'edit', false, $coll_ID)) { // We have permission to give advanced admins perm!
+            $perm_admin = param('blog_perm_admin_' . $loop_ID, 'integer', 0);
+        } else {
+            $perm_admin = 0;
+        }
 
-		if( check_user_perm( 'blog_admin', 'edit', false, $coll_ID ) )
-		{ // We have permission to give advanced admins perm!
-			$perm_admin = param( 'blog_perm_admin_'.$loop_ID, 'integer', 0 );
-		}
-		else
-		{
-			$perm_admin = 0;
-		}
+        $perm_media_upload = param('blog_perm_media_upload_' . $loop_ID, 'integer', 0);
+        $perm_media_browse = param('blog_perm_media_browse_' . $loop_ID, 'integer', 0);
+        $perm_media_change = param('blog_perm_media_change_' . $loop_ID, 'integer', 0);
 
-		$perm_media_upload = param( 'blog_perm_media_upload_'.$loop_ID, 'integer', 0 );
-		$perm_media_browse = param( 'blog_perm_media_browse_'.$loop_ID, 'integer', 0 );
-		$perm_media_change = param( 'blog_perm_media_change_'.$loop_ID, 'integer', 0 );
+        $perm_analytics = param('blog_perm_analytics_' . $loop_ID, 'integer', 0);
 
-		$perm_analytics = param( 'blog_perm_analytics_'.$loop_ID, 'integer', 0 );
+        // Update those permissions in DB:
 
-		// Update those permissions in DB:
+        // Update permissions per user or group or collection if at least on is selected:
+        $update_permissions = ($ismember || $can_be_assignee || $workflow_status || $workflow_user || $workflow_priority ||
+            $perm_item_propose || count($perm_post) || $perm_delpost || $perm_edit_ts || $perm_delcmts || $perm_recycle_owncmts || $perm_vote_spam_comments || $perm_cmtstatuses ||
+            $perm_meta_comments || $perm_cats || $perm_properties || $perm_admin || $perm_media_upload || $perm_media_browse || $perm_media_change || $perm_analytics);
+        if (! $update_permissions &&
+            ($perm_Blog = &$BlogCache->get_by_ID($coll_ID, false, false))) {	// When all permissions are disabled(not checked),
+            // do additional check for users or groups which are always members of the Collection:
+            $null_row = ($context == 'user'
+                ? [
+                    'user_ID' => $loop_ID,
+                ]
+                : [
+                    'grp_ID' => ($context == 'coll' ? $group_ID : $loop_ID),
+                ]);
+            $update_permissions = is_always_coll_perm_enabled((object) $null_row, $prefix, 'can_be_assignee', $perm_Blog->get('owner_user_ID'));
+        }
 
-		// Update permissions per user or group or collection if at least on is selected:
-		$update_permissions = ( $ismember || $can_be_assignee || $workflow_status || $workflow_user || $workflow_priority ||
-			$perm_item_propose || count($perm_post) || $perm_delpost || $perm_edit_ts || $perm_delcmts || $perm_recycle_owncmts || $perm_vote_spam_comments || $perm_cmtstatuses ||
-			$perm_meta_comments || $perm_cats || $perm_properties || $perm_admin || $perm_media_upload || $perm_media_browse || $perm_media_change || $perm_analytics );
-		if( ! $update_permissions &&
-		    ( $perm_Blog = & $BlogCache->get_by_ID( $coll_ID, false, false ) ) )
-		{	// When all permissions are disabled(not checked),
-			// do additional check for users or groups which are always members of the Collection:
-			$null_row = ( $context == 'user'
-				? array( 'user_ID' => $loop_ID )
-				: array( 'grp_ID'  => ( $context == 'coll' ? $group_ID : $loop_ID ) ) );
-			$update_permissions = is_always_coll_perm_enabled( (object)$null_row, $prefix, 'can_be_assignee', $perm_Blog->get( 'owner_user_ID' ) );
-		}
+        if ($update_permissions) {	// Initialize value to update permissions:
+            $ismember = 1;	// Must have this permission
 
-		if( $update_permissions )
-		{	// Initialize value to update permissions:
-			$ismember = 1;	// Must have this permission
-
-			// insert new perms:
-			$inserted_values[] = " ( $main_object_ID, $loop_ID, $ismember, $can_be_assignee, $workflow_status, $workflow_user, $workflow_priority, $perm_item_propose, ".$DB->quote( implode( ',',$perm_post ) ).",
-																".$DB->quote( $perm_item_type ).", ".$DB->quote( $perm_edit ).",
+            // insert new perms:
+            $inserted_values[] = " ( $main_object_ID, $loop_ID, $ismember, $can_be_assignee, $workflow_status, $workflow_user, $workflow_priority, $perm_item_propose, " . $DB->quote(implode(',', $perm_post)) . ",
+																" . $DB->quote($perm_item_type) . ", " . $DB->quote($perm_edit) . ",
 																$perm_delpost, $perm_edit_ts, $perm_delcmts, $perm_recycle_owncmts, $perm_vote_spam_comments, $perm_cmtstatuses,
-																".$DB->quote( $perm_edit_cmt ).",
+																" . $DB->quote($perm_edit_cmt) . ",
 																$perm_meta_comments, $perm_cats, $perm_properties, $perm_admin, $perm_media_upload,
 																$perm_media_browse, $perm_media_change, $perm_analytics )";
-		}
-	}
+        }
+    }
 
-	// Proceed with insertions:
-	if( count( $inserted_values ) )
-	{
-		$DB->query( "INSERT INTO $table( {$ID_field_main}, {$ID_field_edit}, {$prefix}ismember, {$prefix}can_be_assignee, {$prefix}workflow_status, {$prefix}workflow_user, {$prefix}workflow_priority,
+    // Proceed with insertions:
+    if (count($inserted_values)) {
+        $DB->query("INSERT INTO $table( {$ID_field_main}, {$ID_field_edit}, {$prefix}ismember, {$prefix}can_be_assignee, {$prefix}workflow_status, {$prefix}workflow_user, {$prefix}workflow_priority,
 											{$prefix}perm_item_propose, {$prefix}perm_poststatuses, {$prefix}perm_item_type, {$prefix}perm_edit, {$prefix}perm_delpost, {$prefix}perm_edit_ts,
 											{$prefix}perm_delcmts, {$prefix}perm_recycle_owncmts, {$prefix}perm_vote_spam_cmts, {$prefix}perm_cmtstatuses, {$prefix}perm_edit_cmt,
 											{$prefix}perm_meta_comment, {$prefix}perm_cats, {$prefix}perm_properties, {$prefix}perm_admin,
 											{$prefix}perm_media_upload, {$prefix}perm_media_browse, {$prefix}perm_media_change, {$prefix}perm_analytics )
-									VALUES ".implode( ',', $inserted_values ) );
-	}
+									VALUES " . implode(',', $inserted_values));
+    }
 
-	// Unassign users that no longer can be assignees from the items of the collection:
-	$DB->query( 'UPDATE T_items__item
+    // Unassign users that no longer can be assignees from the items of the collection:
+    $DB->query('UPDATE T_items__item
 			SET post_assigned_user_ID = NULL
 		WHERE post_assigned_user_ID IS NOT NULL
 		  AND post_main_cat_ID IN
 		  (
 		    SELECT cat_ID
 		      FROM T_categories
-		     WHERE cat_blog_ID IN ( '.$DB->quote( $coll_IDs ).' )
+		     WHERE cat_blog_ID IN ( ' . $DB->quote($coll_IDs) . ' )
 		  )
 		  AND post_assigned_user_ID NOT IN
 		  (
@@ -282,21 +282,21 @@ function blog_update_perms( $object_ID, $context = 'user' )
 		  (
 		    SELECT blog_owner_user_ID
 		      FROM T_blogs
-		     WHERE blog_ID IN ( '.$DB->quote( $coll_IDs ).' )
+		     WHERE blog_ID IN ( ' . $DB->quote($coll_IDs) . ' )
 		  )
 		  AND post_assigned_user_ID NOT IN
 		  (
 		    SELECT bloguser_user_ID
 		      FROM T_coll_user_perms
 		     WHERE bloguser_can_be_assignee = 1
-		       AND bloguser_blog_ID IN ( '.$DB->quote( $coll_IDs ).' )
+		       AND bloguser_blog_ID IN ( ' . $DB->quote($coll_IDs) . ' )
 		  )
 		  AND post_assigned_user_ID NOT IN
 		  (
 		    SELECT user_ID
 		      FROM T_users INNER JOIN T_coll_group_perms ON user_grp_ID = bloggroup_group_ID
 		     WHERE bloggroup_can_be_assignee = 1
-		       AND bloggroup_blog_ID IN ( '.$DB->quote( $coll_IDs ).' )
+		       AND bloggroup_blog_ID IN ( ' . $DB->quote($coll_IDs) . ' )
 		  )
 		  AND post_assigned_user_ID NOT IN
 		  (
@@ -304,23 +304,21 @@ function blog_update_perms( $object_ID, $context = 'user' )
 		      FROM T_users__secondary_user_groups
 		     INNER JOIN T_coll_group_perms ON sug_grp_ID = bloggroup_group_ID
 		     WHERE bloggroup_can_be_assignee = 1
-		       AND bloggroup_blog_ID IN ( '.$DB->quote( $coll_IDs ).' )
-		  )' );
+		       AND bloggroup_blog_ID IN ( ' . $DB->quote($coll_IDs) . ' )
+		  )');
 
-	if( $DB->rows_affected > 0 )
-	{
-		global $Messages;
-		$Messages->add( sprintf( '%d tasks have lost their assignee due to new permissions (this may include fixes to older inconsistencies in the DB).', $DB->rows_affected ), 'warning' );
-	}
+    if ($DB->rows_affected > 0) {
+        global $Messages;
+        $Messages->add(sprintf('%d tasks have lost their assignee due to new permissions (this may include fixes to older inconsistencies in the DB).', $DB->rows_affected), 'warning');
+    }
 
-	// BLOCK CACHE INVALIDATION:
-	foreach( $coll_IDs as $coll_ID )
-	{
-		BlockCache::invalidate_key( 'set_coll_ID', $coll_ID ); // Settings have changed
-	}
-	BlockCache::invalidate_key( 'set_coll_ID', 'any' ); // Settings of a have changed (for widgets tracking a change on ANY blog)
+    // BLOCK CACHE INVALIDATION:
+    foreach ($coll_IDs as $coll_ID) {
+        BlockCache::invalidate_key('set_coll_ID', $coll_ID); // Settings have changed
+    }
+    BlockCache::invalidate_key('set_coll_ID', 'any'); // Settings of a have changed (for widgets tracking a change on ANY blog)
 
-	// cont_coll_ID  // Content has not changed
+    // cont_coll_ID  // Content has not changed
 }
 
 
@@ -336,44 +334,40 @@ function blog_update_perms( $object_ID, $context = 'user' )
  * @param string Permission level that must be given to the {@link $current_User} object.
  * @return integer new selected blog
  */
-function autoselect_blog( $permname, $permlevel = 'any' )
+function autoselect_blog($permname, $permlevel = 'any')
 {
-	global $blog;
-
-  /**
-	 * @var User
-	 */
-	global $current_User;
-
-	$autoselected_blog = $blog;
-
-	if( $autoselected_blog )
-	{ // a blog is already selected
-		if( ! check_user_perm( $permname, $permlevel, false, $autoselected_blog ) )
-		{ // invalid blog
-		 	// echo 'current blog was invalid';
-			$autoselected_blog = 0;
-		}
-	}
-
-	if( !$autoselected_blog )
-	{ // No blog is selected so far (or selection was invalid)...
-		// Let's try to find another one:
+    global $blog;
 
     /**
-		 * @var BlogCache
-		 */
-		$BlogCache = & get_BlogCache();
+     * @var User
+     */
+    global $current_User;
 
-		// Get first suitable blog
-		$blog_array = $BlogCache->load_user_blogs( $permname, $permlevel, $current_User->ID, 'ID', 'ASC', 1 );
-		if( !empty($blog_array) )
-		{
-			$autoselected_blog = $blog_array[0];
-		}
-	}
+    $autoselected_blog = $blog;
 
-	return $autoselected_blog;
+    if ($autoselected_blog) { // a blog is already selected
+        if (! check_user_perm($permname, $permlevel, false, $autoselected_blog)) { // invalid blog
+            // echo 'current blog was invalid';
+            $autoselected_blog = 0;
+        }
+    }
+
+    if (! $autoselected_blog) { // No blog is selected so far (or selection was invalid)...
+        // Let's try to find another one:
+
+        /**
+         * @var BlogCache
+         */
+        $BlogCache = &get_BlogCache();
+
+        // Get first suitable blog
+        $blog_array = $BlogCache->load_user_blogs($permname, $permlevel, $current_User->ID, 'ID', 'ASC', 1);
+        if (! empty($blog_array)) {
+            $autoselected_blog = $blog_array[0];
+        }
+    }
+
+    return $autoselected_blog;
 }
 
 
@@ -384,23 +378,20 @@ function autoselect_blog( $permname, $permlevel = 'any' )
  */
 function valid_blog_requested()
 {
-	global $Collection, $Blog, $Messages;
-	if( empty( $Blog ) )
-	{ // The requested blog does not exist, Try to get other available blog for the current User
-		$blog_ID = get_working_blog();
-		if( $blog_ID )
-		{
-			$BlogCache = & get_BlogCache();
-			$Collection = $Blog = $BlogCache->get_by_ID( $blog_ID, false, false );
-		}
-	}
+    global $Collection, $Blog, $Messages;
+    if (empty($Blog)) { // The requested blog does not exist, Try to get other available blog for the current User
+        $blog_ID = get_working_blog();
+        if ($blog_ID) {
+            $BlogCache = &get_BlogCache();
+            $Collection = $Blog = $BlogCache->get_by_ID($blog_ID, false, false);
+        }
+    }
 
-	if( empty( $Blog ) )
-	{ // The requested blog does not exist
-		$Messages->add( T_('The requested blog does not exist (any more?)'), 'error' );
-		return false;
-	}
-	return true;
+    if (empty($Blog)) { // The requested blog does not exist
+        $Messages->add(T_('The requested blog does not exist (any more?)'), 'error');
+        return false;
+    }
+    return true;
 }
 
 
@@ -409,47 +400,41 @@ function valid_blog_requested()
  *
  * For use in backoffice
  *
- * @return integer|FALSE Blog ID or FALSE when no available blog to view by current User
+ * @return integer|false Blog ID or FALSE when no available blog to view by current User
  */
 function get_working_blog()
 {
-	global $blog, $UserSettings;
+    global $blog, $UserSettings;
 
-	if( ! is_logged_in() )
-	{ // User must be logged in to view the blogs
-		return false;
-	}
+    if (! is_logged_in()) { // User must be logged in to view the blogs
+        return false;
+    }
 
-	if( ! empty( $blog ) )
-	{ // Use a blog from GET request
-		$blog_ID = intval( $blog );
-		if( $blog_ID > 0 && check_user_perm( 'blog_ismember', 'view', false, $blog_ID ) )
-		{ // Allow to use this blog only when current user has an access to view it
-			return $blog_ID;
-		}
-	}
+    if (! empty($blog)) { // Use a blog from GET request
+        $blog_ID = intval($blog);
+        if ($blog_ID > 0 && check_user_perm('blog_ismember', 'view', false, $blog_ID)) { // Allow to use this blog only when current user has an access to view it
+            return $blog_ID;
+        }
+    }
 
-	$BlogCache = & get_BlogCache();
+    $BlogCache = &get_BlogCache();
 
-	// Try to use the blog which is selected by current user last time
-	$blog_ID = intval( $UserSettings->get( 'selected_blog' ) );
-	// Check if it really exists in DB
-	$selected_Blog = & $BlogCache->get_by_ID( $blog_ID, false, false );
-	if( $selected_Blog && check_user_perm( 'blog_ismember', 'view', false, $selected_Blog->ID ) )
-	{ // Allow to use this blog only when current user is a member of it
-		return $blog_ID;
-	}
+    // Try to use the blog which is selected by current user last time
+    $blog_ID = intval($UserSettings->get('selected_blog'));
+    // Check if it really exists in DB
+    $selected_Blog = &$BlogCache->get_by_ID($blog_ID, false, false);
+    if ($selected_Blog && check_user_perm('blog_ismember', 'view', false, $selected_Blog->ID)) { // Allow to use this blog only when current user is a member of it
+        return $blog_ID;
+    }
 
-	// Use first blog from DB which current user can views
-	if( $blog_array = $BlogCache->load_user_blogs( 'blog_ismember', 'view', NULL, '', '', 1 ) )
-	{
-		foreach( $blog_array as $blog_ID )
-		{
-			return $blog_ID;
-		}
-	}
+    // Use first blog from DB which current user can views
+    if ($blog_array = $BlogCache->load_user_blogs('blog_ismember', 'view', null, '', '', 1)) {
+        foreach ($blog_array as $blog_ID) {
+            return $blog_ID;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -460,31 +445,28 @@ function get_working_blog()
  *
  * @return boolean $blog changed?
  */
-function set_working_blog( $new_blog_ID )
+function set_working_blog($new_blog_ID)
 {
-	global $blog, $UserSettings;
+    global $blog, $UserSettings;
 
-	if( ! is_logged_in() )
-	{	// User must be logged in to set working collection:
-		return false;
-	}
+    if (! is_logged_in()) {	// User must be logged in to set working collection:
+        return false;
+    }
 
-	if( $new_blog_ID != (int)$UserSettings->get('selected_blog') )
-	{ // Save the new default blog.
-		// fp> Test case 1: dashboard without a blog param should go to last selected blog
-		// fp> Test case 2: uploading to the default blog may actually upload into another root (sev)
-		$UserSettings->set( 'selected_blog', $blog );
-		$UserSettings->dbupdate();
-	}
+    if ($new_blog_ID != (int) $UserSettings->get('selected_blog')) { // Save the new default blog.
+        // fp> Test case 1: dashboard without a blog param should go to last selected blog
+        // fp> Test case 2: uploading to the default blog may actually upload into another root (sev)
+        $UserSettings->set('selected_blog', $blog);
+        $UserSettings->dbupdate();
+    }
 
-	if( $new_blog_ID == $blog )
-	{
-		return false;
-	}
+    if ($new_blog_ID == $blog) {
+        return false;
+    }
 
-	$blog = $new_blog_ID;
+    $blog = $new_blog_ID;
 
-	return true;
+    return true;
 }
 
 
@@ -495,83 +477,80 @@ function set_working_blog( $new_blog_ID )
  * @param string Blog type
  * @return array|string
  */
-function get_collection_kinds( $kind = NULL )
+function get_collection_kinds($kind = null)
 {
-	global $Plugins;
+    global $Plugins;
 
-	$kinds = array(
-		'minisite' => array(
-				'name' => T_('Mini-Site'),
-				'class' => 'btn-primary',
-				'desc' => T_('Use this to build a <b>small site</b> consisting of a home page and only a few additional pages.'),
-				'note' => T_('Use this if you want to start with a relatively simple "page builder".')
-								.'<br />'.T_('If your site grows, you can always switch this to a "Home / Main" collection later.'),
-			),
-		'main' => array(
-				'name' => T_('Home / Main'),
-				'class' => 'btn-primary',
-				'desc' => T_('Use this as a site homepage to build a <b>large site</b> consisting of a home page <b>plus</b> several sections (where each section is a separate collection).'),
-				'note' => T_('By default, this home collection will aggregate the contents of all your other collections.')
-								.'<br />'.T_('This collection can also be used to display all the cross-collection site features such as registration, login, user profiles, private messaging, etc.'),
-			),
-		'std' => array(
-				'name' => T_('Blog'), // NOTE: this is a REAL usage of the word 'Blog'. Do NOT change to 'collection'.
-				'class' => 'btn-info',
-				'desc' => T_('A collection of Posts, optimized to present <b>articles or news</b>, sorted primarily by date.'),
-				'note' => T_('Use this is you are going to publish fresh content on a regular basis.')
-								.'<br />'.T_('Can be used as a section of a larger site.'),
-			),
-		'manual' => array(
-				'name' => T_('Manual'),
-				'class' => 'btn-info',
-				'desc' => T_('A collection of Pages, optimized to present <b>reference material</b> organized into chapters, sub-chapters, etc.'),
-				'note' => T_('Use this if you want to publish an online manual, a reference section, a book or a guide.')
-								.'<br />'.T_('Can be used as a section of a larger site.').' '.T_('Should be used with a "manual" skin.'),
-			),
-		'photo' => array(
-				'name' => T_('Gallery'),
-				'class' => 'btn-info',
-				'desc' => T_('A collection of Albums, optimized to present <b>photos</b> grouped into small <b>albums</b>.'),
-				'note' => T_('Use this if you want to publish several images at a time, without much text.')
-								.'<br />'.T_('Can be used as a section of a larger site.').' '.T_('This should be used with a "gallery" skin.'),
-			),
-		'forum' => array(
-				'name' => T_('Forum'),
-				'class' => 'btn-info',
-				'desc' => T_('A collection of Topics (and replies), optimized to be used as an <b>interactive discussion forum</b>.'),
-				'note' => T_('Users will be able to post new topics and replies from the front-office.')
-								.'<br />'.T_('Can be used as a section of a larger site.').' '.T_('This should be used with a "forums" skin.'),
-			),
-		'group' => array(
-				'name' => T_('Tracker'),
-				'class' => 'btn-info',
-				'desc' => T_('A collection of Issues, optimized for <b>issue tracking</b> or <b>collaborative editing</b> between multiple users.'),
-				'note' => T_('Look for the workflow properties on the post editing form.')
-								.'<br />'.T_('Can be used as a section of a larger site.').' '.T_('Should be used with a "tracker" skin. May also be used only in back-office.'),
-			),
-		);
+    $kinds = [
+        'minisite' => [
+            'name' => T_('Mini-Site'),
+            'class' => 'btn-primary',
+            'desc' => T_('Use this to build a <b>small site</b> consisting of a home page and only a few additional pages.'),
+            'note' => T_('Use this if you want to start with a relatively simple "page builder".')
+                            . '<br />' . T_('If your site grows, you can always switch this to a "Home / Main" collection later.'),
+        ],
+        'main' => [
+            'name' => T_('Home / Main'),
+            'class' => 'btn-primary',
+            'desc' => T_('Use this as a site homepage to build a <b>large site</b> consisting of a home page <b>plus</b> several sections (where each section is a separate collection).'),
+            'note' => T_('By default, this home collection will aggregate the contents of all your other collections.')
+                            . '<br />' . T_('This collection can also be used to display all the cross-collection site features such as registration, login, user profiles, private messaging, etc.'),
+        ],
+        'std' => [
+            'name' => T_('Blog'), // NOTE: this is a REAL usage of the word 'Blog'. Do NOT change to 'collection'.
+            'class' => 'btn-info',
+            'desc' => T_('A collection of Posts, optimized to present <b>articles or news</b>, sorted primarily by date.'),
+            'note' => T_('Use this is you are going to publish fresh content on a regular basis.')
+                            . '<br />' . T_('Can be used as a section of a larger site.'),
+        ],
+        'manual' => [
+            'name' => T_('Manual'),
+            'class' => 'btn-info',
+            'desc' => T_('A collection of Pages, optimized to present <b>reference material</b> organized into chapters, sub-chapters, etc.'),
+            'note' => T_('Use this if you want to publish an online manual, a reference section, a book or a guide.')
+                            . '<br />' . T_('Can be used as a section of a larger site.') . ' ' . T_('Should be used with a "manual" skin.'),
+        ],
+        'photo' => [
+            'name' => T_('Gallery'),
+            'class' => 'btn-info',
+            'desc' => T_('A collection of Albums, optimized to present <b>photos</b> grouped into small <b>albums</b>.'),
+            'note' => T_('Use this if you want to publish several images at a time, without much text.')
+                            . '<br />' . T_('Can be used as a section of a larger site.') . ' ' . T_('This should be used with a "gallery" skin.'),
+        ],
+        'forum' => [
+            'name' => T_('Forum'),
+            'class' => 'btn-info',
+            'desc' => T_('A collection of Topics (and replies), optimized to be used as an <b>interactive discussion forum</b>.'),
+            'note' => T_('Users will be able to post new topics and replies from the front-office.')
+                            . '<br />' . T_('Can be used as a section of a larger site.') . ' ' . T_('This should be used with a "forums" skin.'),
+        ],
+        'group' => [
+            'name' => T_('Tracker'),
+            'class' => 'btn-info',
+            'desc' => T_('A collection of Issues, optimized for <b>issue tracking</b> or <b>collaborative editing</b> between multiple users.'),
+            'note' => T_('Look for the workflow properties on the post editing form.')
+                            . '<br />' . T_('Can be used as a section of a larger site.') . ' ' . T_('Should be used with a "tracker" skin. May also be used only in back-office.'),
+        ],
+    ];
 
-	// Define blog kinds, their names and description.
-	$plugin_kinds = $Plugins->trigger_collect( 'GetCollectionKinds', array('kinds' => & $kinds) );
+    // Define blog kinds, their names and description.
+    $plugin_kinds = $Plugins->trigger_collect('GetCollectionKinds', [
+        'kinds' => &$kinds,
+    ]);
 
-	foreach( $plugin_kinds as $l_kinds )
-	{
-		$kinds = array_merge( $l_kinds, $kinds );
-	}
+    foreach ($plugin_kinds as $l_kinds) {
+        $kinds = array_merge($l_kinds, $kinds);
+    }
 
-	if( is_null( $kind ) )
-	{ // Return kinds array
-		return $kinds;
-	}
+    if (is_null($kind)) { // Return kinds array
+        return $kinds;
+    }
 
-	if( array_key_exists( $kind, $kinds ) && !empty($kinds[$kind]['name']) )
-	{
-		return $kinds[$kind]['name'];
-	}
-	else
-	{	// Use default collection kind
-		return $kinds['std']['name'];
-	}
+    if (array_key_exists($kind, $kinds) && ! empty($kinds[$kind]['name'])) {
+        return $kinds[$kind]['name'];
+    } else {	// Use default collection kind
+        return $kinds['std']['name'];
+    }
 }
 
 
@@ -583,95 +562,68 @@ function get_collection_kinds( $kind = NULL )
  * @param integer the id of the blog, if we want to set a blog's cache. Let it NULL to set general caching.
  * @param boolean true to save db changes, false if db update will be called outside from this function
  */
-function set_cache_enabled( $cache_key, $new_status, $coll_ID = NULL, $save_setting = true )
+function set_cache_enabled($cache_key, $new_status, $coll_ID = null, $save_setting = true)
 {
-	load_class( '_core/model/_pagecache.class.php', 'PageCache' );
-	global $Settings;
+    load_class('_core/model/_pagecache.class.php', 'PageCache');
+    global $Settings;
 
-	if( empty( $coll_ID ) )
-	{ // general cache
-		$Collection = $Blog = NULL;
-		$old_cache_status = $Settings->get( $cache_key );
-	}
-	else
-	{ // blog page cache
-		$BlogCache = & get_BlogCache();
-		$Collection = $Blog = $BlogCache->get_by_ID( $coll_ID );
-		$old_cache_status = $Blog->get_setting( $cache_key );
-	}
+    if (empty($coll_ID)) { // general cache
+        $Collection = $Blog = null;
+        $old_cache_status = $Settings->get($cache_key);
+    } else { // blog page cache
+        $BlogCache = &get_BlogCache();
+        $Collection = $Blog = $BlogCache->get_by_ID($coll_ID);
+        $old_cache_status = $Blog->get_setting($cache_key);
+    }
 
-	$PageCache = new PageCache( $Blog );
-	if( $old_cache_status == false && $new_status == true )
-	{ // Caching has been turned ON:
-		if( $PageCache->cache_create( false ) )
-		{ // corresponding cache folder was created
-			if( empty( $coll_ID ) )
-			{ // general cache
-				$result = array( 'success', T_( 'General caching has been enabled.' ) );
-			}
-			else
-			{ // blog page cache
-				$result = array( 'success', T_( 'Page caching has been enabled.' ) );
-			}
-		}
-		else
-		{ // error creating cache folder
-			if( empty( $coll_ID ) )
-			{ // general cache
-				$result = array( 'error', T_( 'General caching could not be enabled. Check /cache/ folder file permissions.' ) );
-			}
-			else
-			{ // blog page cache
-				$result = array( 'error', T_( 'Page caching could not be enabled. Check /cache/ folder file permissions.' ) );
-			}
-			$new_status = false;
-		}
-	}
-	elseif( $old_cache_status == true && $new_status == false )
-	{ // Caching has been turned OFF:
-		$PageCache->cache_delete();
-		if( empty( $coll_ID ) )
-		{ // general cache
-			$result = array( 'note',  T_( 'General caching has been disabled. Cache contents have been purged.' ) );
-		}
-		else
-		{ // blog page cache
-			$result = array( 'note',  T_( 'Page caching has been disabled. Cache contents have been purged.' ) );
-		}
-	}
-	else
-	{ // nothing was changed
-		// check if ajax_form_enabled has correct state after b2evo upgrade
-		if( ( $Blog != NULL ) && ( $new_status ) && ( !$Blog->get_setting( 'ajax_form_enabled' ) ) )
-		{ // if page cache is enabled, ajax form must be enabled to
-			$Blog->set_setting( 'ajax_form_enabled', true );
-			$Blog->dbupdate();
-		}
-		return NULL;
-	}
+    $PageCache = new PageCache($Blog);
+    if ($old_cache_status == false && $new_status == true) { // Caching has been turned ON:
+        if ($PageCache->cache_create(false)) { // corresponding cache folder was created
+            if (empty($coll_ID)) { // general cache
+                $result = ['success', T_('General caching has been enabled.')];
+            } else { // blog page cache
+                $result = ['success', T_('Page caching has been enabled.')];
+            }
+        } else { // error creating cache folder
+            if (empty($coll_ID)) { // general cache
+                $result = ['error', T_('General caching could not be enabled. Check /cache/ folder file permissions.')];
+            } else { // blog page cache
+                $result = ['error', T_('Page caching could not be enabled. Check /cache/ folder file permissions.')];
+            }
+            $new_status = false;
+        }
+    } elseif ($old_cache_status == true && $new_status == false) { // Caching has been turned OFF:
+        $PageCache->cache_delete();
+        if (empty($coll_ID)) { // general cache
+            $result = ['note',  T_('General caching has been disabled. Cache contents have been purged.')];
+        } else { // blog page cache
+            $result = ['note',  T_('Page caching has been disabled. Cache contents have been purged.')];
+        }
+    } else { // nothing was changed
+        // check if ajax_form_enabled has correct state after b2evo upgrade
+        if (($Blog != null) && ($new_status) && (! $Blog->get_setting('ajax_form_enabled'))) { // if page cache is enabled, ajax form must be enabled to
+            $Blog->set_setting('ajax_form_enabled', true);
+            $Blog->dbupdate();
+        }
+        return null;
+    }
 
-	// set db changes
-	if( $Blog == NULL )
-	{
-		$Settings->set( 'general_cache_enabled', $new_status );
-		if( $save_setting )
-		{ // save
-			$Settings->dbupdate();
-		}
-	}
-	else
-	{
-		$Blog->set_setting( $cache_key, $new_status );
-		if( ( $cache_key == 'cache_enabled' ) && $new_status )
-		{ // if page cache is enabled, ajax form must be enabled to
-			$Blog->set_setting( 'ajax_form_enabled', true );
-		}
-		if( $save_setting )
-		{ // save
-			$Blog->dbupdate();
-		}
-	}
-	return $result;
+    // set db changes
+    if ($Blog == null) {
+        $Settings->set('general_cache_enabled', $new_status);
+        if ($save_setting) { // save
+            $Settings->dbupdate();
+        }
+    } else {
+        $Blog->set_setting($cache_key, $new_status);
+        if (($cache_key == 'cache_enabled') && $new_status) { // if page cache is enabled, ajax form must be enabled to
+            $Blog->set_setting('ajax_form_enabled', true);
+        }
+        if ($save_setting) { // save
+            $Blog->dbupdate();
+        }
+    }
+    return $result;
 }
 
 
@@ -683,259 +635,222 @@ function set_cache_enabled( $cache_key, $new_status, $coll_ID = NULL, $save_sett
  * @param boolean if the domain does not match a collection, try to process as a TinyURL and redirect before fallback to default collection
  * @return boolean true if $blog was initialized successful, false otherwise
  */
-function init_requested_coll_or_process_tinyurl( $process_tinyslug_first = true, $process_unknown_domain_as_tinyurl = true )
+function init_requested_coll_or_process_tinyurl($process_tinyslug_first = true, $process_unknown_domain_as_tinyurl = true)
 {
-	global $blog, $ReqHost, $ReqURL, $sanitized_ReqPath, $baseurl, $pagenow; 
-	global $Settings;
-	global $Debuglog;
-	global $resolve_extra_path, $slug_extra_term;
+    global $blog, $ReqHost, $ReqURL, $sanitized_ReqPath, $baseurl, $pagenow;
+    global $Settings;
+    global $Debuglog;
+    global $resolve_extra_path, $slug_extra_term;
 
-	if( !empty( $blog ) )
-	{	// $blog was already initialized (maybe through a stub file)
-		// Don't do any extra processing. This also means you cannot do TinyURLs through a blog stub file, which is ok.
-		return true;
-	}
+    if (! empty($blog)) {	// $blog was already initialized (maybe through a stub file)
+        // Don't do any extra processing. This also means you cannot do TinyURLs through a blog stub file, which is ok.
+        return true;
+    }
 
-	// Set some defaults in case we cannot get those from the URL:
-	$last_part = '';
-	$slug_extra_term = '';
+    // Set some defaults in case we cannot get those from the URL:
+    $last_part = '';
+    $slug_extra_term = '';
 
+    if (! isset($resolve_extra_path)) {	// Resolve extra path by default:
+        $resolve_extra_path = true;
+    }
 
-	if( ! isset( $resolve_extra_path ) )
-	{	// Resolve extra path by default:
-		$resolve_extra_path = true;
-	}
+    if ($resolve_extra_path) {
+        /*
+         * Now we will start to decode the URL extra path
+         *
+         * Possible urls:
+         *
+         * Decoding should try to work like this:
+         *
+         * baseurl/blog-urlname/junk/.../junk/post-slug     -> points to a single post (no ending slash)
+         * baseurl/blog-urlname/junk/.../junk/aA1           -> points to a single post with TinySlug (special format)
+         * baseurl/blog-urlname/junk/.../junk/p142          -> points to a single post
+         * baseurl/blog-urlname/2006/                       -> points to a yearly archive because of ending slash + 4 digits
+         * baseurl/blog-urlname/2006/12/                    -> points to a monthly archive
+         * baseurl/blog-urlname/2006/12/31/                 -> points to a daily archive
+         * baseurl/blog-urlname/2006/w53/                   -> points to a weekly archive
+         * baseurl/blog-urlname/junk/.../junk/chap-urlname/ -> points to a single chapter/category (because of ending slash)
+         * 																	Note: category names cannot be named like this [a-z][0-9]+
+         *
+         * All the above can also exist with a PHP file inserted, like this:
+         * baseurl/index.php/blog-urlname/junk/.../junk/post-slug
+         * baseurl/stubfile.php/blog-urlname/junk/.../junk/post-slug
+         *
+         * All the above can also exist with a specific collection domain for direct selection of collection:
+         * specific-coll-domain/junk/.../junk/post-title    -> points to a single post (no ending slash)
+         * baseurl/blog-urlname/junk/.../junk/p142          -> points to a single post
+         *
+         * And we can also have Tiny URLs:
+         * anydomain/aA1                                    -> points to a single post with TinySlug (special format) AND should be processed with special "TinySlug processing" (301 + params)
+         * anydomain/post-slug                              -> points to a single post with short format URL AND should be processed with special "TinySlug processing" (301 + params)
+         *
+         * So the GENERAL case is:
+         * domain/first-part/.../.../.../last-part
+         * domain/first-part/.../.../.../last-part/
+         * The FIRST and LAST part may have special meanings, so we need to extract them and STORE them for use in multiple places.
+         */
+        $Debuglog->add('Extra path info found! path_string=' . $sanitized_ReqPath, 'url_decode_part_1');
+        // echo "path=[$sanitized_ReqPath]<br />";
 
-	if( $resolve_extra_path )
-	{
-		/*
-		 * Now we will start to decode the URL extra path
-		 *
-		 * Possible urls:
-		 *
-		 * Decoding should try to work like this:
-		 *
-		 * baseurl/blog-urlname/junk/.../junk/post-slug     -> points to a single post (no ending slash)
-		 * baseurl/blog-urlname/junk/.../junk/aA1           -> points to a single post with TinySlug (special format)
-		 * baseurl/blog-urlname/junk/.../junk/p142          -> points to a single post
-		 * baseurl/blog-urlname/2006/                       -> points to a yearly archive because of ending slash + 4 digits
-		 * baseurl/blog-urlname/2006/12/                    -> points to a monthly archive
-		 * baseurl/blog-urlname/2006/12/31/                 -> points to a daily archive
-		 * baseurl/blog-urlname/2006/w53/                   -> points to a weekly archive
-		 * baseurl/blog-urlname/junk/.../junk/chap-urlname/ -> points to a single chapter/category (because of ending slash)
-		 * 																	Note: category names cannot be named like this [a-z][0-9]+
-		 *
-		 * All the above can also exist with a PHP file inserted, like this:
-		 * baseurl/index.php/blog-urlname/junk/.../junk/post-slug  
-		 * baseurl/stubfile.php/blog-urlname/junk/.../junk/post-slug  
-		 *
-		 * All the above can also exist with a specific collection domain for direct selection of collection:
-		 * specific-coll-domain/junk/.../junk/post-title    -> points to a single post (no ending slash)
-		 * baseurl/blog-urlname/junk/.../junk/p142          -> points to a single post
-		 *
-		 * And we can also have Tiny URLs:
-		 * anydomain/aA1                                    -> points to a single post with TinySlug (special format) AND should be processed with special "TinySlug processing" (301 + params)
-		 * anydomain/post-slug                              -> points to a single post with short format URL AND should be processed with special "TinySlug processing" (301 + params)
-		 *
-		 * So the GENERAL case is:
-		 * domain/first-part/.../.../.../last-part
-		 * domain/first-part/.../.../.../last-part/
-		 * The FIRST and LAST part may have special meanings, so we need to extract them and STORE them for use in multiple places.
-		 */
-		$Debuglog->add( 'Extra path info found! path_string='.$sanitized_ReqPath, 'url_decode_part_1' );
-		// echo "path=[$sanitized_ReqPath]<br />";
+        // Slice the path:
+        $path_elements = preg_split('~/~', $sanitized_ReqPath, 20, PREG_SPLIT_NO_EMPTY);
+        // pre_dump( '', $path_elements, $pagenow );
 
-		// Slice the path:
-		$path_elements = preg_split( '~/~', $sanitized_ReqPath, 20, PREG_SPLIT_NO_EMPTY );
-		// pre_dump( '', $path_elements, $pagenow );
+        // PREVENT index.php or blog1.php etc from being considered as a slug later on.
+        if (isset($path_elements[0]) && $path_elements[0] == $pagenow) { // Ignore element that is the current PHP file name (ideally this URL will later be redirected to a canonical URL without any .php file in the URL)
+            array_shift($path_elements);
+            $Debuglog->add('Ignoring *.php in extra path info', 'url_decode_part_1');
+        }
 
-		// PREVENT index.php or blog1.php etc from being considered as a slug later on.
-		if( isset( $path_elements[0] ) && $path_elements[0] == $pagenow )
-		{ // Ignore element that is the current PHP file name (ideally this URL will later be redirected to a canonical URL without any .php file in the URL)
-			array_shift( $path_elements );
-			$Debuglog->add( 'Ignoring *.php in extra path info' , 'url_decode_part_1' );
-		}
+        // Do we still have extra path info to decode?
+        if (count($path_elements)) {
+            // this is the LAST path element!
+            $last_part = $path_elements[count($path_elements) - 1];
 
-		// Do we still have extra path info to decode?
-		if( count( $path_elements ) )
-		{
+            if (strpos($last_part, ' ') !== false) {	// Extract extra term form slug with space as separator:
+                $last_part = explode(' ', $last_part, 2);
+                if (isset($last_part[1])) {	// Set extra term from part of slug after first space:
+                    $slug_extra_term = $last_part[1];
+                }
+                // Use only part before first space, because slug cannot has a space:
+                $last_part = $last_part[0];
+            }
+        }
+    }
 
-			// this is the LAST path element!
-			$last_part = $path_elements[count( $path_elements )-1];
+    if ($process_tinyslug_first && ! empty($last_part) && $Settings->get('redirect_tinyurl')) {	// We should redirect from Tiny URLs to canonical URLs:
+        load_funcs('slugs/model/_slug.funcs.php');
+        if (is_tiny_slug($last_part)) {	// The last part of the current URL looks like Tiny URL:
+            $Debuglog->add('$last_part has correct TinySlug format: ' . $last_part, 'url_decode_part_1');
+            if (($ItemCache = &get_ItemCache()) &&
+                ($Item = &$ItemCache->get_by_urltitle($last_part, false, false)) && // Item is found by the requested Tiny URL
+                ($SlugCache = &get_SlugCache()) &&
+                ($item_Slug = &$SlugCache->get_by_ID($Item->get('tiny_slug_ID'), false, false))) { // Tiny Slug is found in DB)
+                // If we have a tiny-slug and we find a matching Item:
+                $Debuglog->add('Found Item for that slug: #' . $Item->ID . ' (' . $Item->get('title') . ')', 'url_decode_part_1');
 
-			if( strpos( $last_part, ' ' ) !== false )
-			{	// Extract extra term form slug with space as separator:
-				$last_part = explode( ' ', $last_part, 2 );
-				if( isset( $last_part[1] ) )
-				{	// Set extra term from part of slug after first space:
-					$slug_extra_term = $last_part[1];
-				}
-				// Use only part before first space, because slug cannot has a space:
-				$last_part = $last_part[0];
-			}
-		}
-	}
+                // Redirect from tiny URL to canonical URL of the detected Item:
+                $Item->tinyurl_redirect($last_part, $slug_extra_term);
+                // Exit here.
+            }
+        }
+    }
 
+    $Debuglog->add('Trying to identify collection by extra path...', 'url_decode_part_1');
 
-	if( $process_tinyslug_first && ! empty( $last_part ) && $Settings->get( 'redirect_tinyurl' ) )
-	{	// We should redirect from Tiny URLs to canonical URLs:
-		load_funcs( 'slugs/model/_slug.funcs.php' );
-		if( is_tiny_slug( $last_part ) )
-		{	// The last part of the current URL looks like Tiny URL:
-			$Debuglog->add( '$last_part has correct TinySlug format: '.$last_part, 'url_decode_part_1' );
-			if( ( $ItemCache = & get_ItemCache() ) &&
-			    ( $Item = & $ItemCache->get_by_urltitle( $last_part, false, false ) ) && // Item is found by the requested Tiny URL
-			    ( $SlugCache = & get_SlugCache() ) && 
-			    ( $item_Slug = & $SlugCache->get_by_ID( $Item->get( 'tiny_slug_ID' ), false, false ) ) ) // Tiny Slug is found in DB)
-			{	// If we have a tiny-slug and we find a matching Item:
-				$Debuglog->add( 'Found Item for that slug: #'.$Item->ID.' ('.$Item->get( 'title' ).')', 'url_decode_part_1' );
+    // No collection requested by URL param, let's try to match something in the URL:
+    // Note: we try to find a matching collection URL BEFORE falling back to considering a tinyURL:
+    $BlogCache = &get_BlogCache();
 
-				// Redirect from tiny URL to canonical URL of the detected Item:
-				$Item->tinyurl_redirect( $last_part, $slug_extra_term );
-				// Exit here.
-			}
-		}
-	}
+    // fp>yb: What is this for? Make protocol lowercase?
+    $baseurl_regex = preg_replace('/^https?(.*)/i', 'https?$1', preg_quote($baseurl, '#'));
 
+    if (preg_match('#^' . $baseurl_regex . '(index.php/)?([^/]+)#', $ReqHost . $sanitized_ReqPath, $matches)) { // We have an URL that is of the form `http://domain.com/slug` or `http://domain.com/index.php/slug` (NOTE: may still contain `slug.php`)
+        $Debuglog->add('Found a potential URL collection name: ' . $matches[2] . ' (in: ' . $ReqHost . $sanitized_ReqPath . ')', 'url_decode_part_1');
+        if (strpos($matches[2], '.') !== false) {	// There is an extension (like .php) in the collection name, ignore...
+            $Debuglog->add('Ignoring because it contains a dot.', 'url_decode_part_1');
+        } elseif (($Collection = $Blog = &$BlogCache->get_by_urlname($matches[2], false)) !== false) { /* SQL request '=' */
+            // We found a matching Collection by collection Slug:
+            $blog = $Blog->ID;
+            $Debuglog->add('Found matching collection: ' . $blog, 'url_decode_part_1');
+            return true;
+        } else {
+            $Debuglog->add('No match.', 'url_decode_part_1');
+        }
+    }
 
-	$Debuglog->add( 'Trying to identify collection by extra path...', 'url_decode_part_1' );
+    // No collection identified by URL name, let's try to match the absolute URL:
+    // Remove optional index.php:
+    if (preg_match('#^(.+?)index.php#', $ReqHost . $sanitized_ReqPath, $matches)) { // Remove everything starting at `index.php...`:
+        $ReqAbsUrl = $matches[1];
+    } else {	// Match on the whole URL (we'll try to find the base URL at the beginning)
+        $ReqAbsUrl = $ReqHost . $sanitized_ReqPath;
+    }
 
-	// No collection requested by URL param, let's try to match something in the URL:
-	// Note: we try to find a matching collection URL BEFORE falling back to considering a tinyURL:
-	$BlogCache = & get_BlogCache();
+    $Debuglog->add('Trying to identify collection by looking up Absolute url: ' . $ReqAbsUrl, 'url_decode_part_1');
+    // SQL request 'LIKE':
+    if (($Collection = $Blog = &$BlogCache->get_by_url($ReqAbsUrl, false)) !== false) { // We found a matching collection:
+        $blog = $Blog->ID;
+        $Debuglog->add('Found matching collection: ' . $blog, 'url_decode_part_1');
+        return true;
+    }
 
-	// fp>yb: What is this for? Make protocol lowercase?
-	$baseurl_regex = preg_replace( '/^https?(.*)/i', 'https?$1', preg_quote( $baseurl, '#' ) );
+    // No collection identified by absolute URL, try searching URL aliases:
+    $Debuglog->add('Trying to identify collection by looking up URL aliases...', 'url_decode_part_1');
+    $alias = null;
+    if (($Collection = $Blog = &$BlogCache->get_by_url_alias($ReqAbsUrl, $alias, false)) !== false) { // We found a matching collection:
+        $Debuglog->add('Found matching collection: ' . $blog . 'using alias ' . $alias, 'url_decode_part_1');
+        // Find tail from the currently requested alias URL:
+        $same_protocol_alias = url_same_protocol($alias, $ReqAbsUrl);
+        $tail_Path = str_replace($same_protocol_alias, '', $ReqURL);
+        if (substr($tail_Path, 0, 1) != '/') { // Tail must start with '/'
+            $tail_Path = '/' . $tail_Path;
+        }
+        // Redirect from alias collection URL to real collection URL:
+        $redirect_to = url_add_tail($Blog->gen_blogurl(), $tail_Path);
+        if ($Blog->get_setting('http_protocol') == 'allow_both') {	// Allow any protocol of the current alias URL:
+            // fp> DO we really want to redirect immediately here (in case there is extra path?)
+            // yb> Here we always need a redirect from alias collection URL to real collection URL.
+            $redirect_to = url_same_protocol($redirect_to, $ReqAbsUrl);
+        }
+        // Else redirect to real collection URL only with protocol that is used by default for the collection base URL:
+        header_redirect($redirect_to, 301);
+    }
 
-	if( preg_match( '#^'.$baseurl_regex.'(index.php/)?([^/]+)#', $ReqHost.$sanitized_ReqPath, $matches ) )
-	{ // We have an URL that is of the form `http://domain.com/slug` or `http://domain.com/index.php/slug` (NOTE: may still contain `slug.php`)
-		$Debuglog->add( 'Found a potential URL collection name: '.$matches[2].' (in: '.$ReqHost.$sanitized_ReqPath.')', 'url_decode_part_1' );
-		if( strpos( $matches[2], '.' ) !== false )
-		{	// There is an extension (like .php) in the collection name, ignore...
-			$Debuglog->add( 'Ignoring because it contains a dot.', 'url_decode_part_1' );
-		}
-		elseif( ( $Collection = $Blog = & $BlogCache->get_by_urlname( $matches[2], false ) ) !== false ) /* SQL request '=' */
-		{ // We found a matching Collection by collection Slug:
-			$blog = $Blog->ID;
-			$Debuglog->add( 'Found matching collection: '.$blog, 'url_decode_part_1' );
-			return true;
-		}
-		else
-		{
-			$Debuglog->add( 'No match.', 'url_decode_part_1' );
-		}
-	}
+    // No collection identified by Absolute URL or URL alias...
+    // Check for ?blog=123 param now:
+    $Debuglog->add('Checking for explicit "blog" param', 'url_decode_part_1');
+    $blog = param('blog', 'integer', '', true);
 
+    if (! empty($blog)) { // a specific collection has been requested in the URL:
+        return true;
+    }
 
-	// No collection identified by URL name, let's try to match the absolute URL: 
-	// Remove optional index.php:
-	if( preg_match( '#^(.+?)index.php#', $ReqHost.$sanitized_ReqPath, $matches ) )
-	{ // Remove everything starting at `index.php...`:
-		$ReqAbsUrl = $matches[1];
-	}
-	else
-	{	// Match on the whole URL (we'll try to find the base URL at the beginning)
-		$ReqAbsUrl = $ReqHost.$sanitized_ReqPath;
-	}
+    // Check if the default collection uses the current domain as baseurl:
+    // (because we do NOT want to process as tinyURL in that case, that would prevent loading pages like http://domain.com/about )
+    $default_blog_ID = $Settings->get('default_blog_ID');
+    $default_Collection = &$BlogCache->get_by_ID($default_blog_ID, false, false);
+    if ($default_Collection !== null) { // There is a default collection:
+        $default_Collection_baseurl = $default_Collection->gen_baseurl();
+        $Debuglog->add('The default collection lives on: ' . $default_Collection_baseurl, 'url_decode_part_1');
+        if (is_same_url($default_Collection_baseurl, $ReqHost . '/')) {
+            $Debuglog->add('Match! We will consider that we are requesting a page of the default collection: ' . $default_blog_ID, 'url_decode_part_1');
+            $blog = $default_blog_ID;
+            $Collection = $default_Collection;
+            return true;
+        }
+    }
 
-	$Debuglog->add( 'Trying to identify collection by looking up Absolute url: '.$ReqAbsUrl, 'url_decode_part_1' );
-	// SQL request 'LIKE':
-	if( ( $Collection = $Blog = & $BlogCache->get_by_url( $ReqAbsUrl, false ) ) !== false )
-	{ // We found a matching collection:
-		$blog = $Blog->ID;
-		$Debuglog->add( 'Found matching collection: '.$blog, 'url_decode_part_1' );
-		return true;
-	}
+    // No collection identified, we MUST now consider the domain as being a TinyURL domain:
+    if ($process_unknown_domain_as_tinyurl && ! empty($last_part) && $Settings->get('redirect_tinyurl')) {
+        // Check if the URL matches a tinyurl scheme `https?://x.y.z.domain.tld/slug` without extra folders or params:
+        if (preg_match('#^https?://[a-z0-9\-_.]+\.[a-z]+/[a-z0-9\-_\+\s%]+$#i', $ReqAbsUrl)) {
+            $Debuglog->add('URL has correct TinyURL format: ' . $ReqAbsUrl, 'url_decode_part_1');
 
+            if (($ItemCache = &get_ItemCache()) &&
+                ($Item = &$ItemCache->get_by_urltitle($last_part, false, false))) {	// If we find a matching Item by slug:
+                $Debuglog->add('Found Item for that slug: #' . $Item->ID . ' (' . $Item->get('title') . ')', 'url_decode_part_1');
 
-	// No collection identified by absolute URL, try searching URL aliases:
-	$Debuglog->add( 'Trying to identify collection by looking up URL aliases...', 'url_decode_part_1' );
-	$alias = NULL;
-	if( ( $Collection = $Blog = & $BlogCache->get_by_url_alias( $ReqAbsUrl, $alias, false ) ) !== false )
-	{ // We found a matching collection:
-		$Debuglog->add( 'Found matching collection: '.$blog. 'using alias '.$alias, 'url_decode_part_1' );
-		// Find tail from the currently requested alias URL:
-		$same_protocol_alias = url_same_protocol( $alias, $ReqAbsUrl );
-		$tail_Path = str_replace( $same_protocol_alias, '', $ReqURL );
-		if( substr( $tail_Path, 0, 1 ) != '/' )
-		{ // Tail must start with '/'
-			$tail_Path = '/'.$tail_Path;
-		}
-		// Redirect from alias collection URL to real collection URL:
-		$redirect_to = url_add_tail( $Blog->gen_blogurl(), $tail_Path );
-		if( $Blog->get_setting( 'http_protocol' ) == 'allow_both' )
-		{	// Allow any protocol of the current alias URL:
-// fp> DO we really want to redirect immediately here (in case there is extra path?)
-// yb> Here we always need a redirect from alias collection URL to real collection URL.
-			$redirect_to = url_same_protocol( $redirect_to, $ReqAbsUrl );
-		}
-		// Else redirect to real collection URL only with protocol that is used by default for the collection base URL:
-		header_redirect( $redirect_to, 301 );
-	}
+                // Redirect from tiny URL to canonical URL of the detected Item:
+                $Item->tinyurl_redirect($last_part, $slug_extra_term);
+                // Exit here.
+            }
+        }
+    }
 
+    // Still no collection matches and no TinyURL identified, use default Collection:
+    if ($default_Collection !== null) { // We found a matching blog:
+        $blog = $default_blog_ID;
+        $Collection = $default_Collection;
+        $Debuglog->add('Falling back to default collection: ' . $blog, 'url_decode_part_1');
+        return true;
+    }
 
-	// No collection identified by Absolute URL or URL alias...
-	// Check for ?blog=123 param now:
-	$Debuglog->add( 'Checking for explicit "blog" param', 'url_decode_part_1' );
-	$blog = param( 'blog', 'integer', '', true );
-
-	if( !empty($blog) )
-	{ // a specific collection has been requested in the URL:
-		return true;
-	}
-
-
-	// Check if the default collection uses the current domain as baseurl:
-	// (because we do NOT want to process as tinyURL in that case, that would prevent loading pages like http://domain.com/about )
-	$default_blog_ID = $Settings->get( 'default_blog_ID' );
-	$default_Collection = & $BlogCache->get_by_ID( $default_blog_ID, false, false );
-	if( $default_Collection !== NULL )
-	{ // There is a default collection:
-		$default_Collection_baseurl = $default_Collection->gen_baseurl();
-		$Debuglog->add( 'The default collection lives on: '.$default_Collection_baseurl, 'url_decode_part_1' );
-		if( is_same_url( $default_Collection_baseurl, $ReqHost.'/' ) )
-		{	
-			$Debuglog->add( 'Match! We will consider that we are requesting a page of the default collection: '.$default_blog_ID, 'url_decode_part_1' );
-			$blog = $default_blog_ID;
-			$Collection = $default_Collection;
-			return true;
-		}
-	}
-
-	// No collection identified, we MUST now consider the domain as being a TinyURL domain:
-	if( $process_unknown_domain_as_tinyurl && ! empty( $last_part ) && $Settings->get( 'redirect_tinyurl' ) )
-	{
-		// Check if the URL matches a tinyurl scheme `https?://x.y.z.domain.tld/slug` without extra folders or params:
-		if( preg_match( '#^https?://[a-z0-9\-_.]+\.[a-z]+/[a-z0-9\-_\+\s%]+$#i', $ReqAbsUrl ) )
-		{
-			$Debuglog->add( 'URL has correct TinyURL format: '.$ReqAbsUrl, 'url_decode_part_1' );
-
-			if( ( $ItemCache = & get_ItemCache() ) &&
-			    ( $Item = & $ItemCache->get_by_urltitle( $last_part, false, false ) ) )
-			{	// If we find a matching Item by slug:
-				$Debuglog->add( 'Found Item for that slug: #'.$Item->ID.' ('.$Item->get( 'title' ).')', 'url_decode_part_1' );
-
-				// Redirect from tiny URL to canonical URL of the detected Item:
-				$Item->tinyurl_redirect( $last_part, $slug_extra_term );
-				// Exit here.
-			}
-		}
-	}
-
-
-	// Still no collection matches and no TinyURL identified, use default Collection:
-	if( $default_Collection !== NULL )
-	{ // We found a matching blog:
-		$blog = $default_blog_ID;
-		$Collection = $default_Collection;
-		$Debuglog->add( 'Falling back to default collection: '.$blog, 'url_decode_part_1' );
-		return true;
-	}
-
-	// No collection has been selected (we'll probably display the default.php page):
-	$Debuglog->add( 'We cannot use any specific collection.', 'url_decode_part_1' );
-	$blog = NULL;
-	return false;
+    // No collection has been selected (we'll probably display the default.php page):
+    $Debuglog->add('We cannot use any specific collection.', 'url_decode_part_1');
+    $blog = null;
+    return false;
 }
 
 
@@ -944,24 +859,22 @@ function init_requested_coll_or_process_tinyurl( $process_tinyslug_first = true,
  *
  * @param integer the blog Id
  */
-function activate_blog_locale( $blog )
+function activate_blog_locale($blog)
 {
-	global $current_charset;
+    global $current_charset;
 
-	if( empty( $blog ) || ( $blog <= 0 ) )
-	{ // $blog is not a valid blog ID
-		return;
-	}
+    if (empty($blog) || ($blog <= 0)) { // $blog is not a valid blog ID
+        return;
+    }
 
-	$BlogCache = & get_BlogCache();
-	$Collection = $Blog = $BlogCache->get_by_ID( $blog, false, false );
-	if( !empty( $Blog ) )
-	{ // Activate the blog locale
-		locale_activate( $Blog->get('locale') );
+    $BlogCache = &get_BlogCache();
+    $Collection = $Blog = $BlogCache->get_by_ID($blog, false, false);
+    if (! empty($Blog)) { // Activate the blog locale
+        locale_activate($Blog->get('locale'));
 
-		// Re-Init charset handling, in case current_charset has changed:
-		init_charsets( $current_charset );
-	};
+        // Re-Init charset handling, in case current_charset has changed:
+        init_charsets($current_charset);
+    };
 }
 
 
@@ -970,24 +883,21 @@ function activate_blog_locale( $blog )
  *
  * @param integer blog ID
  */
-function init_blog_widgets( $blog_id )
+function init_blog_widgets($blog_id)
 {
-	/**
-	 * @var EnabledWidgetCache
-	 */
-	$EnabledWidgetCache = & get_EnabledWidgetCache();
-	$container_Widget_array = & $EnabledWidgetCache->get_by_coll_ID( $blog_id );
+    /**
+     * @var EnabledWidgetCache
+     */
+    $EnabledWidgetCache = &get_EnabledWidgetCache();
+    $container_Widget_array = &$EnabledWidgetCache->get_by_coll_ID($blog_id);
 
-	if( !empty($container_Widget_array) )
-	{
-		foreach( $container_Widget_array as $container=>$Widget_array )
-		{
-			foreach( $Widget_array as $ComponentWidget )
-			{	// Let the Widget initialize itself:
-				$ComponentWidget->request_required_files();
-			}
-		}
-	}
+    if (! empty($container_Widget_array)) {
+        foreach ($container_Widget_array as $container => $Widget_array) {
+            foreach ($Widget_array as $ComponentWidget) {	// Let the Widget initialize itself:
+                $ComponentWidget->request_required_files();
+            }
+        }
+    }
 }
 
 
@@ -998,80 +908,70 @@ function init_blog_widgets( $blog_id )
  *
  * @param string the requested view name
  */
-function check_allow_disp( $disp )
+function check_allow_disp($disp)
 {
-	global $Collection, $Blog, $Messages;
+    global $Collection, $Blog, $Messages;
 
-	if( ! check_user_status( 'can_be_validated' ) )
-	{ // we don't have the case when user is logged in and the account is not active
-		return;
-	}
+    if (! check_user_status('can_be_validated')) { // we don't have the case when user is logged in and the account is not active
+        return;
+    }
 
-	$messages_content = $Messages->get_string( '', '', '', 'raw' );
-	if( ( strstr( $messages_content, 'disp=activateinfo' ) !== false ) || ( strstr( $messages_content, 'action=req_activate_email' ) !== false ) )
-	{ // If there is already a message to display activateinfo link, then don't add this message again
-		return;
-	}
+    $messages_content = $Messages->get_string('', '', '', 'raw');
+    if ((strstr($messages_content, 'disp=activateinfo') !== false) || (strstr($messages_content, 'action=req_activate_email') !== false)) { // If there is already a message to display activateinfo link, then don't add this message again
+        return;
+    }
 
-	switch( $disp )
-	{
-		case 'activateinfo':
-			// don't display activate account error notification in activate info page
-			return;
-			break; // already exited before this
-		case 'contacts':
-			if( ! check_user_status( 'can_view_contacts' ) )
-			{ // contacts view display is not allowed
-				return;
-			}
-			break;
-		case 'edit':
-			if( ! check_user_status( 'can_edit_post' ) )
-			{ // edit post is not allowed
-				return;
-			}
-			break;
-		case 'messages':
-			if( ! check_user_status( 'can_view_messages' ) )
-			{ // messages view display is not allowed
-				return;
-			}
-			break;
-		case 'msgform':
-			if( ! check_user_status( 'can_view_msgform' ) )
-			{ // msgform display is not allowed
-				return;
-			}
-			break;
-		case 'threads':
-			if( ! check_user_status( 'can_view_threads' ) )
-			{ // threads view display is not allowed
-				return;
-			}
-			break;
-		case 'user':
-			$user_ID = param( 'user_ID', 'integer', '', true );
-			if( ! check_user_status( 'can_view_user', $user_ID ) )
-			{ // user profile display is not allowed
-				return;
-			}
-			break;
-		case 'users':
-			if( ! check_user_status( 'can_view_users' ) )
-			{ // not active user can't see users list
-				return;
-			}
-			break;
-		case 'register_finish':
-			// don't display activate account error notification on register finish form:
-			return;
-		default:
-			break;
-	}
+    switch ($disp) {
+        case 'activateinfo':
+            // don't display activate account error notification in activate info page
+            return;
+            break; // already exited before this
+        case 'contacts':
+            if (! check_user_status('can_view_contacts')) { // contacts view display is not allowed
+                return;
+            }
+            break;
+        case 'edit':
+            if (! check_user_status('can_edit_post')) { // edit post is not allowed
+                return;
+            }
+            break;
+        case 'messages':
+            if (! check_user_status('can_view_messages')) { // messages view display is not allowed
+                return;
+            }
+            break;
+        case 'msgform':
+            if (! check_user_status('can_view_msgform')) { // msgform display is not allowed
+                return;
+            }
+            break;
+        case 'threads':
+            if (! check_user_status('can_view_threads')) { // threads view display is not allowed
+                return;
+            }
+            break;
+        case 'user':
+            $user_ID = param('user_ID', 'integer', '', true);
+            if (! check_user_status('can_view_user', $user_ID)) { // user profile display is not allowed
+                return;
+            }
+            break;
+        case 'users':
+            if (! check_user_status('can_view_users')) { // not active user can't see users list
+                return;
+            }
+            break;
+        case 'register_finish':
+            // don't display activate account error notification on register finish form:
+            return;
+        default:
+            break;
+    }
 
-	// User is allowed to see the requested view, but show an account activation error message
-	$activateinfo_link = 'href="'.get_activate_info_url( NULL, '&amp;' ).'"';
-	$Messages->add( sprintf( T_( 'IMPORTANT: your account is not active yet! Activate your account now by clicking on the activation link in the email we sent you. <a %s>More info &raquo;</a>' ), $activateinfo_link ) );
+    // User is allowed to see the requested view, but show an account activation error message
+    $activateinfo_link = 'href="' . get_activate_info_url(null, '&amp;') . '"';
+    $Messages->add(sprintf(T_('IMPORTANT: your account is not active yet! Activate your account now by clicking on the activation link in the email we sent you. <a %s>More info &raquo;</a>'), $activateinfo_link));
 }
 
 
@@ -1086,131 +986,101 @@ function check_allow_disp( $disp )
  * @param object Permission object: Item or Comment
  * @return mixed string status if with_label is false, array( status, label ) if with_label is true
  */
-function get_highest_publish_status( $type, $blog, $with_label = true, $restrict_max_allowed_status = '', $perm_target = NULL )
+function get_highest_publish_status($type, $blog, $with_label = true, $restrict_max_allowed_status = '', $perm_target = null)
 {
-	global $current_User;
+    global $current_User;
 
-	if( ( $type != 'post' ) && ( $type != 'comment' ) )
-	{ // $type is invalid
-		debug_die( 'Invalid type parameter!' );
-	}
+    if (($type != 'post') && ($type != 'comment')) { // $type is invalid
+        debug_die('Invalid type parameter!');
+    }
 
-	if( $restrict_max_allowed_status == 'redirected' && $type == 'comment' )
-	{	// Comment cannot have a status "redirected", force this to "deprecated":
-		$restrict_max_allowed_status = 'deprecated';
-	}
+    if ($restrict_max_allowed_status == 'redirected' && $type == 'comment') {	// Comment cannot have a status "redirected", force this to "deprecated":
+        $restrict_max_allowed_status = 'deprecated';
+    }
 
-	$BlogCache = & get_BlogCache();
-	$requested_Blog = $BlogCache->get_by_ID( $blog );
-	$default_status = ( $type == 'post' ) ? $requested_Blog->get_setting( 'default_post_status' ) : $requested_Blog->get_setting( 'new_feedback_status' );
+    $BlogCache = &get_BlogCache();
+    $requested_Blog = $BlogCache->get_by_ID($blog);
+    $default_status = ($type == 'post') ? $requested_Blog->get_setting('default_post_status') : $requested_Blog->get_setting('new_feedback_status');
 
-	if( $type == 'post' && $perm_target !== NULL && $perm_target->get_type_setting( 'usage' ) == 'content-block' )
-	{	// Item type usage is Content Block:
-		// Set max allowed visibility status to "Public":
-		$max_allowed_status = 'published';
-	}
-	elseif( $requested_Blog->get_setting( 'allow_access' ) == 'members' )
-	{	// The collection is restricted for members or only for owner:
-		if( ! $requested_Blog->get( 'advanced_perms' ) )
-		{	// If advanced permissions are NOT enabled then only owner has an access for the collection
-			// Set max allowed visibility status to "Private":
-			$max_allowed_status = 'private';
-		}
-		else
-		{	// Otherwise all members of this collection have an access for the collection
-			// Set max allowed visibility status to "Members":
-			$max_allowed_status = 'protected';
-		}
-	}
-	elseif( $requested_Blog->get_setting( 'allow_access' ) == 'users' )
-	{	// The collection is restricted for logged-in users only:
-		// Set max allowed visibility status to "Community":
-		$max_allowed_status = 'community';
-	}
-	else
-	{	// The collection has no restriction for visibility statuses
-		// Set max allowed visibility status to "Public":
-		$max_allowed_status = 'published';
-	}
+    if ($type == 'post' && $perm_target !== null && $perm_target->get_type_setting('usage') == 'content-block') {	// Item type usage is Content Block:
+        // Set max allowed visibility status to "Public":
+        $max_allowed_status = 'published';
+    } elseif ($requested_Blog->get_setting('allow_access') == 'members') {	// The collection is restricted for members or only for owner:
+        if (! $requested_Blog->get('advanced_perms')) {	// If advanced permissions are NOT enabled then only owner has an access for the collection
+            // Set max allowed visibility status to "Private":
+            $max_allowed_status = 'private';
+        } else {	// Otherwise all members of this collection have an access for the collection
+            // Set max allowed visibility status to "Members":
+            $max_allowed_status = 'protected';
+        }
+    } elseif ($requested_Blog->get_setting('allow_access') == 'users') {	// The collection is restricted for logged-in users only:
+        // Set max allowed visibility status to "Community":
+        $max_allowed_status = 'community';
+    } else {	// The collection has no restriction for visibility statuses
+        // Set max allowed visibility status to "Public":
+        $max_allowed_status = 'published';
+    }
 
-	if( empty( $current_User ) || ( ( !$requested_Blog->get( 'advanced_perms' ) ) && ( !$current_User->check_perm_blog_global( $blog, 'editall' ) ) ) )
-	{	// current User is not set or collection advanced perms are not enabled and user has no global perms on the given blog, set status to the default status
-		$curr_status = $default_status;
-		if( $max_allowed_status != 'published' )
-		{	// If max allowed status is not "published" then we should check what status we can return here instead of default:
-			$statuses = get_visibility_statuses();
-			foreach( $statuses as $status_key => $status_title )
-			{
-				if( $curr_status == $status_key || $max_allowed_status == $status_key || $status_key == $restrict_max_allowed_status )
-				{	// Allow to use this status because only this is max allowed for the requested collection:
-					// Use min of max allowed statuses:
-					$allowed_curr_status = $status_key;
-				}
-			}
-			// Force default status to max allowed:
-			$curr_status = ( empty( $allowed_curr_status ) ? '' : $allowed_curr_status );
-		}
-		return ( $with_label ? array( $curr_status, '' ) : $curr_status );
-	}
+    if (empty($current_User) || ((! $requested_Blog->get('advanced_perms')) && (! $current_User->check_perm_blog_global($blog, 'editall')))) {	// current User is not set or collection advanced perms are not enabled and user has no global perms on the given blog, set status to the default status
+        $curr_status = $default_status;
+        if ($max_allowed_status != 'published') {	// If max allowed status is not "published" then we should check what status we can return here instead of default:
+            $statuses = get_visibility_statuses();
+            foreach ($statuses as $status_key => $status_title) {
+                if ($curr_status == $status_key || $max_allowed_status == $status_key || $status_key == $restrict_max_allowed_status) {	// Allow to use this status because only this is max allowed for the requested collection:
+                    // Use min of max allowed statuses:
+                    $allowed_curr_status = $status_key;
+                }
+            }
+            // Force default status to max allowed:
+            $curr_status = (empty($allowed_curr_status) ? '' : $allowed_curr_status);
+        }
+        return ($with_label ? [$curr_status, ''] : $curr_status);
+    }
 
-	$indexed_statuses = array_reverse( get_visibility_statuses( 'ordered-index' ) );
-	$result = false;
-	// Set this flag to know if we should not allow $max_allowed_status and find next status with lower level:
-	$restricted_status_is_allowed = empty( $restrict_max_allowed_status );
-	// Set this flag to false in order to find first allowed status below:
-	$status_is_allowed = false;
-	foreach( $indexed_statuses as $curr_status => $status_index )
-	{
-		if( $curr_status == $restrict_max_allowed_status )
-		{	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
-			$restricted_status_is_allowed = true;
-		}
-		if( $curr_status == $max_allowed_status )
-		{	// This is first allowed status, then all next statuses are also allowed:
-			$status_is_allowed = true;
-		}
-		if( $restricted_status_is_allowed && $status_is_allowed && check_user_perm( 'blog_'.$type.'!'.$curr_status, 'create', false, $blog ) )
-		{	// The highest available publish status has been found:
-			$result = $curr_status;
-			break;
-		}
-	}
+    $indexed_statuses = array_reverse(get_visibility_statuses('ordered-index'));
+    $result = false;
+    // Set this flag to know if we should not allow $max_allowed_status and find next status with lower level:
+    $restricted_status_is_allowed = empty($restrict_max_allowed_status);
+    // Set this flag to false in order to find first allowed status below:
+    $status_is_allowed = false;
+    foreach ($indexed_statuses as $curr_status => $status_index) {
+        if ($curr_status == $restrict_max_allowed_status) {	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
+            $restricted_status_is_allowed = true;
+        }
+        if ($curr_status == $max_allowed_status) {	// This is first allowed status, then all next statuses are also allowed:
+            $status_is_allowed = true;
+        }
+        if ($restricted_status_is_allowed && $status_is_allowed && check_user_perm('blog_' . $type . '!' . $curr_status, 'create', false, $blog)) {	// The highest available publish status has been found:
+            $result = $curr_status;
+            break;
+        }
+    }
 
-	if( ! $result )
-	{	// There are no available public status:
-		if( check_user_perm( 'blog_'.$type.'!private', 'create', false, $blog ) )
-		{	// Check private status:
-			$result = 'private';
-		}
-		else
-		{	// None of the statuses were allowed above the 'draft' status, so we return the lowest level status:
-			$result = 'draft';
-		}
-	}
+    if (! $result) {	// There are no available public status:
+        if (check_user_perm('blog_' . $type . '!private', 'create', false, $blog)) {	// Check private status:
+            $result = 'private';
+        } else {	// None of the statuses were allowed above the 'draft' status, so we return the lowest level status:
+            $result = 'draft';
+        }
+    }
 
-	if( $with_label )
-	{	// Get label for status updating action:
-		if( $result == 'private' )
-		{	// Set special label for private status because it is not defined in get_visibility_statuses( 'ordered-array' ):
-			$result_label = T_('Make private!');
-		}
-		else
-		{	// Get label by status key:
-			$ordered_statuses = get_visibility_statuses( 'ordered-array' );
-			foreach( $ordered_statuses as $index => $ordered_status )
-			{
-				if( $ordered_status[0] == $result )
-				{
-					$result_label = $ordered_status[1];
-					break;
-				}
-			}
-		}
-		return array( $result, empty( $result_label ) ? '' : $result_label );
-	}
+    if ($with_label) {	// Get label for status updating action:
+        if ($result == 'private') {	// Set special label for private status because it is not defined in get_visibility_statuses( 'ordered-array' ):
+            $result_label = T_('Make private!');
+        } else {	// Get label by status key:
+            $ordered_statuses = get_visibility_statuses('ordered-array');
+            foreach ($ordered_statuses as $index => $ordered_status) {
+                if ($ordered_status[0] == $result) {
+                    $result_label = $ordered_status[1];
+                    break;
+                }
+            }
+        }
+        return [$result, empty($result_label) ? '' : $result_label];
+    }
 
-	// Return only the highest available visibility status without label:
-	return $result;
+    // Return only the highest available visibility status without label:
+    return $result;
 }
 
 
@@ -1223,88 +1093,73 @@ function get_highest_publish_status( $type, $blog, $with_label = true, $restrict
  * @param bool true to skip tags from pages, intro posts and sidebar stuff
  * @return array of tags
  */
-function get_tags( $blog_ids, $limit = 0, $filter_list = NULL, $skip_intro_posts = false, $post_statuses = array( 'published' ), $get_cat_blog_ID = false )
+function get_tags($blog_ids, $limit = 0, $filter_list = null, $skip_intro_posts = false, $post_statuses = ['published'], $get_cat_blog_ID = false)
 {
-	global $DB, $localtimenow;
+    global $DB, $localtimenow;
 
-	$BlogCache = & get_BlogCache();
+    $BlogCache = &get_BlogCache();
 
-	if( is_null( $blog_ids ) )
-	{
-		global $blog;
-		$blog_ids = $blog;
-	}
+    if (is_null($blog_ids)) {
+        global $blog;
+        $blog_ids = $blog;
+    }
 
-	if( $blog_ids == '*' )
-	{ // All collections
-		$where_cat_clause = '1';
-	}
-	elseif( is_array( $blog_ids ) )
-	{ // Get quoted ID list
-		$where_cat_clause = 'cat_blog_ID IN ( '.$DB->quote( $blog_ids ).' )';
-	}
-	else
-	{ // Get list of relevant/ aggregated collections
-		$Blog = & $BlogCache->get_by_ID( $blog_ids );
-		$where_cat_clause = trim( $Blog->get_sql_where_aggregate_coll_IDs( 'cat_blog_ID' ) );
+    if ($blog_ids == '*') { // All collections
+        $where_cat_clause = '1';
+    } elseif (is_array($blog_ids)) { // Get quoted ID list
+        $where_cat_clause = 'cat_blog_ID IN ( ' . $DB->quote($blog_ids) . ' )';
+    } else { // Get list of relevant/ aggregated collections
+        $Blog = &$BlogCache->get_by_ID($blog_ids);
+        $where_cat_clause = trim($Blog->get_sql_where_aggregate_coll_IDs('cat_blog_ID'));
 
-		if( $Blog->get_setting( 'aggregate_coll_IDs' ) == '*' )
-		{
-			$blog_ids = '*';
-		}
-	}
+        if ($Blog->get_setting('aggregate_coll_IDs') == '*') {
+            $blog_ids = '*';
+        }
+    }
 
-	// Build query to get the tags:
-	$tags_SQL = new SQL( 'Get tags' );
+    // Build query to get the tags:
+    $tags_SQL = new SQL('Get tags');
 
-	if( $blog_ids != '*' || $get_cat_blog_ID )
-	{
-		$tags_SQL->SELECT( 'tag_name, COUNT( DISTINCT itag_itm_ID ) AS tag_count, tag_ID, cat_blog_ID' );
-	}
-	else
-	{
-		$tags_SQL->SELECT( 'tag_name, COUNT( DISTINCT itag_itm_ID ) AS tag_count, tag_ID' );
-	}
+    if ($blog_ids != '*' || $get_cat_blog_ID) {
+        $tags_SQL->SELECT('tag_name, COUNT( DISTINCT itag_itm_ID ) AS tag_count, tag_ID, cat_blog_ID');
+    } else {
+        $tags_SQL->SELECT('tag_name, COUNT( DISTINCT itag_itm_ID ) AS tag_count, tag_ID');
+    }
 
-	$tags_SQL->FROM( 'T_items__tag' );
-	$tags_SQL->FROM_add( 'INNER JOIN T_items__itemtag ON itag_tag_ID = tag_ID' );
-	$tags_SQL->FROM_add( 'INNER JOIN T_items__item ON itag_itm_ID = post_ID' );
+    $tags_SQL->FROM('T_items__tag');
+    $tags_SQL->FROM_add('INNER JOIN T_items__itemtag ON itag_tag_ID = tag_ID');
+    $tags_SQL->FROM_add('INNER JOIN T_items__item ON itag_itm_ID = post_ID');
 
-	if( $blog_ids != '*' || $get_cat_blog_ID )
-	{
-		$tags_SQL->FROM_add( 'INNER JOIN T_postcats ON itag_itm_ID = postcat_post_ID' );
-		$tags_SQL->FROM_add( 'INNER JOIN T_categories ON postcat_cat_ID = cat_ID' );
-	}
+    if ($blog_ids != '*' || $get_cat_blog_ID) {
+        $tags_SQL->FROM_add('INNER JOIN T_postcats ON itag_itm_ID = postcat_post_ID');
+        $tags_SQL->FROM_add('INNER JOIN T_categories ON postcat_cat_ID = cat_ID');
+    }
 
-	if( $skip_intro_posts )
-	{
-		$tags_SQL->FROM_add( 'LEFT JOIN T_items__type ON post_ityp_ID = ityp_ID' );
-	}
+    if ($skip_intro_posts) {
+        $tags_SQL->FROM_add('LEFT JOIN T_items__type ON post_ityp_ID = ityp_ID');
+    }
 
-	$tags_SQL->WHERE( $where_cat_clause );
-	$tags_SQL->WHERE_and( 'post_status IN ("'.implode( '", "', $post_statuses ).'")' );
-	$tags_SQL->WHERE_and( 'post_datestart < '.$DB->quote( remove_seconds( $localtimenow ) ) );
+    $tags_SQL->WHERE($where_cat_clause);
+    $tags_SQL->WHERE_and('post_status IN ("' . implode('", "', $post_statuses) . '")');
+    $tags_SQL->WHERE_and('post_datestart < ' . $DB->quote(remove_seconds($localtimenow)));
 
-	if( $skip_intro_posts )
-	{	// Skip "Intro", "Page" and other special posts:
-		$tags_SQL->WHERE_and( 'post_ityp_ID IS NULL OR ityp_usage = "post"' );
-	}
+    if ($skip_intro_posts) {	// Skip "Intro", "Page" and other special posts:
+        $tags_SQL->WHERE_and('post_ityp_ID IS NULL OR ityp_usage = "post"');
+    }
 
-	if( ! empty( $filter_list ) )
-	{ // Filter tags
-		$tags_SQL->WHERE_and( 'tag_name NOT IN ( '.$DB->quote( explode( ', ', $filter_list ) ).' )' );
-	}
+    if (! empty($filter_list)) { // Filter tags
+        $tags_SQL->WHERE_and('tag_name NOT IN ( ' . $DB->quote(explode(', ', $filter_list)) . ' )');
+    }
 
-	$tags_SQL->GROUP_BY( 'tag_name' );
+    $tags_SQL->GROUP_BY('tag_name');
 
-	$tags_SQL->ORDER_BY( 'tag_count DESC' );
+    $tags_SQL->ORDER_BY('tag_count DESC');
 
-	if( ! empty( $limit ) )
-	{ // Limit
-		$tags_SQL->LIMIT( $limit );
-	}
+    if (! empty($limit)) { // Limit
+        $tags_SQL->LIMIT($limit);
+    }
 
-	return $DB->get_results( $tags_SQL );
+    return $DB->get_results($tags_SQL);
 }
 
 
@@ -1315,18 +1170,17 @@ function get_tags( $blog_ids, $limit = 0, $filter_list = NULL, $skip_intro_posts
  * @param string get setting for 'post' or 'comment'
  * @return array front office statuses in the given blog
  */
-function get_inskin_statuses( $blog_ID, $type )
+function get_inskin_statuses($blog_ID, $type)
 {
-	if( empty( $blog_ID ) )
-	{ // When blog is not set return the default value
-		return array( 'published', 'community', 'protected', 'private', 'review' );
-	}
+    if (empty($blog_ID)) { // When blog is not set return the default value
+        return ['published', 'community', 'protected', 'private', 'review'];
+    }
 
-	$BlogCache = & get_BlogCache();
-	$Collection = $Blog = $BlogCache->get_by_ID( $blog_ID );
-	$inskin_statuses = trim( $Blog->get_setting( ( $type == 'comment' ) ? 'comment_inskin_statuses' : 'post_inskin_statuses' ) );
+    $BlogCache = &get_BlogCache();
+    $Collection = $Blog = $BlogCache->get_by_ID($blog_ID);
+    $inskin_statuses = trim($Blog->get_setting(($type == 'comment') ? 'comment_inskin_statuses' : 'post_inskin_statuses'));
 
-	return empty( $inskin_statuses ) ? array() : explode( ',', $inskin_statuses );
+    return empty($inskin_statuses) ? [] : explode(',', $inskin_statuses);
 }
 
 
@@ -1336,58 +1190,56 @@ function get_inskin_statuses( $blog_ID, $type )
  * @param string type = 'post' or 'comment'
  * @return array checklist options
  */
-function get_inskin_statuses_options( & $edited_Blog, $type )
+function get_inskin_statuses_options(&$edited_Blog, $type)
 {
-	$checklist_options = array();
-	if( $type != 'post' && $type != 'comment' )
-	{
-		return $checklist_options;
-	}
+    $checklist_options = [];
+    if ($type != 'post' && $type != 'comment') {
+        return $checklist_options;
+    }
 
-	// Get all available statuses except 'deprecated', 'trash' and 'redirected'
-	$statuses = get_visibility_statuses( '', array( 'deprecated', 'trash', 'redirected' ) );
-	$status_icons = get_visibility_statuses( 'icons', array( 'deprecated', 'trash', 'redirected' ) );
+    // Get all available statuses except 'deprecated', 'trash' and 'redirected'
+    $statuses = get_visibility_statuses('', ['deprecated', 'trash', 'redirected']);
+    $status_icons = get_visibility_statuses('icons', ['deprecated', 'trash', 'redirected']);
 
-	// Get current selected visibility statuses:
-	$inskin_statuses = $edited_Blog->get_setting( $type.'_inskin_statuses' );
+    // Get current selected visibility statuses:
+    $inskin_statuses = $edited_Blog->get_setting($type . '_inskin_statuses');
 
-	// Get max allowed visibility status:
-	$max_allowed_status = get_highest_publish_status( $type, $edited_Blog->ID, false );
+    // Get max allowed visibility status:
+    $max_allowed_status = get_highest_publish_status($type, $edited_Blog->ID, false);
 
-	$status_is_hidden = true;
-	foreach( $statuses as $status => $status_text )
-	{	// Add a checklist option for each possible front office post/comment status:
-		if( $max_allowed_status == $status )
-		{	// This is max allowed status, Then display all next statuses with
-			$status_is_hidden = false;
-		}
+    $status_is_hidden = true;
+    foreach ($statuses as $status => $status_text) {	// Add a checklist option for each possible front office post/comment status:
+        if ($max_allowed_status == $status) {	// This is max allowed status, Then display all next statuses with
+            $status_is_hidden = false;
+        }
 
-		$checklist_options[] = array(
-				$type.'_inskin_'.$status, // Field name of checkbox
-				1, // Field value
-				$status_icons[ $status ].' '.$status_text, // Text
-				( strpos( $inskin_statuses, $status ) !== false ), // Checked?
-				'', // Disabled?
-				'', // Note
-				'', // Class
-				$status_is_hidden, // Hidden field instead of checkbox?
-				array(
-					'data-toggle' => 'tooltip',
-					'data-placement' => 'top',
-					'title' => get_status_tooltip_title( $status ) )
-			);
-	}
+        $checklist_options[] = [
+            $type . '_inskin_' . $status, // Field name of checkbox
+            1, // Field value
+            $status_icons[$status] . ' ' . $status_text, // Text
+            (strpos($inskin_statuses, $status) !== false), // Checked?
+            '', // Disabled?
+            '', // Note
+            '', // Class
+            $status_is_hidden, // Hidden field instead of checkbox?
+            [
+                'data-toggle' => 'tooltip',
+                'data-placement' => 'top',
+                'title' => get_status_tooltip_title($status),
+            ],
+        ];
+    }
 
-	return $checklist_options;
+    return $checklist_options;
 }
 
 
 /**
  * Callback for array_map in get_visibility_status()
  */
-function _get_visibility_statuses_callback( $val )
+function _get_visibility_statuses_callback($val)
 {
-	return implode( " ", $val );
+    return implode(" ", $val);
 }
 
 
@@ -1400,186 +1252,174 @@ function _get_visibility_statuses_callback( $val )
  * @param integer Blog ID
  * @return array of statuses
  */
-function get_visibility_statuses( $format = '', $exclude = array('trash'), $check_perms = false, $blog_ID = NULL )
+function get_visibility_statuses($format = '', $exclude = ['trash'], $check_perms = false, $blog_ID = null)
 {
-	switch( $format )
-	{
-		case 'notes-array':
-		case 'notes-string':
-		case 'radio-options':
-			// Array notes for visibility_select()
-			$r = array(
-					'published'  => array( T_('Public'),     '('.T_('Everyone').')' ),
-					'community'  => array( T_('Community'),  '('.T_('Logged in users only').')' ),
-					'protected'  => array( T_('Members'),    '('.T_('Blog members only').')' ),
-					'review'     => array( T_('Review'),     '('.T_('Moderators only (+You)').')' ),
-					'private'    => array( T_('Private'),    '('.T_('You only').')' ),
-					'draft'      => array( T_('Draft'),      '('.T_('You only (+backoffice users)').')' ),
-					'deprecated' => array( T_('Deprecated'), '('.T_('Not published!').')' ),
-					'redirected' => array( T_('Redirected'), '(301)' ),
-					'trash'      => array( T_('Recycled'),   '' )
-				);
+    switch ($format) {
+        case 'notes-array':
+        case 'notes-string':
+        case 'radio-options':
+            // Array notes for visibility_select()
+            $r = [
+                'published' => [T_('Public'),     '(' . T_('Everyone') . ')'],
+                'community' => [T_('Community'),  '(' . T_('Logged in users only') . ')'],
+                'protected' => [T_('Members'),    '(' . T_('Blog members only') . ')'],
+                'review' => [T_('Review'),     '(' . T_('Moderators only (+You)') . ')'],
+                'private' => [T_('Private'),    '(' . T_('You only') . ')'],
+                'draft' => [T_('Draft'),      '(' . T_('You only (+backoffice users)') . ')'],
+                'deprecated' => [T_('Deprecated'), '(' . T_('Not published!') . ')'],
+                'redirected' => [T_('Redirected'), '(301)'],
+                'trash' => [T_('Recycled'),   ''],
+            ];
 
-			if( $format == 'notes-string' )
-			{	// String notes
-				$r = array_map( '_get_visibility_statuses_callback', $r );
-			}
-			break;
+            if ($format == 'notes-string') {	// String notes
+                $r = array_map('_get_visibility_statuses_callback', $r);
+            }
+            break;
 
-		case 'moderation-titles':
-			$change_status = T_('Change status to').': ';
-			$visible_by = ' ('.T_('Visible by').': ';
-			$r = array(
-					'published'  => $change_status.T_('Public').$visible_by.T_('Everyone').')',
-					'community'  => $change_status.T_('Community').$visible_by.T_('Logged in users only').')',
-					'protected'  => $change_status.T_('Members').$visible_by.T_('Blog members only').')',
-					'review'     => $change_status.T_('Review').$visible_by.T_('Moderators only (+You)').')',
-					'private'    => $change_status.T_('Private').$visible_by.T_('You only').')',
-					'draft'      => $change_status.T_('Draft').$visible_by.T_('You only (+backoffice users)').')',
-					'deprecated' => $change_status.T_('Deprecated').' ('.T_('Not published!').')',
-					'redirected' => '',
-					'trash'      => ''
-				);
-			break;
+        case 'moderation-titles':
+            $change_status = T_('Change status to') . ': ';
+            $visible_by = ' (' . T_('Visible by') . ': ';
+            $r = [
+                'published' => $change_status . T_('Public') . $visible_by . T_('Everyone') . ')',
+                'community' => $change_status . T_('Community') . $visible_by . T_('Logged in users only') . ')',
+                'protected' => $change_status . T_('Members') . $visible_by . T_('Blog members only') . ')',
+                'review' => $change_status . T_('Review') . $visible_by . T_('Moderators only (+You)') . ')',
+                'private' => $change_status . T_('Private') . $visible_by . T_('You only') . ')',
+                'draft' => $change_status . T_('Draft') . $visible_by . T_('You only (+backoffice users)') . ')',
+                'deprecated' => $change_status . T_('Deprecated') . ' (' . T_('Not published!') . ')',
+                'redirected' => '',
+                'trash' => '',
+            ];
+            break;
 
-		case 'legend-titles':
-			$r = array(
-					'published' => T_('Visible by anyone'),
-					'community' => T_('Visible by logged-in users only'),
-					'protected' => T_('Visible by members only'),
-					'review'    => T_('Waiting for moderator review'),
-					'private'   => T_('Visible by you only'),
-					'draft'     => T_('Unfinished post'),
-				);
-			break;
+        case 'legend-titles':
+            $r = [
+                'published' => T_('Visible by anyone'),
+                'community' => T_('Visible by logged-in users only'),
+                'protected' => T_('Visible by members only'),
+                'review' => T_('Waiting for moderator review'),
+                'private' => T_('Visible by you only'),
+                'draft' => T_('Unfinished post'),
+            ];
+            break;
 
-		case 'button-titles':
-			$r = array(
-					'published'  => NT_('Save as Public!'),
-					'community'  => NT_('Save for Community!'),
-					'protected'  => NT_('Save for Members!'),
-					'review'     => NT_('Save for Review!'),
-					'private'    => NT_('Save as Private!'),
-					'draft'      => NT_('Save as Draft!'),
-					'deprecated' => NT_('Save as Deprecated!'),
-					'redirected' => NT_('Save as Redirected!'),
-				);
-			break;
+        case 'button-titles':
+            $r = [
+                'published' => NT_('Save as Public!'),
+                'community' => NT_('Save for Community!'),
+                'protected' => NT_('Save for Members!'),
+                'review' => NT_('Save for Review!'),
+                'private' => NT_('Save as Private!'),
+                'draft' => NT_('Save as Draft!'),
+                'deprecated' => NT_('Save as Deprecated!'),
+                'redirected' => NT_('Save as Redirected!'),
+            ];
+            break;
 
-		case 'tooltip-titles':
-			$r = array(
-					'published'  => T_('This is visible by everyone.'),
-					'community'  => T_('This is visible by logged-in users only.'),
-					'protected'  => T_('This is visible by members only.'),
-					'review'     => T_('This is waiting for review and is visible by moderators only.'),
-					'private'    => T_('This is visible only by the owner/author of the post and collection administrators.'),
-					'draft'      => is_admin_page() ? T_('This is a draft.') : T_('This is a draft and is visible only by the owner/author of the post and collection administrators.'),
-					'deprecated' => T_('This is deprecated and visible in the Back-Office only.'),
-					'redirected' => T_('This will redirect to another page when accessed from the Front-Office.'),
-					'trash'      => T_('This is a recycled.'),
-				);
-			break;
+        case 'tooltip-titles':
+            $r = [
+                'published' => T_('This is visible by everyone.'),
+                'community' => T_('This is visible by logged-in users only.'),
+                'protected' => T_('This is visible by members only.'),
+                'review' => T_('This is waiting for review and is visible by moderators only.'),
+                'private' => T_('This is visible only by the owner/author of the post and collection administrators.'),
+                'draft' => is_admin_page() ? T_('This is a draft.') : T_('This is a draft and is visible only by the owner/author of the post and collection administrators.'),
+                'deprecated' => T_('This is deprecated and visible in the Back-Office only.'),
+                'redirected' => T_('This will redirect to another page when accessed from the Front-Office.'),
+                'trash' => T_('This is a recycled.'),
+            ];
+            break;
 
-		case 'ordered-array': // indexed array, ordered from the lowest to the highest public level
-			$r = array(
-				0 => array( 'deprecated', '', T_('Deprecate').'!', 'grey' ),
-				1 => array( 'review', T_('Open to moderators!'), T_('Restrict to moderators!'), 'magenta' ),
-				2 => array( 'protected', T_('Open to members!'), T_('Restrict to members!'), 'orange' ),
-				3 => array( 'community', T_('Open to community!'), T_('Restrict to community!'), 'blue' ),
-				4 => array( 'published', T_('Make public!'), '', 'green' )
-			);
-			return $r;
+        case 'ordered-array': // indexed array, ordered from the lowest to the highest public level
+            $r = [
+                0 => ['deprecated', '', T_('Deprecate') . '!', 'grey'],
+                1 => ['review', T_('Open to moderators!'), T_('Restrict to moderators!'), 'magenta'],
+                2 => ['protected', T_('Open to members!'), T_('Restrict to members!'), 'orange'],
+                3 => ['community', T_('Open to community!'), T_('Restrict to community!'), 'blue'],
+                4 => ['published', T_('Make public!'), '', 'green'],
+            ];
+            return $r;
 
-		case 'ordered-index': // gives each status index in the statuses ordered array
-			$r = array(
-				'trash'      => 0,
-				'redirected' => 0,
-				'deprecated' => 0,
-				'draft'      => 0,
-				'private'    => 0,
-				'review'     => 1,
-				'protected'  => 2,
-				'community'  => 3,
-				'published'  => 4,
-			);
-			break;
+        case 'ordered-index': // gives each status index in the statuses ordered array
+            $r = [
+                'trash' => 0,
+                'redirected' => 0,
+                'deprecated' => 0,
+                'draft' => 0,
+                'private' => 0,
+                'review' => 1,
+                'protected' => 2,
+                'community' => 3,
+                'published' => 4,
+            ];
+            break;
 
-		case 'moderation': // these statuses may need moderation
-			$r = array( 'community', 'protected', 'review', 'private', 'draft' );
-			return $r;
+        case 'moderation': // these statuses may need moderation
+            $r = ['community', 'protected', 'review', 'private', 'draft'];
+            return $r;
 
-		case 'icons': // colored icons
-			$r = array (
-					'published'  => '<span class="fa fa-circle status_color_published"></span>',
-					'community'  => '<span class="fa fa-circle status_color_community"></span>',
-					'protected'  => '<span class="fa fa-circle status_color_protected"></span>',
-					'review'     => '<span class="fa fa-circle status_color_review"></span>',
-					'private'    => '<span class="fa fa-circle status_color_private"></span>',
-					'draft'      => '<span class="fa fa-circle status_color_draft"></span>',
-					'deprecated' => '<span class="fa fa-circle status_color_deprecated"></span>',
-					'redirected' => '<span class="fa fa-circle status_color_redirected"></span>',
-				);
-			break;
+        case 'icons': // colored icons
+            $r = [
+                'published' => '<span class="fa fa-circle status_color_published"></span>',
+                'community' => '<span class="fa fa-circle status_color_community"></span>',
+                'protected' => '<span class="fa fa-circle status_color_protected"></span>',
+                'review' => '<span class="fa fa-circle status_color_review"></span>',
+                'private' => '<span class="fa fa-circle status_color_private"></span>',
+                'draft' => '<span class="fa fa-circle status_color_draft"></span>',
+                'deprecated' => '<span class="fa fa-circle status_color_deprecated"></span>',
+                'redirected' => '<span class="fa fa-circle status_color_redirected"></span>',
+            ];
+            break;
 
-		case 'raw':
-		default:
-			$r = array (
-					'published'  => NT_('Public'),
-					'community'  => NT_('Community'),
-					'protected'  => NT_('Members'),
-					'review'     => NT_('Review'),
-					'private'    => NT_('Private'),
-					'draft'      => NT_('Draft'),
-					'deprecated' => NT_('Deprecated'),
-					'redirected' => NT_('Redirected'),
-					'trash'      => NT_('Recycled'),
-				);
+        case 'raw':
+        default:
+            $r = [
+                'published' => NT_('Public'),
+                'community' => NT_('Community'),
+                'protected' => NT_('Members'),
+                'review' => NT_('Review'),
+                'private' => NT_('Private'),
+                'draft' => NT_('Draft'),
+                'deprecated' => NT_('Deprecated'),
+                'redirected' => NT_('Redirected'),
+                'trash' => NT_('Recycled'),
+            ];
 
-			if( $format != 'keys' && $format != 'raw' )
-			{	// Translate statuses (default format)
-				$r = array_map( 'T_', $r );
-			}
-	}
+            if ($format != 'keys' && $format != 'raw') {	// Translate statuses (default format)
+                $r = array_map('T_', $r);
+            }
+    }
 
-	if( !empty($exclude) )
-	{
-		// PHP 5.1 array_diff_key( $r, $exclude );
-		foreach( $exclude as $ex )
-		{
-			if( isset($r[$ex]) )
-			{
-				unset($r[$ex]);
-			}
-		}
-	}
+    if (! empty($exclude)) {
+        // PHP 5.1 array_diff_key( $r, $exclude );
+        foreach ($exclude as $ex) {
+            if (isset($r[$ex])) {
+                unset($r[$ex]);
+            }
+        }
+    }
 
-	if( $check_perms && ! is_null( $blog_ID ) )
-	{ // Check what status is available for current user
-		foreach( $r as $status_key => $status_title )
-		{
-			if( ! check_user_perm( 'blog_post!'.$status_key, 'create', false, $blog_ID ) )
-			{ // Unset this status from list because current user has no perms to use this status
-				unset( $r[ $status_key ] );
-			}
-		}
-	}
+    if ($check_perms && ! is_null($blog_ID)) { // Check what status is available for current user
+        foreach ($r as $status_key => $status_title) {
+            if (! check_user_perm('blog_post!' . $status_key, 'create', false, $blog_ID)) { // Unset this status from list because current user has no perms to use this status
+                unset($r[$status_key]);
+            }
+        }
+    }
 
-	if( $format == 'keys' )
-	{ // Return status keys for 'visibility_array'
-		$r = array_keys( $r );
-	}
+    if ($format == 'keys') { // Return status keys for 'visibility_array'
+        $r = array_keys($r);
+    }
 
-	if( $format == 'radio-options' )
-	{ // Return options for radio buttons
-		$radio_options = array();
-		foreach( $r as $status => $labels )
-		{
-			$radio_options[] = array( $status, $labels[0].' <span class="notes">'.$labels[1].'</span>' );
-		}
-		return $radio_options;
-	}
+    if ($format == 'radio-options') { // Return options for radio buttons
+        $radio_options = [];
+        foreach ($r as $status => $labels) {
+            $radio_options[] = [$status, $labels[0] . ' <span class="notes">' . $labels[1] . '</span>'];
+        }
+        return $radio_options;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -1593,22 +1433,20 @@ function get_visibility_statuses( $format = '', $exclude = array('trash'), $chec
  *   1 if the first status has higher public level
  *   -1 if it first status has lower public level
  */
-function compare_visibility_status( $first_status, $second_status )
+function compare_visibility_status($first_status, $second_status)
 {
-	$status_index = get_visibility_statuses( 'ordered-index', array() );
-	if( !isset( $status_index[$first_status] ) || !isset( $status_index[$second_status] ) )
-	{ // At least one of the given statuses doesn't exist
-		debug_die( 'Invalid status given to compare!' );
-	}
+    $status_index = get_visibility_statuses('ordered-index', []);
+    if (! isset($status_index[$first_status]) || ! isset($status_index[$second_status])) { // At least one of the given statuses doesn't exist
+        debug_die('Invalid status given to compare!');
+    }
 
-	$first_status_index = $status_index[$first_status];
-	$second_status_index = $status_index[$second_status];
-	if( $first_status_index == $second_status_index )
-	{ // The two status public level is equal, but note this doesn't mean that the two status must be same!
-		return 0;
-	}
+    $first_status_index = $status_index[$first_status];
+    $second_status_index = $status_index[$second_status];
+    if ($first_status_index == $second_status_index) { // The two status public level is equal, but note this doesn't mean that the two status must be same!
+        return 0;
+    }
 
-	return ( $first_status_index > $second_status_index ) ? 1 : -1;
+    return ($first_status_index > $second_status_index) ? 1 : -1;
 }
 
 
@@ -1623,90 +1461,75 @@ function compare_visibility_status( $first_status, $second_status )
  * @param object Permission object: Item or Comment
  * @return array of restricted statuses
  */
-function get_restricted_statuses( $blog_ID, $prefix, $permlevel = 'view', $allow_statuses = '', $restrict_max_allowed_status = '', $perm_target = NULL )
+function get_restricted_statuses($blog_ID, $prefix, $permlevel = 'view', $allow_statuses = '', $restrict_max_allowed_status = '', $perm_target = null)
 {
-	$result = array();
+    $result = [];
 
-	// Get max allowed visibility status:
-	$max_allowed_status = get_highest_publish_status( ( $prefix == 'blog_post!' ? 'post' : 'comment' ), $blog_ID, false, $restrict_max_allowed_status );
+    // Get max allowed visibility status:
+    $max_allowed_status = get_highest_publish_status(($prefix == 'blog_post!' ? 'post' : 'comment'), $blog_ID, false, $restrict_max_allowed_status);
 
-	if( ! is_array( $allow_statuses ) )
-	{	// Convert string to array:
-		$allow_statuses = array( $allow_statuses );
-	}
+    if (! is_array($allow_statuses)) {	// Convert string to array:
+        $allow_statuses = [$allow_statuses];
+    }
 
-	if( $prefix == 'blog_post!' && $perm_target !== NULL && $perm_target->get_type_setting( 'usage' ) == 'content-block' )
-	{	// Always allow "Public" status for Content Block:
-		$allow_statuses[] = 'published';
-	}
+    if ($prefix == 'blog_post!' && $perm_target !== null && $perm_target->get_type_setting('usage') == 'content-block') {	// Always allow "Public" status for Content Block:
+        $allow_statuses[] = 'published';
+    }
 
-	// This statuses are allowed to view/edit only for those users who may create post/comment with these statuses
-	$restricted = array( 'published', 'community', 'protected', 'review', 'private', 'draft', 'deprecated' );
-	$status_is_allowed = false;
-	foreach( $restricted as $status )
-	{
-		if( $status == $max_allowed_status )
-		{	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
-			$status_is_allowed = true;
-		}
-		if( in_array( $status, array( 'published', 'community', 'protected' ) ) )
-		{	// Keep these statuses in array only to set $status_is_allowed in order to know when we can start allow the statuses:
-			continue;
-		}
-		if( ( ! in_array( $status, $allow_statuses ) && ! $status_is_allowed ) || ! check_user_perm( $prefix.$status, 'create', false, $blog_ID ) )
-		{	// This status is not allowed
-			$result[] = $status;
-		}
-	}
+    // This statuses are allowed to view/edit only for those users who may create post/comment with these statuses
+    $restricted = ['published', 'community', 'protected', 'review', 'private', 'draft', 'deprecated'];
+    $status_is_allowed = false;
+    foreach ($restricted as $status) {
+        if ($status == $max_allowed_status) {	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
+            $status_is_allowed = true;
+        }
+        if (in_array($status, ['published', 'community', 'protected'])) {	// Keep these statuses in array only to set $status_is_allowed in order to know when we can start allow the statuses:
+            continue;
+        }
+        if ((! in_array($status, $allow_statuses) && ! $status_is_allowed) || ! check_user_perm($prefix . $status, 'create', false, $blog_ID)) {	// This status is not allowed
+            $result[] = $status;
+        }
+    }
 
-	// 'redirected' status is allowed to view/edit only in case of posts, and only if user has permission
-	if( $prefix == 'blog_comment!' ||
-	    ( $prefix == 'blog_post!' && ! check_user_perm( $prefix.'redirected', 'create', false, $blog_ID ) ) )
-	{ // not allowed
-		$result[] = 'redirected';
-	}
+    // 'redirected' status is allowed to view/edit only in case of posts, and only if user has permission
+    if ($prefix == 'blog_comment!' ||
+        ($prefix == 'blog_post!' && ! check_user_perm($prefix . 'redirected', 'create', false, $blog_ID))) { // not allowed
+        $result[] = 'redirected';
+    }
 
-	// 'trash' status is allowed only in case of comments, and only if user has a permission to delete a comment from the given collection
-	if( $prefix == 'blog_comment!' && ! ( ! empty( $perm_target ) && check_user_perm( 'comment!CURSTATUS', 'delete', false, $perm_target ) ) )
-	{ // not allowed
-		$result[] = 'trash';
-	}
+    // 'trash' status is allowed only in case of comments, and only if user has a permission to delete a comment from the given collection
+    if ($prefix == 'blog_comment!' && ! (! empty($perm_target) && check_user_perm('comment!CURSTATUS', 'delete', false, $perm_target))) { // not allowed
+        $result[] = 'trash';
+    }
 
-	// The other statuses are always allowed to view in backoffice
-	if( $permlevel != 'view' )
-	{ // in case of other then 'view' action we must check the permissions
-		$restricted = array( 'published', 'community', 'protected' );
-		$status_is_allowed = false;
-		foreach( $restricted as $status )
-		{
-			if( $status == $max_allowed_status )
-			{	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
-				$status_is_allowed = true;
-			}
-			if( ( ! in_array( $status, $allow_statuses ) && ! $status_is_allowed ) ||
-			    ! check_user_perm( $prefix.$status, 'create', false, $blog_ID ) )
-			{	// This status is not allowed
-				$result[] = $status;
-			}
-		}
-	}
+    // The other statuses are always allowed to view in backoffice
+    if ($permlevel != 'view') { // in case of other then 'view' action we must check the permissions
+        $restricted = ['published', 'community', 'protected'];
+        $status_is_allowed = false;
+        foreach ($restricted as $status) {
+            if ($status == $max_allowed_status) {	// Set this var to TRUE to make all next statuses below are allowed because it is a max allowed status:
+                $status_is_allowed = true;
+            }
+            if ((! in_array($status, $allow_statuses) && ! $status_is_allowed) ||
+                ! check_user_perm($prefix . $status, 'create', false, $blog_ID)) {	// This status is not allowed
+                $result[] = $status;
+            }
+        }
+    }
 
-	return $result;
+    return $result;
 }
 
 
-function get_status_tooltip_title( $status )
+function get_status_tooltip_title($status)
 {
-	$visibility_statuses = get_visibility_statuses( 'tooltip-titles', array() );
+    $visibility_statuses = get_visibility_statuses('tooltip-titles', []);
 
-	if( isset( $visibility_statuses[$status] ) )
-	{
-		return $visibility_statuses[$status];
-	}
-	else
-	{
-		debug_die( 'Invalid status value' );
-	}
+    if (isset($visibility_statuses[$status])) {
+        return $visibility_statuses[$status];
+    } else {
+        debug_die('Invalid status value');
+    }
 }
 
 /**
@@ -1718,67 +1541,63 @@ function get_status_tooltip_title( $status )
  * @param integer Creator user ID
  * @return boolean
  */
-function can_be_displayed_with_status( $status, $type, $blog_ID, $creator_user_ID )
+function can_be_displayed_with_status($status, $type, $blog_ID, $creator_user_ID)
 {
-	// Get statuses which are visible on front-office:
-	$show_statuses = get_inskin_statuses( $blog_ID, $type );
+    // Get statuses which are visible on front-office:
+    $show_statuses = get_inskin_statuses($blog_ID, $type);
 
-	if( ! in_array( $status, $show_statuses ) )
-	{	// This Item has a status which cannot be displayed on front-office:
-		return false;
-	}
+    if (! in_array($status, $show_statuses)) {	// This Item has a status which cannot be displayed on front-office:
+        return false;
+    }
 
-	global $current_User;
+    global $current_User;
 
-	$permname = ( $type == 'item' ? 'blog_post!' : 'blog_comment!' ).$status;
+    $permname = ($type == 'item' ? 'blog_post!' : 'blog_comment!') . $status;
 
-	switch( $status )
-	{
-		case 'published':
-			// Published items/comments are always allowed:
-			$allowed = true;
-			break;
+    switch ($status) {
+        case 'published':
+            // Published items/comments are always allowed:
+            $allowed = true;
+            break;
 
-		case 'community':
-			// It is always allowed for logged in users:
-			$allowed = is_logged_in( false );
-			break;
+        case 'community':
+            // It is always allowed for logged in users:
+            $allowed = is_logged_in(false);
+            break;
 
-		case 'protected':
-			// It is always allowed for members:
-			$allowed = check_user_perm( 'blog_ismember', 1, false, $blog_ID, false );
-			break;
+        case 'protected':
+            // It is always allowed for members:
+            $allowed = check_user_perm('blog_ismember', 1, false, $blog_ID, false);
+            break;
 
-		case 'private':
-			// It is allowed for users who has global 'editall' permission:
-			$allowed = check_user_perm( 'blogs', 'editall', false, NULL, false );
-			if( ! $allowed && check_user_perm( $permname, 'create', false, $blog_ID, false ) )
-			{	// Own private items/comments are allowed if user can create private items/comments:
-				$allowed = ( $current_User->ID == $creator_user_ID );
-			}
-			break;
+        case 'private':
+            // It is allowed for users who has global 'editall' permission:
+            $allowed = check_user_perm('blogs', 'editall', false, null, false);
+            if (! $allowed && check_user_perm($permname, 'create', false, $blog_ID, false)) {	// Own private items/comments are allowed if user can create private items/comments:
+                $allowed = ($current_User->ID == $creator_user_ID);
+            }
+            break;
 
-		case 'review':
-			// It is allowed for users who have at least 'lt' items/comments edit permission :
-			$allowed = check_user_perm( $permname, 'moderate', false, $blog_ID, false );
-			if( ! $allowed && check_user_perm( $permname, 'create', false, $blog_ID, false ) )
-			{	// Own items/comments with 'review' status are allowed if user can create items/comments with 'review' status
-				$allowed = ( $current_User->ID == $creator_user_ID );
-			}
-			break;
+        case 'review':
+            // It is allowed for users who have at least 'lt' items/comments edit permission :
+            $allowed = check_user_perm($permname, 'moderate', false, $blog_ID, false);
+            if (! $allowed && check_user_perm($permname, 'create', false, $blog_ID, false)) {	// Own items/comments with 'review' status are allowed if user can create items/comments with 'review' status
+                $allowed = ($current_User->ID == $creator_user_ID);
+            }
+            break;
 
-		case 'draft':
-			// In front-office only authors may see their own draft items/comments, but only if the have permission to create draft items/comments:
-			$allowed = ( check_user_perm( $permname, 'create', false, $blog_ID, false )
-				&& $current_User->ID == $creator_user_ID );
-			break;
+        case 'draft':
+            // In front-office only authors may see their own draft items/comments, but only if the have permission to create draft items/comments:
+            $allowed = (check_user_perm($permname, 'create', false, $blog_ID, false)
+                && $current_User->ID == $creator_user_ID);
+            break;
 
-		default:
-			// Decide the unknown item/comment statuses as not visible for front-office:
-			$allowed = false;
-	}
+        default:
+            // Decide the unknown item/comment statuses as not visible for front-office:
+            $allowed = false;
+    }
 
-	return $allowed;
+    return $allowed;
 }
 
 
@@ -1786,46 +1605,42 @@ function can_be_displayed_with_status( $status, $type, $blog_ID, $creator_user_I
  * Get Blog object from general setting
  *
  * @param string Setting name: 'default_blog_ID', 'info_blog_ID', 'login_blog_ID', 'msg_blog_ID'
- * @param object|NULL Current collection, Used for additional checking
+ * @param object|null Current collection, Used for additional checking
  * @param boolean true if function $BlogCache->get_by_ID() should die on error
  * @param boolean true if function $BlogCache->get_by_ID() should die on empty/null
  * @param boolean true to get first detected collection from DB when requested collection is not defined
- * @return object|NULL|false
+ * @return object|null|false
  */
-function & get_setting_Blog( $setting_name, $current_Blog = NULL, $halt_on_error = false, $halt_on_empty = false, $get_first = false )
+function &get_setting_Blog($setting_name, $current_Blog = null, $halt_on_error = false, $halt_on_empty = false, $get_first = false)
 {
-	global $Settings;
+    global $Settings;
 
-	$setting_Blog = false;
+    $setting_Blog = false;
 
-	if( ! isset( $Settings ) )
-	{
-		return $setting_Blog;
-	}
+    if (! isset($Settings)) {
+        return $setting_Blog;
+    }
 
-	$blog_ID = intval( $Settings->get( $setting_name ) );
-	if( $blog_ID > 0 )
-	{ // Check if blog really exists in DB
-		$BlogCache = & get_BlogCache();
-		$setting_Blog = & $BlogCache->get_by_ID( $blog_ID, $halt_on_error, $halt_on_empty );
-	}
+    $blog_ID = intval($Settings->get($setting_name));
+    if ($blog_ID > 0) { // Check if blog really exists in DB
+        $BlogCache = &get_BlogCache();
+        $setting_Blog = &$BlogCache->get_by_ID($blog_ID, $halt_on_error, $halt_on_empty);
+    }
 
-	if( $get_first && empty( $setting_Blog ) )
-	{	// Try to get first collection from DB:
-		$BlogCache = & get_BlogCache();
-		$setting_Blog = & $BlogCache->get_first();
-	}
+    if ($get_first && empty($setting_Blog)) {	// Try to get first collection from DB:
+        $BlogCache = &get_BlogCache();
+        $setting_Blog = &$BlogCache->get_first();
+    }
 
-	if( $setting_name == 'login_blog_ID' &&
-	    $current_Blog !== NULL &&
-	    $current_Blog->get( 'access_type' ) == 'absolute' &&
-	    ! empty( $setting_Blog ) &&
-	    ! url_check_same_domain( $current_Blog->gen_baseurl(), $setting_Blog->gen_baseurl() ) )
-	{	// Don't allow to use main login collection if current collection has a DIFFERENT external domain:
-		$setting_Blog = NULL;
-	}
+    if ($setting_name == 'login_blog_ID' &&
+        $current_Blog !== null &&
+        $current_Blog->get('access_type') == 'absolute' &&
+        ! empty($setting_Blog) &&
+        ! url_check_same_domain($current_Blog->gen_baseurl(), $setting_Blog->gen_baseurl())) {	// Don't allow to use main login collection if current collection has a DIFFERENT external domain:
+        $setting_Blog = null;
+    }
 
-	return $setting_Blog;
+    return $setting_Blog;
 }
 
 
@@ -1834,41 +1649,38 @@ function & get_setting_Blog( $setting_name, $current_Blog = NULL, $halt_on_error
  *
  * @param integer Blog ID
  */
-function get_coll_fav_icon( $blog_ID, $params = array() )
+function get_coll_fav_icon($blog_ID, $params = [])
 {
-	global $admin_url;
+    global $admin_url;
 
-	$params = array_merge( array(
-			'title' => '',
-			'class' => '',
-		), $params );
+    $params = array_merge([
+        'title' => '',
+        'class' => '',
+    ], $params);
 
-	$BlogCache = & get_BlogCache();
-	$edited_Blog = $BlogCache->get_by_ID( $blog_ID );
-	$is_favorite = $edited_Blog->favorite() > 0;
-	if( $is_favorite )
-	{
-		$icon = 'star_on';
-		$action = 'disable_setting';
-		$title = T_('The collection is a favorite');
-	}
-	else
-	{
-		$icon = 'star_off';
-		$action = 'enable_setting';
-		$title = T_('The collection is not a favorite');
-	}
+    $BlogCache = &get_BlogCache();
+    $edited_Blog = $BlogCache->get_by_ID($blog_ID);
+    $is_favorite = $edited_Blog->favorite() > 0;
+    if ($is_favorite) {
+        $icon = 'star_on';
+        $action = 'disable_setting';
+        $title = T_('The collection is a favorite');
+    } else {
+        $icon = 'star_off';
+        $action = 'enable_setting';
+        $title = T_('The collection is not a favorite');
+    }
 
-	return '<a class="evo_post_fav_btn" href="'.$admin_url.'?ctrl=coll_settings'
-			.'&amp;tab=general'
-			.'&amp;action='.$action
-			.'&amp;setting=fav'
-			.'&amp;blog='.$blog_ID
-			.'&amp;'.url_crumb('collection').'" '
-			.'data-coll="'.$edited_Blog->urlname.'" '
-			.'data-favorite="'.( $edited_Blog->favorite() ? '0' : '1' ).'">'
-			.get_icon( $icon, 'imgtag', $params )
-			.'</a>';
+    return '<a class="evo_post_fav_btn" href="' . $admin_url . '?ctrl=coll_settings'
+            . '&amp;tab=general'
+            . '&amp;action=' . $action
+            . '&amp;setting=fav'
+            . '&amp;blog=' . $blog_ID
+            . '&amp;' . url_crumb('collection') . '" '
+            . 'data-coll="' . $edited_Blog->urlname . '" '
+            . 'data-favorite="' . ($edited_Blog->favorite() ? '0' : '1') . '">'
+            . get_icon($icon, 'imgtag', $params)
+            . '</a>';
 }
 
 
@@ -1880,82 +1692,70 @@ function get_coll_fav_icon( $blog_ID, $params = array() )
  * @param string Separator
  * @return string
  */
-function get_blog_order( $Blog = NULL, $return = 'field', $separator = ',' )
+function get_blog_order($Blog = null, $return = 'field', $separator = ',')
 {
-	$result = '';
+    $result = '';
 
-	switch( $return )
-	{
-		case 'field':
-			// Get field for ORDERBY sql clause
-			if( empty( $Blog ) )
-			{ // Get default value if blog is not defined
-				$result = 'datestart';
-			}
-			else
-			{
-				$result = $Blog->get_setting( 'orderby' );
-				if( $Blog->get_setting( 'orderby_1' ) != '' )
-				{ // Append second order field
-					$result .= $separator.$Blog->get_setting( 'orderby_1' );
-					if( $Blog->get_setting( 'orderby_2' ) != '' )
-					{ // Append third order field
-						$result .= $separator.$Blog->get_setting( 'orderby_2' );
-					}
-				}
-			}
-			break;
+    switch ($return) {
+        case 'field':
+            // Get field for ORDERBY sql clause
+            if (empty($Blog)) { // Get default value if blog is not defined
+                $result = 'datestart';
+            } else {
+                $result = $Blog->get_setting('orderby');
+                if ($Blog->get_setting('orderby_1') != '') { // Append second order field
+                    $result .= $separator . $Blog->get_setting('orderby_1');
+                    if ($Blog->get_setting('orderby_2') != '') { // Append third order field
+                        $result .= $separator . $Blog->get_setting('orderby_2');
+                    }
+                }
+            }
+            break;
 
-		case 'dir':
-			// Get direction(ASC|DESC) for ORDERBY sql clause
-			if( empty( $Blog ) )
-			{ // Get default value if blog is not defined
-				$result = 'DESC';
-			}
-			else
-			{
-				$result = $Blog->get_setting( 'orderdir' );
-				if( $Blog->get_setting( 'orderby_1' ) != '' && $Blog->get_setting( 'orderdir_1' ) != '' )
-				{ // Append second order direction
-					$result .= $separator.$Blog->get_setting( 'orderdir_1' );
-					if( $Blog->get_setting( 'orderby_2' ) != '' && $Blog->get_setting( 'orderdir_2' ) != '' )
-					{ // Append third order direction
-						$result .= $separator.$Blog->get_setting( 'orderdir_2' );
-					}
-				}
-			}
-			break;
-	}
+        case 'dir':
+            // Get direction(ASC|DESC) for ORDERBY sql clause
+            if (empty($Blog)) { // Get default value if blog is not defined
+                $result = 'DESC';
+            } else {
+                $result = $Blog->get_setting('orderdir');
+                if ($Blog->get_setting('orderby_1') != '' && $Blog->get_setting('orderdir_1') != '') { // Append second order direction
+                    $result .= $separator . $Blog->get_setting('orderdir_1');
+                    if ($Blog->get_setting('orderby_2') != '' && $Blog->get_setting('orderdir_2') != '') { // Append third order direction
+                        $result .= $separator . $Blog->get_setting('orderdir_2');
+                    }
+                }
+            }
+            break;
+    }
 
-	return $result;
+    return $result;
 }
 
 
 /**
  * Get posts order by options for the order by select list
  *
- * @param integer|NULL Collection ID to get only enabled item types for the collection, NULL to get all item types
+ * @param integer|null Collection ID to get only enabled item types for the collection, NULL to get all item types
  * @param string the value which should be selected by default
  * @param boolean set tru to allow 'none' option, false otherwise
  * @return string HTML code of <option>s for <select>
  */
-function get_post_orderby_options( $coll_ID = NULL, $selected_value, $allow_none = false )
+function get_post_orderby_options($coll_ID = null, $selected_value, $allow_none = false)
 {
-	// Get available sort options:
-	$available_sort_options = get_available_sort_options( $coll_ID, $allow_none, true );
-	// Get general order list options from sub array:
-	$general_orderby_list = $available_sort_options['general'];
+    // Get available sort options:
+    $available_sort_options = get_available_sort_options($coll_ID, $allow_none, true);
+    // Get general order list options from sub array:
+    $general_orderby_list = $available_sort_options['general'];
 
-	// Build $option_list
-	$option_list = Form::get_select_options_string( $general_orderby_list, $selected_value, false, false );
-	if( ! empty( $available_sort_options['custom'] ) )
-	{ // There are custom fields order by options
-		$option_list .= '<optgroup label="'.T_('Custom fields').'">';
-		$option_list .= Form::get_select_options_string( $available_sort_options['custom'], $selected_value, false, false );
-		$option_list .= '</optgroup>';
-	}
+    // Build $option_list
+    $option_list = Form::get_select_options_string($general_orderby_list, $selected_value, false, false);
+    if (! empty($available_sort_options['custom'])) { // There are custom fields order by options
+        $option_list .= '<optgroup label="' . T_('Custom fields') . '">';
+        $option_list .= Form::get_select_options_string($available_sort_options['custom'], $selected_value, false, false);
+        $option_list .= '</optgroup>';
+    }
 
-	return $option_list;
+    return $option_list;
 }
 
 
@@ -1967,23 +1767,23 @@ function get_post_orderby_options( $coll_ID = NULL, $selected_value, $allow_none
  * @param string "Order direction" field name
  * @return string JavaScript
  */
-function get_post_orderby_js( $field_order_by, $field_order_dir )
+function get_post_orderby_js($field_order_by, $field_order_dir)
 {
-	return 'jQuery( document ).ready( function() { disable_selected_orderby_options(); } );
-jQuery( "select[id^='.$field_order_by.']" ).change( function() { disable_selected_orderby_options(); } );
+    return 'jQuery( document ).ready( function() { disable_selected_orderby_options(); } );
+jQuery( "select[id^=' . $field_order_by . ']" ).change( function() { disable_selected_orderby_options(); } );
 function disable_selected_orderby_options()
 {
 	// Disable/Enable second additional order field if the first was changed:
-	jQuery( "#'.$field_order_by.'_2, #'.$field_order_dir.'_2" ).prop( "disabled", jQuery( "#'.$field_order_by.'_1" ).val() == "" );
+	jQuery( "#' . $field_order_by . '_2, #' . $field_order_dir . '_2" ).prop( "disabled", jQuery( "#' . $field_order_by . '_1" ).val() == "" );
 
 	// Redisable options after some order field was changed:
-	jQuery( "select[id^='.$field_order_by.'] option" ).prop( "disabled", false );
-	jQuery( "select[id^='.$field_order_by.']" ).each( function()
+	jQuery( "select[id^=' . $field_order_by . '] option" ).prop( "disabled", false );
+	jQuery( "select[id^=' . $field_order_by . ']" ).each( function()
 	{
 		var selected = jQuery( this ).val();
 		if( selected != "" )
 		{
-			jQuery( "select[id^='.$field_order_by.'][id!=" + jQuery( this ).attr( "id" ) + "]" ).each( function()
+			jQuery( "select[id^=' . $field_order_by . '][id!=" + jQuery( this ).attr( "id" ) + "]" ).each( function()
 			{
 				jQuery( this ).find( "option[value=" + selected + "]" ).prop( "disabled", true );
 			} );
@@ -1998,90 +1798,82 @@ function disable_selected_orderby_options()
  *
  * @param array Params
  */
-function blogs_user_results_block( $params = array() )
+function blogs_user_results_block($params = [])
 {
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'edited_User'          => NULL,
-			'results_param_prefix' => 'actv_blog_',
-			'results_title'        => T_('Collections owned by the User'),
-			'results_no_text'      => T_('User does not own any blogs'),
-			'action'               => '',
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'edited_User' => null,
+        'results_param_prefix' => 'actv_blog_',
+        'results_title' => T_('Collections owned by the User'),
+        'results_no_text' => T_('User does not own any blogs'),
+        'action' => '',
+    ], $params);
 
-	if( ! check_user_perm( 'users', 'moderate' ) || ! check_user_perm( 'blogs', 'view' ) )
-	{	// Check minimum permission:
-		return;
-	}
+    if (! check_user_perm('users', 'moderate') || ! check_user_perm('blogs', 'view')) {	// Check minimum permission:
+        return;
+    }
 
-	$edited_User = $params['edited_User'];
-	if( !$edited_User )
-	{	// No defined User, probably the function is calling from AJAX request
-		$user_ID = param( 'user_ID', 'integer', 0 );
-		if( empty( $user_ID ) )
-		{	// Bad request, Exit here
-			return;
-		}
-		$UserCache = & get_UserCache();
-		if( ( $edited_User = & $UserCache->get_by_ID( $user_ID, false ) ) === false )
-		{	// Bad request, Exit here
-			return;
-		}
-	}
+    $edited_User = $params['edited_User'];
+    if (! $edited_User) {	// No defined User, probably the function is calling from AJAX request
+        $user_ID = param('user_ID', 'integer', 0);
+        if (empty($user_ID)) {	// Bad request, Exit here
+            return;
+        }
+        $UserCache = &get_UserCache();
+        if (($edited_User = &$UserCache->get_by_ID($user_ID, false)) === false) {	// Bad request, Exit here
+            return;
+        }
+    }
 
-	global $DB, $AdminUI;
+    global $DB, $AdminUI;
 
-	param( 'user_tab', 'string', '', true );
-	param( 'user_ID', 'integer', 0, true );
+    param('user_tab', 'string', '', true);
+    param('user_ID', 'integer', 0, true);
 
-	$SQL = new SQL();
-	$SQL->SELECT( '*, cset_value AS collection_logo_file_ID' );
-	$SQL->FROM( 'T_blogs' );
-	$SQL->FROM_add( 'LEFT JOIN T_coll_settings ON blog_ID = cset_coll_ID AND cset_name = "collection_logo_file_ID"' );
-	$SQL->WHERE( 'blog_owner_user_ID = '.$DB->quote( $edited_User->ID ) );
+    $SQL = new SQL();
+    $SQL->SELECT('*, cset_value AS collection_logo_file_ID');
+    $SQL->FROM('T_blogs');
+    $SQL->FROM_add('LEFT JOIN T_coll_settings ON blog_ID = cset_coll_ID AND cset_name = "collection_logo_file_ID"');
+    $SQL->WHERE('blog_owner_user_ID = ' . $DB->quote($edited_User->ID));
 
-	// Create result set:
-	$blogs_Results = new Results( $SQL->get(), $params['results_param_prefix'] );
-	$blogs_Results->Cache = & get_BlogCache();
-	$blogs_Results->title = $params['results_title'];
-	$blogs_Results->no_results_text = $params['results_no_text'];
+    // Create result set:
+    $blogs_Results = new Results($SQL->get(), $params['results_param_prefix']);
+    $blogs_Results->Cache = &get_BlogCache();
+    $blogs_Results->title = $params['results_title'];
+    $blogs_Results->no_results_text = $params['results_no_text'];
 
-	// Get a count of the blogs which current user can delete
-	$deleted_blogs_count = count( $edited_User->get_deleted_blogs() );
-	if( $params['action'] != 'view' && $blogs_Results->get_total_rows() > 0 && $deleted_blogs_count > 0 )
-	{	// Display action icon to delete all records if at least one record exists & user can delete at least one blog
-		$blogs_Results->global_icon( sprintf( T_('Delete all blogs owned by %s'), $edited_User->login ), 'delete', '?ctrl=user&amp;user_tab=activity&amp;action=delete_all_blogs&amp;user_ID='.$edited_User->ID.'&amp;'.url_crumb('user'), ' '.T_('Delete all'), 3, 4 );
-	}
+    // Get a count of the blogs which current user can delete
+    $deleted_blogs_count = count($edited_User->get_deleted_blogs());
+    if ($params['action'] != 'view' && $blogs_Results->get_total_rows() > 0 && $deleted_blogs_count > 0) {	// Display action icon to delete all records if at least one record exists & user can delete at least one blog
+        $blogs_Results->global_icon(sprintf(T_('Delete all blogs owned by %s'), $edited_User->login), 'delete', '?ctrl=user&amp;user_tab=activity&amp;action=delete_all_blogs&amp;user_ID=' . $edited_User->ID . '&amp;' . url_crumb('user'), ' ' . T_('Delete all'), 3, 4);
+    }
 
-	// Initialize Results object
-	blogs_results( $blogs_Results, array(
-			'display_type'    => false,
-			'display_owner'   => false,
-			'display_plist'   => false,
-			'display_order'   => false,
-			'display_caching' => false,
-			'display_fav'     => false,
-		) );
+    // Initialize Results object
+    blogs_results($blogs_Results, [
+        'display_type' => false,
+        'display_owner' => false,
+        'display_plist' => false,
+        'display_order' => false,
+        'display_caching' => false,
+        'display_fav' => false,
+    ]);
 
-	if( is_ajax_content() )
-	{	// init results param by template name
-		if( !isset( $params[ 'skin_type' ] ) || ! isset( $params[ 'skin_name' ] ) )
-		{
-			debug_die( 'Invalid ajax results request!' );
-		}
-		$blogs_Results->init_params_by_skin( $params[ 'skin_type' ], $params[ 'skin_name' ] );
-	}
+    if (is_ajax_content()) {	// init results param by template name
+        if (! isset($params['skin_type']) || ! isset($params['skin_name'])) {
+            debug_die('Invalid ajax results request!');
+        }
+        $blogs_Results->init_params_by_skin($params['skin_type'], $params['skin_name']);
+    }
 
-	$results_params = $AdminUI->get_template( 'Results' );
-	$display_params = array(
-		'before' => str_replace( '>', ' style="margin-top:25px" id="owned_blogs_result">', $results_params['before'] ),
-	);
-	$blogs_Results->display( $display_params );
+    $results_params = $AdminUI->get_template('Results');
+    $display_params = [
+        'before' => str_replace('>', ' style="margin-top:25px" id="owned_blogs_result">', $results_params['before']),
+    ];
+    $blogs_Results->display($display_params);
 
-	if( !is_ajax_content() )
-	{	// Create this hidden div to get a function name for AJAX request
-		echo '<div id="'.$params['results_param_prefix'].'ajax_callback" style="display:none">'.__FUNCTION__.'</div>';
-	}
+    if (! is_ajax_content()) {	// Create this hidden div to get a function name for AJAX request
+        echo '<div id="' . $params['results_param_prefix'] . 'ajax_callback" style="display:none">' . __FUNCTION__ . '</div>';
+    }
 }
 
 
@@ -2090,24 +1882,25 @@ function blogs_user_results_block( $params = array() )
  *
  * @param Form
  */
-function callback_filter_collectionlist( & $Form )
+function callback_filter_collectionlist(&$Form)
 {
-	global $cf_name, $cf_owner, $cf_type;
+    global $cf_name, $cf_owner, $cf_type;
 
-	$UserCache = & get_UserCache();
-	$owner_User = & $UserCache->get_by_login( $cf_owner );
+    $UserCache = &get_UserCache();
+    $owner_User = &$UserCache->get_by_login($cf_owner);
 
-	$Form->text_input( 'cf_name', $cf_name, 40, T_('Name') );
-	$Form->username( 'cf_owner', $owner_User, T_('Owner') );
+    $Form->text_input('cf_name', $cf_name, 40, T_('Name'));
+    $Form->username('cf_owner', $owner_User, T_('Owner'));
 
-	$kinds = get_collection_kinds();
-	$collection_types = array();
-	foreach( $kinds as $kind => $value )
-	{
-		$collection_types[$kind] = $value['name'];
-	}
-	$collection_types = array_merge( array(	'' => T_('All') ), $collection_types );
-	$Form->select_input_array( 'cf_type', $cf_type, $collection_types, T_('Type') );
+    $kinds = get_collection_kinds();
+    $collection_types = [];
+    foreach ($kinds as $kind => $value) {
+        $collection_types[$kind] = $value['name'];
+    }
+    $collection_types = array_merge([
+        '' => T_('All'),
+    ], $collection_types);
+    $Form->select_input_array('cf_type', $cf_type, $collection_types, T_('Type'));
 }
 
 
@@ -2116,227 +1909,195 @@ function callback_filter_collectionlist( & $Form )
  *
  * @param array Params
  */
-function blogs_all_results_block( $params = array() )
+function blogs_all_results_block($params = [])
 {
-	global $admin_url, $DB, $Session;
-	global $cf_name, $cf_owner, $cf_type;
+    global $admin_url, $DB, $Session;
+    global $cf_name, $cf_owner, $cf_type;
 
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'results_param_prefix' => 'blog_',
-			'results_title'        => check_user_perm( 'blog_admin', 'view', false ) ? T_('List of Collections configured on this system').get_manual_link('site-collection-list') : T_('Your Collections'),
-			'results_no_text'      => T_('Create your first collection now').': '
-					.'<a href="'.$admin_url.'?ctrl=collections&amp;action=new" class="btn btn-primary btn-sm" title="'.T_('New Collection').'..."><span class="fa fa-plus-square"></span> '.T_('New Collection').'...</a>',
-			'results_no_perm_text' => ( check_user_perm( 'blogs', 'create' )
-				? T_('Create your first collection now').': '.action_icon( T_('New Collection').'...', 'new', $admin_url.'?ctrl=collections&amp;action=new', T_('New Collection').'...', 3, 4, array( 'class' => 'action_icon btn btn-primary', 'style' => 'margin:-10px 0 -7px 0' ) )
-				: T_('Sorry, you have no permission to edit/view any collection\'s properties.') ),
-			'grouped'              => true,
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'results_param_prefix' => 'blog_',
+        'results_title' => check_user_perm('blog_admin', 'view', false) ? T_('List of Collections configured on this system') . get_manual_link('site-collection-list') : T_('Your Collections'),
+        'results_no_text' => T_('Create your first collection now') . ': '
+                . '<a href="' . $admin_url . '?ctrl=collections&amp;action=new" class="btn btn-primary btn-sm" title="' . T_('New Collection') . '..."><span class="fa fa-plus-square"></span> ' . T_('New Collection') . '...</a>',
+        'results_no_perm_text' => (check_user_perm('blogs', 'create')
+            ? T_('Create your first collection now') . ': ' . action_icon(T_('New Collection') . '...', 'new', $admin_url . '?ctrl=collections&amp;action=new', T_('New Collection') . '...', 3, 4, [
+                'class' => 'action_icon btn btn-primary',
+                'style' => 'margin:-10px 0 -7px 0',
+            ])
+            : T_('Sorry, you have no permission to edit/view any collection\'s properties.')),
+        'grouped' => true,
+    ], $params);
 
-	if( !is_logged_in() )
-	{ // Only logged in users can access to this function
-		return;
-	}
+    if (! is_logged_in()) { // Only logged in users can access to this function
+        return;
+    }
 
-	global $current_User;
+    global $current_User;
 
-	$cf_name = param( 'cf_name', 'string', NULL, true );
-	$cf_owner = param( 'cf_owner', 'string', NULL, true );
-	$cf_type = param( 'cf_type', 'string', NULL, true );
+    $cf_name = param('cf_name', 'string', null, true);
+    $cf_owner = param('cf_owner', 'string', null, true);
+    $cf_type = param('cf_type', 'string', null, true);
 
-	$collection_filters = $Session->get( 'collection_filters' );
+    $collection_filters = $Session->get('collection_filters');
 
-	if( empty( $collection_filters ) )
-	{
-		$collection_filters = array();
-	}
-	if( $cf_name === NULL )
-	{ // Get a param value from Session
-		$cf_name = empty( $collection_filters['name'] ) ? '' : $collection_filters['name'];
-	}
-	else
-	{ // Save new value to Session
-		$collection_filters['name'] = $cf_name;
-	}
-	if( $cf_owner === NULL )
-	{ // Get a param value from Session
-		$cf_owner = empty( $collection_filters['owner'] ) ? '' : $collection_filters['owner'];
-	}
-	else
-	{ // Save new value to Session
-		$collection_filters['owner'] = $cf_owner;
-	}
-	if( $cf_type === NULL )
-	{ // Get a param value from Session
-		$cf_type = empty( $collection_filters['type'] ) ? '' : $collection_filters['type'];
-	}
-	else
-	{ // Save new value to Session
-		$collection_filters['type'] = $cf_type;
-	}
+    if (empty($collection_filters)) {
+        $collection_filters = [];
+    }
+    if ($cf_name === null) { // Get a param value from Session
+        $cf_name = empty($collection_filters['name']) ? '' : $collection_filters['name'];
+    } else { // Save new value to Session
+        $collection_filters['name'] = $cf_name;
+    }
+    if ($cf_owner === null) { // Get a param value from Session
+        $cf_owner = empty($collection_filters['owner']) ? '' : $collection_filters['owner'];
+    } else { // Save new value to Session
+        $collection_filters['owner'] = $cf_owner;
+    }
+    if ($cf_type === null) { // Get a param value from Session
+        $cf_type = empty($collection_filters['type']) ? '' : $collection_filters['type'];
+    } else { // Save new value to Session
+        $collection_filters['type'] = $cf_type;
+    }
 
-	foreach( $collection_filters as $cf => $collection_filter )
-	{
-		if( empty( $collection_filter ) )
-		{	// Remove empty filter:
-			unset( $collection_filters[ $cf ] );
-		}
-	}
+    foreach ($collection_filters as $cf => $collection_filter) {
+        if (empty($collection_filter)) {	// Remove empty filter:
+            unset($collection_filters[$cf]);
+        }
+    }
 
-	// Save new filters
-	$Session->set( 'collection_filters', $collection_filters );
-	$Session->dbsave();
+    // Save new filters
+    $Session->set('collection_filters', $collection_filters);
+    $Session->dbsave();
 
-	if( is_ajax_content() )
-	{
-		$order_action = param( 'order_action', 'string' );
-		$new_value = intval( param( 'new_value', 'string', 0 ) );
-		$order_data = param( 'order_data', 'string' );
+    if (is_ajax_content()) {
+        $order_action = param('order_action', 'string');
+        $new_value = intval(param('new_value', 'string', 0));
+        $order_data = param('order_data', 'string');
 
-		if( $order_action == 'update' )
-		{	// Update collection order to new value:
-			$order_obj_ID = intval( str_replace( 'order-blog-', '', $order_data ) );
-			if( $order_obj_ID > 0 )
-			{	// Update collection order if ID is valid integer:
-				$BlogCache = & get_BlogCache();
-				if( $updated_Blog = & $BlogCache->get_by_ID( $order_obj_ID, false ) )
-				{
-					if( check_user_perm( 'blog_properties', 'edit', false, $updated_Blog->ID ) )
-					{	// If current user can edit the collection:
-						$updated_Blog->set( 'order', $new_value );
-						$updated_Blog->dbupdate();
-						$BlogCache->clear();
-					}
-				}
-			}
-		}
-		elseif( $order_action == 'update_section' )
-		{	// Update section order to new value:
-			$order_obj_ID = intval( str_replace( 'order-section-', '', $order_data ) );
-			if( $order_obj_ID > 0 )
-			{	// Update collection order if ID is valid integer:
-				$SectionCache = & get_SectionCache();
-				if( $updated_Section = & $SectionCache->get_by_ID( $order_obj_ID, false ) )
-				{
-					if( check_user_perm( 'section', 'edit', false, $order_obj_ID ) )
-					{	// If current user can edit the requested section:
-						$updated_Section->set( 'order', $new_value );
-						$updated_Section->dbupdate();
-					}
-				}
-			}
-		}
-	}
+        if ($order_action == 'update') {	// Update collection order to new value:
+            $order_obj_ID = intval(str_replace('order-blog-', '', $order_data));
+            if ($order_obj_ID > 0) {	// Update collection order if ID is valid integer:
+                $BlogCache = &get_BlogCache();
+                if ($updated_Blog = &$BlogCache->get_by_ID($order_obj_ID, false)) {
+                    if (check_user_perm('blog_properties', 'edit', false, $updated_Blog->ID)) {	// If current user can edit the collection:
+                        $updated_Blog->set('order', $new_value);
+                        $updated_Blog->dbupdate();
+                        $BlogCache->clear();
+                    }
+                }
+            }
+        } elseif ($order_action == 'update_section') {	// Update section order to new value:
+            $order_obj_ID = intval(str_replace('order-section-', '', $order_data));
+            if ($order_obj_ID > 0) {	// Update collection order if ID is valid integer:
+                $SectionCache = &get_SectionCache();
+                if ($updated_Section = &$SectionCache->get_by_ID($order_obj_ID, false)) {
+                    if (check_user_perm('section', 'edit', false, $order_obj_ID)) {	// If current user can edit the requested section:
+                        $updated_Section->set('order', $new_value);
+                        $updated_Section->dbupdate();
+                    }
+                }
+            }
+        }
+    }
 
-	$SQL = new SQL();
-	$SQL->SELECT( 'DISTINCT blog_ID, T_blogs.*, user_login, IF( cufv_user_id IS NULL, 0, 1 ) AS blog_favorite, cset_value AS collection_logo_file_ID' );
-	if( $params['grouped'] )
-	{	// Get collections with groups:
-		$SQL->SELECT_add( ', sec_ID, sec_name, sec_order, sec_owner_user_ID' );
-		$SQL->FROM( 'T_section' );
-		$SQL->FROM_add( 'LEFT JOIN T_blogs ON sec_ID = blog_sec_ID' );
-		$SQL->FROM_add( 'LEFT JOIN T_users ON blog_owner_user_ID = user_ID' );
-		$SQL->GROUP_BY( 'blog_ID, sec_ID' );
-		$SQL->ORDER_BY( 'sec_order, sec_name' );
-	}
-	else
-	{	// Get collections without groups:
-		$SQL->FROM( 'T_blogs' );
-		$SQL->FROM_add( 'INNER JOIN T_users ON blog_owner_user_ID = user_ID' );
-	}
-	$SQL->FROM_add( 'LEFT JOIN T_coll_user_favs ON ( cufv_blog_ID = blog_ID AND cufv_user_ID = '.$current_User->ID.' )' );
-	$SQL->FROM_add( 'LEFT JOIN T_coll_settings ON blog_ID = cset_coll_ID AND cset_name = "collection_logo_file_ID"' );
+    $SQL = new SQL();
+    $SQL->SELECT('DISTINCT blog_ID, T_blogs.*, user_login, IF( cufv_user_id IS NULL, 0, 1 ) AS blog_favorite, cset_value AS collection_logo_file_ID');
+    if ($params['grouped']) {	// Get collections with groups:
+        $SQL->SELECT_add(', sec_ID, sec_name, sec_order, sec_owner_user_ID');
+        $SQL->FROM('T_section');
+        $SQL->FROM_add('LEFT JOIN T_blogs ON sec_ID = blog_sec_ID');
+        $SQL->FROM_add('LEFT JOIN T_users ON blog_owner_user_ID = user_ID');
+        $SQL->GROUP_BY('blog_ID, sec_ID');
+        $SQL->ORDER_BY('sec_order, sec_name');
+    } else {	// Get collections without groups:
+        $SQL->FROM('T_blogs');
+        $SQL->FROM_add('INNER JOIN T_users ON blog_owner_user_ID = user_ID');
+    }
+    $SQL->FROM_add('LEFT JOIN T_coll_user_favs ON ( cufv_blog_ID = blog_ID AND cufv_user_ID = ' . $current_User->ID . ' )');
+    $SQL->FROM_add('LEFT JOIN T_coll_settings ON blog_ID = cset_coll_ID AND cset_name = "collection_logo_file_ID"');
 
-	if( ! check_user_perm( 'blogs', 'view' ) )
-	{ // We do not have perm to view all blogs... we need to restrict to those we're a member of:
-		$SQL->FROM_add( 'LEFT JOIN T_coll_user_perms ON ( blog_advanced_perms <> 0 AND blog_ID = bloguser_blog_ID'
-			. ' AND bloguser_user_ID = ' . $current_User->ID . ' )' );
-		$SQL->FROM_add( ' LEFT JOIN T_coll_group_perms ON ( blog_advanced_perms <> 0 AND blog_ID = bloggroup_blog_ID'
-			. ' AND ( bloggroup_group_ID = ' . $current_User->grp_ID
-			. '       OR bloggroup_group_ID IN ( SELECT sug_grp_ID FROM T_users__secondary_user_groups WHERE sug_user_ID = '.$current_User->ID.' ) ) )' );
-		$section_where_sql = '';
-		$collection_where_sql = 'blog_owner_user_ID = '.$current_User->ID
-			.' OR bloguser_ismember <> 0'
-			.' OR bloggroup_ismember <> 0';
-		if( $params['grouped'] )
-		{	// Get default section of the current user group:
-			global $DB;
-			// Get all collections from sections where current user is owner:
-			$section_where_sql .= 'sec_owner_user_ID = '.$current_User->ID.' OR ';
-			// Get collections(if current user is owner or member of these collections) from sections where current user can create new collection:
-			$user_Group = & $current_User->get_Group();
-			$perm_allowed_sections = trim( $user_Group->get_setting( 'perm_allowed_sections' ) );
-			if( ! empty( $perm_allowed_sections ) )
-			{	// If at least one section is specified to be allowed for new collections:
-				$section_where_sql .= '( sec_ID IN ( '.$DB->quote( explode( ',', $perm_allowed_sections ) ).' ) '
-					.'AND ( '.$collection_where_sql.' ) ) OR ';
-			}
-		}
-		$SQL->WHERE( $section_where_sql.$collection_where_sql );
+    if (! check_user_perm('blogs', 'view')) { // We do not have perm to view all blogs... we need to restrict to those we're a member of:
+        $SQL->FROM_add('LEFT JOIN T_coll_user_perms ON ( blog_advanced_perms <> 0 AND blog_ID = bloguser_blog_ID'
+            . ' AND bloguser_user_ID = ' . $current_User->ID . ' )');
+        $SQL->FROM_add(' LEFT JOIN T_coll_group_perms ON ( blog_advanced_perms <> 0 AND blog_ID = bloggroup_blog_ID'
+            . ' AND ( bloggroup_group_ID = ' . $current_User->grp_ID
+            . '       OR bloggroup_group_ID IN ( SELECT sug_grp_ID FROM T_users__secondary_user_groups WHERE sug_user_ID = ' . $current_User->ID . ' ) ) )');
+        $section_where_sql = '';
+        $collection_where_sql = 'blog_owner_user_ID = ' . $current_User->ID
+            . ' OR bloguser_ismember <> 0'
+            . ' OR bloggroup_ismember <> 0';
+        if ($params['grouped']) {	// Get default section of the current user group:
+            global $DB;
+            // Get all collections from sections where current user is owner:
+            $section_where_sql .= 'sec_owner_user_ID = ' . $current_User->ID . ' OR ';
+            // Get collections(if current user is owner or member of these collections) from sections where current user can create new collection:
+            $user_Group = &$current_User->get_Group();
+            $perm_allowed_sections = trim($user_Group->get_setting('perm_allowed_sections'));
+            if (! empty($perm_allowed_sections)) {	// If at least one section is specified to be allowed for new collections:
+                $section_where_sql .= '( sec_ID IN ( ' . $DB->quote(explode(',', $perm_allowed_sections)) . ' ) '
+                    . 'AND ( ' . $collection_where_sql . ' ) ) OR ';
+            }
+        }
+        $SQL->WHERE($section_where_sql . $collection_where_sql);
 
-		$no_results = $params['results_no_perm_text'];
-	}
-	else
-	{
-		$no_results = $params['results_no_text'];
-	}
+        $no_results = $params['results_no_perm_text'];
+    } else {
+        $no_results = $params['results_no_text'];
+    }
 
-	if( ! empty( $cf_name ) )
-	{ // Filter by name
-		$SQL->WHERE_and( '( blog_name LIKE '.$DB->quote('%'.$cf_name.'%').' OR blog_shortname LIKE '.$DB->quote('%'.$cf_name.'%').' OR blog_urlname LIKE '.$DB->quote('%'.$cf_name.'%').' )' );
-	}
+    if (! empty($cf_name)) { // Filter by name
+        $SQL->WHERE_and('( blog_name LIKE ' . $DB->quote('%' . $cf_name . '%') . ' OR blog_shortname LIKE ' . $DB->quote('%' . $cf_name . '%') . ' OR blog_urlname LIKE ' . $DB->quote('%' . $cf_name . '%') . ' )');
+    }
 
-	if( ! empty( $cf_owner ) )
-	{
-		$SQL->WHERE_and( 'user_login = '.$DB->quote( $cf_owner ) );
-	}
+    if (! empty($cf_owner)) {
+        $SQL->WHERE_and('user_login = ' . $DB->quote($cf_owner));
+    }
 
-	if( ! empty( $cf_type ) )
-	{ // Filter by collection type
-		$SQL->WHERE_and( 'blog_type = '.$DB->quote( $cf_type ) );
-	}
+    if (! empty($cf_type)) { // Filter by collection type
+        $SQL->WHERE_and('blog_type = ' . $DB->quote($cf_type));
+    }
 
-	// Create result set:
-	$blogs_Results = new Results( $SQL->get(), $params['results_param_prefix'], '----------A' );
-	$blogs_Results->Cache = & get_BlogCache();
-	$blogs_Results->title = $params['results_title'];
-	$blogs_Results->no_results_text = $no_results;
+    // Create result set:
+    $blogs_Results = new Results($SQL->get(), $params['results_param_prefix'], '----------A');
+    $blogs_Results->Cache = &get_BlogCache();
+    $blogs_Results->title = $params['results_title'];
+    $blogs_Results->no_results_text = $no_results;
 
-	$blogs_Results->filter_area = array(
-		'callback' => 'callback_filter_collectionlist',
-		'is_filtered' => ! empty( $collection_filters ),
-		'url_ignore' => 'results_blog_page',
-	);
-	$blogs_Results->register_filter_preset( 'all', T_('All'), '?ctrl=collections&amp;cf_type=&amp;cf_name=&amp;cf_owner=' );
+    $blogs_Results->filter_area = [
+        'callback' => 'callback_filter_collectionlist',
+        'is_filtered' => ! empty($collection_filters),
+        'url_ignore' => 'results_blog_page',
+    ];
+    $blogs_Results->register_filter_preset('all', T_('All'), '?ctrl=collections&amp;cf_type=&amp;cf_name=&amp;cf_owner=');
 
-	global $admin_url;
-	if( check_user_perm( 'section', 'edit' ) )
-	{	// Display a button to create new section only if Current user has a permission for this action:
-		$blogs_Results->global_icon( T_('New Section').'...', 'new', url_add_param( $admin_url, 'ctrl=collections&amp;action=new_section' ), T_('New Section').'...', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
-	}
-	if( check_user_perm( 'blogs', 'create' ) )
-	{	// Display a button to create new collection only if Current user has a permission to create this in default section:
-		$blogs_Results->global_icon( T_('New Collection').'...', 'new', url_add_param( $admin_url, 'ctrl=collections&amp;action=new' ), T_('New Collection').'...', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
-	}
+    global $admin_url;
+    if (check_user_perm('section', 'edit')) {	// Display a button to create new section only if Current user has a permission for this action:
+        $blogs_Results->global_icon(T_('New Section') . '...', 'new', url_add_param($admin_url, 'ctrl=collections&amp;action=new_section'), T_('New Section') . '...', 3, 4, [
+            'class' => 'action_icon btn-primary',
+        ]);
+    }
+    if (check_user_perm('blogs', 'create')) {	// Display a button to create new collection only if Current user has a permission to create this in default section:
+        $blogs_Results->global_icon(T_('New Collection') . '...', 'new', url_add_param($admin_url, 'ctrl=collections&amp;action=new'), T_('New Collection') . '...', 3, 4, [
+            'class' => 'action_icon btn-primary',
+        ]);
+    }
 
-	// Initialize Results object
-	blogs_results( $blogs_Results, $params );
+    // Initialize Results object
+    blogs_results($blogs_Results, $params);
 
-	if( is_ajax_content() )
-	{ // init results param by template name
-		if( !isset( $params[ 'skin_type' ] ) || ! isset( $params[ 'skin_name' ] ) )
-		{
-			debug_die( 'Invalid ajax results request!' );
-		}
-		$blogs_Results->init_params_by_skin( $params[ 'skin_type' ], $params[ 'skin_name' ] );
-	}
+    if (is_ajax_content()) { // init results param by template name
+        if (! isset($params['skin_type']) || ! isset($params['skin_name'])) {
+            debug_die('Invalid ajax results request!');
+        }
+        $blogs_Results->init_params_by_skin($params['skin_type'], $params['skin_name']);
+    }
 
-	$blogs_Results->display( NULL, 'session' );
+    $blogs_Results->display(null, 'session');
 
-	if( !is_ajax_content() )
-	{ // Create this hidden div to get a function name for AJAX request
-		echo '<div id="'.$params['results_param_prefix'].'ajax_callback" style="display:none">'.__FUNCTION__.'</div>';
-	}
+    if (! is_ajax_content()) { // Create this hidden div to get a function name for AJAX request
+        echo '<div id="' . $params['results_param_prefix'] . 'ajax_callback" style="display:none">' . __FUNCTION__ . '</div>';
+    }
 }
 
 
@@ -2345,104 +2106,93 @@ function blogs_all_results_block( $params = array() )
  *
  * @param array Params
  */
-function blogs_model_results_block( $params = array() )
+function blogs_model_results_block($params = [])
 {
-	global $admin_url, $DB;
+    global $admin_url, $DB;
 
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'results_param_prefix' => 'template_',
-			'results_title'        => T_('Models you can use to start your own collections').get_manual_link( 'site-template-list' ),
-			'results_no_text'      => T_('No model available'),
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'results_param_prefix' => 'template_',
+        'results_title' => T_('Models you can use to start your own collections') . get_manual_link('site-template-list'),
+        'results_no_text' => T_('No model available'),
+    ], $params);
 
-	if( ! check_user_perm( 'blogs', 'create' ) )
-	{	// Only logged in users which can create new collections can access this function
-		return;
-	}
+    if (! check_user_perm('blogs', 'create')) {	// Only logged in users which can create new collections can access this function
+        return;
+    }
 
-	// Check if at least one collection exists in DB:
-	load_funcs( 'dashboard/model/_dashboard.funcs.php' );
-	if( get_table_count( 'T_blogs' ) == 0 )
-	{	// Don't display this panel if no collections:
-		return;
-	}
+    // Check if at least one collection exists in DB:
+    load_funcs('dashboard/model/_dashboard.funcs.php');
+    if (get_table_count('T_blogs') == 0) {	// Don't display this panel if no collections:
+        return;
+    }
 
-	$is_coll_admin = check_user_perm( 'blog_admin', 'editAll' );
+    $is_coll_admin = check_user_perm('blog_admin', 'editAll');
 
-	if( is_ajax_content() )
-	{
-		$order_action = param( 'order_action', 'string' );
+    if (is_ajax_content()) {
+        $order_action = param('order_action', 'string');
 
-		if( $order_action == 'update' )
-		{ // Update an order to new value
-			$new_value = ( int ) param( 'new_value', 'string', 0 );
-			$order_data = param( 'order_data', 'string' );
-			$order_obj_ID = ( int ) str_replace( 'order-blog-', '', $order_data );
-			if( $order_obj_ID > 0 )
-			{ // Update blog order
-				$BlogCache = & get_BlogCache();
-				if( $updated_Blog = & $BlogCache->get_by_ID( $order_obj_ID, false ) )
-				{
-					if( check_user_perm( 'blog_properties', 'edit', false, $updated_Blog->ID ) )
-					{ // Check permission to edit this Blog
-						$updated_Blog->set( 'order', $new_value );
-						$updated_Blog->dbupdate();
-						$BlogCache->clear();
-					}
-				}
-			}
-		}
-	}
+        if ($order_action == 'update') { // Update an order to new value
+            $new_value = (int) param('new_value', 'string', 0);
+            $order_data = param('order_data', 'string');
+            $order_obj_ID = (int) str_replace('order-blog-', '', $order_data);
+            if ($order_obj_ID > 0) { // Update blog order
+                $BlogCache = &get_BlogCache();
+                if ($updated_Blog = &$BlogCache->get_by_ID($order_obj_ID, false)) {
+                    if (check_user_perm('blog_properties', 'edit', false, $updated_Blog->ID)) { // Check permission to edit this Blog
+                        $updated_Blog->set('order', $new_value);
+                        $updated_Blog->dbupdate();
+                        $BlogCache->clear();
+                    }
+                }
+            }
+        }
+    }
 
-	$no_results = $params['results_no_text'];
+    $no_results = $params['results_no_text'];
 
-	$SQL = new SQL();
-	$SQL->SELECT( 'DISTINCT blog_ID, T_blogs.*, user_login' );
-	$SQL->FROM( 'T_blogs INNER JOIN T_users ON blog_owner_user_ID = user_ID' );
-	$SQL->FROM_add( 'INNER JOIN T_coll_settings ON blog_ID = cset_coll_ID' );
-	$SQL->WHERE( 'cset_name = "allow_duplicate" AND cset_value = 1' );
+    $SQL = new SQL();
+    $SQL->SELECT('DISTINCT blog_ID, T_blogs.*, user_login');
+    $SQL->FROM('T_blogs INNER JOIN T_users ON blog_owner_user_ID = user_ID');
+    $SQL->FROM_add('INNER JOIN T_coll_settings ON blog_ID = cset_coll_ID');
+    $SQL->WHERE('cset_name = "allow_duplicate" AND cset_value = 1');
 
-	// Create result set:
-	$blogs_Results = new Results( $SQL->get(), $params['results_param_prefix'] );
-	$blogs_Results->Cache = & get_BlogCache();
-	$blogs_Results->title = $params['results_title'];
-	$blogs_Results->no_results_text = $no_results;
+    // Create result set:
+    $blogs_Results = new Results($SQL->get(), $params['results_param_prefix']);
+    $blogs_Results->Cache = &get_BlogCache();
+    $blogs_Results->title = $params['results_title'];
+    $blogs_Results->no_results_text = $no_results;
 
-	if( check_user_perm( 'blogs', 'create' ) )
-	{
-		global $admin_url;
-		//$blogs_Results->global_icon( T_('New Collection').'...', 'new', url_add_param( $admin_url, 'ctrl=collections&amp;action=new' ), T_('New Collection').'...', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
-	}
+    if (check_user_perm('blogs', 'create')) {
+        global $admin_url;
+        //$blogs_Results->global_icon( T_('New Collection').'...', 'new', url_add_param( $admin_url, 'ctrl=collections&amp;action=new' ), T_('New Collection').'...', 3, 4, array( 'class' => 'action_icon btn-primary' ) );
+    }
 
-	// Initialize Results object
-	blogs_results( $blogs_Results, array(
-		'display_fav' => false,
-		'display_logo' => false,
-		'display_url' => $is_coll_admin,
-		'display_locale' => $is_coll_admin,
-		'display_plist' => false,
-		'display_order' => $is_coll_admin,
-		'display_caching' => false,
-		'display_actions' => false,
-		'display_model_actions' => true
-	) );
+    // Initialize Results object
+    blogs_results($blogs_Results, [
+        'display_fav' => false,
+        'display_logo' => false,
+        'display_url' => $is_coll_admin,
+        'display_locale' => $is_coll_admin,
+        'display_plist' => false,
+        'display_order' => $is_coll_admin,
+        'display_caching' => false,
+        'display_actions' => false,
+        'display_model_actions' => true,
+    ]);
 
-	if( is_ajax_content() )
-	{ // init results param by template name
-		if( !isset( $params[ 'skin_type' ] ) || ! isset( $params[ 'skin_name' ] ) )
-		{
-			debug_die( 'Invalid ajax results request!' );
-		}
-		$blogs_Results->init_params_by_skin( $params[ 'skin_type' ], $params[ 'skin_name' ] );
-	}
+    if (is_ajax_content()) { // init results param by template name
+        if (! isset($params['skin_type']) || ! isset($params['skin_name'])) {
+            debug_die('Invalid ajax results request!');
+        }
+        $blogs_Results->init_params_by_skin($params['skin_type'], $params['skin_name']);
+    }
 
-	$blogs_Results->display( NULL, 'session' );
+    $blogs_Results->display(null, 'session');
 
-	if( !is_ajax_content() )
-	{ // Create this hidden div to get a function name for AJAX request
-		echo '<div id="'.$params['results_param_prefix'].'ajax_callback" style="display:none">'.__FUNCTION__.'</div>';
-	}
+    if (! is_ajax_content()) { // Create this hidden div to get a function name for AJAX request
+        echo '<div id="' . $params['results_param_prefix'] . 'ajax_callback" style="display:none">' . __FUNCTION__ . '</div>';
+    }
 }
 
 
@@ -2452,225 +2202,207 @@ function blogs_model_results_block( $params = array() )
  * @param object Results
  * @param array Params
  */
-function blogs_results( & $blogs_Results, $params = array() )
+function blogs_results(&$blogs_Results, $params = [])
 {
-	// Make sure we are not missing any param:
-	$params = array_merge( array(
-			'display_id'       => true,
-			'display_name'     => true,
-			'display_type'     => true,
-			'display_fullname' => true,
-			'display_owner'    => true,
-			'display_url'      => true,
-			'display_locale'   => true,
-			'display_plist'    => true,
-			'display_fav'      => true,
-			'display_logo'     => true,
-			'display_order'    => true,
-			'display_caching'  => true,
-			'display_actions'  => true,
-			'display_model_actions' => false,
-			'grouped'          => false,
-		), $params );
+    // Make sure we are not missing any param:
+    $params = array_merge([
+        'display_id' => true,
+        'display_name' => true,
+        'display_type' => true,
+        'display_fullname' => true,
+        'display_owner' => true,
+        'display_url' => true,
+        'display_locale' => true,
+        'display_plist' => true,
+        'display_fav' => true,
+        'display_logo' => true,
+        'display_order' => true,
+        'display_caching' => true,
+        'display_actions' => true,
+        'display_model_actions' => false,
+        'grouped' => false,
+    ], $params);
 
-	$cols_num = 0;
+    $cols_num = 0;
 
-	if( $params['display_id'] )
-	{	// Display ID column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('ID'),
-				'order' => 'blog_ID',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '$blog_ID$',
-			);
-		$cols_num++;
-	}
+    if ($params['display_id']) {	// Display ID column:
+        $blogs_Results->cols[] = [
+            'th' => T_('ID'),
+            'order' => 'blog_ID',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '$blog_ID$',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_fav'] )
-	{	// Display Favorite column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Fav'),
-				'th_title' => T_('Favorite'),
-				'order' => 'blog_favorite',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_setting( #blog_ID#, "fav", #blog_favorite# )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_fav']) {	// Display Favorite column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Fav'),
+            'th_title' => T_('Favorite'),
+            'order' => 'blog_favorite',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_setting( #blog_ID#, "fav", #blog_favorite# )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_logo'] )
-	{	// Display collection logo:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Image'),
-				'th_title' => T_('Image'),
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_setting( #blog_ID#, "logo", #collection_logo_file_ID# )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_logo']) {	// Display collection logo:
+        $blogs_Results->cols[] = [
+            'th' => T_('Image'),
+            'th_title' => T_('Image'),
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_setting( #blog_ID#, "logo", #collection_logo_file_ID# )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_name'] )
-	{	// Display Name column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Name'),
-				'order' => 'blog_shortname',
-				'td' => '<strong>%blog_row_name( #blog_shortname#, #blog_ID# )%</strong>',
-			);
-		$cols_num++;
-	}
+    if ($params['display_name']) {	// Display Name column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Name'),
+            'order' => 'blog_shortname',
+            'td' => '<strong>%blog_row_name( #blog_shortname#, #blog_ID# )%</strong>',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_type'] )
-	{	// Display Type column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Type'),
-				'order' => 'blog_type',
-				'td' => '%blog_row_type( #blog_type#, #blog_ID# )%',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-			);
-		$cols_num++;
-	}
+    if ($params['display_type']) {	// Display Type column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Type'),
+            'order' => 'blog_type',
+            'td' => '%blog_row_type( #blog_type#, #blog_ID# )%',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_fullname'] )
-	{	// Display Full Name column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Full Name'),
-				'order' => 'blog_name',
-				'td' => '%blog_row_fullname( #blog_name#, #blog_ID# )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_fullname']) {	// Display Full Name column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Full Name'),
+            'order' => 'blog_name',
+            'td' => '%blog_row_fullname( #blog_name#, #blog_ID# )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['grouped'] )
-	{	// Display group rows:
-		$blogs_Results->group_by = 'sec_ID';
-		$blogs_Results->ID_col = 'blog_ID';
+    if ($params['grouped']) {	// Display group rows:
+        $blogs_Results->group_by = 'sec_ID';
+        $blogs_Results->ID_col = 'blog_ID';
 
-		$blogs_Results->grp_cols[] = array(
-				'td_colspan' => $cols_num,
-				'td' => '%blog_row_group_name( #sec_ID#, #sec_name# )%',
-			);
-	}
+        $blogs_Results->grp_cols[] = [
+            'td_colspan' => $cols_num,
+            'td' => '%blog_row_group_name( #sec_ID#, #sec_name# )%',
+        ];
+    }
 
-	if( $params['display_owner'] )
-	{	// Display Owner column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Owner'),
-				'order' => 'user_login',
-				'td' => '%get_user_identity_link( #user_login# )%',
-			);
-		$cols_num++;
-		if( $params['grouped'] )
-		{	// Group owner:
-			$blogs_Results->grp_cols[] = array(
-					'td' => '%get_user_identity_link( "", #sec_owner_user_ID# )%',
-				);
-			$cols_num = 0;
-		}
-	}
+    if ($params['display_owner']) {	// Display Owner column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Owner'),
+            'order' => 'user_login',
+            'td' => '%get_user_identity_link( #user_login# )%',
+        ];
+        $cols_num++;
+        if ($params['grouped']) {	// Group owner:
+            $blogs_Results->grp_cols[] = [
+                'td' => '%get_user_identity_link( "", #sec_owner_user_ID# )%',
+            ];
+            $cols_num = 0;
+        }
+    }
 
-	if( $params['display_url'] )
-	{	// Display Blog URL column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Blog URL'),
-				'td' => '<a href="@get(\'url\')@">@get(\'url\')@</a>',
-			);
-		$cols_num++;
-	}
+    if ($params['display_url']) {	// Display Blog URL column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Blog URL'),
+            'td' => '<a href="@get(\'url\')@">@get(\'url\')@</a>',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_locale'] )
-	{	// Display Locale column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Locale'),
-				'order' => 'blog_locale',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_locale( #blog_locale#, #blog_ID# )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_locale']) {	// Display Locale column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Locale'),
+            'order' => 'blog_locale',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_locale( #blog_locale#, #blog_ID# )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_plist'] )
-	{	// Display Listed column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Listed'),
-				'th_title' => T_('Public List'),
-				'order' => 'blog_in_bloglist',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_listed( #blog_in_bloglist#, #blog_ID# )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_plist']) {	// Display Listed column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Listed'),
+            'th_title' => T_('Public List'),
+            'order' => 'blog_in_bloglist',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_listed( #blog_in_bloglist#, #blog_ID# )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_order'] )
-	{	// Display Order column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Order'),
-				'order' => 'blog_order',
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_order( #blog_ID#, #blog_order# )%',
-			);
-		$cols_num++;
-		if( $params['grouped'] )
-		{	// Group order:
-			$blogs_Results->grp_cols[] = array(
-					'td_colspan' => $cols_num - 1,
-					'td' => ''
-				);
-			$blogs_Results->grp_cols[] = array(
-					'td_class' => 'shrinkwrap',
-					'td' => '%blog_row_group_order( #sec_ID#, #sec_order# )%',
-				);
-			$cols_num = 0;
-		}
-	}
+    if ($params['display_order']) {	// Display Order column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Order'),
+            'order' => 'blog_order',
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_order( #blog_ID#, #blog_order# )%',
+        ];
+        $cols_num++;
+        if ($params['grouped']) {	// Group order:
+            $blogs_Results->grp_cols[] = [
+                'td_colspan' => $cols_num - 1,
+                'td' => '',
+            ];
+            $blogs_Results->grp_cols[] = [
+                'td_class' => 'shrinkwrap',
+                'td' => '%blog_row_group_order( #sec_ID#, #sec_order# )%',
+            ];
+            $cols_num = 0;
+        }
+    }
 
-	if( $params['display_caching'] )
-	{	// Display Order column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Caching'),
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_caching( {Obj} )%',
-			);
-		$cols_num++;
-	}
+    if ($params['display_caching']) {	// Display Order column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Caching'),
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_caching( {Obj} )%',
+        ];
+        $cols_num++;
+    }
 
-	if( $params['display_actions'] )
-	{	// Display Actions column:
-		$blogs_Results->cols[] = array(
-				'th' => T_('Actions'),
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap',
-				'td' => '%blog_row_actions( {Obj}, #blog_sec_ID# )%',
-			);
-		if( $params['grouped'] )
-		{	// Group actions:
-			$blogs_Results->grp_cols[] = array(
-					'td_colspan' => $cols_num,
-					'td' => ''
-				);
-			$blogs_Results->grp_cols[] = array(
-					'td_class' => 'nowrap',
-					'td' => '%blog_row_group_actions( {row} )%',
-				);
-		}
-	}
+    if ($params['display_actions']) {	// Display Actions column:
+        $blogs_Results->cols[] = [
+            'th' => T_('Actions'),
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap',
+            'td' => '%blog_row_actions( {Obj}, #blog_sec_ID# )%',
+        ];
+        if ($params['grouped']) {	// Group actions:
+            $blogs_Results->grp_cols[] = [
+                'td_colspan' => $cols_num,
+                'td' => '',
+            ];
+            $blogs_Results->grp_cols[] = [
+                'td_class' => 'nowrap',
+                'td' => '%blog_row_group_actions( {row} )%',
+            ];
+        }
+    }
 
-	if( $params['display_model_actions'] )
-	{
-		$blogs_Results->cols[] = array(
-				'th' => T_('Actions'),
-				'th_class' => 'shrinkwrap',
-				'td_class' => 'shrinkwrap left',
-				'td' => '%model_row_actions( {Obj} )%',
-			);
-	}
+    if ($params['display_model_actions']) {
+        $blogs_Results->cols[] = [
+            'th' => T_('Actions'),
+            'th_class' => 'shrinkwrap',
+            'td_class' => 'shrinkwrap left',
+            'td' => '%model_row_actions( {Obj} )%',
+        ];
+    }
 }
 
 
@@ -2687,16 +2419,15 @@ function blogs_results( & $blogs_Results, $params = array() )
  * @param string Section name
  * @return string Section name with link to edit form if user has a permission
  */
-function blog_row_group_name( $sec_ID, $sec_name )
+function blog_row_group_name($sec_ID, $sec_name)
 {
-	global $admin_url;
+    global $admin_url;
 
-	if( check_user_perm( 'section', 'view', false, $sec_ID ) )
-	{	// If user can view the section:
-		$sec_name = '<a href="'.$admin_url.'?ctrl=collections&amp;action=edit_section&amp;sec_ID='.$sec_ID.'">'.$sec_name.'</a>';
-	}
+    if (check_user_perm('section', 'view', false, $sec_ID)) {	// If user can view the section:
+        $sec_name = '<a href="' . $admin_url . '?ctrl=collections&amp;action=edit_section&amp;sec_ID=' . $sec_ID . '">' . $sec_name . '</a>';
+    }
 
-	return '<b>'.$sec_name.'</b>';
+    return '<b>' . $sec_name . '</b>';
 }
 
 /**
@@ -2706,28 +2437,23 @@ function blog_row_group_name( $sec_ID, $sec_name )
  * @param integer Blog ID
  * @return string Link
  */
-function blog_row_name( $coll_name, $coll_ID )
+function blog_row_name($coll_name, $coll_ID)
 {
-	global $ctrl, $admin_url;
-	if( $ctrl == 'dashboard' && check_user_perm( 'blog_ismember', 'view', false, $coll_ID ) )
-	{ // Dashboard
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;tab=dashboard&amp;blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'">';
-		$r .= $coll_name;
-		$r .= '</a>';
-	}
-	elseif( check_user_perm( 'blog_properties', 'edit', false, $coll_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'" title="'.T_('Edit properties...').'">';
-		$r .= $coll_name;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $coll_name;
-	}
-	return $r;
+    global $ctrl, $admin_url;
+    if ($ctrl == 'dashboard' && check_user_perm('blog_ismember', 'view', false, $coll_ID)) { // Dashboard
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;tab=dashboard&amp;blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '">';
+        $r .= $coll_name;
+        $r .= '</a>';
+    } elseif (check_user_perm('blog_properties', 'edit', false, $coll_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '" title="' . T_('Edit properties...') . '">';
+        $r .= $coll_name;
+        $r .= '</a>';
+    } else {
+        $r = $coll_name;
+    }
+    return $r;
 }
 
 
@@ -2738,25 +2464,22 @@ function blog_row_name( $coll_name, $coll_ID )
  * @param integer Blog ID
  * @return string Link
  */
-function blog_row_fullname( $coll_fullname, $coll_ID )
+function blog_row_fullname($coll_fullname, $coll_ID)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$coll_fullname = strmaxlen( $coll_fullname, 40, NULL, 'raw' );
+    $coll_fullname = strmaxlen($coll_fullname, 40, null, 'raw');
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $coll_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;tab=general&amp;blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'" title="'.T_('Edit properties...').'">';
-		$r .= $coll_fullname;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $coll_fullname;
-	}
+    if (check_user_perm('blog_properties', 'edit', false, $coll_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;tab=general&amp;blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '" title="' . T_('Edit properties...') . '">';
+        $r .= $coll_fullname;
+        $r .= '</a>';
+    } else {
+        $r = $coll_fullname;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -2767,54 +2490,47 @@ function blog_row_fullname( $coll_fullname, $coll_ID )
  * @param integer Blog ID
  * @return string Link
  */
-function blog_row_type( $coll_type, $coll_ID )
+function blog_row_type($coll_type, $coll_ID)
 {
-	global $admin_url, $Settings;
+    global $admin_url, $Settings;
 
-	$type_titles = array(
-			'minisite' => T_('Mini-Site'),
-			'main'     => T_('Main'),
-			'std'      => T_('Blog'),
-			'photo'    => T_('Gallery'),
-			'group'    => T_('Collab'),
-			'forum'    => T_('Forum'),
-			'manual'   => T_('Manual'),
-		);
+    $type_titles = [
+        'minisite' => T_('Mini-Site'),
+        'main' => T_('Main'),
+        'std' => T_('Blog'),
+        'photo' => T_('Gallery'),
+        'group' => T_('Collab'),
+        'forum' => T_('Forum'),
+        'manual' => T_('Manual'),
+    ];
 
-	$type_title = isset( $type_titles[ $coll_type ] ) ? $type_titles[ $coll_type ] : $coll_type;
+    $type_title = isset($type_titles[$coll_type]) ? $type_titles[$coll_type] : $coll_type;
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $coll_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&tab=general&action=type&blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'" title="'.T_('Edit properties...').'">';
-		$r .= $type_title;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $type_title;
-	}
+    if (check_user_perm('blog_properties', 'edit', false, $coll_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&tab=general&action=type&blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '" title="' . T_('Edit properties...') . '">';
+        $r .= $type_title;
+        $r .= '</a>';
+    } else {
+        $r = $type_title;
+    }
 
-	// Display the icons depending on how blog is used as default
-	$r .= ' ';
-	if( $coll_ID == $Settings->get( 'default_blog_ID' ) )
-	{ // This blog is default
-		$r .= action_icon( T_('Default collection to display'), 'coll_default', $admin_url.'?ctrl=collections&amp;tab=site_settings' );
-	}
-	if( $coll_ID == $Settings->get( 'login_blog_ID' ) )
-	{ // This blog is used for login actions
-		$r .= action_icon( T_('Collection for login/registration'), 'coll_login', $admin_url.'?ctrl=collections&amp;tab=site_settings' );
-	}
-	if( $coll_ID == $Settings->get( 'msg_blog_ID' ) )
-	{ // This blog is used for messaging
-		$r .= action_icon( T_('Collection for profiles/messaging'), 'coll_message', $admin_url.'?ctrl=collections&amp;tab=site_settings' );
-	}
-	if( $coll_ID == $Settings->get( 'info_blog_ID' ) )
-	{ // This blog is used for info
-		$r .= action_icon( T_('Collection for shared content blocks'), 'coll_info', $admin_url.'?ctrl=collections&amp;tab=site_settings' );
-	}
+    // Display the icons depending on how blog is used as default
+    $r .= ' ';
+    if ($coll_ID == $Settings->get('default_blog_ID')) { // This blog is default
+        $r .= action_icon(T_('Default collection to display'), 'coll_default', $admin_url . '?ctrl=collections&amp;tab=site_settings');
+    }
+    if ($coll_ID == $Settings->get('login_blog_ID')) { // This blog is used for login actions
+        $r .= action_icon(T_('Collection for login/registration'), 'coll_login', $admin_url . '?ctrl=collections&amp;tab=site_settings');
+    }
+    if ($coll_ID == $Settings->get('msg_blog_ID')) { // This blog is used for messaging
+        $r .= action_icon(T_('Collection for profiles/messaging'), 'coll_message', $admin_url . '?ctrl=collections&amp;tab=site_settings');
+    }
+    if ($coll_ID == $Settings->get('info_blog_ID')) { // This blog is used for info
+        $r .= action_icon(T_('Collection for shared content blocks'), 'coll_info', $admin_url . '?ctrl=collections&amp;tab=site_settings');
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -2825,25 +2541,22 @@ function blog_row_type( $coll_type, $coll_ID )
  * @param integer Blog ID
  * @return string Link
  */
-function blog_row_locale( $coll_locale, $coll_ID )
+function blog_row_locale($coll_locale, $coll_ID)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$coll_locale = locale_flag( $coll_locale, NULL, NULL, NULL, false );
+    $coll_locale = locale_flag($coll_locale, null, null, null, false);
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $coll_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'" title="'.T_('Edit properties...').'">';
-		$r .= $coll_locale;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $coll_locale;
-	}
+    if (check_user_perm('blog_properties', 'edit', false, $coll_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '" title="' . T_('Edit properties...') . '">';
+        $r .= $coll_locale;
+        $r .= '</a>';
+    } else {
+        $r = $coll_locale;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -2854,22 +2567,19 @@ function blog_row_locale( $coll_locale, $coll_ID )
  * @param integer Blog order
  * @return string Link or Text
  */
-function blog_row_order( $blog_ID, $blog_order )
+function blog_row_order($blog_ID, $blog_order)
 {
-	global $admin_url;
+    global $admin_url;
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $blog_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;tab=general&amp;blog='.$blog_ID.'#blog_order';
-		$r = '<a href="'.$edit_url.'" id="order-blog-'.$blog_ID.'" style="display:block;">';
-		$r .= $blog_order;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $blog_order;
-	}
-	return $r;
+    if (check_user_perm('blog_properties', 'edit', false, $blog_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;tab=general&amp;blog=' . $blog_ID . '#blog_order';
+        $r = '<a href="' . $edit_url . '" id="order-blog-' . $blog_ID . '" style="display:block;">';
+        $r .= $blog_order;
+        $r .= '</a>';
+    } else {
+        $r = $blog_order;
+    }
+    return $r;
 }
 
 
@@ -2880,23 +2590,20 @@ function blog_row_order( $blog_ID, $blog_order )
  * @param integer Section order
  * @return string Link or Text
  */
-function blog_row_group_order( $sec_ID, $sec_order )
+function blog_row_group_order($sec_ID, $sec_order)
 {
-	global $admin_url;
+    global $admin_url;
 
-	if( check_user_perm( 'section', 'edit', false, $sec_ID ) )
-	{	// Only if current user has a permission to edit sections:
-		$edit_url = $admin_url.'?ctrl=collections&amp;action=edit_section&amp;sec_ID='.$sec_ID;
-		$r = '<a href="'.$edit_url.'" id="order-section-'.$sec_ID.'" style="display:block;">';
-		$r .= $sec_order;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $sec_order;
-	}
+    if (check_user_perm('section', 'edit', false, $sec_ID)) {	// Only if current user has a permission to edit sections:
+        $edit_url = $admin_url . '?ctrl=collections&amp;action=edit_section&amp;sec_ID=' . $sec_ID;
+        $r = '<a href="' . $edit_url . '" id="order-section-' . $sec_ID . '" style="display:block;">';
+        $r .= $sec_order;
+        $r .= '</a>';
+    } else {
+        $r = $sec_order;
+    }
 
-	return '<b>'.$r.'</b>';
+    return '<b>' . $r . '</b>';
 }
 
 
@@ -2906,60 +2613,55 @@ function blog_row_group_order( $sec_ID, $sec_order )
  * @param object Blog
  * @return string
  */
-function blog_row_caching( $Blog )
+function blog_row_caching($Blog)
 {
-	global $admin_url;
+    global $admin_url;
 
-	// Get icon and title for page caching status
-	if( $Blog->get_setting( 'cache_enabled' ) )
-	{ // Page cache is enabled
-		$page_cache_icon = 'page_cache_on';
-		$page_cache_title = T_('Page caching is on. Anonymous users may not see the latest content for 10 minutes.');
-		$page_cache_action = 'disable_setting';
-	}
-	else
-	{ // Page cache is disabled
-		$page_cache_icon = 'page_cache_off';
-		$page_cache_title = T_('Page caching is off. Server performance will not be optimal.');
-		$page_cache_action = 'enable_setting';
-	}
+    // Get icon and title for page caching status
+    if ($Blog->get_setting('cache_enabled')) { // Page cache is enabled
+        $page_cache_icon = 'page_cache_on';
+        $page_cache_title = T_('Page caching is on. Anonymous users may not see the latest content for 10 minutes.');
+        $page_cache_action = 'disable_setting';
+    } else { // Page cache is disabled
+        $page_cache_icon = 'page_cache_off';
+        $page_cache_title = T_('Page caching is off. Server performance will not be optimal.');
+        $page_cache_action = 'enable_setting';
+    }
 
-	// Get icon and title for widget/block caching status
-	if( $Blog->get_setting( 'cache_enabled_widgets' ) )
-	{ // Widget/block cache is enabled
-		$block_cache_icon = 'block_cache_on';
-		$block_cache_title = T_('Block caching is on. Some widgets may not update immediately.');
-		$block_cache_action = 'disable_setting';
-	}
-	else
-	{ // Widget/block cache is disabled
-		$block_cache_icon = 'block_cache_off';
-		$block_cache_title = T_('Block caching is off. Server performance will not be optimal.');
-		$block_cache_action = 'enable_setting';
-	}
+    // Get icon and title for widget/block caching status
+    if ($Blog->get_setting('cache_enabled_widgets')) { // Widget/block cache is enabled
+        $block_cache_icon = 'block_cache_on';
+        $block_cache_title = T_('Block caching is on. Some widgets may not update immediately.');
+        $block_cache_action = 'disable_setting';
+    } else { // Widget/block cache is disabled
+        $block_cache_icon = 'block_cache_off';
+        $block_cache_title = T_('Block caching is off. Server performance will not be optimal.');
+        $block_cache_action = 'enable_setting';
+    }
 
-	$r = '';
-	$before = '<span class="column_icon">';
-	$after = '</span>';
+    $r = '';
+    $before = '<span class="column_icon">';
+    $after = '</span>';
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $Blog->ID ) )
-	{ // User has a permission to edit blog settings
-		$toggle_url = $admin_url.'?ctrl=coll_settings'
-			.'&amp;tab=general'
-			.'&amp;action=%s'
-			.'&amp;setting=%s'
-			.'&amp;blog='.$Blog->ID
-			.'&amp;'.url_crumb( 'collection' );
-		$r .= $before.action_icon( $page_cache_title, $page_cache_icon, sprintf( $toggle_url, $page_cache_action, 'page_cache' ) ).$after;
-		$r .= $before.action_icon( $block_cache_title, $block_cache_icon, sprintf( $toggle_url, $block_cache_action, 'block_cache' ) ).$after;
-	}
-	else
-	{ // No permissions to edit
-		$r .= $before.get_icon( $page_cache_icon, 'imgtag', array( 'title' => $page_cache_title ) ).$after;
-		$r .= $before.get_icon( $block_cache_icon, 'imgtag', array( 'title' => $block_cache_title ) ).$after;
-	}
+    if (check_user_perm('blog_properties', 'edit', false, $Blog->ID)) { // User has a permission to edit blog settings
+        $toggle_url = $admin_url . '?ctrl=coll_settings'
+            . '&amp;tab=general'
+            . '&amp;action=%s'
+            . '&amp;setting=%s'
+            . '&amp;blog=' . $Blog->ID
+            . '&amp;' . url_crumb('collection');
+        $r .= $before . action_icon($page_cache_title, $page_cache_icon, sprintf($toggle_url, $page_cache_action, 'page_cache')) . $after;
+        $r .= $before . action_icon($block_cache_title, $block_cache_icon, sprintf($toggle_url, $block_cache_action, 'block_cache')) . $after;
+    } else { // No permissions to edit
+        $r .= $before . get_icon($page_cache_icon, 'imgtag', [
+            'title' => $page_cache_title,
+        ]) . $after;
+        $r .= $before . get_icon($block_cache_icon, 'imgtag', [
+            'title' => $block_cache_title,
+        ]) . $after;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -2969,42 +2671,38 @@ function blog_row_caching( $Blog )
  * @param integer Value
  * @return string Title
  */
-function blog_row_listed( $value, $coll_ID )
+function blog_row_listed($value, $coll_ID)
 {
-	global $admin_url;
+    global $admin_url;
 
-	switch( $value )
-	{
-		case 'public':
-			$title = T_('Always');
-			break;
-		case 'logged':
-			$title = T_('Logged in');
-			break;
-		case 'member':
-			$title = T_('Members');
-			break;
-		case 'never':
-			$title = T_('Never');
-			break;
-		default:
-			$title = $value;
-			break;
-	}
+    switch ($value) {
+        case 'public':
+            $title = T_('Always');
+            break;
+        case 'logged':
+            $title = T_('Logged in');
+            break;
+        case 'member':
+            $title = T_('Members');
+            break;
+        case 'never':
+            $title = T_('Never');
+            break;
+        default:
+            $title = $value;
+            break;
+    }
 
-	if( check_user_perm( 'blog_properties', 'edit', false, $coll_ID ) )
-	{ // Blog setting & can edit
-		$edit_url = $admin_url.'?ctrl=coll_settings&amp;blog='.$coll_ID;
-		$r = '<a href="'.$edit_url.'" title="'.T_('Edit properties...').'">';
-		$r .= $title;
-		$r .= '</a>';
-	}
-	else
-	{
-		$r = $title;
-	}
+    if (check_user_perm('blog_properties', 'edit', false, $coll_ID)) { // Blog setting & can edit
+        $edit_url = $admin_url . '?ctrl=coll_settings&amp;blog=' . $coll_ID;
+        $r = '<a href="' . $edit_url . '" title="' . T_('Edit properties...') . '">';
+        $r .= $title;
+        $r .= '</a>';
+    } else {
+        $r = $title;
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -3017,27 +2715,27 @@ function blog_row_listed( $value, $coll_ID )
  * @param boolean Blog setting value: 0, 1
  * @return string Icon or Link to change setting
  */
-function blog_row_setting( $blog_ID, $setting_name, $setting_value )
+function blog_row_setting($blog_ID, $setting_name, $setting_value)
 {
-	global $admin_url;
+    global $admin_url;
 
-	switch( $setting_name )
-	{
-		case 'fav':
-			return get_coll_fav_icon( $blog_ID, array( 'class' => 'coll-fav' ) );
+    switch ($setting_name) {
+        case 'fav':
+            return get_coll_fav_icon($blog_ID, [
+                'class' => 'coll-fav',
+            ]);
 
-		case 'logo':
-			$FileCache = & get_FileCache();
-			if( $image_File = & $FileCache->get_by_ID( $setting_value, false, false ) )
-			{
-				return $image_File->get_tag( '', '', '', '', 'crop-32x32', 'original', '', 'lightbox[c'.$image_File->ID.']' );
-			}
-			return;
+        case 'logo':
+            $FileCache = &get_FileCache();
+            if ($image_File = &$FileCache->get_by_ID($setting_value, false, false)) {
+                return $image_File->get_tag('', '', '', '', 'crop-32x32', 'original', '', 'lightbox[c' . $image_File->ID . ']');
+            }
+            return;
 
-		default:
-			// Incorrect setting name
-			return;
-	}
+        default:
+            // Incorrect setting name
+            return;
+    }
 }
 
 
@@ -3048,30 +2746,26 @@ function blog_row_setting( $blog_ID, $setting_name, $setting_value )
  * @param integer Section ID
  * @return string Action links
  */
-function blog_row_actions( $Blog, $sec_ID )
+function blog_row_actions($Blog, $sec_ID)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$r = '<a href="'.$Blog->get( 'url' ).'" class="action_icon btn btn-info btn-xs" title="'.T_('View this collection').'">'.T_('View').'</a>';
-	if( check_user_perm( 'blog_properties', 'edit', false, $Blog->ID ) )
-	{	// If user can edit collection properties:
-		$r .= '<a href="'.$admin_url.'?ctrl=coll_settings&amp;tab=dashboard&amp;blog='.$Blog->ID.'" class="action_icon btn btn-primary btn-xs" title="'.T_('Manage this collection...').'">'.T_('Manage').'</a>';
-	}
-	if( check_user_perm( 'blog_properties', 'copy', false, $Blog->ID ) )
-	{	// If user can copy collection properties:
-		$r .= action_icon( T_('Duplicate this collection...'), 'copy', $admin_url.'?ctrl=collections&amp;action=copy&amp;blog='.$Blog->ID );
-	}
-	if( check_user_perm( 'blog_properties', 'edit', false, $Blog->ID ) )
-	{	// If user can edit collection properties:
-			$r .= action_icon( T_('Delete this blog...'), 'delete', $admin_url.'?ctrl=collections&amp;action=delete&amp;blog='.$Blog->ID.'&amp;'.url_crumb('collection').'&amp;redirect_to='.rawurlencode( regenerate_url( '', '', '', '&' ) ) );
-	}
+    $r = '<a href="' . $Blog->get('url') . '" class="action_icon btn btn-info btn-xs" title="' . T_('View this collection') . '">' . T_('View') . '</a>';
+    if (check_user_perm('blog_properties', 'edit', false, $Blog->ID)) {	// If user can edit collection properties:
+        $r .= '<a href="' . $admin_url . '?ctrl=coll_settings&amp;tab=dashboard&amp;blog=' . $Blog->ID . '" class="action_icon btn btn-primary btn-xs" title="' . T_('Manage this collection...') . '">' . T_('Manage') . '</a>';
+    }
+    if (check_user_perm('blog_properties', 'copy', false, $Blog->ID)) {	// If user can copy collection properties:
+        $r .= action_icon(T_('Duplicate this collection...'), 'copy', $admin_url . '?ctrl=collections&amp;action=copy&amp;blog=' . $Blog->ID);
+    }
+    if (check_user_perm('blog_properties', 'edit', false, $Blog->ID)) {	// If user can edit collection properties:
+        $r .= action_icon(T_('Delete this blog...'), 'delete', $admin_url . '?ctrl=collections&amp;action=delete&amp;blog=' . $Blog->ID . '&amp;' . url_crumb('collection') . '&amp;redirect_to=' . rawurlencode(regenerate_url('', '', '', '&')));
+    }
 
-	if( empty($r) )
-	{ // for IE
-		$r = '&nbsp;';
-	}
+    if (empty($r)) { // for IE
+        $r = '&nbsp;';
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -3081,26 +2775,23 @@ function blog_row_actions( $Blog, $sec_ID )
  * @param object Row
  * @return string Action links
  */
-function blog_row_group_actions( & $row )
+function blog_row_group_actions(&$row)
 {
-	global $admin_url;
+    global $admin_url;
 
-	$r = '';
+    $r = '';
 
-	if( check_user_perm( 'section', 'edit', false, $row->sec_ID ) )
-	{	// If user can edit the section:
-		$r .= action_icon( T_('Edit this section'), 'edit', $admin_url.'?ctrl=collections&amp;action=edit_section&amp;sec_ID='.$row->sec_ID );
-	}
-	if( check_user_perm( 'blogs', 'create', false, $row->sec_ID ) )
-	{	// If user can create new collection in the section:
-		$r .= action_icon( T_('New Collection').'...', 'new', $admin_url.'?ctrl=collections&amp;action=new&amp;sec_ID='.$row->sec_ID );
-	}
-	if( $row->sec_ID != 1 && $row->blog_ID === NULL && check_user_perm( 'section', 'edit', false, $row->sec_ID ) )
-	{	// If user can delete the section(only without collections):
-		$r .= action_icon( T_('Delete this section!'), 'delete', $admin_url.'?ctrl=collections&amp;action=delete_section&amp;sec_ID='.$row->sec_ID.'&amp;'.url_crumb( 'section' ) );
-	}
+    if (check_user_perm('section', 'edit', false, $row->sec_ID)) {	// If user can edit the section:
+        $r .= action_icon(T_('Edit this section'), 'edit', $admin_url . '?ctrl=collections&amp;action=edit_section&amp;sec_ID=' . $row->sec_ID);
+    }
+    if (check_user_perm('blogs', 'create', false, $row->sec_ID)) {	// If user can create new collection in the section:
+        $r .= action_icon(T_('New Collection') . '...', 'new', $admin_url . '?ctrl=collections&amp;action=new&amp;sec_ID=' . $row->sec_ID);
+    }
+    if ($row->sec_ID != 1 && $row->blog_ID === null && check_user_perm('section', 'edit', false, $row->sec_ID)) {	// If user can delete the section(only without collections):
+        $r .= action_icon(T_('Delete this section!'), 'delete', $admin_url . '?ctrl=collections&amp;action=delete_section&amp;sec_ID=' . $row->sec_ID . '&amp;' . url_crumb('section'));
+    }
 
-	return $r;
+    return $r;
 }
 
 
@@ -3110,30 +2801,26 @@ function blog_row_group_actions( & $row )
  * @param object Blog
  * @return string Action links
  */
-function model_row_actions( $Blog )
+function model_row_actions($Blog)
 {
-	global $admin_url;
-	$r = '';
+    global $admin_url;
+    $r = '';
 
-	$r .= '<a href="'.$Blog->get( 'url' ).'" class="action_icon btn btn-info btn-xs" title="'.T_('View this collection').'">'.T_('View').'</a>';
-	$r .= '<a href="'.$admin_url.'?ctrl=collections&amp;action=copy&amp;blog='.$Blog->ID.'" class="action_icon btn btn-primary btn-xs" title="'.T_('Use this model').'">'.T_('Use this model').'</a>';
-	if( check_user_perm( 'blog_properties', 'edit', false, $Blog->ID ) )
-	{
-		$r .= action_icon( T_('Edit this collection...'), 'edit', $admin_url.'?ctrl=coll_settings&amp;tab=general&amp;blog='.$Blog->ID );
-		$r .= action_icon( T_('Delete this blog...'), 'delete', $admin_url.'?ctrl=collections&amp;action=delete&amp;blog='.$Blog->ID.'&amp;'.url_crumb('collection').'&amp;redirect_to='.rawurlencode( regenerate_url( '', '', '', '&' ) ) );
-	}
+    $r .= '<a href="' . $Blog->get('url') . '" class="action_icon btn btn-info btn-xs" title="' . T_('View this collection') . '">' . T_('View') . '</a>';
+    $r .= '<a href="' . $admin_url . '?ctrl=collections&amp;action=copy&amp;blog=' . $Blog->ID . '" class="action_icon btn btn-primary btn-xs" title="' . T_('Use this model') . '">' . T_('Use this model') . '</a>';
+    if (check_user_perm('blog_properties', 'edit', false, $Blog->ID)) {
+        $r .= action_icon(T_('Edit this collection...'), 'edit', $admin_url . '?ctrl=coll_settings&amp;tab=general&amp;blog=' . $Blog->ID);
+        $r .= action_icon(T_('Delete this blog...'), 'delete', $admin_url . '?ctrl=collections&amp;action=delete&amp;blog=' . $Blog->ID . '&amp;' . url_crumb('collection') . '&amp;redirect_to=' . rawurlencode(regenerate_url('', '', '', '&')));
+    }
 
-	if( empty($r) )
-	{ // for IE
-		$r = '&nbsp;';
-	}
+    if (empty($r)) { // for IE
+        $r = '&nbsp;';
+    }
 
-	return $r;
+    return $r;
 }
 
 /**
  * End of helper functions block to display Blogs results.
  * New ( not display helper ) functions must be created above blogs_results function
  */
-
-?>

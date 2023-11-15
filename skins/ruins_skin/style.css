@@ -1,0 +1,303 @@
+/*
+Original b2evolution template: Ruins
+design by Lori Piper
+www.piperenterprises.com/b2evo.html
+*/
+
+h1, h2, h3, h4, h5, h6, p, ol, ul, form, blockquote {
+  padding: 0;
+	margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, pre, code {
+  font-size: 1em;
+}
+
+a, a.contact_link:link, a.contact_link:visited {
+  text-decoration: none;
+	color: #399;
+}
+
+a:hover, a:active, div#footer a.contact_link:hover, div#footer a.contact_link:active {
+  text-decoration: underline;
+	color: #644b1e;
+}
+
+a img {
+  border: none;
+}
+
+body {
+  color: #775;
+	background-color: #000;
+	width: 985px;
+	border: none;
+	margin-left: auto !important;
+	margin-right: auto !important;
+	margin-top: 0px !important;
+	margin-bottom: 0px !important;
+	padding: 0px !important;
+	text-align: center;
+	font-family: papyrus, sans-serif;
+} 
+
+p {
+  padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+li {
+  list-style-type: none;
+}
+
+/*configure top menu*/
+div#header {
+  padding-top: 10px;
+}
+
+div#header li {
+  display: inline;
+}
+
+div#header a {
+  padding: 10px;
+}
+
+div#header ul {
+  float: right;
+	padding-right: 25px;
+}
+
+div.widget_core_coll_title {
+  font: 40px Papyrus, sans-serif;
+  clear: right;
+	padding-top: 150px;
+	margin-top: 0;
+  height: 60px;
+}
+ 
+div.widget_core_coll_title a:hover, div.widget_core_coll_title a:active {
+  text-decoration: none;
+}
+
+div.widget_core_coll_tagline {
+  font: 20px Papyrus, sans-serif;
+}
+
+div#nav {
+  width: 150px;
+	text-align: right;
+	padding-bottom: 40px;
+}
+
+
+/*configure basic layout with background images*/
+div.bText img {
+  background-color: #ccc;
+	border: none;
+}
+
+#skin_wrapper {
+  background: url(img/columns.jpg) repeat-y 141px 240px;
+	text-align: left;
+}
+
+#header {
+  height: 260px;
+	padding: 0;
+	margin: 0;
+  background: url(img/header.jpg) no-repeat 40px top;
+	text-align: center;
+}
+
+#contentleft {
+  float: left;
+	width: 825px;
+}
+
+#midcontent {
+  width: 150px;
+	float: left;
+	padding-left: 70px;
+	margin-left: -71px;
+	text-align: right;
+}
+
+div#midcontent>ul>li, div#sidebar>ul>li {
+  padding-bottom: 20px;
+}
+
+#contentright {
+	float: left;
+	margin-top: -100px;
+}
+
+#sidebar {
+  padding-left: 15px;
+	width: 145px;
+}
+
+div#content {
+  width: 535px;
+	float: left;
+	padding-left: 100px;
+}
+
+div.post {
+  padding-right: 44px;
+	text-align: justify;
+}
+
+div.bText {
+  font-family: sans-serif;
+	border-top: 1px solid #996;
+	padding-top: 20px;
+	padding-bottom: 80px;
+}
+
+.bMore a {
+  font: normal 1em  papyrus, sans-serif;	
+}
+
+p.bMore {
+  padding-top: 10px;
+}
+
+h2 {
+  font-size: 1.4em;
+}
+
+h2.sectionhead {
+  font-size: 1.6em;
+	padding-bottom: 40px;
+}
+
+/*configure comment form*/
+form.bComment {
+  border: none;
+	width: 445px;
+}
+/*configure comments*/
+div.bComment {
+  border: none;
+	border-bottom: 1px solid #339;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	width: 450px;
+}
+
+div.bCommentText {
+  font-family: sans-serif;
+}
+
+.feedback_section, .feedback_feed_msg, .comment_form_title {
+  width: 445px;
+} 
+
+/*move next-post anchor over to the left*/
+table.prevnext_post td.right {
+  padding-right: 45px;
+}
+
+/*hide this behind the comment box*/
+.input img {
+  height: 1px;
+	width: 1px;
+	border: 1px solid #000;
+	background-color: #000;
+}
+
+/*configure feedback message*/
+.action_messages {
+  padding-right: 45px;
+}
+
+div.moderation_msg {
+  border: none;
+	color: #930;
+}
+
+/*configure footer*/
+#footer {
+  clear: both;
+	text-align: center;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 20px;
+	padding-bottom: 10px;
+	background: url(img/footer.jpg) no-repeat 89px 45px;
+	height: 50px;
+	font: .8em sans-serif;
+}
+
+#footer p {
+  padding-left: 260px;
+	padding-right: 260px;
+}
+
+/*move edit button on about pages to the left*/
+h2.sectionhead {
+  padding-right: 35px;
+}
+
+/*configure b2evo logo*/
+div.powered_by {
+  background-color: #fff;
+	border: 2px solid #666;
+}
+
+/*move main content up & avoid overlapping background in IE6*/
+#contentleft {
+  margin-top: -100px;
+}
+
+#midcontent {
+  padding-top: 100px;
+}
+
+/*configure calendar widget*/
+#bCalendarToday {
+  background-color: #996;
+	color: #000;
+	border: 1px solid #399;
+}
+
+#bCalendarToday a {
+  color: #000;
+}
+
+table.bCalendarTable {
+  height: 100%;
+  font-size: .7em;
+	font-family: sans-serif;
+	margin-left: 5px;
+}
+
+.widget_plugin_evo_Calr {
+	margin-left: 0px;
+}
+
+
+a.contact_link:link, a.contact_link:visited {
+  text-decoration: none;
+}
+
+TD.bCalendarCell {
+  padding: 0px;
+	margin: 0px;
+	border: 0px;
+}
+
+/*shorten search field*/
+INPUT.SearchField {
+  width: 130px;
+}
+
+#skin_wrapper {
+	display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+}

@@ -11,26 +11,28 @@
  *
  * @package htsrv
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 ?>
 	</div>
 </div>
 
 <?php
-	echo '<div class="form_footer_notes">'
-			.sprintf( T_('Your IP address: %s'), $Hit->IP ).'<br />'
-			.T_('You will have to accept cookies in order to log in.')
-		.'</div>';
+    echo '<div class="form_footer_notes">'
+            . sprintf(T_('Your IP address: %s'), $Hit->IP) . '<br />'
+            . T_('You will have to accept cookies in order to log in.')
+        . '</div>';
 
-	// Please help us promote b2evolution and leave this logo on your blog:
-	powered_by( array(
-			'block_start' => '<div class="center" style="margin:1em 1em .5ex">',
-			'block_end'   => '</div>',
-			// Check /rsc/img/ for other possible images -- Don't forget to change or remove width & height too
-			'img_url'     => '$rsc$img/powered-by-b2evolution-120t.gif',
-			'img_width'   => 120,
-			'img_height'  => 32,
-		) );
+// Please help us promote b2evolution and leave this logo on your blog:
+powered_by([
+    'block_start' => '<div class="center" style="margin:1em 1em .5ex">',
+    'block_end' => '</div>',
+    // Check /rsc/img/ for other possible images -- Don't forget to change or remove width & height too
+    'img_url' => '$rsc$img/powered-by-b2evolution-120t.gif',
+    'img_width' => 120,
+    'img_height' => 32,
+]);
 ?>
 
 <p class="footer"><?php echo $app_footer_text; ?></p>

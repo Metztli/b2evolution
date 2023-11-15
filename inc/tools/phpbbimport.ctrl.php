@@ -9,32 +9,32 @@
  * @package admin
  * @author fplanque: Francois PLANQUE.
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 // Check permission:
-check_user_perm( 'admin', 'normal', true );
-check_user_perm( 'options', 'edit', true );
+check_user_perm('admin', 'normal', true);
+check_user_perm('options', 'edit', true);
 
-load_funcs( 'tools/model/_phpbb.funcs.php' );
+load_funcs('tools/model/_phpbb.funcs.php');
 
-param( 'action', 'string' );
-$phpbb_version = param( 'ver', 'integer', 2 );
-$phpbb_tool_title = ( $phpbb_version == 3 ? 'phpBB 3 Importer' : 'phpBB Importer' );
+param('action', 'string');
+$phpbb_version = param('ver', 'integer', 2);
+$phpbb_tool_title = ($phpbb_version == 3 ? 'phpBB 3 Importer' : 'phpBB Importer');
 
-if( !empty( $action ) )
-{	// Try to obtain some serious time to do some serious processing (15 minutes)
-	set_max_execution_time( 900 );
-	// Turn off the output buffering to do the correct work of the function flush()
-	@ini_set( 'output_buffering', 'off' );
+if (! empty($action)) {	// Try to obtain some serious time to do some serious processing (15 minutes)
+    set_max_execution_time(900);
+    // Turn off the output buffering to do the correct work of the function flush()
+    @ini_set('output_buffering', 'off');
 }
 
-if( param( 'forum_blog_ID', 'integer', 0 ) > 0 )
-{	// Save last import collection in Session:
-	$Session->set( 'last_import_coll_ID', get_param( 'forum_blog_ID' ) );
+if (param('forum_blog_ID', 'integer', 0) > 0) {	// Save last import collection in Session:
+    $Session->set('last_import_coll_ID', get_param('forum_blog_ID'));
 
-	// Save last used import controller in Session:
-	$Session->set( 'last_import_controller_'.get_param( 'forum_blog_ID' ), ( $phpbb_version == 3 ? 'phpbb3' : 'phpbb' ) );
+    // Save last used import controller in Session:
+    $Session->set('last_import_controller_' . get_param('forum_blog_ID'), ($phpbb_version == 3 ? 'phpbb3' : 'phpbb'));
 }
 
 /**
@@ -49,149 +49,144 @@ if( param( 'forum_blog_ID', 'integer', 0 ) > 0 )
  * 6) 'replies' -> comments
  * 7) 'messages'
  */
-$step = param( 'step', 'string', 'config' );
+$step = param('step', 'string', 'config');
 
 
 // Initialize the config variables for phpBB
 phpbb_init_config();
 
-switch( $action )
-{
-	case 'database':	// Action for Step 1
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'phpbb' );
+switch ($action) {
+    case 'database':	// Action for Step 1
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('phpbb');
 
-		$phpbb_db_host = param( 'db_host', 'string', true );
-		$phpbb_db_name = param( 'db_name', 'string', true );
-		$phpbb_db_user = param( 'db_user', 'string', true );
-		$phpbb_db_pass = param( 'db_pass', 'string', true );
-		$phpbb_db_prefix = param( 'db_prefix', 'string', '' );
-		$phpbb_path_avatars = param( 'path_avatars', 'string', '' );
-		$phpbb_path_attachments = param( 'path_attachments', 'string', '' );
+        $phpbb_db_host = param('db_host', 'string', true);
+        $phpbb_db_name = param('db_name', 'string', true);
+        $phpbb_db_user = param('db_user', 'string', true);
+        $phpbb_db_pass = param('db_pass', 'string', true);
+        $phpbb_db_prefix = param('db_prefix', 'string', '');
+        $phpbb_path_avatars = param('path_avatars', 'string', '');
+        $phpbb_path_attachments = param('path_attachments', 'string', '');
 
-		param_check_not_empty( 'db_host', 'Please enter a database host!' );
-		param_check_not_empty( 'db_name', 'Please enter a database name!' );
-		param_check_not_empty( 'db_user', 'Please enter a username!' );
-		param_check_not_empty( 'db_pass', 'Please enter a password!' );
-		param_check_not_empty( 'forum_blog_ID', 'Please select a collection!' );
+        param_check_not_empty('db_host', 'Please enter a database host!');
+        param_check_not_empty('db_name', 'Please enter a database name!');
+        param_check_not_empty('db_user', 'Please enter a username!');
+        param_check_not_empty('db_pass', 'Please enter a password!');
+        param_check_not_empty('forum_blog_ID', 'Please select a collection!');
 
-		if( param_errors_detected() )
-		{
-			break;
-		}
+        if (param_errors_detected()) {
+            break;
+        }
 
-		$phpbb_db_config = array(
-				'user'     => $phpbb_db_user,
-				'password' => $phpbb_db_pass,
-				'name'     => $phpbb_db_name,
-				'host'     => $phpbb_db_host,
-				'prefix'   => $phpbb_db_prefix,
-				'aliases'  => phpbb_tables_aliases( $phpbb_db_prefix ),
-				'use_transactions'   => $db_config['use_transactions'],
-				'table_options'      => $db_config['table_options'],
-				'connection_charset' => $DB->get_connection_charset(),		// Use same charset as main DB connection so that charsets match!
-				'halt_on_error' => false,
-				'show_errors'   => false,
-				'new_link'      => true,
+        $phpbb_db_config = [
+            'user' => $phpbb_db_user,
+            'password' => $phpbb_db_pass,
+            'name' => $phpbb_db_name,
+            'host' => $phpbb_db_host,
+            'prefix' => $phpbb_db_prefix,
+            'aliases' => phpbb_tables_aliases($phpbb_db_prefix),
+            'use_transactions' => $db_config['use_transactions'],
+            'table_options' => $db_config['table_options'],
+            'connection_charset' => $DB->get_connection_charset(),		// Use same charset as main DB connection so that charsets match!
+            'halt_on_error' => false,
+            'show_errors' => false,
+            'new_link' => true,
 
-				'log_queries' => true,
-				'debug_dump_rows' => 20,
-			);
+            'log_queries' => true,
+            'debug_dump_rows' => 20,
+        ];
 
-		// Test connect to DB:
-		$phpbb_DB = new DB( $phpbb_db_config );
-		unset( $phpbb_db_config['aliases'] );
+        // Test connect to DB:
+        $phpbb_DB = new DB($phpbb_db_config);
+        unset($phpbb_db_config['aliases']);
 
-		if( $phpbb_DB->error )
-		{
-			$Messages->add( $phpbb_DB->last_error, 'error' );
-			break;
-		}
+        if ($phpbb_DB->error) {
+            $Messages->add($phpbb_DB->last_error, 'error');
+            break;
+        }
 
-		// Save DB config of phpBB in the session
-		phpbb_set_var( 'db_config', $phpbb_db_config );
-		phpbb_set_var( 'blog_ID', $forum_blog_ID );
-		phpbb_set_var( 'path_avatars', $phpbb_path_avatars );
-		phpbb_set_var( 'path_attachments', $phpbb_path_attachments );
+        // Save DB config of phpBB in the session
+        phpbb_set_var('db_config', $phpbb_db_config);
+        phpbb_set_var('blog_ID', $forum_blog_ID);
+        phpbb_set_var('path_avatars', $phpbb_path_avatars);
+        phpbb_set_var('path_attachments', $phpbb_path_attachments);
 
-		$step = 'groups';
-		break;
+        $step = 'groups';
+        break;
 
-	case "users":	// Action for Step 2
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'phpbb' );
+    case "users":	// Action for Step 2
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('phpbb');
 
-		$phpbb_ranks = param( 'phpbb_ranks', 'array:integer', array() );
-		$phpbb_group_default = param( 'phpbb_group_default', 'integer' );
-		$phpbb_group_invalid = param( 'phpbb_group_invalid', 'integer' );
+        $phpbb_ranks = param('phpbb_ranks', 'array:integer', []);
+        $phpbb_group_default = param('phpbb_group_default', 'integer');
+        $phpbb_group_invalid = param('phpbb_group_invalid', 'integer');
 
-		param_check_not_empty( 'phpbb_group_default', 'Please select a default group!' );
+        param_check_not_empty('phpbb_group_default', 'Please select a default group!');
 
-		phpbb_set_var( 'ranks', $phpbb_ranks );
-		phpbb_set_var( 'group_default', $phpbb_group_default );
-		phpbb_set_var( 'group_invalid', $phpbb_group_invalid );
+        phpbb_set_var('ranks', $phpbb_ranks);
+        phpbb_set_var('group_default', $phpbb_group_default);
+        phpbb_set_var('group_invalid', $phpbb_group_invalid);
 
-		$phpbb_categories = param( 'phpbb_categories', 'array:integer', array() );
-		$phpbb_forums = param( 'phpbb_forums', 'array:integer', array() );
-		phpbb_set_var( 'import_categories', $phpbb_categories );
-		phpbb_set_var( 'import_forums', $phpbb_forums );
+        $phpbb_categories = param('phpbb_categories', 'array:integer', []);
+        $phpbb_forums = param('phpbb_forums', 'array:integer', []);
+        phpbb_set_var('import_categories', $phpbb_categories);
+        phpbb_set_var('import_forums', $phpbb_forums);
 
-		if( empty( $phpbb_categories ) && empty( $phpbb_forums ) )
-		{
-			$Messages->add( 'Please select at least one forum to import!' );
-		}
+        if (empty($phpbb_categories) && empty($phpbb_forums)) {
+            $Messages->add('Please select at least one forum to import!');
+        }
 
-		if( param_errors_detected() )
-		{
-			$step = 'groups';
-			break;
-		}
+        if (param_errors_detected()) {
+            $step = 'groups';
+            break;
+        }
 
-		// Set this action to complete all processes in the form
-		$flush_action = 'users';
+        // Set this action to complete all processes in the form
+        $flush_action = 'users';
 
-		$step = 'users';
-		break;
+        $step = 'users';
+        break;
 
-	case 'forums':	// Action for Step 3
-	case 'topics':	// Action for Step 4
-	case 'replies':	// Action for Step 5
-	case 'messages':	// Action for Step 6
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'phpbb' );
+    case 'forums':	// Action for Step 3
+    case 'topics':	// Action for Step 4
+    case 'replies':	// Action for Step 5
+    case 'messages':	// Action for Step 6
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('phpbb');
 
-		// Set this action to complete all processes in the form
-		$flush_action = $action;
+        // Set this action to complete all processes in the form
+        $flush_action = $action;
 
-		$step = $action;
-		break;
+        $step = $action;
+        break;
 
-	case 'finish':	// Action for last step
-		// Check that this action request is not a CSRF hacked request:
-		$Session->assert_received_crumb( 'phpbb' );
+    case 'finish':	// Action for last step
+        // Check that this action request is not a CSRF hacked request:
+        $Session->assert_received_crumb('phpbb');
 
-		$BlogCache = & get_BlogCache();
-		$Collection = $Blog = & $BlogCache->get_by_ID( phpbb_get_var( 'blog_ID' ) );
+        $BlogCache = &get_BlogCache();
+        $Collection = $Blog = &$BlogCache->get_by_ID(phpbb_get_var('blog_ID'));
 
-		phpbb_clear_temporary_data();
+        phpbb_clear_temporary_data();
 
-		// Redirect to Blog
-		header_redirect( $Blog->get( 'url' ) );
-		break;
+        // Redirect to Blog
+        header_redirect($Blog->get('url'));
+        break;
 }
 
 
 // Highlight the requested tab (if valid):
-$AdminUI->set_path( 'options', 'misc', 'import' );
+$AdminUI->set_path('options', 'misc', 'import');
 
-$AdminUI->breadcrumbpath_init( false );
-$AdminUI->breadcrumbpath_add( 'System', $admin_url.'?ctrl=system' );
-$AdminUI->breadcrumbpath_add( 'Maintenance', $admin_url.'?ctrl=tools' );
-$AdminUI->breadcrumbpath_add( 'Import', $admin_url.'?ctrl=tools&amp;tab3=import' );
-$AdminUI->breadcrumbpath_add( 'phpBB Importer', $admin_url.'?ctrl=phpbbimport' );
+$AdminUI->breadcrumbpath_init(false);
+$AdminUI->breadcrumbpath_add('System', $admin_url . '?ctrl=system');
+$AdminUI->breadcrumbpath_add('Maintenance', $admin_url . '?ctrl=tools');
+$AdminUI->breadcrumbpath_add('Import', $admin_url . '?ctrl=tools&amp;tab3=import');
+$AdminUI->breadcrumbpath_add('phpBB Importer', $admin_url . '?ctrl=phpbbimport');
 
 // Set an url for manual page:
-$AdminUI->set_page_manual_link( 'phpbb-import' );
+$AdminUI->set_page_manual_link('phpbb-import');
 
 
 // Display <html><head>...</head> section! (Note: should be done early if actions do not redirect)
@@ -203,39 +198,38 @@ $AdminUI->disp_body_top();
 // Begin payload block:
 $AdminUI->disp_payload_begin();
 
-switch( $step )
-{
-	case 'groups':	// Step 2
-		phpbb_unset_var( 'current_step' );
-		$AdminUI->disp_view( 'tools/views/_phpbb_groups.form.php' );
-		// $phpbb_DB->dump_queries();
-		break;
+switch ($step) {
+    case 'groups':	// Step 2
+        phpbb_unset_var('current_step');
+        $AdminUI->disp_view('tools/views/_phpbb_groups.form.php');
+        // $phpbb_DB->dump_queries();
+        break;
 
-	case 'users':	// Step 3
-		$AdminUI->disp_view( 'tools/views/_phpbb_users.form.php' );
-		break;
+    case 'users':	// Step 3
+        $AdminUI->disp_view('tools/views/_phpbb_users.form.php');
+        break;
 
-	case 'forums':	// Step 4
-		$AdminUI->disp_view( 'tools/views/_phpbb_forums.form.php' );
-		break;
+    case 'forums':	// Step 4
+        $AdminUI->disp_view('tools/views/_phpbb_forums.form.php');
+        break;
 
-	case 'topics':	// Step 5
-		$AdminUI->disp_view( 'tools/views/_phpbb_topics.form.php' );
-		break;
+    case 'topics':	// Step 5
+        $AdminUI->disp_view('tools/views/_phpbb_topics.form.php');
+        break;
 
-	case 'replies':	// Step 6
-		$AdminUI->disp_view( 'tools/views/_phpbb_replies.form.php' );
-		break;
+    case 'replies':	// Step 6
+        $AdminUI->disp_view('tools/views/_phpbb_replies.form.php');
+        break;
 
-	case 'messages':	// Step 7
-		$AdminUI->disp_view( 'tools/views/_phpbb_messages.form.php' );
-		break;
+    case 'messages':	// Step 7
+        $AdminUI->disp_view('tools/views/_phpbb_messages.form.php');
+        break;
 
-	case 'config':	// Step 1
-	default:
-		phpbb_unset_var( 'current_step' );
-		$AdminUI->disp_view( 'tools/views/_phpbb_config.form.php' );
-		break;
+    case 'config':	// Step 1
+    default:
+        phpbb_unset_var('current_step');
+        $AdminUI->disp_view('tools/views/_phpbb_config.form.php');
+        break;
 }
 
 
@@ -244,5 +238,3 @@ $AdminUI->disp_payload_end();
 
 // Display body bottom, debug info and close </html>:
 $AdminUI->disp_global_footer();
-
-?>

@@ -14,6 +14,7 @@ namespace GeoIp2\Model;
 class Domain extends AbstractModel
 {
     protected $domain;
+
     protected $ipAddress;
 
     /**

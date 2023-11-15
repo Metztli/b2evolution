@@ -11,33 +11,32 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-if( !isset( $display_params ) )
-{ // init display_params
-	$display_params = array();
+if (! isset($display_params)) { // init display_params
+    $display_params = [];
 }
 
 // Display the users results table:
-users_results_block( array(
-		'display_sec_groups' => true,
-		'display_params'     => $display_params,
-		'display_contact'    => false,
-		'display_email'      => true,
-		'display_automation' => true,
-		'display_btn_tags'   => true,
-		'display_btn_account_status' => true,
-		'display_btn_change_groups'  => true,
-		'display_btn_delspam'=> true,
-		'display_btn_export' => true,
-	) );
+users_results_block([
+    'display_sec_groups' => true,
+    'display_params' => $display_params,
+    'display_contact' => false,
+    'display_email' => true,
+    'display_automation' => true,
+    'display_btn_tags' => true,
+    'display_btn_account_status' => true,
+    'display_btn_change_groups' => true,
+    'display_btn_delspam' => true,
+    'display_btn_export' => true,
+]);
 
-if( is_admin_page() )
-{	// Call plugins event:
-	global $Plugins;
-	$Plugins->trigger_event( 'AdminAfterUsersList' );
+if (is_admin_page()) {	// Call plugins event:
+    global $Plugins;
+    $Plugins->trigger_event('AdminAfterUsersList');
 }
 
-load_funcs( 'users/model/_user_js.funcs.php' );
-?>
+load_funcs('users/model/_user_js.funcs.php');

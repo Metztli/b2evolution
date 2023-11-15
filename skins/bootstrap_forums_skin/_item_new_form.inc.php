@@ -11,13 +11,14 @@
  * @package evoskins
  * @subpackage bootstrap_forums_skin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-$params = array_merge( array(
-		'item_new_submit_text' => T_('Create topic'),
-	), $params );
+$params = array_merge([
+    'item_new_submit_text' => T_('Create topic'),
+], $params);
 
 // Require new item form from v5 skins with overwritten v6 params above:
-require skin_fallback_path( '_item_new_form.inc.php' );
-?>
+require skin_fallback_path('_item_new_form.inc.php');

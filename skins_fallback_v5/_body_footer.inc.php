@@ -9,7 +9,9 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 ?>
 
 <!-- =================================== START OF FOOTER =================================== -->
@@ -17,12 +19,12 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
 
 <?php
 // Display a link to contact the owner of this blog (if owner accepts messages):
-$Blog->contact_link( array(
-		'before'      => '',
-		'after'       => ' &bull; ',
-		'text'   => T_('Contact'),
-		'title'  => T_('Send a message to the owner of this blog...'),
-	) );
+$Blog->contact_link([
+    'before' => '',
+    'after' => ' &bull; ',
+    'text' => T_('Contact'),
+    'title' => T_('Send a message to the owner of this blog...'),
+]);
 ?>
 
 Powered by <a href="http://b2evolution.net/" title="b2evolution home" target="_blank">b2evolution</a>
@@ -35,13 +37,13 @@ Credits: <a href="http://skinfaktory.com/">skin makers</a>
 // Display additional credits:
 // If you can add your own credits without removing the defaults, you'll be very cool :))
 // Please leave this at the bottom of the page to make sure your blog gets listed on b2evolution.net
-credits( array(
-		'list_start'  => ' &bull; ',
-		'list_end'    => ' ',
-		'separator'   => ' &bull; ',
-		'item_start'  => ' ',
-		'item_end'    => ' ',
-	) );
+credits([
+    'list_start' => ' &bull; ',
+    'list_end' => ' ',
+    'separator' => ' &bull; ',
+    'item_start' => ' ',
+    'item_end' => ' ',
+]);
 ?>
 
 </p>
@@ -49,6 +51,6 @@ credits( array(
 <?php
 // ---------------------------- SITE FOOTER INCLUDED HERE ----------------------------
 // If site footers are enabled, they will be included here:
-siteskin_include( '_site_body_footer.inc.php' );
+siteskin_include('_site_body_footer.inc.php');
 // ------------------------------- END OF SITE FOOTER --------------------------------
 ?>

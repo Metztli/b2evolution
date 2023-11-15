@@ -12,9 +12,11 @@
  *
  * @package evocore
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
-load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
+load_class('_core/model/dataobjects/_dataobject.class.php', 'DataObject');
 
 /**
  * Filetype Class
@@ -23,350 +25,313 @@ load_class( '_core/model/dataobjects/_dataobject.class.php', 'DataObject' );
  */
 class Filetype extends DataObject
 {
-	var $extensions = '';
-	var $name = '';
-	var $mimetype = '';
-	var $icon = '';
-	var $viewtype = '';
-	var $allowed ='';
+    public $extensions = '';
 
-	/**
-	 * Constructor
-	 *
-	 * @param table Database row
-	 */
-	function __construct( $db_row = NULL )
-	{
-		// Call parent constructor:
-		parent::__construct( 'T_filetypes', 'ftyp_', 'ftyp_ID' );
+    public $name = '';
 
-		if( $db_row != NULL )
-		{
-			$this->ID         = $db_row->ftyp_ID;
-			$this->extensions = $db_row->ftyp_extensions;
-			$this->name       = $db_row->ftyp_name;
-			$this->mimetype   = $db_row->ftyp_mimetype;
-			$this->icon       = $db_row->ftyp_icon;
-			$this->viewtype   = $db_row->ftyp_viewtype;
-			$this->allowed    = $db_row->ftyp_allowed;
-		}
-		else
-		{	// Create a new filetype:
-			$this->set( 'viewtype', 'browser' );
-			$this->set( 'allowed', 'registered' );
-		}
-	}
+    public $mimetype = '';
 
+    public $icon = '';
 
-	/**
-	 * Load data from Request form fields.
-	 *
-	 * @return boolean true if loaded data seems valid.
-	 */
-	function load_from_Request()
-	{
-		global $force_upload_forbiddenext;
+    public $viewtype = '';
 
-		// Extensions
-		$this->old_extensions = $this->extensions;
-		if( param_string_not_empty( 'ftyp_extensions', T_('Please enter file extensions separated by space.') ) )
-		{ // Check if estensions has a valid format
-			$GLOBALS['ftyp_extensions'] = strtolower( trim( $GLOBALS['ftyp_extensions'] ) );
-			$reg_exp = '/^[a-z0-9]+( [a-z0-9]+)*$/';
-			if( !preg_match( $reg_exp, $GLOBALS['ftyp_extensions'], $res ) )
-			{ // Extensiosn has an invalid format
-				param_error( 'ftyp_extensions', T_( 'Invalid file extensions format.' ) );
-			}
-		}
-		$this->set_from_Request( 'extensions' );
+    public $allowed = '';
 
-		// Name
-		param_string_not_empty( 'ftyp_name', T_('Please enter a name.') );
-		$this->set_from_Request( 'name' );
+    /**
+     * Constructor
+     *
+     * @param table Database row
+     */
+    public function __construct($db_row = null)
+    {
+        // Call parent constructor:
+        parent::__construct('T_filetypes', 'ftyp_', 'ftyp_ID');
 
-		// Mime type
-		$this->old_mimetype = $this->mimetype;
-		// asimo> TODO: Consider to add some further validation for the ftyp_mimetype param value
-		// If it will be correctly validated, the corresponding db field collation may be changed to 'ascii_bin'
-		param_string_not_empty( 'ftyp_mimetype', T_('Please enter a mime type.') );
-		$this->set_from_Request( 'mimetype' );
+        if ($db_row != null) {
+            $this->ID = $db_row->ftyp_ID;
+            $this->extensions = $db_row->ftyp_extensions;
+            $this->name = $db_row->ftyp_name;
+            $this->mimetype = $db_row->ftyp_mimetype;
+            $this->icon = $db_row->ftyp_icon;
+            $this->viewtype = $db_row->ftyp_viewtype;
+            $this->allowed = $db_row->ftyp_allowed;
+        } else {	// Create a new filetype:
+            $this->set('viewtype', 'browser');
+            $this->set('allowed', 'registered');
+        }
+    }
 
-		// Icon for the mime type
-		param( 'ftyp_icon', 'string', '' );
-		$this->set_from_Request( 'icon' );
+    /**
+     * Load data from Request form fields.
+     *
+     * @return boolean true if loaded data seems valid.
+     */
+    public function load_from_Request()
+    {
+        global $force_upload_forbiddenext;
 
-		// View type
-		param( 'ftyp_viewtype', 'string' );
-		$this->set_from_Request( 'viewtype' );
+        // Extensions
+        $this->old_extensions = $this->extensions;
+        if (param_string_not_empty('ftyp_extensions', T_('Please enter file extensions separated by space.'))) { // Check if estensions has a valid format
+            $GLOBALS['ftyp_extensions'] = strtolower(trim($GLOBALS['ftyp_extensions']));
+            $reg_exp = '/^[a-z0-9]+( [a-z0-9]+)*$/';
+            if (! preg_match($reg_exp, $GLOBALS['ftyp_extensions'], $res)) { // Extensiosn has an invalid format
+                param_error('ftyp_extensions', T_('Invalid file extensions format.'));
+            }
+        }
+        $this->set_from_Request('extensions');
 
-		// Allowed to upload theses extensions
-		param( 'ftyp_allowed', 'string', 'registered' );
-		if( $GLOBALS['ftyp_allowed'] != 'admin' )
-		{
-			// Check if the extension is in the array of the not allowed extensions (_advanced.php)
-			$not_allowed = false;
-			$extensions = explode ( ' ', $GLOBALS['ftyp_extensions'] );
-			foreach($extensions as $extension)
-			{
-				if( in_array( $extension, $force_upload_forbiddenext ) )
-				{
-					$not_allowed = true;
-					continue;
-				}
-			}
-			if( $not_allowed )
-			{ // this extension is not allowed
-				$GLOBALS['ftyp_allowed'] = 'admin';
-			}
-		}
-		$this->set_from_Request( 'allowed' );
+        // Name
+        param_string_not_empty('ftyp_name', T_('Please enter a name.'));
+        $this->set_from_Request('name');
 
-		return ! param_errors_detected();
-	}
+        // Mime type
+        $this->old_mimetype = $this->mimetype;
+        // asimo> TODO: Consider to add some further validation for the ftyp_mimetype param value
+        // If it will be correctly validated, the corresponding db field collation may be changed to 'ascii_bin'
+        param_string_not_empty('ftyp_mimetype', T_('Please enter a mime type.'));
+        $this->set_from_Request('mimetype');
 
+        // Icon for the mime type
+        param('ftyp_icon', 'string', '');
+        $this->set_from_Request('icon');
 
-	/**
-	 * Set param value
-	 *
-	 * By default, all values will be considered strings
-	 *
-	 * @param string parameter name
-	 * @param mixed parameter value
-	 * @param boolean true to set to NULL if empty value
-	 * @return boolean true, if a value has been set; false if it has not changed
-	 */
-	function set( $parname, $parvalue, $make_null = false )
-	{
-		switch( $parname )
-		{
-			case 'extensions':
-			case 'name':
-			case 'mimetype':
-			case 'icon':
-			case 'viewtype':
-			case 'allowed':
-			default:
-				return $this->set_param( $parname, 'string', $parvalue, $make_null );
-		}
-	}
+        // View type
+        param('ftyp_viewtype', 'string');
+        $this->set_from_Request('viewtype');
 
-	/**
-	 * Return the img html code of the icon
-	 *
-	 * @param array Params
-	 * @return string
-	 */
-	function get_icon( $params = array() )
-	{
-		$params = array_merge( array(
-				'alt'   => '#',
-				'title' => '#',
-			), $params );
+        // Allowed to upload theses extensions
+        param('ftyp_allowed', 'string', 'registered');
+        if ($GLOBALS['ftyp_allowed'] != 'admin') {
+            // Check if the extension is in the array of the not allowed extensions (_advanced.php)
+            $not_allowed = false;
+            $extensions = explode(' ', $GLOBALS['ftyp_extensions']);
+            foreach ($extensions as $extension) {
+                if (in_array($extension, $force_upload_forbiddenext)) {
+                    $not_allowed = true;
+                    continue;
+                }
+            }
+            if ($not_allowed) { // this extension is not allowed
+                $GLOBALS['ftyp_allowed'] = 'admin';
+            }
+        }
+        $this->set_from_Request('allowed');
 
-		global $rsc_url;
+        return ! param_errors_detected();
+    }
 
-		$icon = $this->icon;
-		if( empty( $icon ) )
-		{ // use default icon
-			$icon = 'file_unknown';
-		}
+    /**
+     * Set param value
+     *
+     * By default, all values will be considered strings
+     *
+     * @param string parameter name
+     * @param mixed parameter value
+     * @param boolean true to set to NULL if empty value
+     * @return boolean true, if a value has been set; false if it has not changed
+     */
+    public function set($parname, $parvalue, $make_null = false)
+    {
+        switch ($parname) {
+            case 'extensions':
+            case 'name':
+            case 'mimetype':
+            case 'icon':
+            case 'viewtype':
+            case 'allowed':
+            default:
+                return $this->set_param($parname, 'string', $parvalue, $make_null);
+        }
+    }
 
-		return get_icon( $icon, 'imgtag', array(
-				'alt'   => $params['alt'] == '#' ? $this->dget( 'name', 'htmlattr' ) : $params['alt'],
-				'title' => $params['title'] == '#' ? $this->dget( 'name', 'htmlattr' ) : $params['title']
-			) );
-	}
+    /**
+     * Return the img html code of the icon
+     *
+     * @param array Params
+     * @return string
+     */
+    public function get_icon($params = [])
+    {
+        $params = array_merge([
+            'alt' => '#',
+            'title' => '#',
+        ], $params);
 
+        global $rsc_url;
 
-	/**
-	 * Get list of extensions for this filetype.
-	 * The first is being considered the default / most appropriate one.
-	 * @return array
-	 */
-	function get_extensions()
-	{
-		return explode(' ', $this->extensions);
-	}
+        $icon = $this->icon;
+        if (empty($icon)) { // use default icon
+            $icon = 'file_unknown';
+        }
 
+        return get_icon($icon, 'imgtag', [
+            'alt' => $params['alt'] == '#' ? $this->dget('name', 'htmlattr') : $params['alt'],
+            'title' => $params['title'] == '#' ? $this->dget('name', 'htmlattr') : $params['title'],
+        ]);
+    }
 
-	/**
-	 * Get if filetype is allowed for the currentUser
-	 *
-	 * @param boolean locked files are allowed for the current user.  @fplanque: this could be used to override. I don't like this. what's the use case?
-	 * @return boolean true if currentUser is allowed to upload/rename files with this filetype, false otherwise
-	 */
-	function is_allowed( $IGNORE_allow_locked = NULL )
-	{
-		global $admins_can_manipulate_sensitive_files;
+    /**
+     * Get list of extensions for this filetype.
+     * The first is being considered the default / most appropriate one.
+     * @return array
+     */
+    public function get_extensions()
+    {
+        return explode(' ', $this->extensions);
+    }
 
-		if( !is_logged_in( false ) )
-		{ // Anonymous Users can only manipulate this filetype if it's open for all.
-			return $this->allowed == 'any';
-		}
+    /**
+     * Get if filetype is allowed for the currentUser
+     *
+     * @param boolean locked files are allowed for the current user.  @fplanque: this could be used to override. I don't like this. what's the use case?
+     * @return boolean true if currentUser is allowed to upload/rename files with this filetype, false otherwise
+     */
+    public function is_allowed($IGNORE_allow_locked = null)
+    {
+        global $admins_can_manipulate_sensitive_files;
 
-		if( $this->allowed != 'admin')
-		{	// User is logged in and the filetype is not sensitive ("admin"), allow:
-			return true;
-		}
+        if (! is_logged_in(false)) { // Anonymous Users can only manipulate this filetype if it's open for all.
+            return $this->allowed == 'any';
+        }
 
-		// The file type can be manipulated only by admins:
+        if ($this->allowed != 'admin') {	// User is logged in and the filetype is not sensitive ("admin"), allow:
+            return true;
+        }
 
-		if( empty( $admins_can_manipulate_sensitive_files ) )
-		{	// b2evo is configured to NEVER allow admins to manipulate sensitive files:
-			return false;
-		}
+        // The file type can be manipulated only by admins:
 
-		// Check if current user is an admin (i-e: is in a group that allows all file manipulations)
-		return check_user_perm( 'files', 'all' );
-	}
+        if (empty($admins_can_manipulate_sensitive_files)) {	// b2evo is configured to NEVER allow admins to manipulate sensitive files:
+            return false;
+        }
 
+        // Check if current user is an admin (i-e: is in a group that allows all file manipulations)
+        return check_user_perm('files', 'all');
+    }
 
-	/**
-	 * Insert object into DB based on previously recorded changes.
-	 *
-	 * @return boolean true on success, false on failure to insert
-	 */
-	function dbinsert()
-	{
-		global $DB;
+    /**
+     * Insert object into DB based on previously recorded changes.
+     *
+     * @return boolean true on success, false on failure to insert
+     */
+    public function dbinsert()
+    {
+        global $DB;
 
-		$dbchanges = $this->dbchanges;
+        $dbchanges = $this->dbchanges;
 
-		$DB->begin();
+        $DB->begin();
 
-		if( ( $r = parent::dbinsert() ) !== false )
-		{
-			// Update types of the Files
-			$this->update_file_types();
+        if (($r = parent::dbinsert()) !== false) {
+            // Update types of the Files
+            $this->update_file_types();
 
-			$DB->commit();
-		}
-		else
-		{
-			$DB->rollback();
-		}
+            $DB->commit();
+        } else {
+            $DB->rollback();
+        }
 
-		return $r;
-	}
+        return $r;
+    }
 
+    /**
+     * Update the DB based on previously recorded changes
+     *
+     * @return boolean true on success, false on failure to update, NULL if no update necessary
+     */
+    public function dbupdate()
+    {
+        global $DB;
 
-	/**
-	 * Update the DB based on previously recorded changes
-	 *
-	 * @return boolean true on success, false on failure to update, NULL if no update necessary
-	 */
-	function dbupdate()
-	{
-		global $DB;
+        $dbchanges = $this->dbchanges;
 
-		$dbchanges = $this->dbchanges;
+        $DB->begin();
 
-		$DB->begin();
+        if (($r = parent::dbupdate()) !== false) {
+            // Update types of the Files
+            $this->update_file_types();
 
-		if( ( $r = parent::dbupdate() ) !== false )
-		{
-			// Update types of the Files
-			$this->update_file_types();
+            $DB->commit();
+        } else {
+            $DB->rollback();
+        }
 
-			$DB->commit();
-		}
-		else
-		{
-			$DB->rollback();
-		}
+        return $r;
+    }
 
-		return $r;
-	}
+    /**
+     * Delete object from DB.
+     *
+     * @return boolean true on success, false on failure to update
+     */
+    public function dbdelete()
+    {
+        global $DB;
 
+        // Save old extensions and old mimetype to update file types after deleting
+        $this->old_extensions = $this->extensions;
+        $this->extensions = '';
+        $this->old_mimetype = $this->mimetype;
+        $this->mimetype = '';
 
-	/**
-	 * Delete object from DB.
-	 *
-	 * @return boolean true on success, false on failure to update
-	 */
-	function dbdelete()
-	{
-		global $DB;
+        $DB->begin();
 
-		// Save old extensions and old mimetype to update file types after deleting
-		$this->old_extensions = $this->extensions;
-		$this->extensions = '';
-		$this->old_mimetype = $this->mimetype;
-		$this->mimetype = '';
+        if (($r = parent::dbdelete()) !== false) {
+            // Update types of the Files
+            $this->update_file_types();
 
-		$DB->begin();
+            $DB->commit();
+        } else {
+            $DB->rollback();
+        }
 
-		if( ( $r = parent::dbdelete() ) !== false )
-		{
-			// Update types of the Files
-			$this->update_file_types();
+        return $r;
+    }
 
-			$DB->commit();
-		}
-		else
-		{
-			$DB->rollback();
-		}
+    /**
+     * Update field 'file_type' in the table T_files
+     */
+    public function update_file_types()
+    {
+        if ($this->extensions == $this->old_extensions && $this->mimetype == $this->old_mimetype) { // The extensions and mimetype were not changed
+            return;
+        }
 
-		return $r;
-	}
+        global $DB;
 
+        $old_extensions = explode(' ', $this->old_extensions);
 
-	/**
-	 * Update field 'file_type' in the table T_files
-	 */
-	function update_file_types()
-	{
-		if( $this->extensions == $this->old_extensions && $this->mimetype == $this->old_mimetype )
-		{ // The extensions and mimetype were not changed
-			return;
-		}
+        if (preg_match('#^(audio/|video/)#', $this->old_mimetype) && $this->mimetype != $this->old_mimetype) { // Previous mimetype was 'audio' or 'video' but it is changed to other, We should update file type
+            $deleted_extensions = $old_extensions;
+        }
 
-		global $DB;
+        $current_file_type = null;
+        if (preg_match('#^audio/#', $this->mimetype)) { // Current file type is Audio format
+            $current_file_type = 'audio';
+        } elseif (preg_match('#^video/#', $this->mimetype)) { // Current file type is Video format
+            $current_file_type = 'video';
+        }
 
-		$old_extensions = explode( ' ', $this->old_extensions );
+        if ($current_file_type) {
+            $new_extensions = $this->get_extensions();
+            if (empty($new_extensions) && empty($old_extensions)) { // No extensions
+                return;
+            }
 
-		if( preg_match( '#^(audio/|video/)#', $this->old_mimetype ) && $this->mimetype != $this->old_mimetype )
-		{ // Previous mimetype was 'audio' or 'video' but it is changed to other, We should update file type
-			$deleted_extensions = $old_extensions;
-		}
+            $deleted_extensions = array_diff($old_extensions, $new_extensions);
+            $added_extensions = array_diff($new_extensions, $old_extensions);
+        }
 
-		$current_file_type = null;
-		if( preg_match( '#^audio/#', $this->mimetype ) )
-		{ // Current file type is Audio format
-			$current_file_type = 'audio';
-		}
-		elseif( preg_match( '#^video/#', $this->mimetype ) )
-		{ // Current file type is Video format
-			$current_file_type = 'video';
-		}
-
-		if( $current_file_type )
-		{
-			$new_extensions = $this->get_extensions();
-			if( empty( $new_extensions ) && empty( $old_extensions ) )
-			{ // No extensions
-				return;
-			}
-
-			$deleted_extensions = array_diff( $old_extensions, $new_extensions );
-			$added_extensions = array_diff( $new_extensions, $old_extensions );
-		}
-
-		if( ! empty( $deleted_extensions ) )
-		{ // Delete file type from old extensions
-			$DB->query( 'UPDATE T_files
+        if (! empty($deleted_extensions)) { // Delete file type from old extensions
+            $DB->query('UPDATE T_files
 					SET file_type = NULL
-				WHERE file_path LIKE "%.'.implode( '" OR file_path LIKE "%.', $deleted_extensions ).'"' );
-		}
+				WHERE file_path LIKE "%.' . implode('" OR file_path LIKE "%.', $deleted_extensions) . '"');
+        }
 
-		if( ! empty( $added_extensions ) )
-		{ // Set audio file type for new extensions
-			$DB->query( 'UPDATE T_files
-					SET file_type = "'.$current_file_type.'"
-				WHERE file_path LIKE "%.'.implode( '" OR file_path LIKE "%.', $added_extensions ).'"' );
-		}
-	}
+        if (! empty($added_extensions)) { // Set audio file type for new extensions
+            $DB->query('UPDATE T_files
+					SET file_type = "' . $current_file_type . '"
+				WHERE file_path LIKE "%.' . implode('" OR file_path LIKE "%.', $added_extensions) . '"');
+        }
+    }
 }
-
-?>

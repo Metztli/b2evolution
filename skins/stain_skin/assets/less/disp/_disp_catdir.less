@@ -1,0 +1,468 @@
+// CATDIR STYLE
+// ======================================================================== /
+#content {
+
+    .cat_content {
+        width: 100%;
+        margin-bottom: 30px;
+
+        // CATEGORI TITLE
+        // ======================================================================== /
+        .category_title {
+            background-color: @w;
+            padding: 25px 20px;
+            box-shadow: @box-shadow;
+
+            h2 {
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                text-align: center;
+                margin: 0;
+            }
+
+            a {
+                text-decoration: underline;
+            }
+        }
+
+        .cats_list {
+            margin: 20px 0 0;
+
+            .evo_post {
+                padding: 10px;
+                margin: 0;
+            }
+
+            // POST IMAGE
+            // ======================================================================== /
+            .evo_post_images,
+            .no_image {
+                margin: -25px -25px 25px;
+            }
+
+            .evo_post_images,
+            .no_image {
+                a {
+                    z-index: 1;
+                    &:before {
+                        content: '';
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        opacity: 0;
+                        z-index: 1;
+
+                        transition: all 0.32s ease;
+                    }
+                }
+            }
+
+            .evo_image_block,
+            .no_image {
+                img {
+                    border-radius: 0;
+                }
+            }
+
+            .evo_image_block {
+                margin: 0;
+                z-index: 0;
+            }
+
+            .no_image {
+                overflow: hidden;
+                border-bottom: 1px solid @cf7;
+            }
+
+            // POST CONTENT
+            // ======================================================================== /
+            .evo_post_content {
+                position: relative;
+                background-color: @w;
+                padding: 25px 25px 5px;
+                box-shadow: @box-shadow;
+                transition: box-shadow 0.32s ease, transform 0.32s ease;
+
+                // AVATAR POST
+                // ======================================================================== /
+                .avatar_post {
+                    position: relative;
+                    display: block;
+                    width: 100%;
+                    text-align: center;
+                    margin-bottom: 20px;
+
+                    .author_avatar {
+
+                        .identity_link_username {
+                            font-size: 1.2rem;
+                        }
+
+                        img {
+                            position: absolute;
+                            top: -50px;
+                            left: 0;
+                            right: 0;
+                            margin: 0 auto;
+                            width: 50px;
+                            height: 50px;
+                            border-radius: 100%;
+                            border: 2px solid @w;
+                            z-index: 10;
+                            transition: all 0.32s ease-in-out;
+                        }
+                    }
+                }
+
+                // POST TITLE
+                // ======================================================================== /
+                .evo_post_title {
+                    display: block;
+                    font-family: @font_heading;
+                    text-align: center;
+                    margin-bottom: 20px;
+
+                    h3 {
+                        font-size: 2.8rem;
+                        font-weight: 700;
+                        letter-spacing: 0.2px;
+                        margin: 0;
+                    }
+
+                    .date {
+                        display: inline-block;
+                        font-family: @font_body;
+                        font-size: 1.2rem;
+                        font-weight: 700;
+                        margin-top: 5px;
+                        color: @c7;
+                        text-transform: uppercase;
+                    }
+
+                    .edit_post {
+                        display: block;
+                        font-size: 1.2rem;
+                    }
+                }
+
+                // EVO POST STATUS
+                // ======================================================================== /
+                .evo_status {
+                    display: table;
+                    margin: -10px auto 20px;
+                }
+
+                // CONTENT EXCERPT
+                // ======================================================================== /
+                .evo_post__text {
+                    font-size: 1.3rem;
+                    color: @c7;
+                    letter-spacing: 0.6px;
+                    margin-bottom: 35px;
+                    text-align: center;
+
+                    .excerpt_more {
+                        display: block;
+                        margin-top: 30px;
+
+                        a {
+                            font-size: 1rem;
+                            letter-spacing: 2px;
+                            text-transform: uppercase;
+                            color: @primary;
+                            border: 1px solid @primary;
+                            padding: 10px 15px;
+
+                            .fa {
+                                padding-left: 10px;
+                            }
+
+                            &:hover, &:active, &:focus {
+                                background-color: @primary;
+                                color: @w;
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+
+                // POST TAGS
+                // ======================================================================== /
+                .post_tags {
+                    margin-top: 0;
+                    margin-bottom: 15px;
+                    text-align: center;
+
+                    a {
+                        font-size: 1rem;
+                        letter-spacing: 0.5px;
+                        padding: 5px 10px;
+                        margin-right: -1px;
+                        color: @c5;
+
+                        .fa {
+                            color: @c7;
+                        }
+
+                        &:hover, &:active, &:focus {
+                            color: @w;
+                        }
+                    }
+
+                }
+
+                // COMMENT INFO
+                // ======================================================================== /
+                .comment_info {
+                    margin-bottom: 20px;
+                    text-align: center;
+
+                    .comment_cat {
+                        font-size: 1.3rem;
+                    }
+                }
+
+            }
+
+            // ======================================================================== /
+            // HOVER IMAGE STYLE
+            // ======================================================================== /
+            .evo_post_images,
+            .no_image {
+                position: relative;
+
+                &.none {
+                    a:before {
+                        display: none;
+                    }
+                }
+
+                &.opacity {
+
+                    a:before {
+                        bottom: 0;
+                        left: 0;
+                        transition: all 0.32s ease-in-out;
+                    }
+                }
+
+                &.zoom {
+
+                    .evo_image_block {
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    a {
+                        img {
+                            transform: scale(1);
+                            transition: transform .3s ease;
+                        }
+
+                        &:before {
+                            top: 0;
+                            left: 0;
+                            transform: scale(0);
+                            transition: transform 0.3s ease-in-out;
+                        }
+                    }
+                }
+
+                &.flip {
+                    perspective: 1300px;
+
+                    a {
+                        transform-style: preserve-3d;
+
+                        &:before {
+                            top: 0;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            margin: auto;
+                            width: 95%;
+                            height: 93%;
+
+                            transition: all 0.4s ease;
+                        }
+
+                        img {
+                            transition: all 0.4s ease;
+                        }
+                    }
+                }
+
+                &.right_left {
+                    a {
+                        &:before {
+                            width: 0;
+                            right: 0;
+                            opacity: 0.5;
+                        }
+                    }
+                }
+
+                &.left_right {
+                    a {
+                        &:before {
+                            width: 0;
+                            left: 0;
+                            opacity: 0.5;
+                        }
+                    }
+                }
+
+                &.bt_top {
+                    a:before {
+                        height: 0;
+                        bottom: 0;
+                    }
+                }
+
+                &.top_bt {
+                    a:before {
+                        height: 0;
+                        top: 0;
+                    }
+                }
+
+            }
+
+            .evo_post {
+                &:hover, &:focus, &:active {
+
+                    .evo_post_content {
+                        box-shadow: 1px 8px 26px -10px rgba(0, 0, 0, 0.2);
+                        transform: translateY(-5px);
+                    }
+
+                    .evo_post_images,
+                    .no_image {
+                        a {
+                        }
+
+                        &.opacity {
+                        }
+
+                        &.zoom {
+                            a {
+                                img {
+                                    transform: scale(1.1) rotate(3deg);
+                                    transition: transform 3s linear;
+                                    transition-delay: 0.2s;
+                                    transition-duration: 3s;
+                                }
+
+                                &:before {
+                                    transform: scale(1.1);
+                                }
+                            }
+                        }
+
+                        &.flip {
+                            a {
+                                &:before {
+                                    transform: rotateY(180deg);
+                                }
+                            }
+                        }
+
+                        &.right_left,
+                        &.left_right {
+                            a {
+                                &:before {
+                                    width: 100%;
+                                }
+                            }
+                        }
+
+                        &.bt_top,
+                        &.top_bt {
+                            a:before {
+                                height: 100%;
+                            }
+                        }
+
+                    }
+
+                }
+            }
+
+            // POST WITH BACKGROUND IMAGE
+            // ======================================================================== /
+            .post_bg_image {
+                z-index: 1;
+                overflow: hidden;
+
+                .evo_image_block {
+                    position: static !important;
+                }
+
+                .no_image {
+                    img {
+                        position: absolute;
+                        // left: -25%;
+                        left: 0;
+                        top: 0;
+                        bottom: 0;
+                        margin: auto;
+                        width: auto;
+                        height: auto;
+                        max-height: none;
+                        min-height: 100%;
+                        // max-width: none;
+                        // width: auto;
+                        // height: 100%;
+                        opacity: 0.85;
+                        z-index: -2;
+                    }
+                }
+
+                .evo_post_images {
+                    position: static;
+                    perspective: none !important;
+
+                    a:before {
+                        opacity: 0.35;
+                        z-index: -1;
+                    }
+
+                    img {
+                        position: absolute;
+                        // left: -25%;
+                        left: 0;
+                        right: 0;
+                        top: 0;
+                        bottom: 0;
+                        margin: auto;
+                        max-width: none;
+                        // min-width: 100%;
+                        width: auto;
+                        height: auto;
+                        max-height: none;
+                        min-height: 100%;
+                        // height: auto;
+                        opacity: 0.25;
+                        z-index: -2;
+                        transform: none !important;
+                    }
+
+                    &.flip {
+                        a:before {
+                            width: 100%;
+                            height: 100%;
+                        }
+                    }
+                }
+
+                .avatar_post {
+                    margin-top: 70px;
+                }
+            }
+
+        }
+
+    }
+
+}

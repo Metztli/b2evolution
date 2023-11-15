@@ -8,7 +8,9 @@
  *
  * @package evocore
  */
-if( !defined('EVO_CONFIG_LOADED') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_CONFIG_LOADED')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $db_storage_charset;
@@ -22,10 +24,10 @@ global $db_storage_charset;
  *
  * Please see {@link db_delta()} for things to take care of.
  */
-$schema_queries = array_merge( $schema_queries, array(
-	'T_skins__skin' => array(
-		'Creating table for installed skins',
-		"CREATE TABLE T_skins__skin (
+$schema_queries = array_merge($schema_queries, [
+    'T_skins__skin' => [
+        'Creating table for installed skins',
+        "CREATE TABLE T_skins__skin (
 				skin_ID      int(10) unsigned NOT NULL auto_increment,
 				skin_class   varchar(32) COLLATE ascii_general_ci NOT NULL,
 				skin_name    varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -35,11 +37,11 @@ $schema_queries = array_merge( $schema_queries, array(
 				UNIQUE skin_folder( skin_folder ),
 				UNIQUE skin_class( skin_class ),
 				KEY skin_name( skin_name )
-			) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+			) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_blogs' => array(
-		'Creating table for Blogs',
-		"CREATE TABLE T_blogs (
+    'T_blogs' => [
+        'Creating table for Blogs',
+        "CREATE TABLE T_blogs (
 			blog_ID              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			blog_sec_ID          INT(10) UNSIGNED NOT NULL DEFAULT 1,
 			blog_shortname       varchar(255) COLLATE utf8mb4_unicode_ci NULL default '',
@@ -72,48 +74,48 @@ $schema_queries = array_merge( $schema_queries, array(
 			blog_alt_skin_ID     int(10) unsigned NULL,
 			PRIMARY KEY blog_ID (blog_ID),
 			UNIQUE KEY blog_urlname (blog_urlname)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_section' => array(
-		'Creating sections table',
-		"CREATE TABLE T_section (
+    'T_section' => [
+        'Creating sections table',
+        "CREATE TABLE T_section (
 			sec_ID            INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			sec_name          VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
 			sec_order         INT(11) NOT NULL,
 			sec_owner_user_ID INT(10) UNSIGNED NOT NULL default 1,
 			PRIMARY KEY ( sec_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_coll_url_aliases' => array(
-		'Creating collection URL aliases table',
-		"CREATE TABLE T_coll_url_aliases (
+    'T_coll_url_aliases' => [
+        'Creating collection URL aliases table',
+        "CREATE TABLE T_coll_url_aliases (
 			cua_coll_ID   INT(10) UNSIGNED NOT NULL,
 			cua_url_alias VARCHAR(255) COLLATE ascii_general_ci NOT NULL,
 			PRIMARY KEY ( cua_url_alias ),
 			INDEX cua_coll_ID ( cua_coll_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_coll_settings' => array(
-		'Creating collection settings table',
-		"CREATE TABLE T_coll_settings (
+    'T_coll_settings' => [
+        'Creating collection settings table',
+        "CREATE TABLE T_coll_settings (
 			cset_coll_ID INT(10) UNSIGNED NOT NULL,
 			cset_name    VARCHAR( 50 ) COLLATE ascii_general_ci NOT NULL,
 			cset_value   VARCHAR( 10000 ) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The AdSense plugin wants to store very long snippets of HTML',
 			PRIMARY KEY ( cset_coll_ID, cset_name )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_coll_locales' => array(
-		'Creating table for collection extra locales and linking with other collections',
-		"CREATE TABLE T_coll_locales (
+    'T_coll_locales' => [
+        'Creating table for collection extra locales and linking with other collections',
+        "CREATE TABLE T_coll_locales (
 			cl_coll_ID        INT(10) UNSIGNED NOT NULL,
 			cl_locale         VARCHAR(20) COLLATE ascii_general_ci NOT NULL,
 			cl_linked_coll_ID INT(10) UNSIGNED NULL,
 			PRIMARY KEY cl_coll_loc_pk (cl_coll_ID, cl_locale)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_widget__container' => array(
-		'Creating components container table',
-		"CREATE TABLE T_widget__container (
+    'T_widget__container' => [
+        'Creating components container table',
+        "CREATE TABLE T_widget__container (
 			wico_ID        INT(10) UNSIGNED auto_increment,
 			wico_code      VARCHAR(128) COLLATE ascii_general_ci NULL DEFAULT NULL,
 			wico_skin_type ENUM( 'normal', 'mobile', 'tablet', 'alt' ) COLLATE ascii_general_ci NOT NULL DEFAULT 'normal',
@@ -124,11 +126,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			wico_item_ID   INT(10) UNSIGNED NULL DEFAULT NULL,
 			PRIMARY KEY    ( wico_ID ),
 			UNIQUE wico_coll_ID_code_skin_type ( wico_coll_ID, wico_code, wico_skin_type )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_widget__widget' => array(
-		'Creating components table',
-		"CREATE TABLE T_widget__widget (
+    'T_widget__widget' => [
+        'Creating components table',
+        "CREATE TABLE T_widget__widget (
 			wi_ID         INT(10) UNSIGNED auto_increment,
 			wi_wico_ID    INT(10) UNSIGNED NOT NULL,
 			wi_order      INT(10) NOT NULL,
@@ -138,11 +140,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			wi_params     TEXT COLLATE utf8mb4_unicode_ci NULL,
 			PRIMARY KEY ( wi_ID ),
 			UNIQUE wi_order( wi_wico_ID, wi_order )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_categories' => array(
-		'Creating table for Categories',
-		"CREATE TABLE T_categories (
+    'T_categories' => [
+        'Creating table for Categories',
+        "CREATE TABLE T_categories (
 			cat_ID              int(10) unsigned NOT NULL auto_increment,
 			cat_parent_ID       int(10) unsigned NULL,
 			cat_name            varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -162,11 +164,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			KEY cat_blog_ID (cat_blog_ID),
 			KEY cat_parent_ID (cat_parent_ID),
 			KEY cat_order (cat_order)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__item' => array(
-		'Creating table for Posts',
-		"CREATE TABLE T_items__item (
+    'T_items__item' => [
+        'Creating table for Posts',
+        "CREATE TABLE T_items__item (
 			post_ID                     int(10) unsigned NOT NULL auto_increment,
 			post_parent_ID              int(10) unsigned NULL,
 			post_creator_user_ID        int(10) unsigned NOT NULL,
@@ -190,7 +192,7 @@ $schema_queries = array_merge( $schema_queries, array(
 			post_excerpt                text COLLATE utf8mb4_unicode_ci NULL,
 			post_excerpt_autogenerated  TINYINT(1) NOT NULL DEFAULT 1,
 			post_short_title            VARCHAR(50) COLLATE utf8mb4_unicode_ci NULL,
-			post_title                  VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			post_title                  VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			post_urltitle               VARCHAR(210) COLLATE ascii_general_ci NOT NULL,
 			post_canonical_slug_ID      int(10) unsigned NULL DEFAULT NULL,
 			post_tiny_slug_ID           int(10) unsigned NULL DEFAULT NULL,
@@ -202,7 +204,7 @@ $schema_queries = array_merge( $schema_queries, array(
 			post_notifications_flags    SET('moderators_notified','members_notified','community_notified','pings_sent') COLLATE ascii_general_ci NOT NULL DEFAULT '',
 			post_wordcount              int(11) default NULL,
 			post_comment_status         ENUM('disabled', 'open', 'closed') COLLATE ascii_general_ci NOT NULL DEFAULT 'open',
-			post_renderers              VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			post_renderers              VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			post_priority               int(11) unsigned null COMMENT 'Task priority in workflow',
 			post_featured               tinyint(1) NOT NULL DEFAULT 0,
 			post_ctry_ID                INT(10) UNSIGNED NULL,
@@ -221,21 +223,21 @@ $schema_queries = array_merge( $schema_queries, array(
 			INDEX post_assigned_user_ID( post_assigned_user_ID ),
 			INDEX post_ityp_ID( post_ityp_ID ),
 			INDEX post_pst_ID( post_pst_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_postcats' => array(
-		'Creating table for Categories-to-Posts relationships',
-		"CREATE TABLE T_postcats (
+    'T_postcats' => [
+        'Creating table for Categories-to-Posts relationships',
+        "CREATE TABLE T_postcats (
 			postcat_post_ID int(10) unsigned NOT NULL,
 			postcat_cat_ID int(10) unsigned NOT NULL,
 			postcat_order DOUBLE NULL,
 			PRIMARY KEY postcat_pk (postcat_post_ID,postcat_cat_ID),
 			UNIQUE catpost ( postcat_cat_ID, postcat_post_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_comments' => array(	// Note: pingbacks no longer supported, but previous pingbacks are to be preserved in the DB
-		'Creating table for Comments',
-		"CREATE TABLE T_comments (
+    'T_comments' => [	// Note: pingbacks no longer supported, but previous pingbacks are to be preserved in the DB
+        'Creating table for Comments',
+        "CREATE TABLE T_comments (
 			comment_ID                 int(10) unsigned NOT NULL auto_increment,
 			comment_item_ID            int(10) unsigned NOT NULL default 0,
 			comment_type               enum('comment','linkback','trackback','pingback','meta','webmention') COLLATE ascii_general_ci NOT NULL default 'comment',
@@ -245,12 +247,12 @@ $schema_queries = array_merge( $schema_queries, array(
 			comment_author             varchar(100) COLLATE utf8mb4_unicode_ci NULL,
 			comment_author_email       varchar(255) COLLATE ascii_general_ci NULL,
 			comment_author_url         varchar(255) NULL,
-			comment_author_IP          varchar(45) COLLATE ascii_general_ci NOT NULL default '',"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */."
+			comment_author_IP          varchar(45) COLLATE ascii_general_ci NOT NULL default '',"/* IPv4 mapped IPv6 addresses maximum length is 45 chars: ex. ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190 */ . "
 			comment_IP_ctry_ID         int(10) unsigned NULL,
 			comment_date               TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			comment_last_touched_ts    TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			comment_content            text COLLATE utf8mb4_unicode_ci NOT NULL,
-			comment_renderers          VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			comment_renderers          VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			comment_rating             TINYINT(1) NULL DEFAULT NULL,
 			comment_featured           TINYINT(1) NOT NULL DEFAULT 0,
 			comment_author_url_nofollow  TINYINT(1) NOT NULL DEFAULT 1,
@@ -274,11 +276,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			KEY comment_date (comment_date),
 			KEY comment_type (comment_type),
 			KEY comment_status(comment_status)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_comments__votes' => array(
-		'Creating table for Comments Votes',
-		"CREATE TABLE T_comments__votes (
+    'T_comments__votes' => [
+        'Creating table for Comments Votes',
+        "CREATE TABLE T_comments__votes (
 			cmvt_cmt_ID  int(10) unsigned NOT NULL,
 			cmvt_user_ID int(10) unsigned NOT NULL,
 			cmvt_helpful TINYINT(1) NULL DEFAULT NULL,
@@ -286,48 +288,48 @@ $schema_queries = array_merge( $schema_queries, array(
 			PRIMARY KEY (cmvt_cmt_ID, cmvt_user_ID),
 			KEY cmvt_cmt_ID (cmvt_cmt_ID),
 			KEY cmvt_user_ID (cmvt_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__prerendering' => array(
-		'Creating item prerendering cache table',
-		"CREATE TABLE T_items__prerendering(
+    'T_items__prerendering' => [
+        'Creating item prerendering cache table',
+        "CREATE TABLE T_items__prerendering(
 			itpr_itm_ID                   INT(10) UNSIGNED NOT NULL,
 			itpr_format                   ENUM('htmlbody','entityencoded','xml','text') COLLATE ascii_general_ci NOT NULL,
-			itpr_renderers                VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			itpr_renderers                VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			itpr_content_prerendered      MEDIUMTEXT COLLATE utf8mb4_unicode_ci NULL,
 			itpr_datemodified             TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			PRIMARY KEY (itpr_itm_ID, itpr_format)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_comments__prerendering' => array(
-		'Creating comment prerendering cache table',
-		"CREATE TABLE T_comments__prerendering(
+    'T_comments__prerendering' => [
+        'Creating comment prerendering cache table',
+        "CREATE TABLE T_comments__prerendering(
 			cmpr_cmt_ID                   INT(10) UNSIGNED NOT NULL,
 			cmpr_format                   ENUM('htmlbody','entityencoded','xml','text') COLLATE ascii_general_ci NOT NULL,
-			cmpr_renderers                VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			cmpr_renderers                VARCHAR(4000) COLLATE ascii_general_ci NOT NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			cmpr_content_prerendered      MEDIUMTEXT COLLATE utf8mb4_unicode_ci NULL,
 			cmpr_datemodified             TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			PRIMARY KEY (cmpr_cmt_ID, cmpr_format)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__version' => array(	// fp> made iver_edit_user_ID NULL because of INSERT INTO SELECT statement that can try to write NULL
-		'Creating item versions table',
-		"CREATE TABLE T_items__version (
+    'T_items__version' => [	// fp> made iver_edit_user_ID NULL because of INSERT INTO SELECT statement that can try to write NULL
+        'Creating item versions table',
+        "CREATE TABLE T_items__version (
 			iver_ID            INT UNSIGNED NOT NULL,
 			iver_type          ENUM('archived','proposed') COLLATE ascii_general_ci NOT NULL DEFAULT 'archived',
 			iver_itm_ID        INT UNSIGNED NOT NULL,
 			iver_edit_user_ID  INT UNSIGNED NULL,
 			iver_edit_last_touched_ts TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00',
 			iver_status        ENUM('published','community','deprecated','protected','private','review','draft','redirected') COLLATE ascii_general_ci NULL,
-			iver_title         VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,"/* Do NOT change this field back to TEXT without a very good reason. */."
+			iver_title         VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,"/* Do NOT change this field back to TEXT without a very good reason. */ . "
 			iver_content       MEDIUMTEXT COLLATE utf8mb4_unicode_ci NULL,
 			PRIMARY KEY        ( iver_ID , iver_type, iver_itm_ID ),
 			INDEX iver_edit_user_ID ( iver_edit_user_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__version_custom_field' => array(
-		'Creating item version custom fields table',
-		"CREATE TABLE T_items__version_custom_field (
+    'T_items__version_custom_field' => [
+        'Creating item version custom fields table',
+        "CREATE TABLE T_items__version_custom_field (
 			ivcf_iver_ID     INT UNSIGNED NOT NULL,
 			ivcf_iver_type   ENUM('archived','proposed') COLLATE ascii_general_ci NOT NULL DEFAULT 'archived',
 			ivcf_iver_itm_ID INT UNSIGNED NOT NULL,
@@ -335,11 +337,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			ivcf_itcf_label  VARCHAR(255) NOT NULL,
 			ivcf_value       VARCHAR( 10000 ) NULL,
 			PRIMARY KEY      ( ivcf_iver_ID, ivcf_iver_type, ivcf_iver_itm_ID, ivcf_itcf_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__version_link' => array(
-		'Creating item version links table',
-		"CREATE TABLE T_items__version_link (
+    'T_items__version_link' => [
+        'Creating item version links table',
+        "CREATE TABLE T_items__version_link (
 			ivl_iver_ID     INT UNSIGNED NOT NULL,
 			ivl_iver_type   ENUM('archived','proposed') COLLATE ascii_general_ci NOT NULL DEFAULT 'archived',
 			ivl_iver_itm_ID INT UNSIGNED NOT NULL,
@@ -348,27 +350,27 @@ $schema_queries = array_merge( $schema_queries, array(
 			ivl_position    VARCHAR(10) COLLATE ascii_general_ci NOT NULL,
 			ivl_order       INT(11) UNSIGNED NOT NULL,
 			PRIMARY KEY     ( ivl_iver_ID, ivl_iver_type, ivl_iver_itm_ID, ivl_link_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__itemgroup' => array(
-		'Creating table for Post Groups',
-		"CREATE TABLE T_items__itemgroup (
+    'T_items__itemgroup' => [
+        'Creating table for Post Groups',
+        "CREATE TABLE T_items__itemgroup (
 			igrp_ID INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			PRIMARY KEY (igrp_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__status' => array(
-		'Creating table for Post Statuses',
-		"CREATE TABLE T_items__status (
+    'T_items__status' => [
+        'Creating table for Post Statuses',
+        "CREATE TABLE T_items__status (
 			pst_ID   int(10) unsigned not null AUTO_INCREMENT,
 			pst_name varchar(30) COLLATE utf8mb4_unicode_ci not null,
 			pst_order   int(11) NULL DEFAULT NULL,
 			primary key ( pst_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__type' => array(
-		'Creating table for Post Types',
-		"CREATE TABLE T_items__type (
+    'T_items__type' => [
+        'Creating table for Post Types',
+        "CREATE TABLE T_items__type (
 			ityp_ID                INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			ityp_name              VARCHAR(30) COLLATE utf8mb4_unicode_ci NOT NULL,
 			ityp_description       TEXT COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
@@ -425,11 +427,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			ityp_front_order_url          SMALLINT NULL,
 			ityp_front_order_location     SMALLINT NULL,
 			PRIMARY KEY ( ityp_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__type_custom_field' => array(
-		'Creating table for custom fields of Post Types',
-		"CREATE TABLE T_items__type_custom_field (
+    'T_items__type_custom_field' => [
+        'Creating table for custom fields of Post Types',
+        "CREATE TABLE T_items__type_custom_field (
 			itcf_ID              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			itcf_ityp_ID         INT(10) UNSIGNED NOT NULL,
 			itcf_label           VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -456,85 +458,85 @@ $schema_queries = array_merge( $schema_queries, array(
 			itcf_merge           TINYINT DEFAULT 0,
 			PRIMARY KEY ( itcf_ID ),
 			UNIQUE itcf_ityp_ID_name( itcf_ityp_ID, itcf_name )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__type_coll' => array(
-		'Creating table for PostType-to-Collection relationships',
-		"CREATE TABLE T_items__type_coll (
+    'T_items__type_coll' => [
+        'Creating table for PostType-to-Collection relationships',
+        "CREATE TABLE T_items__type_coll (
 			itc_ityp_ID int(10) unsigned NOT NULL,
 			itc_coll_ID int(10) unsigned NOT NULL,
 			PRIMARY KEY (itc_ityp_ID, itc_coll_ID),
 			UNIQUE itemtypecoll ( itc_ityp_ID, itc_coll_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__status_type' => array(
-		'Creating table for PostType-to-Status relationships',
-		"CREATE TABLE T_items__status_type (
+    'T_items__status_type' => [
+        'Creating table for PostType-to-Status relationships',
+        "CREATE TABLE T_items__status_type (
 			its_pst_ID INT(10) UNSIGNED NOT NULL,
 			its_ityp_ID INT(10) UNSIGNED NOT NULL,
 			PRIMARY KEY ( its_ityp_ID, its_pst_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__tag' => array(
-		'Creating table for Tags',
-		"CREATE TABLE T_items__tag (
+    'T_items__tag' => [
+        'Creating table for Tags',
+        "CREATE TABLE T_items__tag (
 			tag_ID   INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			tag_name VARCHAR(50) COLLATE utf8mb4_bin NOT NULL,
 			PRIMARY KEY (tag_ID),
 			UNIQUE tag_name( tag_name )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__itemtag' => array(
-		'Creating table for Post-to-Tag relationships',
-		"CREATE TABLE T_items__itemtag (
+    'T_items__itemtag' => [
+        'Creating table for Post-to-Tag relationships',
+        "CREATE TABLE T_items__itemtag (
 			itag_itm_ID int(10) unsigned NOT NULL,
 			itag_tag_ID int(10) unsigned NOT NULL,
 			PRIMARY KEY (itag_itm_ID, itag_tag_ID),
 			UNIQUE tagitem ( itag_tag_ID, itag_itm_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__subscriptions' => array(
-		'Creating table for subscriptions to individual blog posts',
-		"CREATE TABLE T_items__subscriptions (
+    'T_items__subscriptions' => [
+        'Creating table for subscriptions to individual blog posts',
+        "CREATE TABLE T_items__subscriptions (
 			isub_item_ID    int(10) unsigned NOT NULL,
 			isub_user_ID    int(10) unsigned NOT NULL,
 			isub_comments   tinyint(1) NOT NULL DEFAULT 0 COMMENT 'The user wants to receive notifications for new comments on this post',
 			PRIMARY KEY (isub_item_ID, isub_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__item_settings' => array(
-		'Creating item settings table',
-		"CREATE TABLE T_items__item_settings (
+    'T_items__item_settings' => [
+        'Creating item settings table',
+        "CREATE TABLE T_items__item_settings (
 			iset_item_ID  int(10) unsigned NOT NULL,
 			iset_name     varchar( 50 ) COLLATE ascii_general_ci NOT NULL,
 			iset_value    varchar( 10000 ) COLLATE utf8mb4_unicode_ci NULL,
 			PRIMARY KEY ( iset_item_ID, iset_name )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__item_custom_field' => array(
-		'Creating item custom field values table',
-		"CREATE TABLE T_items__item_custom_field (
+    'T_items__item_custom_field' => [
+        'Creating item custom field values table',
+        "CREATE TABLE T_items__item_custom_field (
 			icfv_item_ID     INT UNSIGNED NOT NULL,
 			icfv_itcf_name   VARCHAR(255) COLLATE ascii_general_ci NOT NULL,
 			icfv_value       VARCHAR( 10000 ) COLLATE utf8mb4_unicode_ci NULL,
 			icfv_parent_sync TINYINT(1) NOT NULL DEFAULT 1,
 			PRIMARY KEY      ( icfv_item_ID, icfv_itcf_name )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__user_data' => array(
-		'Creating table for user post data',
-		"CREATE TABLE T_items__user_data (
+    'T_items__user_data' => [
+        'Creating table for user post data',
+        "CREATE TABLE T_items__user_data (
 			itud_user_ID          INT(10) UNSIGNED NOT NULL,
 			itud_item_ID          INT(10) UNSIGNED NOT NULL,
 			itud_read_item_ts     TIMESTAMP NULL DEFAULT NULL,
 			itud_read_comments_ts TIMESTAMP NULL DEFAULT NULL,
 			itud_flagged_item     TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY ( itud_user_ID, itud_item_ID )
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__votes' => array(
-		'Creating table for Items Votes',
-		"CREATE TABLE T_items__votes (
+    'T_items__votes' => [
+        'Creating table for Items Votes',
+        "CREATE TABLE T_items__votes (
 			itvt_item_ID INT UNSIGNED NOT NULL,
 			itvt_user_ID INT UNSIGNED NOT NULL,
 			itvt_updown  TINYINT(1) NULL DEFAULT NULL,
@@ -543,11 +545,11 @@ $schema_queries = array_merge( $schema_queries, array(
 			PRIMARY KEY (itvt_item_ID, itvt_user_ID),
 			KEY itvt_item_ID (itvt_item_ID),
 			KEY itvt_user_ID (itvt_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_items__checklist_lines' => array(
-		'Creating table for checklists',
-		"CREATE TABLE T_items__checklist_lines (
+    'T_items__checklist_lines' => [
+        'Creating table for checklists',
+        "CREATE TABLE T_items__checklist_lines (
 			check_ID      INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			check_item_ID INT(10) UNSIGNED NOT NULL,
 			check_checked TINYINT(1) NOT NULL DEFAULT 0,
@@ -555,23 +557,23 @@ $schema_queries = array_merge( $schema_queries, array(
 			check_order   INT(11) NOT NULL DEFAULT 1,
 			PRIMARY KEY (check_ID),
 			KEY check_item_ID (check_item_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_subscriptions' => array(
-		'Creating table for subscriptions',
-		"CREATE TABLE T_subscriptions (
+    'T_subscriptions' => [
+        'Creating table for subscriptions',
+        "CREATE TABLE T_subscriptions (
 			sub_coll_ID     int(10) unsigned    not null,
 			sub_user_ID     int(10) unsigned    not null,
 			sub_items       tinyint(1)          not null,
 			sub_items_mod   TINYINT(1)          NOT NULL,
 			sub_comments    tinyint(1)          not null,
 			primary key (sub_coll_ID, sub_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	// Important if you change the perm_poststatuses or perm_cmtstatuses set content or order you must change the get_statuse_permvalue() content respectively
-	'T_coll_user_perms' => array(
-		'Creating table for Blog-User permissions',
-		"CREATE TABLE T_coll_user_perms (
+    // Important if you change the perm_poststatuses or perm_cmtstatuses set content or order you must change the get_statuse_permvalue() content respectively
+    'T_coll_user_perms' => [
+        'Creating table for Blog-User permissions',
+        "CREATE TABLE T_coll_user_perms (
 			bloguser_blog_ID              int(10) unsigned NOT NULL default 0,
 			bloguser_user_ID              int(10) unsigned NOT NULL default 0,
 			bloguser_ismember             tinyint NOT NULL default 0,
@@ -599,12 +601,12 @@ $schema_queries = array_merge( $schema_queries, array(
 			bloguser_perm_media_change    tinyint NOT NULL default 0,
 			bloguser_perm_analytics       tinyint NOT NULL default 0,
 			PRIMARY KEY bloguser_pk (bloguser_blog_ID,bloguser_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	// Important if you change the perm_poststatuses or perm_cmtstatuses set content or order you must change the get_status_permvalue() content respectively
-	'T_coll_group_perms' => array(
-		'Creating table for blog-group permissions',
-		"CREATE TABLE T_coll_group_perms (
+    // Important if you change the perm_poststatuses or perm_cmtstatuses set content or order you must change the get_status_permvalue() content respectively
+    'T_coll_group_perms' => [
+        'Creating table for blog-group permissions',
+        "CREATE TABLE T_coll_group_perms (
 			bloggroup_blog_ID              int(10) unsigned NOT NULL default 0,
 			bloggroup_group_ID             int(10) unsigned NOT NULL default 0,
 			bloggroup_ismember             tinyint NOT NULL default 0,
@@ -632,19 +634,19 @@ $schema_queries = array_merge( $schema_queries, array(
 			bloggroup_perm_media_change    tinyint NOT NULL default 0,
 			bloggroup_perm_analytics       tinyint NOT NULL default 0,
 			PRIMARY KEY bloggroup_pk (bloggroup_blog_ID,bloggroup_group_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_coll_user_favs' => array(
-		'Creating table for user favorite collections',
-		"CREATE TABLE T_coll_user_favs (
+    'T_coll_user_favs' => [
+        'Creating table for user favorite collections',
+        "CREATE TABLE T_coll_user_favs (
 			cufv_user_ID    int(10) unsigned NOT NULL,
 			cufv_blog_ID    int(10) unsigned NOT NULL,
 			PRIMARY KEY cufv_pk (cufv_user_ID, cufv_blog_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_links' => array(
-		'Creating table for Links',
-		"CREATE TABLE T_links (
+    'T_links' => [
+        'Creating table for Links',
+        "CREATE TABLE T_links (
 			link_ID               int(10) unsigned  not null AUTO_INCREMENT,
 			link_datecreated      TIMESTAMP         NOT NULL DEFAULT '2000-01-01 00:00:00',
 			link_datemodified     TIMESTAMP         NOT NULL DEFAULT '2000-01-01 00:00:00',
@@ -665,28 +667,26 @@ $schema_queries = array_merge( $schema_queries, array(
 			INDEX link_cmt_ID( link_cmt_ID ),
 			INDEX link_usr_ID( link_usr_ID ),
 			INDEX link_file_ID (link_file_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_temporary_ID' => array(
-		'Creating table for temporary IDs (used for uploads on new posts or messages)',
-		"CREATE TABLE T_temporary_ID (
+    'T_temporary_ID' => [
+        'Creating table for temporary IDs (used for uploads on new posts or messages)',
+        "CREATE TABLE T_temporary_ID (
 			tmp_ID      INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			tmp_type    VARCHAR(32) COLLATE ascii_general_ci NOT NULL,
 			tmp_coll_ID INT(10) UNSIGNED NULL,
 			tmp_item_ID INT(11) UNSIGNED NULL COMMENT 'Link to parent Item of Comment in order to enable permission checks',
 			PRIMARY KEY (tmp_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
 
-	'T_links__vote' => array(
-		'Creating table for File Links Votes',
-		"CREATE TABLE T_links__vote (
+    'T_links__vote' => [
+        'Creating table for File Links Votes',
+        "CREATE TABLE T_links__vote (
 			lvot_link_ID       int(10) UNSIGNED NOT NULL,
 			lvot_user_ID       int(10) UNSIGNED NOT NULL,
 			lvot_like          tinyint(1),
 			lvot_inappropriate tinyint(1),
 			lvot_spam          tinyint(1),
 			primary key (lvot_link_ID, lvot_user_ID)
-		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset" ),
-) );
-
-?>
+		) ENGINE = innodb DEFAULT CHARSET = $db_storage_charset"],
+]);

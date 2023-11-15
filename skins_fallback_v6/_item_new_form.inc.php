@@ -10,22 +10,23 @@
  *
  * @package evoskins
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
-$new_Item = get_session_Item( 0, true );
+$new_Item = get_session_Item(0, true);
 
-$params = array_merge( array(
-		'item_new_form_start' => '<div class="evo_item_new_form panel panel-default">'
-															.'<div class="panel-heading">'
-																.'<h3 class="panel-title">'
-																	.sprintf( T_('New [%s]'), $new_Item->get_type_setting( 'name' ) )
-																.'</h3>'
-															.'</div>'
-															.'<div class="panel-body">',
-		'item_new_form_end'   => '</div></div>',
-	), $params );
+$params = array_merge([
+    'item_new_form_start' => '<div class="evo_item_new_form panel panel-default">'
+                                                        . '<div class="panel-heading">'
+                                                            . '<h3 class="panel-title">'
+                                                                . sprintf(T_('New [%s]'), $new_Item->get_type_setting('name'))
+                                                            . '</h3>'
+                                                        . '</div>'
+                                                        . '<div class="panel-body">',
+    'item_new_form_end' => '</div></div>',
+], $params);
 
 // Require new item form from v5 skins with overwritten v6 params above:
-require skin_fallback_path( '_item_new_form.inc.php', 5 );
-?>
+require skin_fallback_path('_item_new_form.inc.php', 5);

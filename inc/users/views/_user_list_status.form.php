@@ -11,56 +11,62 @@
  *
  * @package admin
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 global $admin_url;
 
-$Form = new Form( NULL, 'users_status_checkchanges' );
+$Form = new Form(null, 'users_status_checkchanges');
 
-$Form->switch_template_parts( array(
-		'labelclass' => 'control-label col-sm-6',
-		'inputstart' => '<div class="controls col-sm-6">',
-		'inputstart_radio' => '<div class="controls col-sm-6">',
-		'infostart'  => '<div class="controls col-sm-6"><div class="form-control-static">',
-	) );
+$Form->switch_template_parts([
+    'labelclass' => 'control-label col-sm-6',
+    'inputstart' => '<div class="controls col-sm-6">',
+    'inputstart_radio' => '<div class="controls col-sm-6">',
+    'infostart' => '<div class="controls col-sm-6"><div class="form-control-static">',
+]);
 
-$Form->title_fmt = '<span style="float:right">$global_icons$</span><div>$title$</div>'."\n";
+$Form->title_fmt = '<span style="float:right">$global_icons$</span><div>$title$</div>' . "\n";
 
-$Form->begin_form( 'fform' );
+$Form->begin_form('fform');
 
-$Form->add_crumb( 'users' );
+$Form->add_crumb('users');
 $Form->hidden_ctrl();
 
 // A link to close popup window:
-$close_icon = action_icon( TB_('Close this window'), 'close', '', '', 0, 0, array( 'id' => 'close_button', 'class' => 'floatright' ) );
+$close_icon = action_icon(TB_('Close this window'), 'close', '', '', 0, 0, [
+    'id' => 'close_button',
+    'class' => 'floatright',
+]);
 
-$Form->begin_fieldset( TB_('Set account status...').get_manual_link( 'userlist-set-account-status' ).$close_icon );
+$Form->begin_fieldset(TB_('Set account status...') . get_manual_link('userlist-set-account-status') . $close_icon);
 
-	echo '<div class="alert alert-info">';
-	echo TB_('Changing the account status for users may trigger additional actions: Welcome messages, Subscriptions, Unsubscriptions, etc.');
-	echo '</div>';
+echo '<div class="alert alert-info">';
+echo TB_('Changing the account status for users may trigger additional actions: Welcome messages, Subscriptions, Unsubscriptions, etc.');
+echo '</div>';
 
-	// Status:
-	$user_status_icons = get_user_status_icons();
-	reset( $user_status_icons );
-	$first_key = key( $user_status_icons );
-	$status_icon = '<div id="user_status_icon" class="status_icon">'.$user_status_icons[$first_key].'</div>';
-	$Form->select_input_array( 'account_status', $first_key, get_user_statuses(), TB_( 'New account status' ), '', array( 'input_prefix' => $status_icon ) );
+// Status:
+$user_status_icons = get_user_status_icons();
+reset($user_status_icons);
+$first_key = key($user_status_icons);
+$status_icon = '<div id="user_status_icon" class="status_icon">' . $user_status_icons[$first_key] . '</div>';
+$Form->select_input_array('account_status', $first_key, get_user_statuses(), TB_('New account status'), '', [
+    'input_prefix' => $status_icon,
+]);
 
 $Form->end_fieldset();
 
-$Form->button( array( '', 'actionArray[update_status]', TB_('Make changes now!'), 'SaveButton' ) );
+$Form->button(['', 'actionArray[update_status]', TB_('Make changes now!'), 'SaveButton']);
 
 $Form->end_form();
 ?>
 <script>
 var user_status_icons = new Array;
 <?php
-foreach( $user_status_icons as $status => $icon )
-{	// Init js array with user status icons
-?>
-user_status_icons['<?php echo $status; ?>'] = '<?php echo format_to_js( $icon ); ?>';
+foreach ($user_status_icons as $status => $icon) {	// Init js array with user status icons
+    ?>
+user_status_icons['<?php echo $status; ?>'] = '<?php echo format_to_js($icon); ?>';
 <?php } ?>
 
 jQuery( '#account_status' ).change( function()

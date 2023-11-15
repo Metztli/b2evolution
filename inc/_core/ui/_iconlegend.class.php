@@ -14,7 +14,9 @@
  * @author fplanque: Francois PLANQUE.
  * @author mbruneau: Marc BRUNEAU / PROGIDISTRI
  */
-if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.' );
+if (! defined('EVO_MAIN_INIT')) {
+    die('Please, do not access this page directly.');
+}
 
 
 /**
@@ -26,74 +28,62 @@ if( !defined('EVO_MAIN_INIT') ) die( 'Please, do not access this page directly.'
  */
 class IconLegend
 {
-	/**
-	 * List of used icon names
-	 * @var array
-	 */
-	var $icons = array();
+    /**
+     * List of used icon names
+     * @var array
+     */
+    public $icons = [];
 
+    /**
+     * Add an icon with his legend to the icons array
+     *
+     * @param string name of the icon
+     */
+    public function add_icon($icon)
+    {
+        if (! in_array($icon, $this->icons)) {
+            $this->icons[] = $icon;
+        }
+    }
 
-	/**
-	 * Add an icon with his legend to the icons array
-	 *
-	 * @param string name of the icon
-	 */
-	function add_icon( $icon )
-	{
-		if( !in_array( $icon, $this->icons ) )
-		{
-			$this->icons[] = $icon;
-		}
-	}
+    /**
+     * Display the icon legend
+     */
+    public function display_legend()
+    {
+        if (empty($this->icons)) {
+            return;
+        }
 
+        // There are some icons to display:
+        echo '<div id="icon_legend">' . T_('Legend') . ': ';
 
-	/**
-	 * Display the icon legend
-	 */
-	function display_legend()
-	{
-		if( empty( $this->icons ) )
-		{
-			return;
-		}
+        // Loop on all map array of filenames for icons to display icons list in the same order:
+        foreach ($this->icons as $icon) {
+            $icon_info = get_icon_info($icon);
+            if (! $icon_info) {
+                continue;
+            }
 
-		// There are some icons to display:
-		echo '<div id="icon_legend">'.T_('Legend').': ';
+            echo '<span class="legend_element">' . get_icon($icon) . ' ';
 
-		// Loop on all map array of filenames for icons to display icons list in the same order:
-		foreach( $this->icons as $icon )
-		{
-			$icon_info = get_icon_info($icon);
-			if( ! $icon_info )
-			{
-				continue;
-			}
+            if (isset($icon_info['legend'])) { // Icon has a legend:
+                echo $icon_info['legend'] . ' ';
+            } else { // Icon has no legend so we use the alt:
+                echo $icon_info['alt'] . ' ';
+            }
 
-			echo '<span class="legend_element">'.get_icon( $icon ).' ';
+            echo '</span>';
+        }
 
-			if( isset( $icon_info['legend'] ) )
-			{ // Icon has a legend:
-				echo $icon_info['legend'] . ' ';
-			}
-			else
-			{ // Icon has no legend so we use the alt:
-				echo $icon_info['alt'] . ' ';
-			}
+        echo '</div>';
+    }
 
-			echo '</span>';
-		}
-
-		echo '</div>';
-	}
-
-
-	/**
-	 * Reset icons array
-	 */
-	function reset()
-	{
-		$this->icons[] = array();
-	}
+    /**
+     * Reset icons array
+     */
+    public function reset()
+    {
+        $this->icons[] = [];
+    }
 }
-
-?>
