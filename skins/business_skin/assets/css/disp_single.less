@@ -1,0 +1,448 @@
+// ========================================================================
+// Disp Single Style
+// ======================================================================== /
+.disp_single, .disp_page {
+   // background-color: @w;
+
+   // Evo Cover Image Style
+   // ======================================================================== /
+   .evo_cover_image {
+      margin-bottom: 40px;
+   }
+
+   // Main Content
+   // ======================================================================== /
+   #main-content{
+
+      // Pagination
+      // ======================================================================== /
+      .pager {
+         border: 1px solid @e;
+         margin-top: 0;
+         background-color: @w;
+
+         .previous, .next {
+            a{
+               color: @c7;
+               font-size: 1.4rem;
+               border-radius: 0;
+               border: 0;
+               margin: 0;
+               padding: 10px 12px;
+               background-color: @w;
+
+               &:hover, &:active, &:focus {
+                  background-color: transparent;
+                  color: @primary;
+               }
+
+            }
+         }
+      }
+
+
+      // Posts
+      // ======================================================================== /
+      .evo_post {
+         box-shadow: none;
+		 word-wrap: break-word;
+         overflow: hidden;
+
+        & > header {
+           border-bottom: 1px solid @e;
+           padding-bottom: 10px;
+           margin-bottom: 20px;
+
+           .cat-links {
+             display: inline-block;
+             a{
+                color: @b;
+                border-bottom: 1px dotted @primary;
+                &:hover, &:active, &:focus {
+                   text-decoration: none;
+                }
+
+             }
+          }
+        }
+
+         // Tags Style
+         // ======================================================================== /
+         .single_tags {
+            padding: 15px 0 0;
+            color: @c7;
+
+            a{
+               // font-size: 1.4rem;
+               color: @c4;
+               border-bottom: 1px dotted @primary;
+               &:hover, &:active, &:focus {
+                  color: @primary;
+                  text-decoration: none;
+               }
+            }
+         }
+
+         // Feedback Stling
+         // ======================================================================== /
+         #feedbacks {
+            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 1px solid @bdr_bg;
+
+            .evo_comment__list_title {
+               font-family: @font_title;
+            }
+
+            .evo_comment__meta_info {
+               a{
+                  &:hover, &:focus, &:active {
+                     background: @primary;
+                     color: @w;
+                     border-color: @primary;
+                  }
+               }
+            }
+
+            .alert {
+               font-size: 1.4rem;
+            }
+         }
+
+         // Panel
+         // ======================================================================== /
+         .panel {
+            border: 0;
+
+            .panel-heading {
+               position: relative;
+               background-color: transparent;
+               border: 0;
+               padding-left: 0;
+               padding-right: 0;
+               overflow: hidden;
+               padding-bottom: 15px;
+
+               &::after {
+                  content: '';
+                  position: absolute;
+                  top: 50%;
+                  width: 100%;
+                  height: 1px;
+                  background-color: @e;
+               }
+
+               .panel-title {
+                  display: inline-block;
+                  font-size: 1.8rem;
+                  font-weight: normal;
+                  color: @b;
+                  background: @w;
+                  padding-right: 10px;
+               }
+            }
+
+            & > .panel-body {
+               border: 1px solid @e;
+               padding: 20px;
+               background-color: @w;
+            }
+         }
+
+         // Evo_comment
+         // ======================================================================== /
+         .evo_comment, .evo_comment__preview {
+            position: relative;
+
+            // Panel Heading
+            // ======================================================================== /
+            .panel-heading {
+               margin: 0;
+               overflow: inherit;
+
+               .evo_comment_title{
+                  font-size: 1.5rem;
+                  font-weight: normal;
+                  a{
+                     color: @primary;
+                     &:hover, &:focus, &:active {
+                        background-color: transparent;
+                     }
+                  }
+               }
+            }
+
+            // Comment Avatar
+            // ======================================================================== /
+            .evo_comment_avatar {
+               position: absolute;
+               left: 20px;
+               margin-right: 10px;
+
+               img {
+                  float: none;
+                  border-radius: 100%;
+               }
+
+               @media screen and ( max-width: @S ) {
+                  display: block;
+                  position: relative;
+                  left: 0;
+                  margin: 0 auto;
+                  text-align: center;
+               }
+            }
+
+            .evo_comment_rating, .evo_comment_text {
+               margin-left: 80px;
+
+               @media screen and ( max-width: @S ) {
+                  margin-left: 0;
+               }
+            }
+
+            .evo_comment_rating {
+               margin-bottom: 10px;
+            }
+
+            .evo_comment_text {
+               display: block;
+               font-size: 1.4rem;
+               min-height: 65px;
+
+               img {
+                  max-width: 100%;
+               }
+
+               .evo_image_block {
+                  display: table;
+                  margin-right: auto;
+                  margin-left: auto;
+                  &:hover a {
+                     &::before {
+                        border-radius: 3px;
+                     }
+                  }
+               }
+            }
+
+            .evo_comment_footer {
+               margin-top: 15px;
+               display: block;
+
+               small {
+                  font-size: 100%;
+                  font-size: 1.3rem;
+               }
+
+               .action_btn_group {
+                  float: right;
+               }
+
+               .permalink_right {
+                  background-color: @primary;
+                  padding: 2px 6px;
+                  color: @w;
+                  border-radius: 2px;
+                  margin-left: 0.5rem;
+                  font-size: 1.2rem;
+                  margin-top: -5px;
+                  &:hover, &:active, &:focus {
+                     text-decoration: none;
+                  }
+               }
+            }
+         }
+
+         .evo_comment__preview {
+            .panel-body {
+               background-color: @bg_post_regular;
+            }
+         }
+
+         // Form Single
+         // ======================================================================== /
+         .evo_form {
+
+            .form-group {
+               label {
+                  font-family: @font_title;
+                  font-size: 1.4rem;
+               }
+            }
+
+            .fieldset_wrapper {
+               .panel-body {
+                  padding: 10px 0;
+                  border: 0;
+               }
+            }
+
+            .form_text_input, .form_textarea_input {
+               box-shadow: none;
+               border-radius: 3px;
+               border-color: @bdr_bg;
+
+               &:hover, &:focus, &:active {
+                  border-color: @primary;
+               }
+            }
+
+            .form_textarea_input {
+
+               &:hover, &:focus, &:active {
+                  box-shadow: none;
+                  border-color: @primary;
+               }
+            }
+
+            .user {
+               font-size: 1.4rem;
+            }
+
+            .preview, .submit {
+               border-radius: 2px;
+               font-weight: 700;
+               text-transform: uppercase;
+               letter-spacing: 0;
+               padding: 10px 18px;
+               font-size: 1.3rem;
+               box-shadow: none;
+               transition: all 0.32s ease-in-out;
+
+               &:hover, &:focus, &:active {
+                  outline: 0;
+                  box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+               }
+            }
+
+            .preview {
+               background-color: @e;
+               border-color: @e;
+               color: @c9;
+               margin-right: 3px;
+            }
+
+            .submit {
+               background-color: @primary;
+               border-color: @primary;
+
+               &:hover, &:focus, &:active {
+                  outline: 0;
+                  background-color: #09C1DC;
+                  border-color: #09C1DC;
+               }
+            }
+         }
+
+         // Comment Notification
+         // ======================================================================== /
+         .evo_post_comment_notification, .evo_post_feedback_feed_msg {
+            font-size: 1.4rem;
+         }
+
+         // Comment Notification
+         // ======================================================================== /
+         .evo_post_comment_notification {
+
+            a {
+               color: @c4;
+               font-size: 1.3rem;
+
+               &:hover, &:active, &:focus {
+                  color: @primary;
+                  border: none;
+                  background-color: transparent;
+               }
+            }
+
+            a.btn  {
+
+               &:hover, &:active, &:focus {
+                  color: @w;
+                  background-color: @primary;
+                  border: 1px solid @primary;
+                  box-shadow: none;
+                  outline: 0;
+               }
+            }
+         }
+      }
+   }
+
+   // ========================================================================
+   // Custom Widget Posts Style
+   // ======================================================================== /
+   #main-sidebar {
+      .widget_plugin_evo_Calr {
+
+         .bCalendarTable {
+            caption {
+               a{
+                  background-color: @w;
+               }
+            }
+         }
+      }
+   }
+
+}// end disp_singe
+
+
+// Button User link hover on Comment Section
+// ======================================================================== /
+.bubbletip_user__buttons {
+
+   a {
+      font-family: @font_body;
+      font-size: 1.3rem;
+      padding: 6px 0 !important;
+      color: @w !important;
+   }
+
+   .btn-primary {
+      background-color: #337ab7 !important;
+
+      &:hover {
+         background-color: #286090 !important;
+      }
+   }
+
+   .btn-danger {
+      background-color: #d43f3a !important;
+
+      &:hover {
+         background-color: #c9302c !important;
+      }
+   }
+
+}
+
+
+// Item Meta Comments
+// ======================================================================== /
+.item_meta_comments {
+   .fieldset_wrapper {
+      .panel-heading {
+         font-size: 1.6rem;
+         overflow: hidden;
+         &::after {
+            margin-left: 10px;
+         }
+      }
+   }
+
+   .evo_comment__meta {
+      .panel-heading {
+         overflow: hidden !important;
+      }
+
+      .panel-body {
+         transition: all 0.32s ease-in-out;
+         &:hover, &:active, &:focus {
+            box-shadow: 3px 6px 15px rgba(111, 111, 111, 0.15);
+         }
+      }
+   }
+
+}

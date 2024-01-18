@@ -1,0 +1,274 @@
+/* ----------------------------------------------------------------------------
+ * Main Sidebar
+ * -------------------------------------------------------------------------- */
+#main-sidebar {
+
+   @media screen and ( min-width: @MM ) {
+      &.col-md-4 {
+         padding-left: 25px;
+
+         &.pull-left {
+            padding-left: 15px;
+            padding-right: 25px;
+         }
+      }
+   }
+
+   @media only screen and ( max-width: @MM ) {
+      padding-top: 30px;
+   }
+
+   // ========================================================================
+   // Widget Styling
+   // ======================================================================== /
+   .evo_widget {
+      font-size: 1.4rem;
+      border: 0;
+      padding: 0;
+      box-shadow: none;
+      background-color: transparent;
+      margin-bottom: 25px;
+      color: @b;
+
+      a{
+         color: @b;
+
+         &:hover, &:active, &:focus {
+            color: @primary;
+         }
+      }
+
+      ul {
+         list-style-type: none;
+         margin: 0;
+         padding: 0;
+
+         ul {
+           padding-left: 30px;
+         }
+
+         li {
+
+            strong {
+
+               a {
+                  color: #555555;
+               }
+            }
+
+         }
+
+      }
+
+   }
+
+   .panel-body, .panel-heading{
+      padding: 15px 0;
+   }
+
+
+   // Panel Heading
+   // ======================================================================== /
+   .panel-heading {
+      position: relative;
+      overflow: hidden;
+      background-color: transparent;
+      border: 0;
+
+      .panel-title {
+         display: inline-block;
+         font-size: 1.6rem;
+         font-weight: normal;
+         color: #000000;
+         padding-right: 20px;
+      }
+
+      &::after {
+         content: '';
+         position: absolute;
+         top: 50%;
+         width: 100%;
+         height: 1px;
+         background-color: #e4e4e4;
+      }
+   }
+
+   .panel.panel-default {
+      background: transparent;
+   }
+
+   input[type="email"],
+   input[type="number"],
+   input[type="password"],
+   input[type="tel"],
+   input[type="url"],
+   input[type="text"]{
+      box-shadow: none;
+      border-radius: 2px;
+
+      &:focus {
+         // box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px @primary;
+         box-shadow: none;
+         border-color: @primary;
+         opacity: 0.6;
+      }
+   }
+
+   // Panel Body
+   // ======================================================================== /
+   .panel-body {
+      font-size: 1.4rem;
+      padding-top: 5px;
+   }
+
+   // Styling Image
+   // ======================================================================== /
+   .widget_core_image {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+   }
+
+   // Widget User Login
+   // ======================================================================== /
+   .widget_core_user_login {
+
+      img {
+         border-radius: 100%;
+         margin-right: 5px;
+      }
+
+   }
+
+   // Widget Member
+   // ======================================================================== /
+   .widget_core_org_members {
+
+      .panel-body {
+
+         div.col-lg-4 {
+            width: 100%;
+            float: none;
+            padding-bottom: 20px;
+
+            img {
+               width: 140px;
+            }
+
+         }
+
+         .ufld_icon_links {
+            margin-bottom: 10px;
+
+            a {
+               color: @c7;
+               // background-color: #ddd;
+
+               &:hover, &:active, &:focus {
+                  color: @w;
+               }
+            }
+         }
+      }
+
+   }
+
+   // User Links
+   // ======================================================================== /
+   .widget_core_user_links {
+      .ufld_icon_links {
+
+         a{
+            margin: 1px;
+            color: @c4;
+            background-color: #eee;
+         }
+      }
+   }
+
+   // Search Form
+   // ======================================================================== /
+   .widget_core_coll_search_form {
+      .compact_search_form{
+
+         .search_field, .search_submit {
+            box-shadow: none;
+            border-radius: 0;
+
+            &:focus, &:hover, &:active {
+               opacity: 1;
+               box-shadow: none;
+            }
+         }
+
+      }
+   }
+
+   // Tag Cloud
+   // ======================================================================== /
+   .widget_core_coll_tag_cloud {
+
+      .tag_cloud {
+         a{
+            margin: 2px;
+            background-color: @bg_post_regular;
+            border: 1px solid @bdr_bg;
+
+            &:hover, &:active, &:focus {
+               text-decoration: none;
+               background-color: @primary;
+               color: @w;
+               border-color: @primary;
+            }
+         }
+      }
+   }
+
+   // Title Logo Image and Text
+   // ======================================================================== /
+   .widget_core_coll_logo, .widget_core_coll_title {
+
+      .panel-heading {
+
+         &::after {
+            width: 0;
+         }
+      }
+
+      .panel-title {
+         display: block;
+         text-align: center;
+         text-transform: uppercase;
+         font-size: 3.2rem;
+         font-weight: 700;
+         letter-spacing: 2px;
+
+         a {
+
+            &:hover, &:active, &:focus {
+               color: @b;
+               text-decoration: none;
+            }
+         }
+      }
+   }
+
+   // Tagline
+   // ======================================================================== /
+   .widget_core_coll_tagline {
+      text-align: center;
+   }
+
+   // Recent Comment
+   // ======================================================================== /
+   .widget_core_coll_comment_list {
+
+      a {
+         &:hover, &:active, &:focus {
+            background-color: transparent;
+         }
+      }
+
+   }
+
+}

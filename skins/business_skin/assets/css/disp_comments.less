@@ -1,0 +1,100 @@
+// ========================================================================
+// Custom Style for Comments Disp
+// ======================================================================== /
+.disp_comments {
+
+   .evo_comment {
+      margin-bottom: 30px;
+      border-color: @e;
+      border-radius: 2px;
+
+      a {
+         color: @primary;
+
+         &:hover, &:active, &:focus {
+            background-color: transparent;
+            color: @primary;
+         }
+      }
+
+      img {
+         max-width: 100%;
+      }
+
+      .panel-heading {
+         background-color: transparent;
+         border-color: @e;
+         color: @c4;
+         padding: 12px 15px;
+
+         .evo_comment_title, .panel-title {
+            font-size: 1.3rem;
+            font-weight: normal;
+
+            a{
+               color: @primary;
+
+               &:hover, &:active, &:focus {
+                  background-color: transparent;
+               }
+            }
+         }
+
+         .panel-title {
+            @media only screen and ( max-width: @M ) {
+               margin-bottom: 5px;
+            }
+         }
+
+      }
+
+      .panel-body {
+         @media screen and ( min-width: @M ) {
+            padding: 20px;
+         }
+      }
+
+      .evo_comment_text {
+         font-size: 1.4rem;
+      }
+
+      .evo_comment_info {
+         padding-top: 5px;
+         font-size: 1.4rem;
+
+         a {
+            background-color: @e;
+            padding: 2px 5px;
+            color: @c4;
+            border-radius: 2px;
+            margin-top: -1px;
+
+            &:hover {
+               text-decoration: none;
+               background-color: @primary;
+               color: @w;
+            }
+         }
+
+         .action_btn_group {
+           float: right;
+         }
+      }
+
+      .evo_comment_avatar {
+         img {
+            margin-right: 20px;
+
+            @media screen and ( max-width: @S ) {
+               float: none;
+               display: block;
+               position: relative;
+               margin: 0 auto 15px;
+               text-align: center;
+            }
+         }
+      }
+
+   }
+
+}

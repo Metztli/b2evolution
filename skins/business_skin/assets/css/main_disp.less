@@ -1,0 +1,630 @@
+// Profle Content
+// ======================================================================== /
+.profile_content {
+   .evo_form_user {
+      .profile_column_left {
+         // float: left;
+         width: 260px;
+         max-width: 260px;
+
+         img {
+            width: 100%;
+            height: auto;
+         }
+
+         @media screen and ( max-width: @M ) {
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+
+            img {
+               max-width: 320px;
+            }
+         }
+      }
+      .profile_column_right {
+         margin-left: 280px;
+
+         @media screen and ( max-width: @M ) {
+            margin-left: 0;
+         }
+      }
+   }
+
+   .panel {
+      border-color: @primary;
+      border-radius: 2px;
+
+      .panel-heading {
+         background-color: @primary;
+         color: @w;
+         border-radius: 0;
+         box-shadow: none;
+         border-bottom: 0;
+      }
+
+      .panel-body {
+         .control-label {
+            width: 120px;
+
+            .fa {
+               padding-right: 5px;
+            }
+         }
+
+         .fixedform-controls {
+            margin-left: 135px;
+         }
+
+      }
+   }
+
+   .profile_buttons {
+      .btn {
+         border-radius: 2px;
+         padding: 10px;
+      }
+   }
+
+}
+
+
+// Register widget form
+// ======================================================================== /
+.widget_core_user_register {
+	#register_form {
+
+      .form-group {
+			margin: 0;
+		}
+
+		label {
+			text-align: left;
+			width: 160px;
+			padding-left: 0;
+         padding-bottom: 5px;
+		}
+
+      .controls {
+			padding: 0;
+			width: 100%;
+		}
+
+		.form_text_input.form-control {
+			width: 100%;
+         margin-bottom: 5px;
+		}
+	}
+
+	.submit {
+		font-size: 12px;
+	}
+
+	.field_register_btn {
+
+		.panel {
+			margin: 0;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+
+			.panel-body {
+				padding-left: 0;
+				padding-right: 0;
+				padding-bottom: 0;
+
+				#submit_login_form {
+					margin-right: 10px;
+
+               &:focus, &:active, &:hover {
+                  outline: 0;
+                  // color: @w;
+                  // background-color: @primary;
+               }
+				}
+			}
+
+		}
+	}
+}
+
+
+// Login widget form
+// ======================================================================== /
+.widget_core_user_login {
+
+	#login_form {
+
+		.form-group {
+			margin: 0;
+		}
+
+      label {
+			text-align: left;
+			width: 160px;
+			padding-left: 0;
+         padding-bottom: 5px;
+		}
+
+		.controls {
+			padding: 0;
+			width: 100%;
+		}
+
+		.form_text_input.form-control {
+			width: 100%;
+		}
+	}
+
+	.submit {
+		font-size: 12px;
+	}
+
+	.field_login_btn {
+
+		.panel {
+			margin: 0;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+
+			.panel-body {
+				padding-left: 0;
+				padding-right: 0;
+				padding-bottom: 0;
+
+				#submit_login_form {
+					margin-right: 10px;
+				}
+			}
+		}
+	}
+
+	.register_link {
+		display: block;
+		padding-top: 10px;
+	}
+
+}
+
+
+// Profile tabs on ?disp=profile
+// ======================================================================== /
+ul.profile_tabs {
+	margin: 0 2ex 2ex;
+	position: relative;
+	top: 1px;
+}
+
+.profile_avatar {
+	float: right;
+	padding: 10px;
+	margin-left: 10px;
+}
+
+// Use full width for all textarea
+.form-horizontal .controls textarea.form-control {
+	width: 100%;
+}
+
+
+// Table for select categories of item
+table.catselect {
+
+	input#new_category_name {
+		width: 98% !important;
+	}
+}
+
+// Form elements on item edit page
+label.control-label[for=post_title] {
+	width: auto;
+}
+
+// A form to create a new message/thread
+textarea.message_text {
+	width: 95%;
+}
+
+div.bSideItem {
+	background: #F7F5FA;
+	border-radius: 5px;
+	padding: 10px;
+	margin-bottom: 10px;
+	text-shadow: 0 1px 0 #FFFFFF;
+
+	h4 {
+		margin-top: 0;
+	}
+}
+
+
+// Login/Register forms:
+// ======================================================================== /
+.skin-form {
+	border-radius: 3px;
+	border-color: @primary;
+
+	.panel-heading {
+		padding: 20px 25px;
+		color: @w;
+		background-color: @primary;
+		border-radius: 0;
+		border-bottom: 0;
+
+		.panel-title {
+			font-size: 1.8rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+
+			.close {
+				top: 0;
+				color: @w;
+				opacity: 0.8;
+
+				&:hover, &:active, &:focus {
+					opacity: 1;
+					outline: 0;
+				}
+
+				span {
+					&:hover, &:active, &:focus {
+						outline: 0;
+						box-shadow: none;
+						border: none;
+					}
+				}
+			}
+		}
+	}
+
+	.panel-body {
+		padding: 30px;
+
+		.panel {
+			border: none;
+			box-shadow: none;
+		}
+		.panel-body {
+			padding: 0;
+		}
+	}
+
+	.fieldset {
+		margin: 0;
+		div.input {
+			margin: 0;
+		}
+	}
+
+	.control-buttons, div.input {
+		padding: 0;
+		width: 100%;
+		text-align: center;
+	}
+}
+
+
+// Evo Form
+// ======================================================================== /
+.evo_form {
+	.form_text_input, .form_textarea_input {
+		padding: 8px 12px;
+		border-radius: 2px;
+		border-color: @bdr_bg;
+		box-shadow: none;
+      height: auto;
+
+		&:focus {
+			border-color: @primary;
+			box-shadow: none !important;
+		}
+	}
+
+	.submit {
+		border-radius: 2px;
+		font-size: 1.3rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		background-color: @primary;
+		border-color: @primary;
+		transition: all 0.32s ease-in-out;
+
+		&:hover, &:focus, &:active {
+			outline: none;
+			box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+		}
+	}
+}
+
+.evo_panel__login,
+.evo_panel__lostpass,
+.evo_panel__register,
+.evo_panel__activation {
+	min-width: 290px;
+	margin: 1.5em auto auto;
+	border-color: @bdr_bg;
+
+	.panel {
+		margin: 5px 0;
+	}
+
+	.panel-body {
+		padding: 30px 30px 15px;
+	}
+
+	.form_text_input {
+		padding: 12px 15px;
+		border-radius: 2px;
+		border-color: @primary;
+		box-shadow: none;
+      height: auto;
+
+		&:focus {
+			border-color: @primary;
+			box-shadow: none !important;
+		}
+	}
+
+	.btn {
+		border-radius: 2px;
+		font-size: 1.4rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		// letter-spacing: 0.5px;
+		transition: all 0.32s ease-in-out;
+
+		&:hover, &:active, &:focus {
+			outline: 0;
+			box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+		}
+
+		&.btn-success {
+			background-color: @primary;
+			border-color: @primary;
+		}
+
+		&.btn-primary {
+			background-color: @c5;
+			border-color: @c5;
+		}
+	}
+
+}
+
+.evo_panel__login {
+   // padding-top: 20px;
+	max-width: 460px;
+}
+
+.evo_panel__lostpass {
+	max-width: 480px;
+
+	#ffield_x label {
+		display: none;
+	}
+}
+
+.evo_panel__activation {
+	max-width: 530px;
+
+	#activateinfo_form .control-buttons{
+		text-align: left;
+	}
+
+}
+
+.evo_panel__register {
+	max-width: 580px;
+
+	.control-buttons{
+		text-align: left;
+	}
+
+	&.register-disabled {
+		width: 350px;
+	}
+
+	.form-control {
+
+      &#country, &#u {
+			// width: 100%;
+		}
+	}
+}
+
+.evo_form__login_links {
+	padding: 0 5px;
+	font-size: 92%;
+}
+
+.evo_form__login {
+
+	fieldset {
+		margin-bottom: 20px;
+	}
+
+	.controls {
+		padding: 0;
+		margin: 0;
+		width: 100%;
+	}
+
+	.control-buttons {
+		margin-left: 0;
+	}
+
+	input.form-control[type=text], input.form-control[type=password] {
+		width: 100%;
+      height: auto;
+	}
+
+	.btn {
+		margin-top: 5px;
+	}
+}
+
+#login_form {
+	.control-buttons {
+		text-align: left;
+	}
+}
+
+.standard_login_link {
+	text-align: center;
+	margin: 3em 0 1ex 0;
+}
+
+.form_footer_notes {
+	margin-top: 0;
+}
+
+
+// Messages
+div.action_messages, div.log_container {
+	margin: 0;
+}
+
+// Positions on the action buttons near page titles}
+
+// This skin needs this for disp=posts to separate from lower pagination
+footer.row {
+	margin-top: 20px;
+}
+
+
+// Disp 404
+// ======================================================================== /
+.error_404 {
+   min-height: 500px;
+   padding-top: 100px;
+   text-align: center;
+
+   .fa-exclamation-triangle {
+      font-size: 8rem;
+   }
+
+   h2 {
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+   }
+
+}
+
+
+// Disp Detail Profile
+// ======================================================================== /
+.disp_profile,
+.disp_avatar,
+.disp_pwdchange,
+.disp_userprefs,
+.disp_subs {
+
+   .main_content {
+      .profile_tabs {
+         margin: 0 0 30px;
+         border-bottom: 2px solid @primary;
+
+         li {
+            &.active {
+               a {
+                  color: @w;
+                  border-color: @primary;
+                  background-color: @primary;
+               }
+            }
+
+            a {
+               font-size: 1.3rem;
+               font-weight: 700;
+               text-transform: uppercase;
+               letter-spacing: 0.2px;
+               border-radius: 3px 3px 0 0;
+
+               &:hover, &:active, &:focus {
+                  background-color: @primary;
+                  border-color: @primary;
+                  color: @w;
+               }
+            }
+         }
+      }
+
+      .panel {
+         border-radius: 2px;
+         border-color: @primary;
+      }
+
+      .panel-heading {
+         color: @w;
+         background-color: @primary;
+         border-bottom: 0;
+         border-radius: 0;
+      }
+
+      .panel-body {
+         padding: 20px;
+      }
+
+      .control-label {
+         .fa {
+            padding-right: 3px;
+         }
+      }
+
+      .controls {
+
+         .form_text_input {
+            max-width: 92%;
+         }
+      }
+
+      .btn {
+         font-size: 1.3rem;
+         font-weight: 700;
+         padding: 10px 15px;
+         letter-spacing: 0.2px;
+         text-transform: uppercase;
+         border-radius: 2px;
+      }
+
+      .btn-primary {
+         background-color: @primary;
+         border-color: @primary;
+
+         &:hover, &:active, &:focus {
+            box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+         }
+      }
+
+      #ffield_edited_user_email {
+         .help-inline {
+            .btn {
+               padding: 8px 12px;
+               color: @w;
+               background-color: @primary;
+               border-color: @primary;
+            }
+         }
+      }
+
+   }
+
+}
+
+
+// ======================================================================== /
+// Disp Access Requires Login
+// ======================================================================== /
+.disp_access_requires_login,
+.disp_login {
+
+   #main-content {
+      min-height: 80vh;
+   }
+
+}

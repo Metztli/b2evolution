@@ -1,0 +1,106 @@
+/**
+ * Thanks to use Business Blog Skin
+ *
+ * Author:          Ariflaw
+ * Autor URI:       http://www.ariflaw.com
+ * Author Contact:  hello@ariflaw.com
+ *
+ * @support By b2evolution
+ */
+
+// VARIABLE
+// ======================================================================== /
+@import "assets/css/variable";
+
+// GLOBAL STYLE
+// ======================================================================== /
+@import "assets/css/global";
+
+// IMPORT FOR DEFAULT STYLE SKIN
+// ======================================================================== /
+
+// --------- Universal item list widget & Recent posts widget ---------
+@import "../../rsc/less/_universal_item_list_widget.module.less";
+// Skin custom layout overrides
+div.widget_core_coll_item_list,
+div.widget_core_coll_featured_posts,
+div.widget_core_coll_post_list,
+div.widget_core_coll_page_list,
+div.widget_core_coll_related_post_list {
+	// Removing border-radius on images
+	img {
+		border-radius: 0;
+	}
+
+    // Removing background-color on RWD blocks
+    &.evo_layout_rwd .widget_rwd_content {
+        background-color: transparent;
+        border-radius: 0;
+        padding: 0;
+        margin: 0 0 30px 0;
+        // Editing post title font-size on RWD blocks
+        .item_title {
+            font-family: @font_title;
+            font-size: 17px;
+        }
+    }
+
+    &.evo_1pic__special.evo_noexcerpt.evo_noteaser.evo_layout_rwd .widget_rwd_content .item_title a {
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+}
+
+// ------------------- Media Index widget --------------------
+@import "../../rsc/less/_coll_media_index_widget.module.less";
+// -----------------------------------------------------------
+
+// ----------- User Avatars (User List) widget ------------
+@import "../../rsc/less/_user_avatars_widget.module.less";
+// --------------------------------------------------------
+
+// -----------------About Author widget -------------------
+@import "../../rsc/less/_about_author_widget.module.less";
+// --------------------------------------------------------
+
+// ------------- Organization Members widget -------------
+@import "../../rsc/less/_org_members_widget.module.less";
+	// Override constants used in the module:
+	@widget_core_org_members-color: #333;
+	@widget_core_org_members-user-link-color: #000;
+	@widget_core_org_members-user-link-hover-color: #23527c;
+// -------------------------------------------------------
+
+// HEADER STYLE
+// ======================================================================== /
+@import "assets/css/header";
+
+// SIDEBAR
+// ======================================================================== /
+@import "assets/css/sidebar";
+
+// WIDGET
+// ======================================================================== /
+@import "assets/css/widget";
+
+// CONTENT
+// ======================================================================== /
+@import "assets/css/content";
+@import "assets/css/disp_posts";
+@import "assets/css/disp_single";
+@import "assets/css/disp_mediaidx";
+@import "assets/css/disp_search";
+@import "assets/css/disp_front";
+@import "assets/css/disp_comments";
+@import "assets/css/disp_arcdir";
+@import "assets/css/disp_catdir";
+@import "assets/css/disp_postidx";
+@import "assets/css/disp_tags";
+@import "assets/css/disp_sitemap";
+@import "assets/css/disp_contact";
+@import "assets/css/main_disp";
+
+// FOOTER
+// ======================================================================== /
+@import "assets/css/footer";

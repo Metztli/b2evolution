@@ -1,0 +1,258 @@
+// ========================================================================
+// Disp Style Code
+// ======================================================================== /
+// A search button
+input.search_field {
+	margin-bottom: 0;
+	display: inline-block;
+}
+
+form.search .search_options {
+	width: 100%;
+	.search_option input {
+		margin-right: 5px;
+	}
+	.search_option label {
+		margin-bottom: 0;
+		margin-top: 5px;
+	}
+}
+
+div.compact_search_form {
+	input.search_field {
+		width: 100%;
+		margin: 0;
+	}
+}
+
+div.extended_search_form {
+	text-align: center;
+	margin: 0 auto 2em auto;
+	max-width: 530px;
+
+	.search_options {
+		text-align: center;
+
+		.search_option {
+			display: inline-block;
+			margin-right: 10px;
+		}
+	}
+}
+
+.disp_search {
+   // background-color: @bg_post_regular;
+
+   // Search Box Style
+   // ======================================================================== /
+   .search-box {
+      padding: 60px 30px;
+      border-bottom: 1px solid @bdr_bg;
+
+      @media only screen and ( max-width: @S ) {
+         padding-left: 0;
+         padding-right: 0;
+      }
+
+      // Title
+      // ======================================================================== /
+      .title_search_box {
+         font-family: @font_title;
+         font-weight: 700;
+         font-size: 2.8rem;
+         text-align: center;
+         margin-bottom: 30px;
+      }
+
+      // Widget Search
+      // ======================================================================== /
+      .widget_core_coll_search_form {
+         overflow: hidden;
+
+         .compact_search_form {
+            margin: 0 auto;
+            width: 90%;
+
+            @media screen and (max-width: @M) {
+               width: 100%;
+            }
+
+            .search_field, .search_submit {
+               height: 50px;
+               line-height: 15px;
+               border-color: @primary;
+               border-radius: 0;
+
+               &:hover, &:focus, &:active {
+                  outline: none;
+                  box-shadow: none;
+               }
+            }
+
+            .search_field {
+               float: left;
+               width: 75%;
+               font-size: 1.6rem;
+               padding-right: 15px;
+               padding-left: 15px;
+
+               &:focus, &:active {
+                  border-color: @primary;
+               }
+            }
+
+            .search_submit {
+               float: right;
+               width: 25%;
+               font-size: 1.6rem;
+               font-weight: 600;
+               text-transform: uppercase;
+               letter-spacing: 1px;
+               padding-left: 10px;
+               padding-right: 10px;
+               background-color: @primary;
+            }
+         }
+      }
+
+   }
+
+   // Main-content
+   // ======================================================================== /
+   #main-content {
+      .widget_core_coll_search_form {
+         padding-bottom: 40px;
+      }
+   }
+
+   // Search Result
+   // ======================================================================== /
+   .search_result {
+      font-size: 1.4rem;
+      padding: 0;
+
+      .search_result_score.dimmed{
+         width: 55px;
+         height: 55px;
+         line-height: 55px;
+         text-align: center;
+         font-weight: 700;
+         font-size: 1.5rem;
+         border-radius: 100%;
+         background-color: @primary;
+         color: @w;
+         box-shadow: @bx_post;
+
+         @media screen and ( max-width: @S ) {
+            // width: 100%;
+            // height: 100%;
+            margin: 0 auto;
+            float: none;
+            border-radius: 2px;
+            margin-bottom: 15px;
+         }
+
+      }
+
+      .search_content_wrap {
+         padding: 0 0 40px 0;
+         margin-bottom: 30px;
+         margin-left: 80px;
+         border-bottom: 1px solid @bdr_bg;
+
+         @media screen and ( max-width: @S ) {
+            margin-left: 0;
+         }
+
+         .search_title {
+            font-family: @font_title;
+            font-size: 2.2rem;
+            line-height: 1.3;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: @c4;
+
+            a {
+               color: @c4;
+               text-decoration: none;
+
+               &:hover, &:active, &:focus {
+                  color: @primary;
+                  text-decoration: underline;
+               }
+            }
+
+         }
+
+         .result_content {
+            // font-size: 1.4rem;
+            margin-bottom: 15px;
+         }
+
+         .search_info {
+            margin-bottom: 2px;
+            font-size: 94%;
+
+            a {
+               color: @c4;
+               border-bottom: 1px dotted @primary;
+
+               &:hover, &:active, &:focus {
+                  background-color: transparent;
+                  text-decoration: none;
+                  color: @primary;
+               }
+            }
+         }
+
+      }
+   }
+
+   // Pagination
+   // ======================================================================== /
+   .pagination {
+      margin-top: 8px;
+
+      li{
+         display: inline-block;
+         margin: 0 1px;
+
+         .active {
+            margin-right: 1px;
+         }
+      }
+   }
+
+   // ========================================================================
+   // Main Sidebar Style
+   // ======================================================================== /
+   #main-sidebar {
+
+      // Tags Style
+      // ======================================================================== /
+      .widget_core_coll_tag_cloud {
+
+         .tag_cloud {
+            a {
+               background-color: @w;
+            }
+         }
+      }
+
+      // Calender
+      // ======================================================================== /
+      .widget_plugin_evo_Calr {
+
+         .bCalendarTable {
+            caption {
+               a {
+                  background-color: @bg_post_regular;
+               }
+            }
+         }
+
+      }
+
+   }
+
+}

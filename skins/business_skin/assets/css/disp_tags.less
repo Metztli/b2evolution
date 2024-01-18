@@ -1,0 +1,50 @@
+// ========================================================================
+// Style Tags Disp
+// ======================================================================== /
+.disp_tags {
+   // background-color: @bg_post_regular;
+
+   #main-content {
+
+      .tag_cloud {
+         background-color: @w;
+         box-shadow: @bx_post;
+         font-size: 1.5rem;
+         padding: 30px;
+
+         ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+         }
+
+         a {
+            padding: 6px 20px;
+            border: 1px solid @bdr_bg;
+            margin: 3px 2px;
+            display: inline-block;
+            font-size: 1.4rem !important;
+            color: @c4;
+            background: @bg_post_regular;
+            border-radius: 2px;
+
+            &:hover, &:active, &:focus {
+               background-color: @primary;
+               border-color: @primary;
+               color: @w;
+               text-decoration: none;
+            }
+         }
+
+      }
+
+   }
+
+   #main-sidebar {
+      .tag_cloud {
+         box-shadow: none;
+         padding: 0;
+      }
+   }
+
+}

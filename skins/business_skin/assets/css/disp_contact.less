@@ -1,0 +1,325 @@
+// Concat Disp Style
+// ======================================================================== /
+.detail_contacts {
+   .results {
+      border-color: @primary;
+      border-radius: 2px;
+
+      .panel-heading {
+         padding: 15px;
+         color: @w;
+         background-color: @primary;
+         border-radius: 0;
+
+         .panel-title {
+            text-transform: uppercase;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+         }
+      }
+
+      .form_text_input {
+         box-shadow: none;
+         &:hover, &:active, &:focus {
+            border-color: @primary;
+            box-shadow: none;
+         }
+      }
+
+   }
+
+   .btn {
+      border-radius: 2px;
+      // border-color: @primary;
+      &:hover, &:active, &:focus {
+         outline: none;
+      }
+   }
+
+   .form_send_contacts {
+      .btn-default {
+         border-color: @primary;
+         &:hover, &:active, &:focus {
+            color: @w;
+            background-color: @primary;
+         }
+      }
+   }
+
+   .form_add_contacts {
+      .input-sm {
+         border-color: @primary;
+         &:hover, &:focus, &:active {
+            box-shadow: none;
+         }
+      }
+
+      .SaveButton {
+         font-weight: 700;
+         text-transform: uppercase;
+         letter-spacing: 0;
+         background-color: @primary;
+         border-color: @primary;
+      }
+   }
+
+}
+
+// Form Tread
+// ======================================================================== /
+.evo_form__thread {
+   border: 1px solid @e;
+   padding: 30px;
+   margin-bottom: 30px;
+   transition: all 0.32s ease-in-out;
+
+   &:hover, &:focus, &:active {
+      border-color: @primary;
+      box-shadow: 1px 2px 8px rgba(108, 106, 106, 0.1);
+   }
+
+   .control-label {
+      font-family: @font_title;
+   }
+
+   .form-control,
+   .token-input-list-facebook
+    {
+      border-radius: 2px;
+      padding: 20px 12px;
+      box-shadow: none;
+      border-color: @bdr_bg;
+
+      &:hover, &:focus, &:active {
+         box-shadow: none;
+         border-color: @primary;
+      }
+   }
+
+   .token-input-list-facebook {
+      box-shadow: none;
+      padding: 8px 8px 4px;
+   }
+
+   .form_textarea_input {
+      padding-top: 8px;
+      padding-bottom: 8px;
+   }
+
+   .message_toolbars {
+      margin-bottom: 10px;
+   }
+
+   .control-buttons {
+      .btn {
+         font-size: 1.3rem;
+         border-radius: 2px;
+         padding: 10px 25px;
+         font-weight: 700;
+         text-transform: uppercase;
+         letter-spacing: 0;
+         transition: all 0.32s ease-in-out;
+
+         &:active, &:hover, &:focus {
+            outline: none;
+            box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+         }
+
+         &-primary {
+            background-color: @primary;
+            border-color: @primary;
+         }
+
+         &-info {
+            color: @c9;
+            background-color: @e;
+            border-color: @e;
+         }
+      }
+   }
+}
+
+
+// Disp Thread
+// ======================================================================== /
+.detail_threads {
+
+   .results {
+      border-color: @primary;
+      border-radius: 2px;
+
+      // Panel Heading
+      // ======================================================================== /
+      .panel-heading {
+         padding: 20px;
+         border-radius: 0;
+         color: @w;
+         letter-spacing: 1px;
+         text-transform: uppercase;
+         background-color: @primary;
+      }
+
+      // Button
+      // ======================================================================== /
+      .btn {
+         border-radius: 2px;
+
+         &.btn-default {
+            background-color: @w;
+            border-color: @w;
+         }
+
+         &.btn-primary {
+            background-color: @btn_primary;
+            border-color: @btn_primary;
+
+            &:hover, &:active, &:focus {
+               background-color: @btn_primary_hover;
+               border-color: @btn_primary_hover;
+            }
+         }
+
+         &.btn-info {
+            border-color: @btn_info;
+            &:hover, &:active, &:focus {
+               outline: 0;
+            }
+         }
+      }
+
+      // Form Input
+      // ======================================================================== /
+      .form_text_input {
+         box-shadow: none;
+         border-radius: 2px;
+
+         &:hover, &:active, &:focus {
+            border-color: @primary;
+         }
+      }
+
+      // Table Scroll
+      // ======================================================================== /
+      .table_scroll {
+         img {
+            border-radius: 100%;
+            margin-right: 5px;
+         }
+
+         .fa.fa-check {
+            padding-right: 5px;
+         }
+
+         tr {
+            &.lastline {
+               border-bottom: none;
+            }
+         }
+      }
+   }
+}
+
+// Detail Messages
+// ======================================================================== /
+.detail_messages {
+
+   // Private Messages List
+   // ======================================================================== /
+   .evo_private_messages_list {
+
+      .messages_navigation {
+         border: 1px solid @bdr_bg;
+         border-radius: 2px;
+         padding: 8px 15px;
+         margin-bottom: 30px;
+      }
+
+      .panel {
+         border-radius: 2px;
+         border: 1px solid @primary;
+
+         .panel-heading {
+            border-radius: 0;
+            color: @w;
+            background-color: @primary;
+            padding: 15px;
+
+            .panel-title {
+               font-size: 1.3rem;
+               font-weight: 600;
+               text-transform: uppercase;
+               text-shadow: none;
+               letter-spacing: 1px;
+
+               .user {
+                  color: @w;
+                  text-transform: capitalize;
+                  &:hover, &:active, &:focus {
+                     color: @b;
+                  }
+               }
+            }
+
+            img {
+               border-radius: 100%;
+            }
+         }
+
+         .panel-body {
+            padding: 30px;
+         }
+
+         .btn, .SaveButton {
+            &:hover, &:active, &:focus {
+               outline: none;
+            }
+         }
+
+         .SaveButton {
+            border-radius: 2px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 15px;
+            transition: all 0.32s ease-in-out;
+
+            &:hover, &:focus, &:active {
+               box-shadow: 3px 3px 12px rgba(111, 111, 111, 0.27);
+            }
+
+            &.btn-primary {
+               background-color: @primary;
+               border-color: @primary;
+            }
+
+            &.btn-info {
+               background-color: @c7;
+               border-color: @c7;
+            }
+         }
+
+      }
+
+      // Results
+      // ======================================================================== /
+      .results {
+         margin-top: 30px;
+
+         .filters {
+            padding: 15px;
+         }
+
+         .form_text_input {
+            box-shadow: none;
+            &:focus, &:hover, &:active {
+               border-color: @primary;
+            }
+         }
+
+         .message_text {
+            padding: 15px;
+         }
+      }
+   }
+}

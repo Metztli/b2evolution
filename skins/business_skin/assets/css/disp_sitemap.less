@@ -1,0 +1,80 @@
+// ========================================================================
+// Style Sitemap Disp
+// ======================================================================== /
+.disp_sitemap {
+   background-color: @bg_post_regular;
+
+   .content_sitemap {
+      position: relative;
+      background-color: @w;
+      box-shadow: @bx_post;
+      font-size: 1.4rem;
+      padding: 30px;
+
+      .title_widgets {
+         position: relative;
+         display: inline-block;
+         font-family: @font_title;
+         font-size: 2.2rem;
+         margin-top: 0;
+         margin-bottom: 20px;
+         padding-left: 15px;
+         padding-bottom: 10px;
+
+         &::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 70%;
+            top: 0;
+            left: 0;
+            background-color: @primary;
+         }
+
+      }
+
+      .evo_widget {
+         margin-bottom: 30px;
+
+         ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+         }
+
+         a {
+            color: @c4;
+
+            &:hover, &:active, &:focus {
+               color: @primary;
+            }
+         }
+
+      }
+
+      .widget_core_coll_common_links {
+         a {
+            font-weight: normal;
+         }
+
+         li:last-child {
+            border-bottom: none;
+         }
+      }
+
+      .widget_core_coll_category_list {
+
+      }
+
+
+      .widget_core_coll_post_list {
+         margin-bottom: 0;
+
+         li:last-child {
+            border-bottom: none;
+         }
+      }
+
+   }
+
+}

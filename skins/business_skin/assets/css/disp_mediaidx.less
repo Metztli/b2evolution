@@ -1,0 +1,295 @@
+// ========================================================================
+// Disp Mediaidx Style
+// ======================================================================== /
+.disp_mediaidx {
+   // background-color: @bg_post_regular;
+
+   // ========================================================================
+   // Main Content Mediaidx
+   // ======================================================================== /
+   #main-mediaidx {
+      margin-top: 60px;
+
+      .title_mediaidx {
+         display: inline-block;
+         font-family: @font_title;
+         font-size: 3.2rem;
+         font-weight: 700;
+         text-align: center;
+         border-bottom: 2px solid @primary;
+         padding-bottom: 10px;
+         margin: 0 15px 40px;
+
+         @media only screen and ( max-width: @M ) {
+            margin-bottom: 30px;
+         }
+
+         @media ( max-width: @MX ) {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            margin-bottom: 20px;
+         }
+
+      }
+
+      .widget_core_coll_media_index {
+         clear: both;
+
+         .evo_image_index {
+            position: relative;
+            margin: 0 auto;
+            text-align: left;
+
+            // Responsive
+            // ======================================================================== /
+            @media ( max-width: @MX ) {
+               .grid-item, .grid-item.three, .grid-item.one {
+                  width: 100%;
+                  float: none;
+                  padding-left: 0;
+                  padding-right: 0;
+               }
+            }
+
+            // Default 2 Column
+            // ======================================================================== /
+            li {
+               position: relative;
+               top: 0;
+               left: 0;
+               display: inline-block;
+               float: left;
+               width: 50%;
+               // padding: 15px;
+
+               // One Column
+               // ======================================================================== /
+               &.one {
+                  width: 100%;
+                  float: none;
+
+                  .box {
+                     &.title a {
+                        &::after {
+                           bottom: 42px;
+                        }
+                     }
+                  }
+
+                  .title.title_overlay {
+
+                     .note {
+                        font-size: 1.8rem;
+                     }
+                  }
+
+                  .note {
+                     font-size: 2.4rem;
+                     padding-left: 30px;
+
+                     &::after {
+                        bottom: 24px;
+                     }
+                  }
+               }
+
+               // 3 Column
+               // ======================================================================== /
+               &.three {
+                  width: 33.333%;
+
+                  @media only screen and ( max-width: @MM ) {
+                     width: 50%;
+                  }
+
+                  .box {
+
+                     &.title a::after {
+                        bottom: 28px;
+                     }
+
+                     a{
+                        &::after {
+                           bottom: 30px;
+                        }
+                     }
+
+                     .note {
+                        padding: 20px 15px 0;
+                        margin-bottom: 20px;
+
+                        &::after {
+
+                        }
+                     }
+                  }
+
+                  .title_overlay {
+                     .note {
+                        font-size: 1.4rem;
+                        padding: 10px 20px;
+                     }
+                  }
+
+                  .note {
+                     margin: auto;
+                     padding: 15px;
+                     font-size: 1.5rem;
+
+                     &::after {
+                        bottom: 22px;
+                     }
+                  }
+
+               }
+
+               figure {
+                  position: relative;
+                  margin: 0;
+                  text-align: center;
+                  overflow: hidden;
+
+                  // Style Box Layout
+                  // ======================================================================== /
+                  &.box {
+                     box-shadow: @bx_post;
+                     border-radius: 2px;
+
+                     &.title a {
+                        &::after {
+                           content: '';
+                           position: absolute;
+                           left: 0;
+                           right: 0;
+                           bottom: 26px;
+                           margin: 0 auto;
+                           width: 90%;
+                           height: 1px;
+                           background-color: @c2;
+                           z-index: 1;
+                        }
+                     }
+
+                     img {
+                        border-radius: 2px 2px 0 0;
+                     }
+
+                     .note {
+                        position: relative;
+                        margin-bottom: 15px;
+                        z-index: 2;
+                        top: 0;
+                        bottom: inherit;
+
+                        &::after {
+                           height: 0;
+                        }
+                     }
+
+                     // Title Overlay
+                     &.title.title_overlay {
+                        border-radius: 0;
+
+                        img {
+                           border-radius: 0;
+                        }
+
+                        a::after {
+                           display: none;
+                        }
+
+                        .note {
+                           position: absolute;
+                           margin-bottom: 0;
+                           background-color: @primary;
+                           color: @w;
+                        }
+                     }
+
+                  } // end .box
+
+               } // end figure
+
+               img {
+                  display: block;
+                  max-width: 100%;
+                  height: auto;
+                  margin: 0 auto;
+                  text-align: center;
+                  border-radius: 0;
+               }
+
+            }
+
+            // Title
+            // ======================================================================== /
+            .note {
+               display: inline-block;
+               font-family: @font_title;
+               font-size: 1.6rem;
+               letter-spacing: 0;
+               padding-right: 15px;
+               padding-left: 15px;
+               margin-top: 10px;
+               margin-bottom: 10px;
+               color: @c2;
+               background-color: @w;
+               z-index: 0;
+
+               &:after {
+                  content: '';
+                  position: absolute;
+                  left: 0;
+                  right: 0;
+                  bottom: 18px;
+                  width: 100%;
+                  height: 1px;
+                  margin: 0 auto;
+                  background-color: @c7;
+                  z-index: -1;
+               }
+            }
+
+            // Title Overlay
+            // ======================================================================== /
+            .title_overlay {
+               opacity: 0.8;
+               transition: all 0.32s ease-in-out;
+
+               &:hover {
+                  opacity: 1;
+               }
+
+               .note {
+                  display: block;
+                  position: absolute;
+                  bottom: 0;
+                  left: -100%;
+                  font-weight: 600;
+                  background-color: @primary;
+                  color: @w;
+                  margin: 0;
+                  padding: 10px 20px;
+                  opacity: 0;
+                  transition: all 0.52s ease-in-out;
+
+                  &::after {
+                     display: none;
+                  }
+               }
+
+            }
+
+            .grid-item:hover .title.title_overlay .note{
+               left: 0;
+               opacity: 1;
+               transition: all 0.32s ease-in-out;
+            }
+
+         }
+
+      }
+
+   }
+
+}

@@ -1,0 +1,43 @@
+// ========================================================================
+// Disp PostIdx Style
+// ======================================================================== /
+.disp_postidx {
+   // background-color: @bg_post_regular;
+
+   #main-content {
+
+      .widget_core_coll_post_list {
+         background-color: @w;
+         box-shadow: @bx_post;
+         font-size: 1.5rem;
+         padding: 30px;
+
+         ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+         }
+
+         li {
+
+            &:last-child {
+               border-bottom: none;
+            }
+         }
+
+         a {
+            color: @c4;
+         }
+
+      }
+
+   }
+
+   #main-sidebar {
+      .widget_core_coll_post_list {
+         box-shadow: none;
+         padding: 0;
+      }
+   }
+
+}

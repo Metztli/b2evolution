@@ -1,0 +1,372 @@
+/* ----------------------------------------------------------------------------
+ * Main Footer Styling
+ * -------------------------------------------------------------------------- */
+#main-footer {
+    background-color: @c2;
+    color: @w;
+    margin-top: 50px;
+
+    font-size: 1.4rem;
+
+    // Widget Footer Styling
+    // ======================================================================== /
+    .widget_footer {
+        padding: 40px 0;
+
+        .evo_widget {
+
+            .widget_title {
+                font-family: @font_body;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: @w;
+                opacity: 0.8;
+                text-transform: uppercase;
+                letter-spacing: 1.8px;
+                margin-bottom: 25px;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            a {
+                color: @w;
+                opacity: 0.8;
+
+                &:hover, &:active, &:focus {
+                    color: @primary;
+                    opacity: 1;
+                }
+            }
+
+            .item_title {
+                a {
+                    opacity: 1;
+                }
+            }
+
+        }
+
+      // Pannel and Form
+      // ======================================================================== /
+      .panel.panel-default {
+         background-color: transparent;
+      }
+
+      input {
+         border-radius: 2px;
+         border: 0;
+
+         &:focus {
+            box-shadow: none;
+         }
+      }
+
+      // List Styling
+      // ======================================================================== /
+      .widget_core_coll_category_list,
+      .widget_core_content_hierarchy,
+      .widget_core_coll_common_links,
+      .widget_core_coll_post_list,
+      .widget_core_coll_page_list,
+      .widget_core_coll_related_post_list,
+      .widget_plugin_evo_Arch,
+      .widget_core_linkblog,
+      .widget_core_coll_item_list.evo_noexcerpt,
+      .widget_core_coll_comment_list,
+      .widget_core_coll_xml_feeds,
+      .widget_core_colls_list_public,
+      .widget_core_user_tools {
+
+        ul {
+
+            & > li {
+               border-bottom: 1px solid @b;
+            }
+         }
+
+         & > ul > li:last-child {
+            border-bottom: 0;
+         }
+      }
+
+      // Footer Widget User Link
+      // ======================================================================== /
+      .widget_core_user_links {
+
+         .ufld_icon_links {
+
+            a {
+               background: transparent;
+               margin: 2px;
+            }
+         }
+
+      }
+
+      // Tag Cloud Styling
+      // ======================================================================== /
+      .widget_core_coll_tag_cloud {
+
+         .tag_cloud {
+
+            a{
+               padding: 6px 12px;
+               background-color: @b;
+               margin: 2px;
+
+               &:hover, &:active, &:focus {
+                  color: @w;
+               }
+            }
+         }
+      }
+
+      // Search Form
+      // ======================================================================== /
+      .widget_core_coll_search_form {
+         .compact_search_form{
+
+            .search_field, .search_submit {
+               border-radius: 0;
+               box-shadow: none;
+
+               &:focus, &:hover, &:active {
+                  opacity: 1;
+                  box-shadow: none;
+               }
+            }
+
+         }
+      }
+
+      // widget_plugin_evo_Calr Styling
+      // ======================================================================== /
+      .widget_plugin_evo_Calr {
+
+         .bCalendarTable {
+            font-size: 100%;
+
+            caption {
+               position: relative;
+               text-align: center;
+               padding: 10px;
+
+               a{
+                  padding: 0 15px;
+                  background-color: transparent;
+                  z-index: 0;
+
+                  &:hover{
+                     color: @w;
+                     text-decoration: none;
+                  }
+
+                  &::after {
+                     content: '';
+                     position: absolute;
+                     left: 0;
+                     bottom: 45%;
+                     width: 100%;
+                     height: 1px;
+                     background-color: @w;
+                     z-index: -1;
+                  }
+               }
+            }
+
+            td, th {
+               padding: 6px;
+               width: 6ex;
+               color: @b;
+            }
+
+            tbody{
+               a {
+                  color: @primary;
+                  font-weight: 700;
+               }
+            }
+
+            #bCalendarToday {
+               background-color: @primary;
+               border-color: @primary;
+               font-weight: 700;
+               color: @w;
+
+               a {
+                  color: @w;
+                  opacity: 1;
+               }
+            }
+
+         }
+      }
+
+      // Comment List
+      // ======================================================================== /
+      .widget_core_coll_comment_list {
+         a {
+            &:hover, &:focus, &:active {
+               background-color: transparent;
+            }
+         }
+
+      }
+
+      // Logo and Tagline
+      // ======================================================================== /
+      .widget_core_coll_logo, .widget_core_coll_tagline {
+         text-align: center;
+      }
+
+      .widget_core_coll_title {
+         text-align: center;
+         a {
+            display: block;
+         }
+         small {
+            font-family: @font_body;
+            text-transform: capitalize;
+            color: @w;
+            font-size: 90%;
+         }
+      }
+
+      .widget_core_coll_logo {
+         img {
+            max-width: 100%;
+         }
+      }
+
+      // Widget Member
+      // ======================================================================== /
+      .widget_core_org_members {
+
+         div.col-lg-4 {
+            display: inline-block;
+            clear: both;
+
+            .user_field {
+               height: 100% !important;
+            }
+         }
+
+         .ufld_icon_links {
+
+            a {
+               background-color: @b;
+
+               .fa {
+                  font-size: 1.5rem;
+               }
+
+               &:hover, &:active, &:focus {
+                  color: @w;
+               }
+            }
+         }
+
+      }
+
+   }
+
+   // Copyright Styling
+   // ======================================================================== /
+   .copyright {
+      padding: 25px 0 20px;
+      font-size: 1.2rem;
+      border-top: 1px solid @c4;
+
+      p {
+         color: @copyright_text;
+         text-align: center;
+         margin: 0 auto;
+      }
+
+      a{
+         color: @w;
+         opacity: 0.9;
+
+         &:hover, &:focus, &:active {
+            opacity: 1;
+         }
+      }
+   }
+
+}
+
+
+// Style Back to Top
+// ======================================================================== /
+.cd-top {
+   display: inline-block;
+   height: 40px;
+   width: 40px;
+   position: fixed;
+   bottom: 30px;
+   right: 15px;
+   z-index: 9998;
+
+   font-size: 2rem;
+   font-size: 20px;
+   text-align: center;
+   line-height: 40px;
+   color: @w;
+   border-radius: 2px;
+   box-shadow: 0 0 10px rgba( 0, 0, 0, 0.05 );
+   overflow: hidden;
+   background-color: @primary;
+
+   visibility: hidden;
+   opacity: 0;
+   transition: all 0.3s ease-in-out;
+
+   &.cd-is-visible {
+      // the button becomes visible
+      visibility: visible;
+      opacity: 1;
+      color: @w;
+
+      &:hover {
+         opacity: 1;
+      }
+   }
+
+   &.cd-fade-out {
+      // if the user keeps scrolling down, the button is out of focus and becomes less visible
+      opacity: 0.5;
+
+      @media screen and ( max-width: @ML ){
+         opacity: 0.9;
+      }
+
+   }
+
+   @media screen and ( max-width: @M ) {
+      right: 20px;
+      bottom: 20px;
+   }
+
+   @media screen and ( max-width: @S ) {
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
+   }
+
+
+}
+
+.no-touch .cd-hover {
+   opacity: 1;
+}
+
+
+// SITEWIDE STYLE
+// ======================================================================== /
+.sitewide_footer {
+    box-shadow: none !important;
+}

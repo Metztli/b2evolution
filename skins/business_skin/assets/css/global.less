@@ -1,0 +1,199 @@
+// ========================================================================
+// FONT INCLUDE
+// ======================================================================== /
+// @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,400italic,600,700,900,700italic");
+@import url("https://fonts.googleapis.com/css?family=Ubuntu:400,300,700");
+
+/* ----------------------------------------------------------------------------
+ * Globall Style
+ * -------------------------------------------------------------------------- */
+#skin_wrapper{
+   font-size: 10px;
+
+   // @media screen and ( max-width: @MM ) {
+   //    font-size: 9.75px;
+   // }
+   // @media screen and ( max-width: @M ) {
+   //    font-size: 9.5px;
+   // }
+   // @media screen and ( max-width: @MX ) {
+   //    font-size: 9.25px;
+   // }
+   // @media screen and ( max-width: @S ) {
+   //    font-size: 9px;
+   // }
+
+}
+
+#skin_wrapper{
+   font: normal 1.4rem/1.6 @font_body;
+   color: @c4;
+   background-color: @w;
+}
+
+a{
+   color: @primary;
+
+   &:hover, &:focus, &:active {
+      color: @primary;
+      outline: none;
+
+      transition: all 0.2s ease-out;
+   }
+}
+
+a[rel~=nofollow]:not([class~=btn]):hover {
+   background-color: transparent;
+}
+
+.evo_hasbgimg {
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
+// Removing hover options from specially positioned cover images of the posts
+.special_cover_image_masonry {
+	a:before {
+		background-color: transparent !important;
+	}
+	a:after {
+		display: none !important;
+	}
+}
+
+// Removing border from dips=Front feature post widget
+.jumbotron .evo_post_title h3:before {
+	display: none;
+}
+
+// TYPOGRAPY
+// ======================================================================== /
+h1, h2, h3, h4, h5, h6 {
+   font-family: @font_title;
+   font-weight: 700;
+   margin: 25px 0 15px;
+
+   @media screen and ( max-width: @S ) {
+      margin-top: 15px;
+      margin-bottom: 5px;
+   }
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+ul {
+
+   p {
+      margin-bottom: 0 !important;
+   }
+
+}
+
+blockquote {
+   font-style: italic;
+   font-size: 1.6rem;
+   line-height: 1.4;
+   letter-spacing: 0.2px;
+   color: @c7;
+
+   p{
+      margin-bottom: 0 !important;
+   }
+}
+
+.btn {
+   transition: all 0.2s ease-out;
+
+   &:hover, &:active, &:focus {
+      outline: 0 !important;
+      box-shadow: none;
+   }
+}
+
+// Row -> Remove row If min-width: 480px and max-width: 768px
+// ======================================================================== /
+@media screen
+and ( min-width: @S )
+and ( max-width: @M ) {
+
+   .row {
+      margin-right: 0;
+      margin-left: 0;
+   }
+
+   #header-top,
+   #main-mediaidx {
+      .row {
+         margin-right: -15px;
+         margin-left: -15px;
+      }
+   }
+
+}
+
+.alert-dismissable .close,
+.alert-dismissible .close {
+   top: 1px;
+}
+
+
+// COLUMNS CLASS
+// ======================================================================== /
+.one_column {
+    max-width: 100%;
+    width: 100%;
+}
+
+.two_columns {
+    max-width: 100% / 2;
+    width: 50%;
+    float: left;
+
+    @media screen and ( max-width: @MX ) {
+        max-width: 100%;
+        width: 100%;
+        float: none;
+    }
+}
+
+.three_columns {
+    max-width: 33.32%;
+    width: 100% / 3;
+    float: left;
+
+    @media screen and ( max-width: @M ) {
+        max-width: 50%;
+        width: 50%;
+    }
+
+    @media screen and ( max-width: @MX ) {
+        max-width: 100%;
+        width: 100%;
+        float: none;
+    }
+}
+
+.four_columns {
+    max-width: 25%;
+    float: left;
+
+    @media screen and ( max-width: @L ) {
+		max-width: 33.32%;
+		width: 100% / 3;
+    }
+
+    @media screen and ( max-width: @MM ) {
+        max-width: 50%;
+        width: 50%;
+    }
+
+    @media screen and ( max-width: @MX ) {
+        max-width: 100%;
+        width: 100%;
+        float: none;
+    }
+}
