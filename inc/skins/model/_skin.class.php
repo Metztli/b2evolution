@@ -692,6 +692,8 @@ class Skin extends DataObject
                 }
 
                 // Sort skin containers by order field:
+		// Jose/Metztli IT 01-17-2024 below needs fix
+		// uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero
                 uasort($this->container_list, [$this, 'sort_containers']);
             } else {	// Get containers from skin files:
                 // Only v5 skins may use containers searched in skin files if they don't declare at least one container:

@@ -358,4 +358,9 @@ class WidgetContainer extends DataObject
                 return $this->ID ? T_('Shared sub-container') : T_('New shared sub-container');
         }
     }
+    // Jose/Metztli IT 01-16-2024
+    public function __toString()
+{
+return "This is a string representation of the object";
+}
 }

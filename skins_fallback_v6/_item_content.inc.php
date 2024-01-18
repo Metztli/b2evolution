@@ -125,7 +125,7 @@ $params = array_merge([
     'footer_text_mode' => '#', // 'single', 'xml' or empty. Will detect 'single' from $disp automatically.
     'footer_text_start' => '<div class="evo_post_footer">',
     'footer_text_end' => '</div>',
-], $params);
+], (array)$params); // Jose/Metztli IT 01-17-2024 casted as array second argument.
 
 // Determine content mode to use..
 if ($Item->is_intro()) {

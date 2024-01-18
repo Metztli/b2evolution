@@ -224,8 +224,10 @@ class org_members_Widget extends ComponentWidget
 
             if ($this->disp_params['display_icons']) { // Initialise css classes for icons depending on widget setting and only when they are displayed
                 $icon_colors_classes = '';
-                if (! empty($this->disp_params['icon_colors'])) { // If at least one color status is selected
-                    foreach ($this->disp_params['icon_colors'] as $class_name => $is_selected) {
+		if (! empty($this->disp_params['icon_colors'])) {
+		       	// If at least one color status is selected
+			// Jose/Metztli IT 01-17-2024 casted below as array
+                    foreach ((array)$this->disp_params['icon_colors'] as $class_name => $is_selected) {
                         if (! empty($is_selected)) {
                             $icon_colors_classes .= ' ufld__' . $class_name . 'color';
                         }

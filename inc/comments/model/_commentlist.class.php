@@ -1240,4 +1240,9 @@ class CommentList2 extends DataObjectList2
         // Restart this list:
         $this->restart();
     }
+// Jose/Metztli IT 01-16-2024
+    public function __toString()
+{
+return "This is a string representation of the object";
+}
 }

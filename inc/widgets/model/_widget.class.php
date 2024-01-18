@@ -1302,7 +1302,8 @@ class ComponentWidget extends DataObject
             $widget_Blog = &$this->get_Blog();
 
             // Convert active renderers options for plugin functions below:
-            $widget_renderers = array_keys($this->disp_params['renderers']);
+	    // Jose/Metztli 01-17-2024 casted below as array
+            $widget_renderers = array_keys((array)$this->disp_params['renderers']);
 
             $this->renderers_validated = $Plugins->validate_renderer_list($widget_renderers, [
                 'Blog' => &$widget_Blog,

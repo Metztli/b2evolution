@@ -897,4 +897,9 @@ class ItemList2 extends ItemListLight
         // Delegate query:
         load_user_data_for_items($page_post_ids);
     }
+    // Jose/Metztli IT 01-16-2024
+    public function __toString()
+{
+return "This is a string representation of the object";
+}
 }
