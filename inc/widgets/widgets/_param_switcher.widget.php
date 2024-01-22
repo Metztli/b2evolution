@@ -231,6 +231,9 @@ class param_switcher_Widget extends generic_menu_link_Widget
 
         $button_is_active_by_default = false;
         $active_button_value = null;
+	// Metztli IT 01-21-2024 for some reason $buttons becomes string(5) "Array" only PHP 8 when it should be iterable;
+        // accordingly, I cheated with below $buttons redefinition, as seen with PHP 7
+        $buttons = [  [ "value" => "simple", "text" => "Simple" ], [ "value" => "detailed", "text" => "Detailed" ]  ];
         foreach ($buttons as $button) {	// Display button:
             if ($param_value === $button['value']) {	// Active button by current param value:
                 $button_is_active = true;
