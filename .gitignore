@@ -15,6 +15,7 @@ npm-debug.log
 /nbproject/
 .idea/*
 
+skins/evopress
 conf/_local.php
 plugins/geoip_plugin/GeoLite2-Country.mmdb
 npm-debug.log

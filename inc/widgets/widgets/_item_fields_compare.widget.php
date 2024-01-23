@@ -1090,7 +1090,8 @@ class item_fields_compare_Widget extends ComponentWidget
      */
     public function sort_custom_fields($custom_field_a, $custom_field_b)
     {
-        return $custom_field_a['order'] > $custom_field_b['order'];
+        //Jose/Metztli IT 01-22-2024 satisfying PHP 8 to get rid of deprecation notice at line 672 above
+	return ($custom_field_a['order'] > $custom_field_b['order']) ? 1 : -1;
     }
 
     /**

@@ -692,8 +692,6 @@ class Skin extends DataObject
                 }
 
                 // Sort skin containers by order field:
-		// Jose/Metztli IT 01-17-2024 below needs fix
-		// uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero
                 uasort($this->container_list, [$this, 'sort_containers']);
             } else {	// Get containers from skin files:
                 // Only v5 skins may use containers searched in skin files if they don't declare at least one container:
@@ -717,7 +715,8 @@ class Skin extends DataObject
         $a_container_order = isset($a_container[1]) ? $a_container[1] : 0;
         $b_container_order = isset($b_container[1]) ? $b_container[1] : 0;
 
-        return $a_container_order > $b_container_order;
+	// Jose/Metztli IT 01-22-2024 satisfying PHP 8 to get rid of deprecation notice in Collections, Widgets tab (see line 695 above) 
+ 	return ($a_container_order < $b_container_order) ? -1 : 1;
     }
 
     /**
