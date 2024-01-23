@@ -1619,8 +1619,9 @@ class Form extends Widget
      * @param string note to be displayed after the field
      * @param string CSS class for select
      * @param string Javascript to add for onchange event (trailing ";").
+     * Jose/Metztli IT 01-23-2024 modified deprecation to make $field_label *follow* $field_value
      */
-    public function time_select($field_name, $field_value = null, $precision = '5mn', $field_label, $field_note = null, $field_class = null, $field_onchange = null)
+    public function time_select($field_name, $field_label, $field_value = null, $precision = '5mn', $field_note = null, $field_class = null, $field_onchange = null)
     {
         preg_match('#([0-9]+)(mn|s)#', $precision, $matches);
 
@@ -1708,8 +1709,9 @@ class Form extends Widget
      * @param integer maximum value for the input select
      * @param integer increment for the loop (precision)
      * @param array params
+     * Jose/Metztli IT 01-23-2024 modified deprecation to make $field_params *follow* optional $precision
      */
-    public function _number_select($field_value, $max, $precision = 1, $field_params)
+    public function _number_select($field_value, $max, $field_params, $precision = 1)
     {
         $r = '<select' . get_field_attribs_as_string($field_params) . '>';
 
