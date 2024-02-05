@@ -1,6 +1,6 @@
 ![b2evolution CMS](media/shared/global/logos/b2evolution_1016x208_wbg.png)
 
-# b2evolution CMS for **PHP 8**
+# b2evolution CMS for **PHP 8.0**
 
 This is b2evolution CMS version **7.2.5-stable**.
 

@@ -162,7 +162,7 @@ class WidgetContainer extends DataObject
                 if ($widget_page_Item->dbinsert()) {	// Update widget container with new inserted item ID:
                     $this->set('item_ID', $widget_page_Item->ID);
                     $result_message = sprintf(T_('New item %s has been created.'), '#' . $widget_page_Item->ID . '(' . $widget_page_Item->get_title() . ')');
-                } else {	// New Item cannot be createed by some reason:
+                } else {	// New Item cannot be created due to unknown circumstances:
                     $result = false;
                 }
             } else {	// Wrong Item Type has been selected:
