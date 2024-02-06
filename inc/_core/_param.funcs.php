@@ -223,7 +223,7 @@ function param(
     }
 
     // Check if the type is the special array or regexp
-    if (substr($type, 0, 7) == 'array:/') { // It is an array type param which may contains elements matching to the given regular expression
+    if (str_starts_with($type, 'array:/')) { // It is an array type param which may contains elements matching to the given regular expression
         $elements_regexp = substr($type, 6);
         $elements_type = 'string';
         $type = 'array:regexp';
@@ -591,8 +591,8 @@ function param_duration($var)
         'minute' => 60,       // 60 seconds
         'hour' => 3600,     // 60 minutes
         'day' => 86400,    // 24 hours
-        'month' => 2592000,  // 30 days
-        'year' => 31536000, // 365 days
+        'month' => 2_592_000,  // 30 days
+        'year' => 31_536_000, // 365 days
     ];
 
     $value = param($var . '_value', 'integer', 0);
@@ -980,7 +980,7 @@ function param_check_url($var, $context, $field_err_msg = null)
         $antispam_check = true;
     }
 
-    if (strpos($var, '[') !== false) {	// Variable is array, for example 'input_name[group_name][123][]'
+    if (str_contains($var, '[')) {	// Variable is array, for example 'input_name[group_name][123][]'
         // We should get a value from $GLOBALS[input_name][group_name][123][0]
         $var_array = explode('[', $var);
         $url_value = $GLOBALS;
@@ -1185,25 +1185,21 @@ function _format_input_date_to_iso_callback($matches)
     if ($matches[1] == "\\") {
         return $matches[2];
     } // escaped
-    switch ($matches[2]) {
-        case "d": return "([0-3]\\d)"; // day, 01-31
-        case "j": return "([1-3]?\\d)"; // day, 1-31
-        case "l": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday"])))) . ")";
-        case "D": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_abbrev"])))) . ")";
-        case "e": // b2evo extension!
-            return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_letter"])))) . ")";
-        case "S": return "(st|nd|rd|th)?"; // english suffix for day. Made optional as jQuery formatDate does not support this format.
-
-        case "m": return "([0-1]\\d)"; // month, 01-12
-        case "n": return "(1?\\d)"; // month, 1-12
-        case "F": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month"])))) . ")"; //  A full textual representation of a month, such as January or March
-        case "M": return "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month_abbrev"])))) . ")";
-
-        case "y": return "(\\d\\d)"; // year, 00-99
-        case "Y": return "(\\d{4})"; // year, XXXX
-        default:
-            return $matches[0];
-    }
+    return match ($matches[2]) {
+        "d" => "([0-3]\\d)",
+        "j" => "([1-3]?\\d)",
+        "l" => "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday"])))) . ")",
+        "D" => "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_abbrev"])))) . ")",
+        "e" => "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["weekday_letter"])))) . ")",
+        "S" => "(st|nd|rd|th)?",
+        "m" => "([0-1]\\d)",
+        "n" => "(1?\\d)",
+        "F" => "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month"])))) . ")",
+        "M" => "(" . str_replace("~", "\~", implode("|", array_map("trim", array_map("T_", $GLOBALS["month_abbrev"])))) . ")",
+        "y" => "(\\d\\d)",
+        "Y" => "(\\d{4})",
+        default => $matches[0],
+    };
 }
 
 
@@ -1273,21 +1269,21 @@ function check_is_color($color)
  * And check we have a compact date (numbers only) ( used for URL filtering )
  *
  * @param string Variable to set
+ * @param string error message
  * @param mixed Default value or TRUE if user input required
  * @param boolean memorize ( see {@link param()} )
- * @param string error message
  * @param boolean 'required': Is non-empty date required? Default: true.
  *
  * @return string the compact date value ( yyyymmdd )
  */
-function param_compact_date($var, $default = '', $memorize = false, $err_msg, $required = false)
+function param_compact_date($var, $err_msg, $default = '', $memorize = false, $required = false)
 {
-    global $$var;
+    global ${$var};
+    // Jose/Metztli IT 02-05-2024 had to make $default follow 'string', as well, else showstopper!
+    param($var, $default, 'string', $memorize);
 
-    param($var, 'string', $default, $memorize);
-
-    if (preg_match('#^[0-9]{4,}$#', $$var)) {	// Valid compact date, all good.
-        return $$var;
+    if (preg_match('#^[0-9]{4,}$#', ${$var})) {	// Valid compact date, all good.
+        return ${$var};
     }
 
     // We do not have a compact date, try normal date matching:
@@ -1295,7 +1291,7 @@ function param_compact_date($var, $default = '', $memorize = false, $err_msg, $r
 
     if ($iso_date) {
         set_param($var, compact_date($iso_date));
-        return $$var;
+        return ${$var};
     }
 
     // Nothing valid found....
@@ -1318,12 +1314,12 @@ function param_compact_date($var, $default = '', $memorize = false, $err_msg, $r
  */
 function param_time($var, $default = '', $memorize = false, $override = false, $forceset = true, $allow_empty = false)
 {
-    global $$var;
+    global ${$var};
 
     $got_time = false;
 
     if (param($var, 'string', $default, $memorize, $override, $forceset)) { // Got a time from text field:
-        if (preg_match('/^(\d\d):(\d\d)(:(\d\d))?$/', $$var, $matches)) {
+        if (preg_match('/^(\d\d):(\d\d)(:(\d\d))?$/', ${$var}, $matches)) {
             $time_h = $matches[1];
             $time_mn = $matches[2];
             $time_s = empty($matches[4]) ? 0 : $matches[4];
@@ -1332,19 +1328,19 @@ function param_time($var, $default = '', $memorize = false, $override = false, $
     } elseif (($time_h = param($var . '_h', 'integer', -1)) != -1
                 && ($time_mn = param($var . '_mn', 'integer', -1)) != -1) {	// Got a time from selects:
         $time_s = param($var . '_s', 'integer', 0);
-        $$var = substr('0' . $time_h, -2) . ':' . substr('0' . $time_mn, -2) . ':' . substr('0' . $time_s, -2);
+        ${$var} = substr('0' . $time_h, -2) . ':' . substr('0' . $time_mn, -2) . ':' . substr('0' . $time_s, -2);
         $got_time = true;
     }
 
-    if ($allow_empty && empty($$var)) { // Allow to use empty time value
-        return $$var;
+    if ($allow_empty && empty(${$var})) { // Allow to use empty time value
+        return ${$var};
     } elseif ($got_time) { // We got a time...
         // Check if ranges are correct:
         if ($time_h >= 0 && $time_h <= 23
             && $time_mn >= 0 && $time_mn <= 59
             && $time_s >= 0 && $time_s <= 59) {
             // Time is correct
-            return $$var;
+            return ${$var};
         }
     }
 
@@ -1489,14 +1485,14 @@ function param_combo($var, $default, $allow_none, $err_msg = '')
  */
 function param_child_select_value($var)
 {
-    global $$var;
+    global ${$var};
 
     if ($val = param($var, 'string')) { // keep only the second part of val
         preg_match('/^[0-9]+-([0-9]+)$/', $val, $res);
 
         if (isset($res[1])) { //set to the var the second part of val
-            $$var = $res[1];
-            return $$var;
+            ${$var} = $res[1];
+            return ${$var};
         }
     }
     return '';
@@ -1509,17 +1505,17 @@ function param_child_select_value($var)
  */
 function param_check_phone($var, $required = false)
 {
-    global $$var;
+    global ${$var};
 
-    if (empty($$var) && ! $required) { // empty is OK:
+    if (empty(${$var}) && ! $required) { // empty is OK:
         return true;
     }
 
-    if (! preg_match('|^\+?[\-*#/(). 0-9]+$|', $$var)) {
+    if (! preg_match('|^\+?[\-*#/(). 0-9]+$|', ${$var})) {
         param_error($var, T_('The phone number is invalid.'));
         return false;
     } else { // Keep only 0123456789+ caracters
-        $$var = preg_replace('#[^0-9+]#', '', $$var);
+        ${$var} = preg_replace('#[^0-9+]#', '', ${$var});
     }
     return true;
 }
@@ -1585,7 +1581,7 @@ function param_check_passwords($var1, $var2, $required = false, $min_length = 6,
         return false;
     }
 
-    if (preg_match('/[<>&]/', isset($_POST[$var1]) ? $_POST[$var1] : $_GET[$var1])) { // Checking the not allowed chars
+    if (preg_match('/[<>&]/', $_POST[$var1] ?? $_GET[$var1])) { // Checking the not allowed chars
         param_error_multiple([$var1, $var2], $params['msg_pass_wrong']);
         return false;
     }
@@ -1725,11 +1721,11 @@ function param_add_message_to_Log($var, $err_msg, $log_category = 'error', $grou
         $var_id = Form::get_valid_id($var);
         $start_link = '<a href="#' . $var_id . '" onclick="var form_elem = document.getElementById(\'' . $var_id . '\'); if( form_elem ) { if(form_elem.select) { form_elem.select(); } else if(form_elem.focus) { form_elem.focus(); } }">'; // "SELECT" does not have .select()
 
-        if (strpos($err_msg, '<a') !== false) { // there is at least one link in $err_msg, link those parts that are no links
+        if (str_contains($err_msg, '<a')) { // there is at least one link in $err_msg, link those parts that are no links
             $err_msg = preg_replace('~(\s*)(<a\s+[^>]+>[^<]*</a>\s*)~i', '</a>$1&raquo;$2' . $start_link, $err_msg);
         }
 
-        if (substr($err_msg, 0, 4) == '</a>') { // There was a link at the beginning of $err_msg: we do not prepend an emtpy link before it
+        if (str_starts_with($err_msg, '</a>')) { // There was a link at the beginning of $err_msg: we do not prepend an emtpy link before it
             if (empty($group_header)) {
                 $Messages->add(substr($err_msg, 4) . '</a>', $log_category);
             } else {
@@ -1763,7 +1759,7 @@ function param_add_message_to_Log($var, $err_msg, $log_category = 'error', $grou
  */
 function memorize_param($var, $type, $default, $value = null)
 {
-    global $Debuglog, $global_param_list, $$var;
+    global $Debuglog, $global_param_list, ${$var};
 
     if (! isset($global_param_list)) { // Init list if necessary:
         if (isset($Debuglog)) {
@@ -1864,9 +1860,9 @@ function get_memorized($ignore = '')
     if (isset($global_param_list)) {
         foreach ($global_param_list as $var => $thisparam) {
             if (! in_array($var, $ignore)) {
-                global $$var;
-                $value = $$var;
-                $memo[$var] = $$var;
+                global ${$var};
+                $value = ${$var};
+                $memo[$var] = ${$var};
             }
         }
     }
@@ -1913,14 +1909,14 @@ function regenerate_url($ignore = '', $set = '', $pagefileurl = '', $glue = '&am
             // Check if the param should to be ignored:
             $skip = false;
             foreach ($ignore as $ignore_pattern) {
-                if (substr($ignore_pattern, 0, 1) == '/') { // regexp:
+                if (str_starts_with($ignore_pattern, '/')) { // regexp:
                     if (preg_match($ignore_pattern, $var)) {	// Skip this param!
                         $skip = true;
                         break;
                     }
                 } else {
                     $ignore_value = null;
-                    if (strpos($ignore_pattern, '=') !== false) { // Ignore only one value from array param
+                    if (str_contains($ignore_pattern, '=')) { // Ignore only one value from array param
                         $ignore_pattern = explode('=', $ignore_pattern);
                         $ignore_value = $ignore_pattern[1];
                         $ignore_pattern = $ignore_pattern[0];
@@ -1933,8 +1929,8 @@ function regenerate_url($ignore = '', $set = '', $pagefileurl = '', $glue = '&am
                             $value_is_string = ! is_array($value);
                             $value_is_negative = false;
                             if ($value_is_string) { // Convert string param to array to remove one value
-                                $string_separator = (strpos($value, ',') !== false) ? ',' : ' ';
-                                if (substr($value, 0, 1) == '-' && substr($ignore_value, 0, 1) != '-') { // If value is negative
+                                $string_separator = (str_contains($value, ',')) ? ',' : ' ';
+                                if (str_starts_with($value, '-') && !str_starts_with($ignore_value, '-')) { // If value is negative
                                     $value = substr($value, 1);
                                     $value_is_negative = true;
                                 }
@@ -2084,13 +2080,13 @@ function _trapError($reset = 1)
  * @todo dh> Not implemented?!
  *
  * @param string Variable to set
+ * @param string error message
  * @param mixed Default value or TRUE if user input required
  * @param boolean memorize ( see {@link param()} )
- * @param string error message
  *
  * @return string
  */
-function param_html($var, $default = '', $memorize = false, $err_msg)
+function param_html($var, $err_msg, $default = '', $memorize = false)
 {
 }
 
@@ -2322,19 +2318,11 @@ function check_html_sanity($content, $context = 'posting', $User = null, $encodi
 
     // Log incident in system log
     if ($error) {
-        switch ($context) {
-            case 'commenting':
-                $object_type = 'comment';
-                break;
-
-            case 'posting':
-            case 'xmlrpc_posting':
-                $object_type = 'item';
-                break;
-
-            default:
-                $object_type = null;
-        }
+        $object_type = match ($context) {
+            'commenting' => 'comment',
+            'posting', 'xmlrpc_posting' => 'item',
+            default => null,
+        };
         syslog_insert(sprintf('Antispam: Illegal content found. Content contains blacklisted word "%s".', $block), 'error', $object_type);
     }
 
@@ -2464,7 +2452,7 @@ function balance_tags($text)
         $tagqueue = '';
 
         // Pop or Push
-        if (substr($regex[1], 0, 1) == '/') { // End Tag
+        if (str_starts_with($regex[1], '/')) { // End Tag
             $tag = strtolower(substr($regex[1], 1));
 
             // if too many closing tags
@@ -2610,7 +2598,7 @@ function is_safe_filepath($filepath)
     }
 
     if (! $filemanager_allow_dotdot_in_filenames &&
-        strpos($filepath, '..') !== false) {	// Don't allow .. in file path because it is disable by config:
+        str_contains($filepath, '..')) {	// Don't allow .. in file path because it is disable by config:
         return false;
     }
 
@@ -2618,7 +2606,7 @@ function is_safe_filepath($filepath)
         $orig_filepath = $filepath;
         $filepath = urldecode($filepath);
 
-        if (strpos($filepath, '../') !== false || strpos($filepath, '..\\') !== false) {	// Don't allow a traversal directory:
+        if (str_contains($filepath, '../') || str_contains($filepath, '..\\')) {	// Don't allow a traversal directory:
             return false;
         }
     } while ($filepath != $orig_filepath);
@@ -2664,7 +2652,7 @@ function param_format_condition($condition, $action, $rules = null)
     $is_encoded = ! is_object($condition);
 
     if ($is_encoded) {	// If source param is an encoded string, we should decode it firstly before formatting:
-        $condition = json_decode($condition);
+        $condition = json_decode($condition, null, 512, JSON_THROW_ON_ERROR);
 
         if ($condition === null || ! isset($condition->valid) || $condition->valid !== true) {	// Wrong condition object:
             return $action == 'db' ? '' : 'null';
@@ -2677,7 +2665,7 @@ function param_format_condition($condition, $action, $rules = null)
 
     if (empty($condition->rules)) {	// No rules, Skip it:
         if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
-            $condition = json_encode($condition);
+            $condition = json_encode($condition, JSON_THROW_ON_ERROR);
         }
         return $condition;
     }
@@ -2689,7 +2677,7 @@ function param_format_condition($condition, $action, $rules = null)
         $allowed_rules = [];
         $denied_rules = [];
         foreach ($rules as $r => $rule) {
-            if (substr($rule, 0, 1) == '-') {	// Deny this rule:
+            if (str_starts_with($rule, '-')) {	// Deny this rule:
                 $denied_rules[] = substr($rule, 1);
             } else {	// Allow this rule:
                 $allowed_rules[] = $rule;
@@ -2724,7 +2712,7 @@ function param_format_condition($condition, $action, $rules = null)
     }
 
     if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
-        $condition = json_encode($condition);
+        $condition = json_encode($condition, JSON_THROW_ON_ERROR);
     }
 
     return $condition;
@@ -2746,12 +2734,12 @@ function param_format_condition_rule($rule_value, $rule_type, $action)
                 case 'db':
                     // To database format:
                     $formatted_date = format_input_date_to_iso($rule_value);
-                    return $formatted_date ? $formatted_date : $rule_value;
+                    return $formatted_date ?: $rule_value;
 
                 case 'js':
                     // To JavaScript format:
                     $formatted_date = mysql2date(locale_input_datefmt(), $rule_value);
-                    return $formatted_date ? $formatted_date : $rule_value;
+                    return $formatted_date ?: $rule_value;
             }
             break;
     }
