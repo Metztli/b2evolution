@@ -1739,8 +1739,9 @@ function get_blog_order($Blog = null, $return = 'field', $separator = ',')
  * @param string the value which should be selected by default
  * @param boolean set tru to allow 'none' option, false otherwise
  * @return string HTML code of <option>s for <select>
+ * Jose/Metztli IT 02-07-2024 fixed deprecation by having $selected_value following optional parameter $coll_ID
  */
-function get_post_orderby_options($coll_ID = null, $selected_value, $allow_none = false)
+function get_post_orderby_options($selected_value, $coll_ID = null, $allow_none = false)
 {
     // Get available sort options:
     $available_sort_options = get_available_sort_options($coll_ID, $allow_none, true);

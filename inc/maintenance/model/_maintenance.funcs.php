@@ -516,8 +516,9 @@ function download_archive($archive_path)
  * @param string action name
  * @param boolean overwrite
  * @param array read only file list
+ * Jose/Metztli IT 02-07-2024 fixed deprecation by having (passed by reference) $read_only_list following optional parameter $action
  */
-function verify_overwrite($src, $dest, $action = '', $overwrite = true, &$read_only_list)
+function verify_overwrite($src, $dest, &$read_only_list, $action = '', $overwrite = true)
 {
     global $basepath, $Settings;
 
