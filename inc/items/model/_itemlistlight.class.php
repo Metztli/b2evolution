@@ -2093,7 +2093,8 @@ class ItemListLight extends DataObjectList2
             while ($Item = &$this->get_item()) {
                 // -------------
                 // DISPLAY CONTENT of the Item depending on widget params:
-                $content_is_displayed = $this->display_list_item_contents($Item, false, $item_index, $params) || $content_is_displayed;
+		// Jose/Metztli IT 02-09-2024 had to slide $item_index, $params arguments one place backwards
+                $content_is_displayed = $this->display_list_item_contents($Item, $item_index, $params, false) || $content_is_displayed;
                 // -------------
             }
 
@@ -2136,8 +2137,10 @@ class ItemListLight extends DataObjectList2
             echo $params['group_start'];
 
             $item_index = 0;
-            foreach ($items_map_by_chapter[$Chapter->ID] as $iterator_Item) {	// Display contents of the Item depending on widget params:
-                $content_is_displayed = $this->display_list_item_contents($iterator_Item, true, $item_index, $params) || $content_is_displayed;
+	    foreach ($items_map_by_chapter[$Chapter->ID] as $iterator_Item) {
+	    	// Display contents of the Item depending on widget params:
+		// Jose/Metztli IT 02-09-2024 had to slide $item_index, $params arguments one place backwards
+                $content_is_displayed = $this->display_list_item_contents($iterator_Item, $item_index, $params, true) || $content_is_displayed;
             }
 
             // Close category group:
@@ -2156,7 +2159,7 @@ class ItemListLight extends DataObjectList2
      * @param integer Item index
      * @return boolean TRUE - if content is displayed
      */
-    public function display_list_item_contents(&$disp_Item, $chapter_mode = false, &$item_index, $params = [])
+    public function display_list_item_contents(&$disp_Item, &$item_index, $chapter_mode = false, $params = [])
     {
         global $disp, $Item;
 
@@ -2325,7 +2328,7 @@ class ItemListLight extends DataObjectList2
      * @param array Params
      * @param boolean Changed by reference when content is displayed
      */
-    public function display_list_images($params = [], &$content_is_displayed)
+    public function display_list_images(&$content_is_displayed, $params = [])
     {
         $params = array_merge([
             'before' => '',

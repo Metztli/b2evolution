@@ -1791,7 +1791,7 @@ class Plugins
      * @params array params to set Blog and apply_rendering setting_name ( see {@link load_index_apply_rendering()} )
      * @return array validated array of renderer codes
      */
-    public function validate_renderer_list($renderers = ['default'], $params)
+    public function validate_renderer_list($params, $renderers = ['default'])
     {
         // Init Blog and $setting_name from the given params
         if (isset($params['Item'])) { // Validate post renderers
@@ -1907,7 +1907,7 @@ class Plugins
      * @param array If given, assume these renderers to be checked.
      * @param array params from where to get 'apply_rendering' setting
      */
-    public function get_renderer_options($current_renderers = null, $params)
+    public function get_renderer_options($params, $current_renderers = null)
     {
         global $inc_path, $admin_url;
 
@@ -2051,7 +2051,7 @@ class Plugins
      * @param array If given, assume these renderers to be checked.
      * @param array params from where to get 'apply_rendering' setting
      */
-    public function get_renderer_checkboxes($current_renderers = null, $params)
+    public function get_renderer_checkboxes($params, $current_renderers = null)
     {
         if (isset($params['setting_name'])) {	// Use the defined setting name from params:
             $setting_name = $params['setting_name'];
