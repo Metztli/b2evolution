@@ -12,12 +12,10 @@ rm -f .gitmodules
 rm -f .gitignore
 echo "Removing test skins (export only produces empty folders)"
 rm -rf skins/clean1_skin
-rm -rf skins/horizon_blog_skin
-rm -rf skins/horizon_main_skin
 echo Removing myself now
 rm -f package.sh
 echo Stepping out
 cd ..
 echo Compressing...
 currentbasename=${PWD##*/} 	# Assign current basename to variable
-zip -qr9 ${currentbasename}.zip b2evolution 
+zip -qr9 ${currentbasename}.zip metztli-b2evo-7.2.5-for-PHP8

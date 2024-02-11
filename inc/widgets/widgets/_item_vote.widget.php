@@ -137,7 +137,10 @@ class item_vote_Widget extends ComponentWidget
             $widget_Item = &$this->disp_params['Item'];
         }
 
-        if (empty($widget_Item) || ! $widget_Item->can_vote()) {	// Don't display the voting panel if a voting on the item is not allowed by some reason:
+        // if (empty($widget_Item) || ! $widget_Item->can_vote()) {
+        // Don't display the voting panel if a voting on the item is not allowed by some reason:
+	if (! empty($widget_Item) ||  $widget_Item->can_vote()) {
+        // Jose/Metztli IT 02-11-2024 Display the voting panel regardless
             $this->display_debug_message('Widget "' . $this->get_name() . '" is hidden because a voting on the item is not allowed by some reason.');
             return false;
         }
