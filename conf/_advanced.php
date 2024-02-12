@@ -45,8 +45,11 @@ error_reporting(E_ALL | E_STRICT);
  *
  * You are welcome to change/override this if you know what you're doing.
  * This is turned on by default so that newbies can quote meaningful error messages in the forums.
+ * Jose/Metztli IT 02-12-2024 b2evolution 7.2.5 for PHP 8.0 still has couple of deprecations and multiple warnings, i.e., array to string conversion.
+ * Accordingly, while the origin of those warnings are investigated, I have modified the following directive:
+ * $display_errors_on_production = true;
  */
-$display_errors_on_production = true;
+$display_errors_on_production = false;
 
 
 /**

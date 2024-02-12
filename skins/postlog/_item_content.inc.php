@@ -32,7 +32,7 @@ $params = array_merge([
     'before_more_link' => '<p class="bMore">',
     'after_more_link' => '</p>',
     'more_link_text' => '#',
-], $params);
+], (array)$params); // Jose/Metztli IT 02-12-2024 casted second argument $params to array as skin complained of being string.
 
 
 if (! empty($params['image_size'])) {

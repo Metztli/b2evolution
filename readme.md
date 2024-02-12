@@ -2,6 +2,13 @@
 
 # b2evolution CMS for **PHP 8.0**
 
+Please, see included b2evolution.nginx.conf.sample if you want to hack the upgrade to PHP80 (or higher) under Nginx.
+
+If on Nginx, note that PHP memory and time zone adjustments are done into conf/\_advanced.php file; the latter
+
+also contains directive `$instance_name = 'b2evo';` which can be modified if you will be hosting several b2evolution
+ instances -- either local and/or remote.
+
 This is b2evolution CMS version **7.2.5-stable**.
 
 ## A complete engine for your website !

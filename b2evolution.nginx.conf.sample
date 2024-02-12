@@ -1,0 +1,74 @@
+  server {
+    ## listen :443;
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/b2evolution;
+    index  index.php index.html index.htm;
+    ## server_name  domain.tld;
+    server_name _;
+    
+    etag on;
+    client_max_body_size 128M;
+    
+    location ~* /htsrv/getfile.php/(.*)$
+    {
+		try_files $uri /htsrv/getfile.php?$args;
+    }
+
+    location ~* \.(png|jpg|ico|cur|gif|pdf|zip|jpeg|ttf|eot|woff)$
+    {
+		aio threads;
+		gzip on;
+		gzip_static off;
+		add_header Cache-Control "max-age: 86640";
+		access_log off;
+		log_not_found off;
+		etag on;
+    }
+    
+    location ~* \.(js|map|html|css|json|htm|xml|txt)$
+    {
+		aio threads;
+		add_header Cache-Control "max-age: 86640";
+		access_log off;
+		log_not_found off;
+		etag on;
+    }
+    
+    location /api/
+    {
+		auth_basic          off;
+		rewrite "^/api/v(?<version>[^/]+)/(?<parameters>(.+))$" /htsrv/rest.php?api_version=$version&api_request=$parameters last;
+    }
+
+    location /go/
+    {
+		rewrite "^/go/(?<key>(.+))$" /htsrv/track.php?key=$key last;
+    }
+    
+    if ( $http_user_agent ~* (nmap|nikto|wikto|sf|sqlmap|bsqlbf|w3af|acunetix|havij|appscan) ) { return 403; }
+        
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+       }
+
+    location ~ \.php$ {
+    		include /etc/nginx/fastcgi_params;
+    		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		
+		fastcgi_buffers 8 128k;
+		fastcgi_buffer_size 256k;
+		fastcgi_read_timeout 3000;
+		fastcgi_keep_conn on;
+		fastcgi_index index.php;
+    		fastcgi_pass           unix:/run/php/php8.0-fpm.sock;
+     }
+
+    location ~ /\. { deny all;  internal;}	
+    location ~ /\.svn|/\.git { deny all; internal; }
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt { access_log off; log_not_found off; }
+    
+    location ~ /.well-known {allow all;}        
+
+  }

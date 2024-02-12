@@ -83,7 +83,7 @@ $params = array_merge([
     'footer_text_mode' => '#', // 'single', 'xml' or empty. Will detect 'single' from $disp automatically.
     'footer_text_start' => '<div class="item_footer">',
     'footer_text_end' => '</div>',
-], $params);
+], (array)$params); // Jose/Metztli IT 02-12-2024 casted second argument $params to array as skin complained of being string.
 
 if ($disp_detail == 'single') {
     //echo "test";
