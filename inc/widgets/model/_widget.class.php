@@ -486,7 +486,7 @@ class ComponentWidget extends DataObject
     public function load_param_array()
     {
         if (is_null($this->param_array)) {	// Param array has not been loaded yet
-            $this->param_array = @unserialize($this->params);
+            $this->param_array = @unserialize((string)$this->params);
 
             if (empty($this->param_array)) {	// No saved param values were found:
                 $this->param_array = [];
