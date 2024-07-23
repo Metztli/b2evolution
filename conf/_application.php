@@ -26,6 +26,11 @@ $app_version = '7.2.5-stable';
 $app_date = '2022-08-06';
 
 /**
+ * Jose/Metztli IT 07-23-2024 first release for PHP80
+ */
+$metztli_php_version = 'for PHP 8.0';
+
+/**
  * Is this b2evolution PRO?
  * If the PRO modules are available some UI elements will be set up differently.
  * This requires the PHP files for the PRO modules (otherwise there will be errors)
@@ -36,7 +41,7 @@ $app_pro = false;
 /**
  * Long version string for checking differences
  */
-$app_version_long = $app_version . '-' . $app_date;
+$app_version_long = $app_version . '-' . $app_date . ' ' . $metztli_php_version;
 
 /**
  * This is used to check if the database is up to date.
