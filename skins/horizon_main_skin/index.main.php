@@ -121,9 +121,9 @@ if ($disp != 'front') { // Don't display header on disp=front
         // --------------------------------- END OF MESSAGES ---------------------------------
     }
 
-    if ($disp == 'front') { // Start of wrapper for front page area, in order to have the $Messages outside this block
-        echo '<div class="front_main_content">';
-    }
+if ($disp == 'front') { // Start of wrapper for front page area, in order to have the $Messages outside this block
+    echo '<div class="front_main_content">';
+}
 ?>
 
 	<?php

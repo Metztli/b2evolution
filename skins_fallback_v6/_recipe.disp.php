@@ -230,11 +230,11 @@ if (mainlist_get_item()) {	// If Item is found by requested slug:
 		<div class="col-lg-3 col-sm-4">
 			<h4><?php $Item->custom([
     'field' => 'ingredients',
-			    'what' => 'label',
+                'what' => 'label',
 ]); ?></h4>
 			<p><?php $Item->custom([
-			    'field' => 'ingredients',
-			]); ?></p>
+                'field' => 'ingredients',
+            ]); ?></p>
 		</div>
 		<div class="col-lg-9 col-sm-8">
 			<h4><?php echo T_('Directions'); ?></h4>

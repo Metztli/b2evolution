@@ -263,7 +263,7 @@ if (! $edited_Comment->is_meta() &&
     $Form->hidden('comment_rating', 0);
 }
 
-    // ####################### ADVANCED PROPERTIES #########################
+// ####################### ADVANCED PROPERTIES #########################
 if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) { // ------------------------------------ TIME STAMP -------------------------------------
     $Form->begin_fieldset(TB_('Date & Time'), [
         'id' => 'cmntform_datetime',

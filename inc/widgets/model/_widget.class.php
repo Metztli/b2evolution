@@ -486,7 +486,7 @@ class ComponentWidget extends DataObject
     public function load_param_array()
     {
         if (is_null($this->param_array)) {	// Param array has not been loaded yet
-            $this->param_array = @unserialize($this->params ?? '');
+            $this->param_array = @unserialize($this->params);
 
             if (empty($this->param_array)) {	// No saved param values were found:
                 $this->param_array = [];
@@ -1302,7 +1302,7 @@ class ComponentWidget extends DataObject
             $widget_Blog = &$this->get_Blog();
 
             // Convert active renderers options for plugin functions below:
-	    // Jose/Metztli 01-17-2024 casted below as array
+            // Jose/Metztli 01-17-2024 casted below as array
             $widget_renderers = array_keys((array)$this->disp_params['renderers']);
 
             $this->renderers_validated = $Plugins->validate_renderer_list($widget_renderers, [

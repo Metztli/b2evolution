@@ -63,7 +63,7 @@ siteskin_include('_site_body_header.inc.php');
 	      		<div class="evo_container">
 	      		   <p class="header-contact-info">
 	               <?php
-                   // Display contact info, adding on your skin settings
+	               // Display contact info, adding on your skin settings
 	       if ($text = $Skin->get_setting('ht_contact_info')) {
 	           echo $text;
 	       };
@@ -218,7 +218,7 @@ if ($Skin->is_visible_container('sidebar')) {
 
    		<p>
    			<?php
-                // Display footer text (text can be edited in Blog Settings):
+	            // Display footer text (text can be edited in Blog Settings):
 	            $Blog->footer_text([
 	                'before' => '',
 	                'after' => ' &bull; ',

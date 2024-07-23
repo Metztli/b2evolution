@@ -13385,8 +13385,8 @@ class Item extends ItemLight
         return $r;
     }
     // Jose/Metztli IT 01-20-2024
-public function __toString()
-{
-return "_item.class.php: This is a string representation of the object";
-}
+    public function __toString()
+    {
+        return "_item.class.php: This is a string representation of the object";
+    }
 }

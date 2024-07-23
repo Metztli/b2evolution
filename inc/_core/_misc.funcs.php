@@ -9288,7 +9288,7 @@ jQuery( document ).on( 'click', '#modal_window button[data-dismiss=modal]', func
 <?php
         }
 
-        return $import_files;
+    return $import_files;
 }
 
 

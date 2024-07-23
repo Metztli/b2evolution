@@ -715,8 +715,8 @@ class Skin extends DataObject
         $a_container_order = isset($a_container[1]) ? $a_container[1] : 0;
         $b_container_order = isset($b_container[1]) ? $b_container[1] : 0;
 
-	// Jose/Metztli IT 01-22-2024 satisfying PHP 8 to get rid of deprecation notice in Collections, Widgets tab (see line 695 above) 
- 	return ($a_container_order < $b_container_order) ? -1 : 1;
+        // Jose/Metztli IT 01-22-2024 satisfying PHP 8 to get rid of deprecation notice in Collections, Widgets tab (see line 695 above)
+        return ($a_container_order < $b_container_order) ? -1 : 1;
     }
 
     /**

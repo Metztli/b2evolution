@@ -94,10 +94,10 @@ if (! $Item->is_intro()) { // Don't display the following for intro posts
                 'template' => '<div class="evo_status evo_status__$status$ badge pull-right">$status_title$</div>',
             ]);
         }
-        // Permalink:
-        $Item->permanent_link([
-            'text' => '#icon#',
-        ]);
+    // Permalink:
+    $Item->permanent_link([
+        'text' => '#icon#',
+    ]);
 
     // Author
     $Item->author([

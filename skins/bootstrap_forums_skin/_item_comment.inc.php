@@ -105,15 +105,15 @@ switch ($Comment->get('type')) {
                 ]);
             }
 
-            $Comment->author2([
-                'before' => ' ',
-                'after' => '#',
-                'before_user' => '',
-                'after_user' => '#',
-                'format' => 'htmlbody',
-                'link_to' => $params['link_to'],		// 'userpage' or 'userurl' or 'userurl>userpage' or 'userpage>userurl'
-                'link_text' => $params['author_link_text'],
-            ]);
+        $Comment->author2([
+            'before' => ' ',
+            'after' => '#',
+            'before_user' => '',
+            'after_user' => '#',
+            'format' => 'htmlbody',
+            'link_to' => $params['link_to'],		// 'userpage' or 'userurl' or 'userurl>userpage' or 'userpage>userurl'
+            'link_text' => $params['author_link_text'],
+        ]);
 
         echo ' <span class="text-muted">';
         $Comment->date(locale_extdatefmt() . ' ' . locale_shorttimefmt());

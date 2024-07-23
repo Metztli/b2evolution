@@ -31,16 +31,16 @@ jQuery( document ).on( 'click', 'a.evo_post_fav_btn', function()
 								//icon_container.removeClass( 'fa-star-o' );
 								//icon_container.addClass( 'fa-star' );
 								me.html( '<?php echo format_to_js(get_icon('star_on', 'imgtag', [
-								    'class' => 'coll-fav',
-								])); ?>' );
+                                    'class' => 'coll-fav',
+                                ])); ?>' );
 								break;
 
 							default:
 								//icon_container.removeClass( 'fa-star' );
 								//icon_container.addClass( 'fa-star-o' );
 								me.html( '<?php echo format_to_js(get_icon('star_off', 'imgtag', [
-								    'class' => 'coll-fav',
-								])); ?>' );
+                                    'class' => 'coll-fav',
+                                ])); ?>' );
 						}
 						favorite_link.data( 'favorite', data.setting == 1 ? 0 : 1 );
 					}

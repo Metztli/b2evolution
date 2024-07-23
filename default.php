@@ -145,7 +145,7 @@ if (! $PageCache->check()) { // Cache miss, we have to generate:
                 echo '</a></strong>';
                 echo '</li>';
             }
-            // ---------------------------------- END OF BLOG LIST ---------------------------------
+        // ---------------------------------- END OF BLOG LIST ---------------------------------
         ?>
 		</ul>
 

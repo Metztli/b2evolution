@@ -1075,8 +1075,8 @@ class MarkdownImport extends AbstractImport
                 $this->log('<p class="red">Stopping import of this file. Continue import at NEXT .md file...</p>');
             }
 
-                // Separator between each Item log:
-                $this->close_log_wrappers();
+            // Separator between each Item log:
+            $this->close_log_wrappers();
             $this->log('<br>');
         }
 

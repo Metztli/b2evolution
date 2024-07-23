@@ -62,7 +62,7 @@ if ($active_front_Item = &$Skin->get_active_front_Item()) {
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span id="tbhs_items_menu_small_active"><?php echo $active_front_Item->get_title([
     'title_field' => 'short_title,title',
-					    'link_type' => 'none',
+                        'link_type' => 'none',
 ]); ?></span> <span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">

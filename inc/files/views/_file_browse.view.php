@@ -131,12 +131,12 @@ $Widget->disp_template_replaced('block_start');
 							title="<?php echo T_('Unset filter'); ?>" class="ActionButton btn btn-warning btn-xs"><?php echo T_('Reset'); ?></button>
 						<?php
                     }
-                $Form->end_form();
+                    $Form->end_form();
                 }
 
-            // Settings:
-            echo '<a href="' . regenerate_url('', 'action=edit_settings') . '" class="file_browser_settings" title="'
-                . T_('Edit display settings') . '">' . T_('Display settings') . '</a>';
+// Settings:
+echo '<a href="' . regenerate_url('', 'action=edit_settings') . '" class="file_browser_settings" title="'
+    . T_('Edit display settings') . '">' . T_('Display settings') . '</a>';
 ?>
 
 			<!-- ROOTS SELECT -->
@@ -242,7 +242,7 @@ if ($fm_Filelist->is_filtering()) {
             echo '</td>';
         }
 
-        echo '<td id="fm_files">';
+echo '<td id="fm_files">';
 
 
 // ______________________________ Files ______________________________

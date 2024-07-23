@@ -94,8 +94,8 @@ while ($Item = &mainlist_get_item()) {	// For each blog post, do everything belo
 
 			<div class="editlinkwrapper"><span class="peditl">		<?php $Item->edit_link([
     // Link to backoffice for editing
-			    'before' => '',
-			    'after' => '',
+                'before' => '',
+                'after' => '',
 ]); ?></span></div>
 			<?php
             $Item->locale_temp_switch(); // Temporarily switch to post locale (useful for multilingual blogs)

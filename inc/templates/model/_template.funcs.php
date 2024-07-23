@@ -97,7 +97,7 @@ function render_template($template, &$params, $objects = [], &$used_template_tag
             }
         } else {	// Process a normal template tag:
             // Decode PARAMS like |name=value|name=value]
-	    // Jose/Metztli IT 02-04-2024 casted to array else keys would be undefined here in $params
+            // Jose/Metztli IT 02-04-2024 casted to array else keys would be undefined here in $params
             $this_tag_params = get_template_tag_params_from_string($tag_param_strings, (array)$params);
 
             if (is_array($used_template_tags)) {

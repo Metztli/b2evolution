@@ -69,7 +69,7 @@ echo '</div>';
                 'template' => '<div class="floatright"><span class="note status_$status$" data-toggle="tooltip" data-placement="top" title="$tooltip_title$"><span>$status_title$</span></span></div>',
             ]);
         }
-        $Comment->rating();
+$Comment->rating();
 $Comment->content('htmlbody', false, true, $params);
 ?>
 		<div class="clearer"></div>

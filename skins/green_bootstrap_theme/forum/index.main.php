@@ -156,40 +156,40 @@ if (! in_array($disp, ['login', 'lostpassword', 'register', 'activateinfo', 'acc
         $p = param('p', 'integer', 0); // Edit post from Front-office
     }
 
-    // ------------------------ TITLE FOR THE CURRENT REQUEST ------------------------
-    request_title([
-        'title_before' => '<h2 class="page_title">',
-        'title_after' => '</h2>',
-        'title_single_disp' => false,
-        'title_page_disp' => false,
-        'title_widget_page_disp' => false,
-        'format' => 'htmlbody',
-        'category_text' => '',
-        'categories_text' => '',
-        'catdir_text' => '',
-        'comments_text' => '',
-        'search_text' => '',
-        'front_text' => '',
-        'posts_text' => '',
-        'flagged_text' => '',
-        'mustread_text' => '',
-        'useritems_text' => T_('User\'s topics'),
-        'usercomments_text' => T_('User\'s replies'),
-        'register_text' => '',
-        'login_text' => '',
-        'lostpassword_text' => '',
-        'account_activation' => '',
-        'msgform_text' => '',
-        'user_text' => '',
-        'users_text' => '',
-        'display_edit_links' => ($disp == 'edit'),
-        'edit_links_template' => [
-            'before' => '<span class="pull-right">',
-            'after' => '</span>',
-            'advanced_link_class' => 'btn btn-info btn-sm',
-            'close_link_class' => 'btn btn-default btn-sm',
-        ],
-    ]);
+// ------------------------ TITLE FOR THE CURRENT REQUEST ------------------------
+request_title([
+    'title_before' => '<h2 class="page_title">',
+    'title_after' => '</h2>',
+    'title_single_disp' => false,
+    'title_page_disp' => false,
+    'title_widget_page_disp' => false,
+    'format' => 'htmlbody',
+    'category_text' => '',
+    'categories_text' => '',
+    'catdir_text' => '',
+    'comments_text' => '',
+    'search_text' => '',
+    'front_text' => '',
+    'posts_text' => '',
+    'flagged_text' => '',
+    'mustread_text' => '',
+    'useritems_text' => T_('User\'s topics'),
+    'usercomments_text' => T_('User\'s replies'),
+    'register_text' => '',
+    'login_text' => '',
+    'lostpassword_text' => '',
+    'account_activation' => '',
+    'msgform_text' => '',
+    'user_text' => '',
+    'users_text' => '',
+    'display_edit_links' => ($disp == 'edit'),
+    'edit_links_template' => [
+        'before' => '<span class="pull-right">',
+        'after' => '</span>',
+        'advanced_link_class' => 'btn btn-info btn-sm',
+        'close_link_class' => 'btn btn-default btn-sm',
+    ],
+]);
 // ----------------------------- END OF REQUEST TITLE ----------------------------
 ?>
 

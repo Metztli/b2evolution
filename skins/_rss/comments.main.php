@@ -78,7 +78,7 @@ request_title([
 		<item>
 			<title><?php echo format_to_output(T_('In response to') . ':', 'xml') ?> <?php $Comment->Item->title([
     'format' => 'xml',
-			    'link_type' => 'none',
+		        'link_type' => 'none',
 ]); ?></title>
 			<?php
 		    $content = $Comment->get_content();

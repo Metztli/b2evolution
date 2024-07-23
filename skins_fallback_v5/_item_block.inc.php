@@ -60,8 +60,8 @@ $Item->load_Blog();
     if ($params['disp_title']) { // Display a title
         ?>
 	<h3 class="bTitle"><?php $Item->title([
-	    'link_type' => $params['item_title_link_type'],
-	]); ?></h3>
+        'link_type' => $params['item_title_link_type'],
+    ]); ?></h3>
 	<?php } ?>
 
 	<?php

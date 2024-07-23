@@ -303,25 +303,25 @@ switch ($content_mode) {
 
             	               // URL link, if the post has one:
             	               $Item->url_link([
-                            'before' => $params['before_url_link'],
+            	            'before' => $params['before_url_link'],
             	                   'after' => $params['after_url_link'],
             	                   'text_template' => $params['url_link_text_template'],
             	                   'url_template' => $params['url_link_url_template'],
             	                   'target' => $params['url_link_target'],
             	                   'podcast' => '#', // Auto display mp3 player if post type is podcast (=> false, to disable)
-                        ]);
+            	        ]);
             	           }
-            	           // Display CONTENT:
-            	           $Item->content_teaser([
+            // Display CONTENT:
+            $Item->content_teaser([
                         'before' => $params['before_content_teaser'],
-            	               'after' => $params['after_content_teaser'],
-            	               'before_image' => $params['before_image'],
-            	               'before_image_legend' => $params['before_image_legend'],
-            	               'after_image_legend' => $params['after_image_legend'],
-            	               'after_image' => $params['after_image'],
-            	               'image_size' => $params['image_size'],
-            	               'limit' => $params['image_limit'],
-            	               'image_link_to' => $params['image_link_to'],
+                'after' => $params['after_content_teaser'],
+                'before_image' => $params['before_image'],
+                'before_image_legend' => $params['before_image_legend'],
+                'after_image_legend' => $params['after_image_legend'],
+                'after_image' => $params['after_image'],
+                'image_size' => $params['image_size'],
+                'limit' => $params['image_limit'],
+                'image_link_to' => $params['image_link_to'],
                     ]);
             /*
                         $Item->more_link( array(

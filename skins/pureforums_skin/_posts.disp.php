@@ -78,7 +78,7 @@ if (! empty($cat) && ($cat > 0)) { // Display sub-chapters
                                         echo '<br /><span class="ft_desc">' . $Chapter->dget('description') . '</span>';
                                     }
 
-                                    $sorted_sub_chapters = $Chapter->get_children(true);
+                    $sorted_sub_chapters = $Chapter->get_children(true);
                     if (count($sorted_sub_chapters) > 0) { // Subforums exist
                         echo '<div class="subcats">';
                         echo T_('Subforums') . ': ';
@@ -156,22 +156,22 @@ if (! empty($cat)) { // Go to grab the featured posts only on pages with defined
     }
 }
 
-if ($MainList->result_num_rows > 0) {
-    while (mainlist_get_item()) { // For each blog post, do everything below up to the closing curly brace "}"
-        // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-        skin_include('_item_list.inc.php', [
-            'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
-            'image_size' => 'fit-400x320',
-        ]);
-        // ----------------------------END ITEM BLOCK  ----------------------------
-    }
-} elseif (isset($current_Chapter)) { // Display a message about no posts in this category
-    ?>
+    if ($MainList->result_num_rows > 0) {
+        while (mainlist_get_item()) { // For each blog post, do everything below up to the closing curly brace "}"
+            // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+            skin_include('_item_list.inc.php', [
+                'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
+                'image_size' => 'fit-400x320',
+            ]);
+            // ----------------------------END ITEM BLOCK  ----------------------------
+        }
+    } elseif (isset($current_Chapter)) { // Display a message about no posts in this category
+        ?>
 <tr>
 	<td colspan="5"><?php echo T_('There is no topic in this forum yet.'); ?></td>
 </tr>
 <?php
-}
+    }
     ?>
 	<tr class="panel bottom">
 		<td colspan="5"><?php

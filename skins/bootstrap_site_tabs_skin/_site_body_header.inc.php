@@ -75,81 +75,81 @@ if (! $site_has_logo_file) {	// Display site name:
 <?php
 }
 
-            if (($header_tabs = $site_Skin->get_header_tabs()) !== false) {	// Display the grouped header tabs:
-                foreach ($header_tabs as $s => $header_tab) {	// Display level 0 tabs:
-                    ?>
+if (($header_tabs = $site_Skin->get_header_tabs()) !== false) {	// Display the grouped header tabs:
+    foreach ($header_tabs as $s => $header_tab) {	// Display level 0 tabs:
+        ?>
 					<li<?php echo $site_Skin->get_header_tab_attr_class($header_tab, $s); ?>>
 						<a href="<?php echo $header_tab['url']; ?>"<?php echo empty($header_tab['rel']) ? '' : ' rel="' . $header_tab['rel'] . '"'; ?>><?php echo $header_tab['name']; ?></a>
 					</li>
 <?php
-                }
-            } else {	// Display not grouped header tabs:
-                // --------------------------------- START OF COLLECTION LIST --------------------------------
-                // Call widget directly (without container):
-                skin_widget([
-                    // CODE for the widget:
-                    'widget' => 'colls_list_public',
-                    // Optional display params
-                    'block_start' => '',
-                    'block_end' => '',
-                    'block_display_title' => false,
-                    'list_start' => '',
-                    'list_end' => '',
-                    'item_start' => '<li>',
-                    'item_end' => '</li>',
-                    'item_selected_start' => '<li class="active">',
-                    'item_selected_end' => '</li>',
-                    'link_selected_class' => 'active',
-                    'link_default_class' => '',
-                ]);
-                // ---------------------------------- END OF COLLECTION LIST ---------------------------------
+    }
+} else {	// Display not grouped header tabs:
+    // --------------------------------- START OF COLLECTION LIST --------------------------------
+    // Call widget directly (without container):
+    skin_widget([
+        // CODE for the widget:
+        'widget' => 'colls_list_public',
+        // Optional display params
+        'block_start' => '',
+        'block_end' => '',
+        'block_display_title' => false,
+        'list_start' => '',
+        'list_end' => '',
+        'item_start' => '<li>',
+        'item_end' => '</li>',
+        'item_selected_start' => '<li class="active">',
+        'item_selected_end' => '</li>',
+        'link_selected_class' => 'active',
+        'link_default_class' => '',
+    ]);
+    // ---------------------------------- END OF COLLECTION LIST ---------------------------------
 
-                if ($site_Skin->get_info_coll_ID() > 0) {	// We have a collection for shared content blocks:
-                    // --------------------------------- START OF PAGES LIST --------------------------------
-                    // Call widget directly (without container):
-                    skin_widget([
-                        // CODE for the widget:
-                        'widget' => 'coll_page_list',
-                        // Optional display params
-                        'block_start' => '',
-                        'block_end' => '',
-                        'block_display_title' => false,
-                        'list_start' => '',
-                        'list_end' => '',
-                        'item_start' => '<li>',
-                        'item_end' => '</li>',
-                        'item_selected_start' => '<li class="active">',
-                        'item_selected_end' => '</li>',
-                        'link_selected_class' => 'active',
-                        'link_default_class' => '',
-                        'blog_ID' => $site_Skin->get_info_coll_ID(),
-                        'item_group_by' => 'none',
-                        'order_by' => 'order',		// Order (as explicitly specified)
-                    ]);
-                    // ---------------------------------- END OF PAGES LIST ---------------------------------
-                }
+    if ($site_Skin->get_info_coll_ID() > 0) {	// We have a collection for shared content blocks:
+        // --------------------------------- START OF PAGES LIST --------------------------------
+        // Call widget directly (without container):
+        skin_widget([
+            // CODE for the widget:
+            'widget' => 'coll_page_list',
+            // Optional display params
+            'block_start' => '',
+            'block_end' => '',
+            'block_display_title' => false,
+            'list_start' => '',
+            'list_end' => '',
+            'item_start' => '<li>',
+            'item_end' => '</li>',
+            'item_selected_start' => '<li class="active">',
+            'item_selected_end' => '</li>',
+            'link_selected_class' => 'active',
+            'link_default_class' => '',
+            'blog_ID' => $site_Skin->get_info_coll_ID(),
+            'item_group_by' => 'none',
+            'order_by' => 'order',		// Order (as explicitly specified)
+        ]);
+        // ---------------------------------- END OF PAGES LIST ---------------------------------
+    }
 
-                // --------------------------------- START OF CONTACT LINK --------------------------------
-                // Call widget directly (without container):
-                skin_widget([
-                    // CODE for the widget:
-                    'widget' => 'basic_menu_link',
-                    // Optional display params
-                    'block_start' => '',
-                    'block_end' => '',
-                    'block_display_title' => false,
-                    'list_start' => '',
-                    'list_end' => '',
-                    'item_start' => '<li>',
-                    'item_end' => '</li>',
-                    'item_selected_start' => '<li class="active">',
-                    'item_selected_end' => '</li>',
-                    'link_selected_class' => 'active',
-                    'link_default_class' => '',
-                    'link_type' => 'ownercontact',
-                ]);
-                // --------------------------------- END OF CONTACT LINK --------------------------------
-            }
+    // --------------------------------- START OF CONTACT LINK --------------------------------
+    // Call widget directly (without container):
+    skin_widget([
+        // CODE for the widget:
+        'widget' => 'basic_menu_link',
+        // Optional display params
+        'block_start' => '',
+        'block_end' => '',
+        'block_display_title' => false,
+        'list_start' => '',
+        'list_end' => '',
+        'item_start' => '<li>',
+        'item_end' => '</li>',
+        'item_selected_start' => '<li class="active">',
+        'item_selected_end' => '</li>',
+        'link_selected_class' => 'active',
+        'link_default_class' => '',
+        'link_type' => 'ownercontact',
+    ]);
+    // --------------------------------- END OF CONTACT LINK --------------------------------
+}
 ?>
 				</ul>
 			</nav>

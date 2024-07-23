@@ -93,7 +93,7 @@ while ($Comment = &$CommentList->get_next()) { // Loop through comments:
 <item rdf:about="<?php $Comment->permanent_url() ?>">
 	<title><?php echo format_to_output(T_('In response to') . ':', 'xml') ?> <?php $Comment->Item->title([
     'format' => 'xml',
-	    'link_type' => 'none',
+        'link_type' => 'none',
 ]); ?></title>
 	<link><?php $Comment->permanent_url() ?></link>
 	<dc:date><?php $Comment->date('isoZ', true); ?></dc:date>

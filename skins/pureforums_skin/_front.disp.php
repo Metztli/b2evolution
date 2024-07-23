@@ -66,7 +66,7 @@ if (count($chapters) > 0) {
                                     echo '<br /><span class="ft_desc">' . $Chapter->dget('description') . '</span>';
                                 }
 
-                                $sorted_sub_chapters = $Chapter->get_children(true);
+                $sorted_sub_chapters = $Chapter->get_children(true);
                 if (count($sorted_sub_chapters) > 0) { // Subforums exist
                     echo '<div class="subcats">';
                     echo T_('Subforums') . ': ';

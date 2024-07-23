@@ -66,8 +66,8 @@ if (! empty($bg_File) && $bg_File->exists()) { // If it exists in media folder
             // --------------------------------- END OF MESSAGES ---------------------------------
         }
 
-        // Start of wrapper for front page area, in order to have the $Messages outside this block
-        echo '<div class="front_main_content">';
+// Start of wrapper for front page area, in order to have the $Messages outside this block
+echo '<div class="front_main_content">';
 ?>
 
 		<?php

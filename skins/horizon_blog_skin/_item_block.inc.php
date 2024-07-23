@@ -94,23 +94,23 @@ if (! $Item->is_intro()) { // Don't display the following for intro posts
             ]);
         }
 
-        if ($disp != 'page') {
-            // ------------------------- "Item Single - Header" CONTAINER EMBEDDED HERE --------------------------
-            // Display container contents:
-            skin_container( /* TRANS: Widget container name */ NT_('Item Single Header'), [
-                'widget_context' => 'item',	// Signal that we are displaying within an Item
-                // The following (optional) params will be used as defaults for widgets included in this container:
-                // This will enclose each widget in a block:
-                'block_start' => '<div class="evo_widget $wi_class$">',
-                'block_end' => '</div>',
-                // This will enclose the title of each widget:
-                'block_title_start' => '<h3>',
-                'block_title_end' => '</h3>',
+    if ($disp != 'page') {
+        // ------------------------- "Item Single - Header" CONTAINER EMBEDDED HERE --------------------------
+        // Display container contents:
+        skin_container( /* TRANS: Widget container name */ NT_('Item Single Header'), [
+            'widget_context' => 'item',	// Signal that we are displaying within an Item
+            // The following (optional) params will be used as defaults for widgets included in this container:
+            // This will enclose each widget in a block:
+            'block_start' => '<div class="evo_widget $wi_class$">',
+            'block_end' => '</div>',
+            // This will enclose the title of each widget:
+            'block_title_start' => '<h3>',
+            'block_title_end' => '</h3>',
 
-                'author_link_text' => $params['author_link_text'],
-            ]);
-            // ----------------------------- END OF "Item Single - Header" CONTAINER -----------------------------
-        }
+            'author_link_text' => $params['author_link_text'],
+        ]);
+        // ----------------------------- END OF "Item Single - Header" CONTAINER -----------------------------
+    }
     ?>
 	</div>
 	<?php

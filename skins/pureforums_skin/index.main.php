@@ -177,25 +177,25 @@ messages([
     if ($disp == 'edit') {	// Add or Edit a post
         $p = param('p', 'integer', 0); // Edit post from Front-office
     }
-    // ------------------------ TITLE FOR THE CURRENT REQUEST ------------------------
-    request_title([
-        'title_before' => '<h2 class="page_title">',
-        'title_after' => '</h2>',
-        'title_single_disp' => false,
-        'title_page_disp' => false,
-        'format' => 'htmlbody',
-        'edit_text_create' => T_('Post a new topic'),
-        'edit_text_update' => T_('Edit post'),
-        'category_text' => '',
-        'categories_text' => '',
-        'catdir_text' => '',
-        'comments_text' => T_('Latest Replies'),
-        'front_text' => '',
-        'posts_text' => '',
-        'useritems_text' => T_('User\'s topics'),
-        'usercomments_text' => T_('User\'s replies'),
-        'user_text' => '',
-    ]);
+// ------------------------ TITLE FOR THE CURRENT REQUEST ------------------------
+request_title([
+    'title_before' => '<h2 class="page_title">',
+    'title_after' => '</h2>',
+    'title_single_disp' => false,
+    'title_page_disp' => false,
+    'format' => 'htmlbody',
+    'edit_text_create' => T_('Post a new topic'),
+    'edit_text_update' => T_('Edit post'),
+    'category_text' => '',
+    'categories_text' => '',
+    'catdir_text' => '',
+    'comments_text' => T_('Latest Replies'),
+    'front_text' => '',
+    'posts_text' => '',
+    'useritems_text' => T_('User\'s topics'),
+    'usercomments_text' => T_('User\'s replies'),
+    'user_text' => '',
+]);
 // ----------------------------- END OF REQUEST TITLE ----------------------------
 ?>
 

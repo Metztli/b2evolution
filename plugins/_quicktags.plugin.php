@@ -259,8 +259,8 @@ class quicktags_plugin extends Plugin
 		<?php
     }
 
-    if ($params['allow_restricted_html']) {	// Allow <img> and <a> html tags:
-        ?>
+        if ($params['allow_restricted_html']) {	// Allow <img> and <a> html tags:
+            ?>
 		<?php echo $params['js_prefix']; ?>b2evoButtons[<?php echo $params['js_prefix']; ?>b2evoButtons.length] = new <?php echo $params['js_prefix']; ?>b2evoButton(
 				'<?php echo $params['js_prefix']; ?>b2evo_img'
 				,'<?php echo($simple ? 'image' : 'img') ?>', ''
@@ -278,7 +278,7 @@ class quicktags_plugin extends Plugin
 				,'<?php echo TS_('A href [Alt-A]') ?>'
 			); // special case
 	<?php
-    }
+        }
         ?>
 
 		function <?php echo $params['js_prefix']; ?>b2evoGetButton(button, i)

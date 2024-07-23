@@ -103,7 +103,7 @@ foreach ($legends as $l => $legend) { // Print out all legends
 			<i class="icon fa <?php echo $legend_data['icon']; ?>" title="<?php echo $legend_data['title']; ?>"></i>
 			<?php
                         }
-                        echo $legend_data['title']; ?>
+                echo $legend_data['title']; ?>
 		</div>
 	<?php
             }

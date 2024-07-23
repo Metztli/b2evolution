@@ -82,7 +82,7 @@ request_title([
         echo format_to_output(T_('In response to') . ':', 'xml') . ' ';
 	    $Comment->get_Item();
 	    $Comment->Item->title([
-        'format' => 'xml',
+	    'format' => 'xml',
 	        'link_type' => 'none',
     ]); ?></title>
 		<link rel="alternate" type="text/html" href="<?php $Comment->permanent_url() ?>" />

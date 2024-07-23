@@ -74,10 +74,10 @@ if (! $Item->is_intro()) { // Don't display these data for intro posts
                 'format' => 'styled',
             ]);
         }
-        // Permalink:
-        $Item->permanent_link([
-            'text' => '#icon#',
-        ]);
+    // Permalink:
+    $Item->permanent_link([
+        'text' => '#icon#',
+    ]);
 
     // We want to display the post time:
     $Item->issue_time([

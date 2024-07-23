@@ -44,11 +44,11 @@ siteskin_include('_site_body_header.inc.php');
         $cover_image_url = $Item->get_cover_image_url();
     }
 
-    if (empty($cover_image_url)) { // No cover of the post
-        $main_full_image_div_attrs = ' class="single_bg nocover"';
-    } else { // Use a cover image as main background only when it exists for the post
-        $main_full_image_div_attrs = ' class="single_bg" style="background-image:url(\'' . $cover_image_url . '\')"';
-    }
+if (empty($cover_image_url)) { // No cover of the post
+    $main_full_image_div_attrs = ' class="single_bg nocover"';
+} else { // Use a cover image as main background only when it exists for the post
+    $main_full_image_div_attrs = ' class="single_bg" style="background-image:url(\'' . $cover_image_url . '\')"';
+}
 ?>
 
   <!-- Main Full Image  -->

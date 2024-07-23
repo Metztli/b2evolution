@@ -177,7 +177,7 @@ if ($disp == 'mustread') {	// Display a link to view changes only for "must read
         echo '</div>';
     } // --------------------------------------------------------------------------------------------------------------------------
 
-    echo '<!-- Assigned User Block -->';
+echo '<!-- Assigned User Block -->';
 if ($display_workflow) { // ==========================================================================================================================
     $assigned_User = $Item->get_assigned_User();
     $priority_color = item_priority_color($Item->priority);

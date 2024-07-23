@@ -121,8 +121,8 @@ if ($is_other_disp) {
 	<?php } else { ?>
 
 		<?php
-            // ------------------------- "Header" CONTAINER EMBEDDED HERE --------------------------
-            // Display container and contents:
+	        // ------------------------- "Header" CONTAINER EMBEDDED HERE --------------------------
+	        // Display container and contents:
 	        widget_container('header', [
 	            // The following params will be used as defaults for widgets included in this container:
 	            'container_display_if_empty' => true, // Display container anyway even if no widget

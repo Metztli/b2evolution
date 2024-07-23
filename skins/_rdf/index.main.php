@@ -76,7 +76,7 @@ while ($Item = &mainlist_get_item()) {	// For each blog post, do everything belo
 <item rdf:about="<?php $Item->permanent_url('single') ?>">
 	<title><?php $Item->title([
     'format' => 'xml',
-	    'link_type' => 'none',
+        'link_type' => 'none',
 ]); ?></title>
 	<link><?php $Item->permanent_url('single') ?></link>
 	<?php

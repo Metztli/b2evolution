@@ -77,7 +77,7 @@ while ($Item = &mainlist_get_item()) {	// For each blog post, do everything belo
 		<item>
 			<title><?php $Item->title([
     'format' => 'xml',
-			    'link_type' => 'none',
+                'link_type' => 'none',
 ]); ?></title>
 			<link><?php $Item->permanent_url('single') ?></link>
 			<?php
@@ -116,139 +116,139 @@ while ($Item = &mainlist_get_item()) {	// For each blog post, do everything belo
             // TODO: add length="12216320" type="audio/mpeg"
         }
 
-        if ($feed_content == 'excerpt') {	// EXCERPTS ---------------------------------------------------------------------
-            ?>
+    if ($feed_content == 'excerpt') {	// EXCERPTS ---------------------------------------------------------------------
+        ?>
 			<description><?php
-                $content = $Item->get_excerpt();
+            $content = $Item->get_excerpt();
 
-            // Get content as "htmlbody", otherwise make_rel_links_abs() can't catch <a> and <img> tags
-            // TODO: clean solution : work in format_to_output!
-            echo format_to_output(make_rel_links_abs($content), 'entityencoded');
+        // Get content as "htmlbody", otherwise make_rel_links_abs() can't catch <a> and <img> tags
+        // TODO: clean solution : work in format_to_output!
+        echo format_to_output(make_rel_links_abs($content), 'entityencoded');
 
-            // Display Item footer text (text can be edited in Blog Settings):
-            $Item->footer([
-                'mode' => 'xml',
-                'block_start' => '<div class="item_footer">',
-                'block_end' => '</div>',
-                'format' => 'entityencoded',
-            ]);
-            ?></description>
+        // Display Item footer text (text can be edited in Blog Settings):
+        $Item->footer([
+            'mode' => 'xml',
+            'block_start' => '<div class="item_footer">',
+            'block_end' => '</div>',
+            'format' => 'entityencoded',
+        ]);
+        ?></description>
 			<content:encoded><![CDATA[<?php
-                echo $Item->get_excerpt('htmlfeed');
+            echo $Item->get_excerpt('htmlfeed');
 
-            // Display Item footer text (text can be edited in Blog Settings):
-            $Item->footer([
-                'mode' => 'xml',
-                'block_start' => '<div class="item_footer">',
-                'block_end' => '</div>',
-                'format' => 'htmlfeed',
-            ]);
-            ?>]]></content:encoded>
+        // Display Item footer text (text can be edited in Blog Settings):
+        $Item->footer([
+            'mode' => 'xml',
+            'block_start' => '<div class="item_footer">',
+            'block_end' => '</div>',
+            'format' => 'htmlfeed',
+        ]);
+        ?>]]></content:encoded>
 					<?php
 
-        } elseif ($feed_content == 'normal'
-                    || $feed_content == 'full') {	// POST CONTENTS -----------------------------------------------------------------
-            ?>
+    } elseif ($feed_content == 'normal'
+                || $feed_content == 'full') {	// POST CONTENTS -----------------------------------------------------------------
+        ?>
 			<description><?php
-                // URL link, if the post has one: (TODO: move below the text, because in summaries or podcasts it blows to have this on top)
-                $Item->url_link([
-                    'before' => '<p>',
-                    'after' => '</p>',
-                    'format' => 'entityencoded',
-                    'podcast' => false,
-                ]);
-
-            // Display images that are linked to this post:
-            $content = $Item->get_images([
-                'before' => '<div>',
-                'before_image' => '<div>',
-                'before_image_legend' => '<div><i>',
-                'after_image_legend' => '</i></div>',
-                'after_image' => '</div>',
-                'after' => '</div>',
-                'image_size' => $image_size,
-            ], 'htmlbody');
-
-            $content .= $Item->get_content_teaser(1, false);
-
-            if ($feed_content == 'normal') {	// Teasers only
-                $content .= $Item->get_more_link([
-                    'before' => '',
-                    'after' => '',
-                    'disppage' => 1,
-                ]);
-            } else {	// Full contents
-                $content .= $Item->get_content_extension(1, true);
-            }
-
-            // Get content as "htmlbody", otherwise make_rel_links_abs() can't catch <a> and <img> tags
-            // TODO: clean solution : work in format_to_output!
-            echo format_to_output(make_rel_links_abs($content), 'entityencoded');
-
-            // Display Item footer text (text can be edited in Blog Settings):
-            $Item->footer([
-                'mode' => 'xml',
-                'block_start' => '<div class="item_footer">',
-                'block_end' => '</div>',
+            // URL link, if the post has one: (TODO: move below the text, because in summaries or podcasts it blows to have this on top)
+            $Item->url_link([
+                'before' => '<p>',
+                'after' => '</p>',
                 'format' => 'entityencoded',
+                'podcast' => false,
             ]);
-            ?></description>
-			<content:encoded><![CDATA[<?php
-                // URL link, if the post has one:
-                $Item->url_link([
-                    'before' => '<p>',
-                    'after' => '</p>',
-                    'podcast' => false,
-                    'format' => 'htmlfeed',
-                ]);
 
-            // Display images that are linked to this post:
-            $Item->images([
-                'before' => '<div>',
-                'before_image' => '<div>',
-                'before_image_legend' => '<div><i>',
-                'after_image_legend' => '</i></div>',
-                'after_image' => '</div>',
-                'after' => '</div>',
-                'image_size' => 'fit-320x320',
-            ], 'htmlfeed');
+        // Display images that are linked to this post:
+        $content = $Item->get_images([
+            'before' => '<div>',
+            'before_image' => '<div>',
+            'before_image_legend' => '<div><i>',
+            'after_image_legend' => '</i></div>',
+            'after_image' => '</div>',
+            'after' => '</div>',
+            'image_size' => $image_size,
+        ], 'htmlbody');
 
-            $Item->content_teaser([
+        $content .= $Item->get_content_teaser(1, false);
+
+        if ($feed_content == 'normal') {	// Teasers only
+            $content .= $Item->get_more_link([
+                'before' => '',
+                'after' => '',
                 'disppage' => 1,
-                'stripteaser' => false,
-                'format' => 'htmlfeed',
-                'before_image' => '<div>',
-                'before_image_legend' => '<div><i>',
-                'after_image_legend' => '</i></div>',
-                'after_image' => '</div>',
-                'image_size' => 'fit-320x320',
             ]);
-
-            if ($feed_content == 'normal') {	// Teasers only
-                $Item->more_link([
-                    'before' => '',
-                    'after' => '',
-                    'disppage' => 1,
-                    'format' => 'htmlfeed',
-                ]);
-            } else {	// Full contents
-                $Item->content_extension([
-                    'disppage' => 1,
-                    'force_more' => true,
-                    'format' => 'htmlfeed',
-                ]);
-            }
-
-            // Display Item footer text (text can be edited in Blog Settings):
-            $Item->footer([
-                'mode' => 'xml',
-                'block_start' => '<div class="item_footer">',
-                'block_end' => '</div>',
-                'format' => 'htmlfeed',
-            ]);
-            ?>]]></content:encoded>
-					<?php
+        } else {	// Full contents
+            $content .= $Item->get_content_extension(1, true);
         }
+
+        // Get content as "htmlbody", otherwise make_rel_links_abs() can't catch <a> and <img> tags
+        // TODO: clean solution : work in format_to_output!
+        echo format_to_output(make_rel_links_abs($content), 'entityencoded');
+
+        // Display Item footer text (text can be edited in Blog Settings):
+        $Item->footer([
+            'mode' => 'xml',
+            'block_start' => '<div class="item_footer">',
+            'block_end' => '</div>',
+            'format' => 'entityencoded',
+        ]);
+        ?></description>
+			<content:encoded><![CDATA[<?php
+            // URL link, if the post has one:
+            $Item->url_link([
+                'before' => '<p>',
+                'after' => '</p>',
+                'podcast' => false,
+                'format' => 'htmlfeed',
+            ]);
+
+        // Display images that are linked to this post:
+        $Item->images([
+            'before' => '<div>',
+            'before_image' => '<div>',
+            'before_image_legend' => '<div><i>',
+            'after_image_legend' => '</i></div>',
+            'after_image' => '</div>',
+            'after' => '</div>',
+            'image_size' => 'fit-320x320',
+        ], 'htmlfeed');
+
+        $Item->content_teaser([
+            'disppage' => 1,
+            'stripteaser' => false,
+            'format' => 'htmlfeed',
+            'before_image' => '<div>',
+            'before_image_legend' => '<div><i>',
+            'after_image_legend' => '</i></div>',
+            'after_image' => '</div>',
+            'image_size' => 'fit-320x320',
+        ]);
+
+        if ($feed_content == 'normal') {	// Teasers only
+            $Item->more_link([
+                'before' => '',
+                'after' => '',
+                'disppage' => 1,
+                'format' => 'htmlfeed',
+            ]);
+        } else {	// Full contents
+            $Item->content_extension([
+                'disppage' => 1,
+                'force_more' => true,
+                'format' => 'htmlfeed',
+            ]);
+        }
+
+        // Display Item footer text (text can be edited in Blog Settings):
+        $Item->footer([
+            'mode' => 'xml',
+            'block_start' => '<div class="item_footer">',
+            'block_end' => '</div>',
+            'format' => 'htmlfeed',
+        ]);
+        ?>]]></content:encoded>
+					<?php
+    }
     ?>
 			<comments><?php echo $Item->get_single_url('auto'); ?>#comments</comments>
 			<wfw:commentRss><?php echo format_to_output($Item->get_feedback_feed_url('_rss2'), 'xml'); ?></wfw:commentRss>

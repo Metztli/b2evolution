@@ -120,9 +120,9 @@ jQuery( '#button_add_field' ).click( function ()
 		+ '<input type="hidden" name="msgform_additional_fields[]" value="' + field_id + '" />'
 		+ field_title
 		+ ' <?php echo format_to_js(get_icon('minus', 'imgtag', [
-		    'class' => 'remove_user_field',
-		    'style' => 'cursor:pointer',
-		])); ?>'
+            'class' => 'remove_user_field',
+            'style' => 'cursor:pointer',
+        ])); ?>'
 		+ '<?php echo format_to_js($Form->infoend); ?>' );
 
 	return false;

@@ -171,8 +171,8 @@ echo '</form>';
         // ----------------------------END ITEM BLOCK  ----------------------------
     }
 
-    // Display message if no post:
-    display_if_empty();
+// Display message if no post:
+display_if_empty();
 
 while ($Item = &mainlist_get_item()) {	// For each blog post:
     // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------

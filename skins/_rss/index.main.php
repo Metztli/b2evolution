@@ -59,7 +59,7 @@ while ($Item = &mainlist_get_item()) {	// For each blog post, do everything belo
 		<item>
 			<title><?php $Item->title([
     'format' => 'xml',
-			    'link_type' => 'none',
+                'link_type' => 'none',
 ]); ?></title>
 			<?php
             if ($feed_content == 'excerpt') {	// EXCERPTS ---------------------------------------------------------------------

@@ -305,8 +305,8 @@ jQuery( document ).ready( function()
 	{
 		var obj_this = jQuery( this );
 		jQuery.post( '<?php echo $this->get_htsrv_url('load_country', [
-		    'user_ID' => $User->ID,
-		], '&'); ?>',
+            'user_ID' => $User->ID,
+        ], '&'); ?>',
 			function( result )
 			{
 				obj_this.parent().html( ajax_debug_clear( result ) );

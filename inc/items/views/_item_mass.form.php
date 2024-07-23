@@ -213,16 +213,16 @@ if ($edited_Item->allow_comment_statuses()) {
 		<?php
         }
 
-        if ($edited_Item->get_type_setting('allow_disabling_comments')) { // Allow disabling comments
-            ?>
+    if ($edited_Item->get_type_setting('allow_disabling_comments')) { // Allow disabling comments
+        ?>
 			<label title="<?php echo TB_('Visitors cannot see nor leave comments on this post.') ?>"><input type="radio" name="post_comment_status" value="disabled" class="checkbox" <?php if ($post_comment_status == 'disabled') {
 			    echo 'checked="checked"';
 			} ?> />
 			<?php echo TB_('Disabled') ?></label><br />
 		<?php
-        }
+    }
 
-        $Form->end_fieldset();
+    $Form->end_fieldset();
 }
 
 ?>

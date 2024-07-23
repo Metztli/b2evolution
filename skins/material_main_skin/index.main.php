@@ -124,9 +124,9 @@ if ($is_pictured_page) { // Display a picture from skin setting as background im
             // --------------------------------- END OF MESSAGES ---------------------------------
         }
 
-        if ($disp == 'front') { // Start of wrapper for front page area, in order to have the $Messages outside this block
-            echo '<div class="front_main_content">';
-        }
+if ($disp == 'front') { // Start of wrapper for front page area, in order to have the $Messages outside this block
+    echo '<div class="front_main_content">';
+}
 ?>
 
                 <?php

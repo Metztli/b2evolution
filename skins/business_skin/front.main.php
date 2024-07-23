@@ -54,15 +54,15 @@ skin_include('_body_header.inc.php');
                     // --------------------------------- END OF MESSAGES ---------------------------------
                 }
 
-                // ------------------- PREV/NEXT POST LINKS (SINGLE POST MODE) -------------------
-                item_prevnext_links([
-                    'block_start' => '<nav><ul class="pager">',
-                    'prev_start' => '<li class="previous">',
-                    'prev_end' => '</li>',
-                    'next_start' => '<li class="next">',
-                    'next_end' => '</li>',
-                    'block_end' => '</ul></nav>',
-                ]);
+// ------------------- PREV/NEXT POST LINKS (SINGLE POST MODE) -------------------
+item_prevnext_links([
+    'block_start' => '<nav><ul class="pager">',
+    'prev_start' => '<li class="previous">',
+    'prev_end' => '</li>',
+    'next_start' => '<li class="next">',
+    'next_end' => '</li>',
+    'block_end' => '</ul></nav>',
+]);
 // ------------------------- END OF PREV/NEXT POST LINKS -------------------------
 
 // ------------------------ TITLE FOR THE CURRENT REQUEST ------------------------

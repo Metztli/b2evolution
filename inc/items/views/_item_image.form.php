@@ -190,12 +190,12 @@ $Form->end_form();
     if(! empty($image_class)) {
         echo 'apply_image_class( "' . $image_class . '" );';
     }
-    if(! empty($thumbnail_class)) {
-        echo 'apply_image_class( "' . $thumbnail_class . '" );';
-    }
-    if(! empty($inline_class)) {
-        echo 'apply_image_class( "' . $inline_class . '" );';
-    }
+if(! empty($thumbnail_class)) {
+    echo 'apply_image_class( "' . $thumbnail_class . '" );';
+}
+if(! empty($inline_class)) {
+    echo 'apply_image_class( "' . $inline_class . '" );';
+}
 ?>
 			} );
 

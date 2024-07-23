@@ -305,8 +305,8 @@ headers_content_mightcache('text/html');		// In most situations, you do NOT want
             break;
     }
 
-    // Add JavaScript and CSS files included by plugins and skin
-    include_footerlines();
+// Add JavaScript and CSS files included by plugins and skin
+include_footerlines();
 ?>
 </body>
 </html>

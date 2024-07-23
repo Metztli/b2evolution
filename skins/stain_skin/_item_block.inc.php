@@ -113,10 +113,10 @@ if ($params['disp_title']) {
                 'template' => '<div class="evo_status evo_status__$status$ badge pull-right">$status_title$</div>',
             ]);
         }
-        // Permalink:
-        $Item->permanent_link([
-            'text' => '',
-        ]);
+    	    // Permalink:
+    	    $Item->permanent_link([
+    	        'text' => '',
+    	    ]);
     	    // We want to display the post time:
     	    $Item->issue_time([
     	        'before' => ' ' . T_('Posted on '),

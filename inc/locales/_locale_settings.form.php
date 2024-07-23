@@ -350,16 +350,16 @@ if ($action == 'edit') { // Edit a locale:
 			<th<?php echo $loc_transinfo ? ' rowspan="2"' : ''; ?>><?php echo TB_('Edit') ?></th>
 			<?php
 		}
-        if ($loc_transinfo) {
-            ?>
+    if ($loc_transinfo) {
+        ?>
 			<th colspan="2"><?php echo TB_('General') ?></th>
 			<th colspan="2"><?php echo TB_('Back-office') ?></th>
 			<th colspan="2"><?php echo TB_('Demo contents') ?></th>
 			<?php
-            if (check_user_perm('options', 'edit') && $allow_po_extraction) {
-                echo '<th rowspan="2" class="lastcol">' . TB_('Extract') . '</th>';
-            }
-        } ?>
+        if (check_user_perm('options', 'edit') && $allow_po_extraction) {
+            echo '<th rowspan="2" class="lastcol">' . TB_('Extract') . '</th>';
+        }
+    } ?>
 	</tr>
 	<?php
     if ($loc_transinfo) {

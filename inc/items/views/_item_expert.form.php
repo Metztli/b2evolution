@@ -894,44 +894,44 @@ if ($edited_Item->allow_comment_statuses()) {
 		<?php
         }
 
-        if ($edited_Item->get_type_setting('allow_disabling_comments')) { // Allow disabling comments
-            ?>
+    if ($edited_Item->get_type_setting('allow_disabling_comments')) { // Allow disabling comments
+        ?>
 			<label title="<?php echo TB_('Visitors cannot see nor leave comments on this post.') ?>"><input type="radio" name="post_comment_status" value="disabled" class="checkbox" <?php if ($post_comment_status == 'disabled') {
 			    echo 'checked="checked"';
 			} ?> />
 			<?php echo TB_('Disabled') ?></label><br />
 		<?php
-        }
+    }
 
-        if ($edited_Item->get_type_setting('allow_comment_form_msg')) {	// If custom message is allowed before comment form:
-            $Form->switch_layout('none');
-            $Form->textarea_input('comment_form_msg', $edited_Item->get_setting('comment_form_msg'), 3, TB_('Message before comment form'));
-            echo '<br />';
+    if ($edited_Item->get_type_setting('allow_comment_form_msg')) {	// If custom message is allowed before comment form:
+        $Form->switch_layout('none');
+        $Form->textarea_input('comment_form_msg', $edited_Item->get_setting('comment_form_msg'), 3, TB_('Message before comment form'));
+        echo '<br />';
+        $Form->switch_layout(null);
+    }
+
+    if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) {	// If user has a permission to edit advanced properties of items:
+        if ($edited_Item->get_type_setting('use_comment_expiration') != 'never') { // Display comment expiration
+            $Form->switch_layout('table');
+            $Form->duration_input(
+                'expiry_delay',
+                $edited_Item->get_setting('comment_expiry_delay'),
+                TB_('Expiry delay'),
+                'months',
+                'hours',
+                [
+                    'minutes_step' => 1,
+                    'required' => $edited_Item->get_type_setting('use_comment_expiration') == 'required',
+                    'note' => TB_('Older comments and ratings will no longer be displayed.'),
+                ]
+            );
             $Form->switch_layout(null);
+        } else { // Hide comment expiration
+            $Form->hidden('expiry_delay', $edited_Item->get_setting('comment_expiry_delay'));
         }
+    }
 
-        if (check_user_perm('blog_edit_ts', 'edit', false, $Blog->ID)) {	// If user has a permission to edit advanced properties of items:
-            if ($edited_Item->get_type_setting('use_comment_expiration') != 'never') { // Display comment expiration
-                $Form->switch_layout('table');
-                $Form->duration_input(
-                    'expiry_delay',
-                    $edited_Item->get_setting('comment_expiry_delay'),
-                    TB_('Expiry delay'),
-                    'months',
-                    'hours',
-                    [
-                        'minutes_step' => 1,
-                        'required' => $edited_Item->get_type_setting('use_comment_expiration') == 'required',
-                        'note' => TB_('Older comments and ratings will no longer be displayed.'),
-                    ]
-                );
-                $Form->switch_layout(null);
-            } else { // Hide comment expiration
-                $Form->hidden('expiry_delay', $edited_Item->get_setting('comment_expiry_delay'));
-            }
-        }
-
-        $Form->end_fieldset();
+    $Form->end_fieldset();
 }
 
 

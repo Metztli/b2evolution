@@ -99,11 +99,11 @@ if (count($res_hits)) {
             if (isset($diagram_columns['session'])) {
                 echo '<th style="background-color:#' . $diagram_columns['session']['color'] . '">' . $diagram_columns['session']['title'] . '</th>';
             }
-            foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
-                if ($diagram_column_key != 'session') {
-                    echo '<th style="background-color:#' . $diagram_column_data['color'] . '">' . $diagram_column_data['title'] . '</th>';
-                }
-            }
+    foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
+        if ($diagram_column_key != 'session') {
+            echo '<th style="background-color:#' . $diagram_column_data['color'] . '">' . $diagram_column_data['title'] . '</th>';
+        }
+    }
     ?>
 			<th class="lastcol"><?php echo T_('Total') ?></th>
 		</tr>
@@ -216,18 +216,18 @@ if (count($res_hits)) {
         if (isset($diagram_columns['session'])) {
             echo '<td class="right">' . array_sum($sessions) . '</td>';
         }
-        foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
-            if ($diagram_column_key != 'session') {
-                echo '<td class="right">';
-                if ($is_live_data) {
-                    $diagram_col_url_params = empty($diagram_column_data['link_data'][0]) ? '' : '&amp;referer_type=' . $diagram_column_data['link_data'][0];
-                    echo '<a href="' . $link_text_total . $diagram_col_url_params . '">' . $hits_total[$diagram_column_key] . '</a>';
-                } else {
-                    echo $hits_total[$diagram_column_key];
-                }
-                echo '</td>';
+    foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
+        if ($diagram_column_key != 'session') {
+            echo '<td class="right">';
+            if ($is_live_data) {
+                $diagram_col_url_params = empty($diagram_column_data['link_data'][0]) ? '' : '&amp;referer_type=' . $diagram_column_data['link_data'][0];
+                echo '<a href="' . $link_text_total . $diagram_col_url_params . '">' . $hits_total[$diagram_column_key] . '</a>';
+            } else {
+                echo $hits_total[$diagram_column_key];
             }
+            echo '</td>';
         }
+    }
     ?>
 			<td class="lastcol right"><?php echo $is_live_data ? '<a href="' . $link_text_total . '">' . array_sum($hits_total) . '</a>' : array_sum($hits_total); ?></td>
 		</tr>

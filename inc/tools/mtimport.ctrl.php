@@ -164,8 +164,8 @@ param('import_mode', 'string', 'normal');
         }
     }
 
-    // get the params
-    param('simulate', 'integer', 0);
+// get the params
+param('simulate', 'integer', 0);
 param('default_password', 'string', 'changeme');
 param('default_password2', 'string', 'changeme');
 param('post_locale', 'string', $Settings->get('default_locale'));

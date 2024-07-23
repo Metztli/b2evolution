@@ -136,7 +136,7 @@ if ($single_cat_ID) {	// Display sub-chapters:
                                     echo '<br /><span class="ft_desc">' . $Chapter->dget('description') . '</span>';
                                 }
 
-                                $sorted_sub_chapters = $Chapter->get_children(true);
+                $sorted_sub_chapters = $Chapter->get_children(true);
                 if (count($sorted_sub_chapters) > 0) { // Subforums exist
                     echo '<div class="subcats">';
                     echo T_('Subforums') . ': ';
@@ -214,22 +214,22 @@ if ($single_cat_ID) {	// Go to grab only featured posts only on pages with defin
     }
 }
 
-if ($MainList->result_num_rows > 0) {
-    while (mainlist_get_item()) { // For each blog post, do everything below up to the closing curly brace "}"
-        // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
-        skin_include('_item_list.inc.php', [
-            'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
-            'image_size' => 'fit-1280x720',
-        ]);
-        // ----------------------------END ITEM BLOCK  ----------------------------
-    }
-} else {	// Display a message about no posts:
-    ?>
+    if ($MainList->result_num_rows > 0) {
+        while (mainlist_get_item()) { // For each blog post, do everything below up to the closing curly brace "}"
+            // ---------------------- ITEM BLOCK INCLUDED HERE ------------------------
+            skin_include('_item_list.inc.php', [
+                'content_mode' => 'auto',		// 'auto' will auto select depending on $disp-detail
+                'image_size' => 'fit-1280x720',
+            ]);
+            // ----------------------------END ITEM BLOCK  ----------------------------
+        }
+    } else {	// Display a message about no posts:
+        ?>
 <div class="ft_no_post">
 	<?php echo isset($current_Chapter) ? T_('There is no topic in this forum yet.') : T_('No topics.'); ?>
 </div>
 <?php
-}
+    }
     ?>
 	</section>
 

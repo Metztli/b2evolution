@@ -61,16 +61,16 @@ $params = array_merge([
                     'template' => '<div class="floatright"><span class="note status_$status$" data-toggle="tooltip" data-placement="top" title="$tooltip_title$"><span>$status_title$</span></span></div>',
                 ]);
             }
-            // Link to comments, trackbacks, etc.:
-            $Item->feedback_link([
-                'type' => 'feedbacks',
-                'link_before' => '<div class="action_right">',
-                'link_after' => '</div>',
-                'link_text_zero' => get_icon('nocomment'),
-                'link_text_one' => get_icon('comments'),
-                'link_text_more' => get_icon('comments'),
-                'link_title' => '#',
-            ]);
+// Link to comments, trackbacks, etc.:
+$Item->feedback_link([
+    'type' => 'feedbacks',
+    'link_before' => '<div class="action_right">',
+    'link_after' => '</div>',
+    'link_text_zero' => get_icon('nocomment'),
+    'link_text_one' => get_icon('comments'),
+    'link_text_more' => get_icon('comments'),
+    'link_title' => '#',
+]);
 
 $Item->permanent_link([
     'before' => '<div class="action_right">',

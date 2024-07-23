@@ -52,17 +52,17 @@ $params = array_merge([
 	<div class="calendar">
 		<div class="cal-month month-<?php $Item->issue_time([
     'time_format' => 'm',
-		    'before' => '',
-		    'after' => '',
+            'before' => '',
+            'after' => '',
 ]); ?>"><?php $Item->issue_time([
     'time_format' => 'M',
-		    'before' => '',
-		    'after' => '',
+            'before' => '',
+            'after' => '',
 ]); ?></div>
 		<div class="cal-date"><?php $Item->issue_time([
     'time_format' => 'j',
-		    'before' => '',
-		    'after' => '',
+            'before' => '',
+            'after' => '',
 ]); ?></div>
 	</div>
 
@@ -88,8 +88,8 @@ $params = array_merge([
 
 	<div class="post-author">
 		<span class="lead">By</span> <?php $Item->author([
-		    'link_text' => 'auto',
-		]) ?><br />
+            'link_text' => 'auto',
+        ]) ?><br />
 
 	<?php
     if (! $Item->is_intro()) {	// Display only if we're not displaying an intro post:

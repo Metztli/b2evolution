@@ -360,7 +360,7 @@ class WidgetContainer extends DataObject
     }
     // Jose/Metztli IT 01-16-2024
     public function __toString()
-{
-return "This is a string representation of the object";
-}
+    {
+        return "This is a string representation of the object";
+    }
 }

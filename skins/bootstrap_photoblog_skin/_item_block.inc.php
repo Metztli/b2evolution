@@ -98,7 +98,7 @@ $Item->images([
 
 	        // POST TITLE:
 	        $Item->title([
-            'before' => $title_before,
+	        'before' => $title_before,
 	            'after' => $title_after,
 	            'link_type' => '#',
         ]);
@@ -106,7 +106,7 @@ $Item->images([
 	        // EDIT LINK:
 	        if ($Item->is_intro()) { // Display edit link only for intro posts, because for all other posts the link is displayed on the info line.
 	            $Item->edit_link([
-                'before' => '<div class="' . button_class('group') . '">',
+	            'before' => '<div class="' . button_class('group') . '">',
 	                'after' => '</div>',
 	                'text' => $Item->is_intro() ? get_icon('edit') . ' ' . T_('Edit Intro') : '#',
 	                'class' => button_class('text'),
@@ -116,51 +116,51 @@ $Item->images([
 	        echo $params['item_title_line_after'];
 	    }
 
-	    if (! $Item->is_intro()) { // Don't display the following for intro posts
-	        echo '<div class="small text-muted">';
+if (! $Item->is_intro()) { // Don't display the following for intro posts
+    echo '<div class="small text-muted">';
 
-	        if ($Item->status != 'published') {
-	            $Item->format_status([
-	                'template' => '<div class="evo_status evo_status__$status$ badge pull-right" data-toggle="tooltip" data-placement="top" title="$tooltip_title$">$status_title$</div>',
-	            ]);
-	        }
-	        // Permalink:
-	        $Item->permanent_link([
-	            'text' => '#icon#',
-	        ]);
+    if ($Item->status != 'published') {
+        $Item->format_status([
+            'template' => '<div class="evo_status evo_status__$status$ badge pull-right" data-toggle="tooltip" data-placement="top" title="$tooltip_title$">$status_title$</div>',
+        ]);
+    }
+    // Permalink:
+    $Item->permanent_link([
+        'text' => '#icon#',
+    ]);
 
-	        // We want to display the post time:
-	        $Item->issue_time([
-	            'before' => ' ' . T_('posted on '),
-	            'after' => ' ',
-	            'time_format' => locale_extdatefmt(),
-	        ]);
+    // We want to display the post time:
+    $Item->issue_time([
+        'before' => ' ' . T_('posted on '),
+        'after' => ' ',
+        'time_format' => locale_extdatefmt(),
+    ]);
 
-	        // Author
-	        $Item->author([
-	            'before' => /* TRANS: author name */ ' ' . T_('by') . ' ',
-	            'after' => ' ',
-	            'link_text' => $params['author_link_text'],
-	        ]);
+    // Author
+    $Item->author([
+        'before' => /* TRANS: author name */ ' ' . T_('by') . ' ',
+        'after' => ' ',
+        'link_text' => $params['author_link_text'],
+    ]);
 
-	        // Categories
-	        $Item->categories([
-	            'before' => /* TRANS: category name(s) */ T_('in') . ' ',
-	            'after' => ' ',
-	            'include_main' => true,
-	            'include_other' => true,
-	            'include_external' => true,
-	            'link_categories' => true,
-	        ]);
+    // Categories
+    $Item->categories([
+        'before' => /* TRANS: category name(s) */ T_('in') . ' ',
+        'after' => ' ',
+        'include_main' => true,
+        'include_other' => true,
+        'include_external' => true,
+        'link_categories' => true,
+    ]);
 
-	        // Link for editing
-	        $Item->edit_link([
-	            'before' => ' &bull; ',
-	            'after' => '',
-	        ]);
+    // Link for editing
+    $Item->edit_link([
+        'before' => ' &bull; ',
+        'after' => '',
+    ]);
 
-	        echo '</div>';
-	    }
+    echo '</div>';
+}
 ?>
 
 	</header>

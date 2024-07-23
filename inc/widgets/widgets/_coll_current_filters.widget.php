@@ -139,9 +139,9 @@ class coll_current_filters_Widget extends ComponentWidget
 
         $this->init_display($params);
 
-	if (isset($show_filters)) {
-	       	// Rewrite default filters by predefined
-		// Jose/Metztli IT 01-16-2024 casted as array below:
+        if (isset($show_filters)) {
+            // Rewrite default filters by predefined
+            // Jose/Metztli IT 01-16-2024 casted as array below:
             $this->disp_params['show_filters'] = array_merge((array)$this->disp_params['show_filters'], $show_filters);
         }
 

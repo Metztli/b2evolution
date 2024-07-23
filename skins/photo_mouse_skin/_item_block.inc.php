@@ -142,7 +142,7 @@ if ($disp != 'single' || $disp != 'page') {
                 ]);
             }
 
-            echo '<div class="action_right">';
+echo '<div class="action_right">';
 
 // Link for editing
 $Item->edit_link([
@@ -183,9 +183,9 @@ if (! $Item->is_intro()) {
 } else {
     $permalink_title = '';
 }
-    $Item->title([
-        'link_type' => $permalink_title,
-    ]);
+$Item->title([
+    'link_type' => $permalink_title,
+]);
 ?></h3>
 
 			<?php

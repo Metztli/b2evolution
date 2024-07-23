@@ -143,13 +143,13 @@ if ($single_Item = &mainlist_get_item()) { // Get Item here, because it can be n
                 'template' => '<div class="evo_status evo_status__$status$ badge" data-toggle="tooltip" data-placement="top" title="$tooltip_title$">$status_title$</div>',
             ]);
         }
-        $single_Item->edit_link([
-            // Link to backoffice for editing
-            'before' => '',
-            'after' => '',
-            'text' => get_icon('edit'),
-            'title' => T_('Edit title/description...'),
-        ]);
+    $single_Item->edit_link([
+        // Link to backoffice for editing
+        'before' => '',
+        'after' => '',
+        'text' => get_icon('edit'),
+        'title' => T_('Edit title/description...'),
+    ]);
     ?>
 			</span><!-- .nav_album_title -->
 
