@@ -1474,7 +1474,10 @@ function create_default_jobs($is_upgrade = false)
     $cleanup_email_logs_key = 'cleanup-email-logs';
     $heavy_db_maintenance_key = 'heavy-db-maintenance';
     $light_db_maintenance_key = 'light-db-maintenance';
+    /**
+     * Jose/Metztli IT 07-24-204 avoid to prevent error since online server is not available
     $poll_antispam_key = 'poll-antispam-blacklist';
+     */
     $process_hitlog_key = 'process-hit-log';
     $prune_pagecache_key = 'prune-old-files-from-page-cache';
     $prune_sessions_key = 'prune-old-hits-and-sessions';
@@ -1503,7 +1506,10 @@ function create_default_jobs($is_upgrade = false)
         $prune_pagecache_key => "( " . $DB->quote(form_date($tomorrow, '02:00:00')) . ", 86400, " . $DB->quote($prune_pagecache_key) . ", " . $ctsk_params . " )",
         $process_hitlog_key => "( " . $DB->quote(form_date($tomorrow, '02:15:00')) . ", 86400, " . $DB->quote($process_hitlog_key) . ", " . $ctsk_params . " )",
         $prune_sessions_key => "( " . $DB->quote(form_date($tomorrow, '02:30:00')) . ", 86400, " . $DB->quote($prune_sessions_key) . ", " . $ctsk_params . " )",
+	/**
+	 * Jose/Metztli IT 07-24-2024 avoid to prevent error since https://www.stateoftheevolution.com/posts/shutting-down-antispam-server/
         $poll_antispam_key => "( " . $DB->quote(form_date($tomorrow, '02:45:00')) . ", 86400, " . $DB->quote($poll_antispam_key) . ", " . $ctsk_params . " )",
+	 */
         $post_reminder_key => "( " . $DB->quote(form_date($tomorrow, '03:00:00')) . ", 86400, " . $DB->quote($post_reminder_key) . ", " . $ctsk_params . " )",
         $inactive_reminder_key => "( " . $DB->quote(form_date($tomorrow, '03:15:00')) . ", 86400, " . $DB->quote($inactive_reminder_key) . ", " . $ctsk_params . " )",
         $comment_reminder_key => "( " . $DB->quote(form_date($tomorrow, '03:30:00')) . ", 86400, " . $DB->quote($comment_reminder_key) . ", " . $ctsk_params . " )",
