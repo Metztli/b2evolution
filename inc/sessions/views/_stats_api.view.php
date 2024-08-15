@@ -65,7 +65,7 @@ $hits_summary_mode = get_hits_summary_mode();
 $is_live_mode = ($hits_summary_mode == 'live');
 
 // Get hits and session data for chart and table:
-list($res_hits, $sessions) = get_hits_results_api($hits_summary_mode);
+[$res_hits, $sessions] = get_hits_results_api($hits_summary_mode);
 
 if (count($res_hits)) {
     // Initialize params to filter by selected collection and/or group:
@@ -77,7 +77,7 @@ if (count($res_hits)) {
 
     if (! $is_live_mode) {	// Display diagram to compare hits:
         display_hits_filter_form('compare', $diagram_columns);
-        list($prev_res_hits, $prev_sessions) = get_hits_results_api('compare');
+        [$prev_res_hits, $prev_sessions] = get_hits_results_api('compare');
         display_hits_diagram('api', $diagram_columns, [$prev_res_hits, $prev_sessions], 'cmpcanvasbarschart');
     }
 
@@ -135,7 +135,7 @@ if (count($res_hits)) {
             }
             ?></td><?php
             if (isset($diagram_columns['session'])) {
-                echo '<td class="right">' . (isset($sessions[date('Y-m-d', $last_date)]) ? $sessions[date('Y-m-d', $last_date)] : 0) . '</td>';
+                echo '<td class="right">' . ($sessions[date('Y-m-d', $last_date)] ?? 0) . '</td>';
             }
             foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
                 if ($diagram_column_key != 'session') {
@@ -186,7 +186,7 @@ if (count($res_hits)) {
         }
         ?></td><?php
         if (isset($diagram_columns['session'])) {
-            echo '<td class="right">' . (isset($sessions[date('Y-m-d', $last_date)]) ? $sessions[date('Y-m-d', $last_date)] : 0) . '</td>';
+            echo '<td class="right">' . ($sessions[date('Y-m-d', $last_date)] ?? 0) . '</td>';
         }
         foreach ($diagram_columns as $diagram_column_key => $diagram_column_data) {
             if ($diagram_column_key != 'session') {

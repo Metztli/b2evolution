@@ -23,7 +23,7 @@ $perm_options_edit = check_user_perm('options', 'edit', false);
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 // Create query:
 $SQL = new SQL();

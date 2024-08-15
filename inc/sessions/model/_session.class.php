@@ -450,7 +450,7 @@ class Session
                     } elseif (is_array($this->_data[$param][1])) {	// Display only type for array var:
                         $session_old_value = 'Array( ' . implode(', ', array_keys($this->_data[$param][1])) . ' )';
                     } elseif (is_object($this->_data[$param][1])) {	// Display class name for object var:
-                        $session_old_value = 'Object: ' . get_class($this->_data[$param][1]);
+                        $session_old_value = 'Object: ' . $this->_data[$param][1]::class;
                     } else {	// Display var type for others:
                         $session_old_value = gettype($this->_data[$param][1]);
                     }
@@ -570,7 +570,7 @@ class Session
 
         // Retrieve latest saved crumb:
         $crumb_recalled = $this->get('crumb_latest_' . $crumb_name, '-0');
-        list($crumb_value, $crumb_time) = explode('-', $crumb_recalled);
+        [$crumb_value, $crumb_time] = explode('-', $crumb_recalled);
 
         if ($servertimenow - $crumb_time > ($crumb_expires / 2)) {	// The crumb we already had is older than 1 hour...
             // We'll need to generate a new value:
@@ -628,8 +628,8 @@ class Session
         }
 
         // Retrieve latest and previous crumbs:
-        list($crumb_latest, $latest_crumb_time) = explode('-', $this->get('crumb_latest_' . $crumb_name, '-0'));
-        list($crumb_previous, $prev_crumb_time) = explode('-', $this->get('crumb_prev_' . $crumb_name, '-0'));
+        [$crumb_latest, $latest_crumb_time] = explode('-', $this->get('crumb_latest_' . $crumb_name, '-0'));
+        [$crumb_previous, $prev_crumb_time] = explode('-', $this->get('crumb_prev_' . $crumb_name, '-0'));
 
         // Validate the latest and previous crumbs:
         $crumb_latest_is_valid = ($crumb_received == $crumb_latest);
@@ -760,7 +760,7 @@ class Session
 
         if ($this->get('using_alt_skin')) {	// Do additional check to know if we can continue to use Alt skin:
             if (isset($Blog) &&
-                strpos($Hit->get_referer(), $Blog->get('url')) === 0) {	// We can continue to use Alt skin because referer URL is started with collection base URL:
+                str_starts_with($Hit->get_referer(), $Blog->get('url'))) {	// We can continue to use Alt skin because referer URL is started with collection base URL:
                 return true;
             } else {	// Don't continue to use Alt skin because referer is not started with collection base URL:
                 $this->delete('using_alt_skin');
@@ -770,7 +770,7 @@ class Session
         if (isset($Hit) &&
             isset($Blog) &&
             $Blog->get_setting('display_alt_skin_referer') &&
-            strpos($Hit->get_referer(), $Blog->get_setting('display_alt_skin_referer_url')) !== false) {	// Current referer URL contains string from collection setting:
+            str_contains($Hit->get_referer(), $Blog->get_setting('display_alt_skin_referer_url'))) {	// Current referer URL contains string from collection setting:
             $this->set('using_alt_skin', true);
             return true;
         }

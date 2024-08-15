@@ -113,7 +113,7 @@ $Timer->stop('_init_session__user_settings');
 // LOGIN:
 // fp> TODO: even if the session already has a user, we still need to get in there... that should be changed.
 $Timer->pause('_init_session');
-require dirname(__FILE__) . '/_init_login.inc.php';
+require __DIR__ . '/_init_login.inc.php';
 $Timer->resume('_init_session');
 
 

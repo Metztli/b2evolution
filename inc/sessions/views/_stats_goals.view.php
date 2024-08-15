@@ -23,7 +23,7 @@ $perm_options_edit = check_user_perm('options', 'edit', false);
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 global $final, $s, $cat;
 $final = param('final', 'integer', null, true);

@@ -18,7 +18,7 @@ if (! defined('EVO_MAIN_INIT')) {
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 load_class('/sessions/model/_goal.class.php', 'Goal');
 load_funcs('/cron/_cron.funcs.php');

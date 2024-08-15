@@ -24,7 +24,7 @@ if ($edited_User->ID != $current_User->ID && ! $current_User->can_moderate_user(
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 $user_ID = param('user_ID', 'integer', 0, true);
 

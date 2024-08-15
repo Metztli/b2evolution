@@ -32,7 +32,7 @@ $unknown_errors = trim(ob_get_clean());
 
 // Make sure we have a result message:
 $result_message = [
-    'message' => 'Result Message:' . "\n\n" . (isset($result['message']) ? $result['message'] : ''),
+    'message' => 'Result Message:' . "\n\n" . ($result['message'] ?? ''),
 ];
 
 $result_message['message'] .= "\nResult so far:" . (isset($result['result']) ? "'" . $result['result'] . "'" : '[Not set]');

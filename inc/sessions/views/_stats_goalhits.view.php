@@ -21,7 +21,7 @@ global $Session, $UserSettings;
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 global $datestartinput, $datestart, $datestopinput, $datestop;
 

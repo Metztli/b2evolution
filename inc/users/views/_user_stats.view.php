@@ -306,17 +306,11 @@ function stats_gender_value($value, $total)
  */
 function stats_gender_name($gender)
 {
-    switch ($gender) {
-        case 'F':
-            return T_('Women');
-            break;
-        case 'M':
-            return T_('Men');
-            break;
-        default:
-            return T_('Unknown');
-            break;
-    }
+    return match ($gender) {
+        'F' => T_('Women'),
+        'M' => T_('Men'),
+        default => T_('Unknown'),
+    };
 }
 $Results->cols[] = [
     'th' => T_('Gender'),

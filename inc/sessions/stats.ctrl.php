@@ -270,7 +270,7 @@ switch ($action) {
                 'last_60_days' => 'prev_60_days',
                 'current_month' => 'prev_month',
             ];
-            $UserSettings->set('aggcmp_period', isset($aggcmp_periods[$agg_period]) ? $aggcmp_periods[$agg_period] : $agg_period);
+            $UserSettings->set('aggcmp_period', $aggcmp_periods[$agg_period] ?? $agg_period);
             if ($agg_period == 'specific_month') {
                 $UserSettings->set('agg_month', param('agg_month', 'integer'));
                 $UserSettings->set('agg_year', param('agg_year', 'integer'));
@@ -578,31 +578,14 @@ switch ($AdminUI->get_path(1)) {
     case 'summary':
         // Display VIEW:
         load_funcs('sessions/views/_stats_view.funcs.php');
-        switch ($tab3) {
-            case 'browser':
-                $AdminUI->disp_view('sessions/views/_stats_browserhits.view.php');
-                break;
-
-            case 'api':
-                $AdminUI->disp_view('sessions/views/_stats_api.view.php');
-                break;
-
-            case 'search_referers':
-                $AdminUI->disp_view('sessions/views/_stats_search_referers.view.php');
-                break;
-
-            case 'robot':
-                $AdminUI->disp_view('sessions/views/_stats_robots.view.php');
-                break;
-
-            case 'feed':
-                $AdminUI->disp_view('sessions/views/_stats_syndication.view.php');
-                break;
-
-            case 'global':
-            default:
-                $AdminUI->disp_view('sessions/views/_stats_summary.view.php');
-        }
+        match ($tab3) {
+            'browser' => $AdminUI->disp_view('sessions/views/_stats_browserhits.view.php'),
+            'api' => $AdminUI->disp_view('sessions/views/_stats_api.view.php'),
+            'search_referers' => $AdminUI->disp_view('sessions/views/_stats_search_referers.view.php'),
+            'robot' => $AdminUI->disp_view('sessions/views/_stats_robots.view.php'),
+            'feed' => $AdminUI->disp_view('sessions/views/_stats_syndication.view.php'),
+            default => $AdminUI->disp_view('sessions/views/_stats_summary.view.php'),
+        };
         break;
 
     case 'other':

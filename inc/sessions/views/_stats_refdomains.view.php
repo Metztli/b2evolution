@@ -18,7 +18,7 @@ if (! defined('EVO_MAIN_INIT')) {
 /**
  * View funcs
  */
-require_once dirname(__FILE__) . '/_stats_view.funcs.php';
+require_once __DIR__ . '/_stats_view.funcs.php';
 
 
 global $blog, $sec_ID, $admin_url, $rsc_url, $UserSettings, $tab3;

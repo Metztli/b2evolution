@@ -34,7 +34,7 @@ function hits_results(&$Results, $params = [])
 
     $hide_columns = explode(',', $hide_columns);
 
-    $Results->title = isset($preset_results_title) ? $preset_results_title : T_('Recent hits') . get_manual_link('recent-hits-list');
+    $Results->title = $preset_results_title ?? T_('Recent hits') . get_manual_link('recent-hits-list');
 
     $param_prefix = 'results_' . $Results->param_prefix;
     $tab = get_param('tab');
@@ -48,7 +48,7 @@ function hits_results(&$Results, $params = [])
         'url_ignore' => $param_prefix . 'page,exclude,sess_ID,remote_IP',
     ];
 
-    $Results->register_filter_preset('all', T_('All'), isset($preset_filter_all_url) ? $preset_filter_all_url : $admin_url . '?ctrl=stats&amp;tab=' . $tab . $section_params . '&amp;' . $param_prefix . 'order=' . $params['default_order']);
+    $Results->register_filter_preset('all', T_('All'), $preset_filter_all_url ?? $admin_url . '?ctrl=stats&amp;tab=' . $tab . $section_params . '&amp;' . $param_prefix . 'order=' . $params['default_order']);
     $Results->register_filter_preset('all_but_curr', T_('All but current session'), $admin_url . '?ctrl=stats&amp;tab=' . $tab . $section_params . '&ampsess_ID=' . $Session->ID . '&amp;exclude=1&amp;' . $param_prefix . 'order=' . $params['default_order']);
     $Results->register_filter_preset('direct_hits', T_('Direct hits'), $admin_url . '?ctrl=stats&amp;agent_type=browser&amp;tab=' . $tab . $section_params . '&amp;referer_type=direct&amp;exclude=0&amp;' . $param_prefix . 'order=' . $params['default_order']);
     $Results->register_filter_preset('refered_hits', T_('Referred hits'), $admin_url . '?ctrl=stats&amp;agent_type=browser&amp;tab=' . $tab . $section_params . '&amp;referer_type=referer&amp;exclude=0&amp;' . $param_prefix . 'order=' . $params['default_order']);
@@ -309,7 +309,7 @@ function stats_format_req_URI($hit_coll_ID, $hit_uri, $max_len = 40, $hit_disp =
         $hit_uri = sprintf(T_('Internal search: %s'), $res[1]);
     } elseif ($hit_disp == 'redirect') {	// This is a redirect:
         return '[' . get_link_tag($full_url, 'redirect') . ']';
-    } elseif (strpos($hit_uri, 'email_passthrough.php') !== false) {	// This is a click from email message:
+    } elseif (str_contains($hit_uri, 'email_passthrough.php')) {	// This is a click from email message:
         return '[' . get_link_tag($full_url, 'email_passthrough') . ']';
     } elseif (utf8_strlen($hit_uri) > $max_len) {
         $hit_uri = '...' . utf8_substr($hit_uri, -$max_len);
@@ -339,10 +339,8 @@ function stats_format_req_URI($hit_coll_ID, $hit_uri, $max_len = 40, $hit_disp =
 
 /**
  * display avatar and login linking to sessions list for user
- *
- * @param mixed $login
  */
-function stat_session_login($login)
+function stat_session_login(mixed $login)
 {
     if (empty($login)) {
         return '<span class="note">' . T_('Anon.') . '</span>';
@@ -697,7 +695,7 @@ function get_hits_results_global($mode = 'live')
             $SQL->WHERE_and('blog_sec_ID = ' . $DB->quote($sec_ID));
         }
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
     }
@@ -771,7 +769,7 @@ function get_hits_results_browser($mode = 'live')
         $SQL->FROM('T_hits__aggregate');
         $SQL->WHERE('hagg_agent_type = "browser"');
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
 
@@ -857,7 +855,7 @@ function get_hits_results_search_referers($mode = 'live')
         $SQL->FROM('T_hits__aggregate');
         $SQL->WHERE('hagg_agent_type = "browser"');
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
 
@@ -928,7 +926,7 @@ function get_hits_results_api($mode = 'live')
         $SQL->FROM('T_hits__aggregate');
         $SQL->WHERE('hagg_type = "api"');
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
 
@@ -1009,7 +1007,7 @@ function get_hits_results_robot($mode = 'live')
             $SQL->WHERE_and('blog_sec_ID = ' . $sec_ID);
         }
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
     }
@@ -1068,7 +1066,7 @@ function get_hits_results_rss($mode = 'live')
             $SQL->WHERE_and('blog_sec_ID = ' . $sec_ID);
         }
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('hagg_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('hagg_date <= ' . $DB->quote($hits_end_date));
     }
@@ -1112,7 +1110,7 @@ function get_hits_results_goal($mode = 'live')
 			EXTRACT( DAY FROM ghag_date ) AS day');
         $SQL->FROM('T_track__goalhit_aggregate');
         // Filter by date:
-        list($hits_start_date, $hits_end_date) = get_filter_aggregated_hits_dates($mode);
+        [$hits_start_date, $hits_end_date] = get_filter_aggregated_hits_dates($mode);
         $SQL->WHERE_and('ghag_date >= ' . $DB->quote($hits_start_date));
         $SQL->WHERE_and('ghag_date <= ' . $DB->quote($hits_end_date));
     }
@@ -1262,7 +1260,7 @@ function display_hits_diagram($type, $diagram_columns, $res_hits, $canvas_id = '
         }
 
         if (isset($col_mapping['session'])) {	// Store a count of sessions:
-            $chart['chart_data'][$col_mapping['session']][0] = (isset($sessions[date('Y-m-d', $this_date)]) ? $sessions[date('Y-m-d', $this_date)] : 0);
+            $chart['chart_data'][$col_mapping['session']][0] = ($sessions[date('Y-m-d', $this_date)] ?? 0);
         }
     }
 
