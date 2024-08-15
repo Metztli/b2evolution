@@ -8087,6 +8087,7 @@ function render_inline_tags($Object, $tags, $params = [])
         'after_image' => '</div>',
         'after' => '</div>',
         'image_size' => 'fit-400x320',
+	'image_alt' => null,	// prevent undefined array key
         'image_link_to' => 'original', // Can be 'orginal' (image) or 'single' (this post)
         'limit' => 1000, // Max # of images displayed
     ], $params);

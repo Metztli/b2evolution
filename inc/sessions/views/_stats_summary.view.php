@@ -17,7 +17,7 @@ if (! defined('EVO_MAIN_INIT')) {
 
 global $blog, $sec_ID, $admin_url, $AdminUI, $hit_type_color, $Hit, $Settings, $localtimenow;
 
-// All diagarm and table columns for current page:
+// All diagram and table columns for current page:
 $diagram_columns = [
     'rss' => [
         'title' => T_('XML (RSS/Atom)'),

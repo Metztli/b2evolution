@@ -65,7 +65,7 @@ echo '<h2 class="page-title">' . T_('Hits from web browsers - Summary') . get_ma
 // Display panel with buttons to control a view of hits summary pages:
 display_hits_summary_panel($diagram_columns);
 
-// Filter diagram columns by seleated types:
+// Filter diagram columns by selected types:
 $diagram_columns = get_filtered_hits_diagram_columns('browser', $diagram_columns);
 
 // Check if it is a mode to display a live data:

@@ -54,7 +54,7 @@ echo '<div class="evo_content_block evo_content_summary">';
 
 $block_item_Widget->title = T_('Posts Browser') . get_manual_link('browse-edit-tab');
 
-// Generate global icons depending on seleted tab with item type
+// Generate global icons depending on selected tab with item type
 item_type_global_icons($block_item_Widget);
 
 $block_item_Widget->disp_template_replaced('block_start');
