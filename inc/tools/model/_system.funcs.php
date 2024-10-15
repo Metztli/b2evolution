@@ -1027,6 +1027,14 @@ function display_system_check($params)
             disp_system_check('ok');
         }
 
+        // WEBP:
+        init_system_check('GD WebP Support', ! empty($gd_info['WebP Support']) ? T_('Read/Write') : T_('No'));
+        if (empty($gd_info['WebP Support'])) {
+            disp_system_check('warning', sprintf(T_('You will not be able to automatically generate thumbnails for %s images.'), 'WebP'));
+        } else {
+            disp_system_check('ok');
+        }
+
         // GIF:
         if (! empty($gd_info['GIF Create Support'])) {
             $gif_support = T_('Read/Write');
@@ -1082,12 +1090,12 @@ function display_system_check($params)
 
         // WebP:
         // This is not yet considered an image by b2evolution, see is_image_file().
-        init_system_check('GD WebP Support', ! empty($gd_info['WebP Support']) ? T_('Read/Write') : T_('No'));
-        if (empty($gd_info['WebP Support'])) {
-            disp_system_check('warning', sprintf(T_('You will not be able to automatically generate thumbnails for %ss images.'), 'WebP'));
-        } else {
-            disp_system_check('ok');
-        }
+        // init_system_check('GD WebP Support', ! empty($gd_info['WebP Support']) ? T_('Read/Write') : T_('No'));
+        // if (empty($gd_info['WebP Support'])) {
+        //    disp_system_check('warning', sprintf(T_('You will not be able to automatically generate thumbnails for %ss images.'), 'WebP'));
+        // } else {
+        //    disp_system_check('ok');
+        // }
 
         // TGA:
         // This is not yet considered an image by b2evolution, see is_image_file().

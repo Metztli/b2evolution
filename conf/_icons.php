@@ -146,7 +146,7 @@ function get_icon_info($name)
         ];
 
         case 'file_image': return [
-            'ext' => '\.(gif|png|jpe?g)',
+            'ext' => '\.(gif|png|jpe?g|webp)',
             'alt' => '',
             'size' => [16, 16],
             'xy' => [16, 32],

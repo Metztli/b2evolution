@@ -357,10 +357,14 @@ function is_image_file($file_path)
         return true;
     }
 
+    if (substr($file_path, -5) == '.webp') {	// Consider all WebP file as image, because blah, blah, files has a mime type as 'image/webp':
+        return true;
+    }
+
     $file_info = finfo_open(FILEINFO_MIME_TYPE);
     $file_type = finfo_file($file_info, $file_path);
 
-    return in_array($file_type, ['image/png', 'image/jpeg', 'image/gif', 'image/svg', 'image/svg+xml']);
+    return in_array($file_type, ['image/png', 'image/jpeg', 'image/gif', 'image/svg', 'image/webp', 'image/svg+xml']);
 }
 
 /**
@@ -400,7 +404,8 @@ function imgsize($path, $param = 'widthheight')
             case 1: return 'gif';
             case 2: return 'jpg';
             case 3: return 'png';
-            case 4: return 'swf';
+            case 4: return 'webp';
+            case 5: return 'swf';
             default: return 'unknown';
         }
     } elseif ($param == 'string') {
@@ -1566,7 +1571,7 @@ function prepare_uploaded_files($uploadedFiles)
     foreach ($uploadedFiles as $File) {
         $Filetype = &$File->get_Filetype();
         if ($Filetype) {
-            if (in_array($Filetype->mimetype, ['image/jpeg', 'image/gif', 'image/png'])) {	// Image file
+            if (in_array($Filetype->mimetype, ['image/jpeg', 'image/gif', 'image/png', 'image/webp'])) {	// Image file
                 prepare_uploaded_image($File, $Filetype->mimetype);
             }
         }

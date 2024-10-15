@@ -155,6 +155,7 @@ function load_image($path, $mimetype)
             'image/jpeg' => 'imagecreatefromjpeg',
             'image/gif' => 'imagecreatefromgif',
             'image/png' => 'imagecreatefrompng',
+            'image/webp' => 'imagecreatefromwebp',
         ];
 
         if (isset($mime_function[$mimetype])) {
@@ -235,6 +236,12 @@ function save_image($imh, $path, $mimetype, $quality = 90, $chmod = null)
             // By default GD  will not save the alpha channel for transparent PNG, we need to set the alpha flag
             imagesavealpha($imh, true);
             $r = @imagepng($imh, $path);
+            break;
+
+        case 'image/webp':
+            // By default GD  will not save the alpha channel for transparent PNG, we need to set the alpha flag
+            imagesavealpha($imh, true);
+            $r = @imagewebp($imh, $path);
             break;
 
         default:

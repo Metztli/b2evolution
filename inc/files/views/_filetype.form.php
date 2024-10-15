@@ -68,7 +68,7 @@ $Form->radio(
     [
         ['browser', TB_('Open with browser (popup)'), TB_('Let the browser handle the file in a popup.')],
         ['text', TB_('Open with text viewer (popup)'), TB_('Use the online text viewer (recommended for .txt)')],
-        ['image', TB_('Open with image viewer (popup)'), TB_('Use the online image viewer (recommended for .gif .png .jpg)')],
+        ['image', TB_('Open with image viewer (popup)'), TB_('Use the online image viewer (recommended for .gif .png .jpg .webp)')],
         ['external', TB_('Open with external app (no popup)'), TB_('Let the browser handle the file in a popup. Note: if you do not want Word to open inside of IE, you must uncheck "browse in same window" in Windows\' file types.')],
         ['download', TB_('Download to disk (no popup)'), TB_('Tell the browser to save the file to disk instead of displaying it.')],
     ],

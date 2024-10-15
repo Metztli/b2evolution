@@ -5384,7 +5384,7 @@ class Item extends ItemLight
 
         while ($attached_File = &$this->placeholder_FileList->get_next()) {
             if ($video_File->get_name() != $attached_File->get_name() &&
-                preg_match('#^' . $video_file_name_without_ext . '\.(jpg|jpeg|png|gif)+$#', $attached_File->get_name())) { // It is a file with same name but with image extension
+                preg_match('#^' . $video_file_name_without_ext . '\.(jpg|jpeg|png|gif|webp)+$#', $attached_File->get_name())) { // It is a file with same name but with image extension
                 return $attached_File;
             }
         }
