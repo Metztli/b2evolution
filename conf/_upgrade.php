@@ -84,7 +84,7 @@ $fileupload_url = $baseurl . 'media/';				# WARNING: slashes moved!
  * @global string $fileupload_allowedtypes
  * @deprecated 1.6: this is only used for creating the defaults when upgrading
  */
-$fileupload_allowedtypes = ' jpg gif png txt ';
+$fileupload_allowedtypes = ' jpg gif png txt webp ';
 
 
 /**

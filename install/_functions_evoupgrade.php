@@ -1367,7 +1367,7 @@ function upgrade_b2evo_tables($upgrade_action = 'evoupgrade')
 							VALUES
 								( "reloadpage_timeout", "300" ),
 								( "upload_enabled", "' . (isset($use_fileupload) ? (int) $use_fileupload : '1') . '" ),
-								( "upload_allowedext", "' . (isset($fileupload_allowedtypes) ? $fileupload_allowedtypes : 'jpg gif png') . '" ),
+								( "upload_allowedext", "' . (isset($fileupload_allowedtypes) ? $fileupload_allowedtypes : 'jpg gif png webp') . '" ),
 								( "upload_maxkb", "' . (isset($fileupload_maxk) ? (int) $fileupload_maxk : '96') . '" )
 							';
         $DB->query($query);
@@ -1508,13 +1508,14 @@ function upgrade_b2evo_tables($upgrade_action = 'evoupgrade')
 				(4, 'txt', 'Text file', 'text/plain', 'document.png', 'text', 1),
 				(5, 'htm html', 'HTML file', 'text/html', 'html.png', 'browser', 0),
 				(6, 'pdf', 'PDF file', 'application/pdf', 'pdf.png', 'browser', 1),
-				(7, 'doc', 'Microsoft Word file', 'application/msword', 'doc.gif', 'external', 1),
+				(7, 'webp', 'WebP image', 'image/webp', 'image2.png', 'image', 1),
 				(8, 'xls', 'Microsoft Excel file', 'application/vnd.ms-excel', 'xls.gif', 'external', 1),
 				(9, 'ppt', 'Powerpoint', 'application/vnd.ms-powerpoint', 'ppt.gif', 'external', 1),
 				(10, 'pps', 'Slideshow', 'pps', 'pps.gif', 'external', 1),
 				(11, 'zip', 'ZIP archive', 'application/zip', 'zip.gif', 'external', 1),
 				(12, 'php php3 php4 php5 php6', 'PHP script', 'application/x-httpd-php', 'php.gif', 'text', 0),
-				(13, 'css', 'Style sheet', 'text/css', '', 'text', 1)
+				(13, 'css', 'Style sheet', 'text/css', '', 'text', 1),
+				(14, 'doc', 'Microsoft Word file', 'application/msword', 'doc.gif', 'external', 1)
 			");
         echo "OK.<br />\n";
 
@@ -3371,7 +3372,7 @@ function upgrade_b2evo_tables($upgrade_action = 'evoupgrade')
 						WHERE ftyp_ID NOT IN (' . $allowed_ids . ')');
         $DB->query('UPDATE T_filetypes
 						SET ftyp_allowed = "any"
-						WHERE ftyp_extensions = "gif" OR ftyp_extensions = "png" OR ftyp_extensions LIKE "%jpg%"');
+						WHERE ftyp_extensions = "gif" OR ftyp_extensions = "png" OR ftyp_extensions LIKE "%jpg%" OR ftyp_extensions = "webp"');
 
         // Add m4v file type if not exists
         if (! db_key_exists('T_filetypes', 'ftyp_extensions', '"m4v"')) {
@@ -3587,7 +3588,7 @@ function upgrade_b2evo_tables($upgrade_action = 'evoupgrade')
         // but from now we should use a icon name from the file /conf/_icons.php
         $DB->query('UPDATE T_filetypes
 						SET ftyp_icon = "file_image"
-						WHERE ftyp_extensions IN ( "gif", "png", "jpg jpeg" )');
+						WHERE ftyp_extensions IN ( "gif", "png", "jpg jpeg", "webp" )');
         $DB->query('UPDATE T_filetypes
 						SET ftyp_icon = "file_document"
 						WHERE ftyp_extensions = "txt"');

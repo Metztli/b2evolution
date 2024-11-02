@@ -38,6 +38,7 @@ function generateUpToDateMimeArray()
             'zip' => 'application/zip',
             'gif' => 'image/gif',
             'png' => 'image/png',
+            'webp' => 'image/webp',
             'css' => 'text/css',
             'js' => 'text/javascript',
             'txt' => 'text/plain',

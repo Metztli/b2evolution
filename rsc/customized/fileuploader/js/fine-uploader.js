@@ -4483,6 +4483,9 @@ function htmlspecialchars_decode (string, quote_style) {
               case "png":
                 return "image/png";
 
+              case "webp":
+                return "image/webp";
+
               case "bmp":
                 return "image/bmp";
 
@@ -4828,6 +4831,7 @@ function htmlspecialchars_decode (string, quote_style) {
         "image/jpeg": "ffd8ff",
         "image/gif": "474946",
         "image/png": "89504e",
+        "image/webp": "52494646",
         "image/bmp": "424d",
         "image/tiff": [ "49492a00", "4d4d002a" ]
     };

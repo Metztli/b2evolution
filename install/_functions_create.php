@@ -870,7 +870,7 @@ Technology, Media & Telecom',                     'recommended', 'unrestricted',
 			(4, 'txt', 'Text file', 'text/plain', 'file_document', 'text', 'registered'),
 			(5, 'htm html', 'HTML file', 'text/html', 'file_www', 'browser', 'admin'),
 			(6, 'pdf', 'PDF file', 'application/pdf', 'file_pdf', 'browser', 'registered'),
-			(7, 'doc docx', 'Microsoft Word file', 'application/msword', 'file_doc', 'external', 'registered'),
+			(7, 'webp', 'WebP image', 'image/webp', 'file_image', 'image', 'any'),
 			(8, 'xls xlsx', 'Microsoft Excel file', 'application/vnd.ms-excel', 'file_xls', 'external', 'registered'),
 			(9, 'ppt pptx', 'Powerpoint', 'application/vnd.ms-powerpoint', 'file_ppt', 'external', 'registered'),
 			(10, 'pps', 'Slideshow', 'pps', 'file_pps', 'external', 'registered'),
@@ -891,7 +891,8 @@ Technology, Media & Telecom',                     'recommended', 'unrestricted',
 			(25, 'md', 'Markdown text file', 'text/plain', 'file_document', 'text', 'registered'),
 			(26, 'csv', 'CSV file', 'text/plain', 'file_document', 'text', 'registered'),
 			(27, 'svg', 'SVG file', 'image/svg+xml', 'file_document', 'image', 'admin'),
-			(28, 'ico', 'ICO image', 'image/x-icon', 'file_image', 'image', 'admin')
+			(28, 'ico', 'ICO image', 'image/x-icon', 'file_image', 'image', 'admin'),
+			(29, 'doc docx', 'Microsoft Word file', 'application/msword', 'file_doc', 'external', 'registered')
 		");
     task_end();
 

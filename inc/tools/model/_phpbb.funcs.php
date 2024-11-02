@@ -2101,7 +2101,7 @@ function phpbb_import_avatar($phpbb_user, $user_ID, $path_avatars)
             phpbb_set_var('avatars_count_missing', phpbb_get_var('avatars_count_missing') + 1);
             return false;
         }
-        if (empty($avatar_file_url_info['mimetype']) || ! in_array($avatar_file_url_info['mimetype'], ['image/gif', 'image/jpeg', 'image/png'])) {	// Wrong image type of remote url:
+        if (empty($avatar_file_url_info['mimetype']) || ! in_array($avatar_file_url_info['mimetype'], ['image/gif', 'image/jpeg', 'image/png', 'image/webp'])) {	// Wrong image type of remote url:
             phpbb_log(sprintf(
                 'Impossible to get avatar file of the user #%s(%s) because wrong image type of the remote avatar file %s.',
                 $phpbb_user->user_id,
@@ -2121,6 +2121,9 @@ function phpbb_import_avatar($phpbb_user, $user_ID, $path_avatars)
                 break;
             case 'image/png':
                 $avatar_extension = 'png';
+                break;
+            case 'image/webp':
+                $avatar_extension = 'webp';
                 break;
         }
     } else {	// Check if the avatar file really exists on the disk:

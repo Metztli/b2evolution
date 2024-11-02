@@ -47,7 +47,7 @@ class html5_videojs_plugin extends Plugin
         $this->long_desc = $this->short_desc . ' '
             . sprintf(
                 T_('This player can display a placeholder image of the same name as the video file with the following extensions: %s.'),
-                'jpg, jpeg, png, gif'
+                'jpg, jpeg, png, gif, webp'
             );
     }
 

@@ -1498,7 +1498,7 @@ class MarkdownImport extends AbstractImport
             $item_url = '';
             $link_anchor = substr($m[7], 1);
         } else {	// We cannot convert this markdown link:
-            $this->log_linked_file((isset($m[8]) && in_array(strtolower(substr($m[8], 1)), ['png', 'gif', 'jpg', 'jpeg', 'svg']) ? 'error_image' : 'error_link'), $m[0]);
+            $this->log_linked_file((isset($m[8]) && in_array(strtolower(substr($m[8], 1)), ['png', 'gif', 'jpg', 'jpeg', 'svg', 'webp']) ? 'error_image' : 'error_link'), $m[0]);
             return $m[0];
         }
 
