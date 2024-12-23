@@ -1476,7 +1476,7 @@ function create_default_jobs($is_upgrade = false)
     $heavy_db_maintenance_key = 'heavy-db-maintenance';
     $light_db_maintenance_key = 'light-db-maintenance';
     /**
-     * Jose/Metztli IT 07-24-204 avoid to prevent error since online server is not available
+     * Jose/Metztli IT 07-24-2024 avoid to prevent error since online server is not available
     $poll_antispam_key = 'poll-antispam-blacklist';
      */
     $process_hitlog_key = 'process-hit-log';

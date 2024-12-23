@@ -910,7 +910,7 @@ $use_cdns = false;		// Use false by default so b2evo works on intranets, local t
  * By default, only the most trusted CDNs are enabled while the other ones are commented out.
  */
 $library_cdn_urls = [
-    '#jquery#' => ['//code.jquery.com/jquery-1.11.1.min.js', '//code.jquery.com/jquery-1.11.1.js'],
+    '#jquery#' => ['//code.jquery.com/jquery-3.7.1.min.js', '//code.jquery.com/jquery-3.7.1.js'],
     // jqueryUI is commented out because b2evo uses only a subset... ?
     //'#jqueryUI#' => array( '//code.jquery.com/ui/1.10.4/jquery-ui.min.js', '//code.jquery.com/ui/1.10.4/jquery-ui.js' ),
     //'#jqueryUI_css#' => array( '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css', '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css' ),
