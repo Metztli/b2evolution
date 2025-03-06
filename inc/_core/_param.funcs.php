@@ -29,10 +29,8 @@ if (! defined('EVO_MAIN_INIT')) {
     die('Please, do not access this page directly.');
 }
 
-
 // DEBUG: (Turn switch on or off to log debug info for specified category)
 $GLOBALS['debug_params'] = false;
-
 
 /**
  * Format param value to valid value depending on type
@@ -489,7 +487,6 @@ function param(
     return $GLOBALS[$var];
 }
 
-
 /**
  * Get the param from an array param's first index instead of the value.
  *
@@ -515,7 +512,6 @@ function param_arrayindex($param_name, $default = '')
 
     return $value;
 }
-
 
 /**
  * Get the action from params.
@@ -543,7 +539,6 @@ function param_action($default = '', $memorize = false)
 
     return $action;
 }
-
 
 /**
  * Get a param from cookie.
@@ -577,7 +572,6 @@ function param_cookie(
     return $r;
 }
 
-
 /**
  * Get total seconds from the following fields: months, days, hours, minutes, seconds
  *
@@ -606,7 +600,6 @@ function param_duration($var)
     return $seconds;
 }
 
-
 /**
  * @param string param name
  * @param string error message
@@ -618,7 +611,6 @@ function param_string_not_empty($var, $err_msg, $field_err_msg = null)
     param($var, 'string', true);
     return param_check_not_empty($var, $err_msg, $field_err_msg);
 }
-
 
 /**
  * @param string param name
@@ -640,7 +632,6 @@ function param_check_not_empty($var, $err_msg = null, $field_err_msg = null)
     return true;
 }
 
-
 /**
  * Checks if the param is an integer (no float, e.g. 3.14).
  *
@@ -652,7 +643,6 @@ function param_check_number($var, $err_msg, $required = false)
 {
     return param_validate($var, 'check_is_number', $required, $err_msg);
 }
-
 
 /**
  * Check for interval params
@@ -686,7 +676,6 @@ function param_check_interval($var_min, $var_max, $err_msg_number, $err_msg_comp
     return $result_min && $result_max && $result_compare;
 }
 
-
 /**
  * Checks if the param is an integer (no float, e.g. 3.14).
  *
@@ -700,7 +689,6 @@ function check_is_number($number)
     }
 }
 
-
 /**
  * Checks if the param is a decimal number
  *
@@ -712,7 +700,6 @@ function param_check_decimal($var, $err_msg, $required = false)
 {
     return param_validate($var, 'check_is_decimal', $required, $err_msg);
 }
-
 
 /**
  * Checks if the param is a decimal number
@@ -726,7 +713,6 @@ function check_is_decimal($decimal)
         return T_('The decimal value is invalid.');
     }
 }
-
 
 /**
  * Gets a param and makes sure it's a decimal number (no float, e.g. 3.14) in a given range.
@@ -742,7 +728,6 @@ function param_integer_range($var, $min, $max, $err_msg, $required = true)
     param($var, 'integer', $required ? true : '');
     return param_check_range($var, $min, $max, $err_msg, $required);
 }
-
 
 /**
  * Checks if the param is a decimal number (no float, e.g. 3.14) in a given range.
@@ -767,7 +752,6 @@ function param_check_range($var, $min, $max, $err_msg, $required = true)
     return true;
 }
 
-
 /**
  * @param string param name
  * @return boolean true if OK
@@ -776,7 +760,6 @@ function param_check_email($var, $required = false)
 {
     return param_validate($var, 'check_is_email', $required, null);
 }
-
 
 /**
  * Check that email address looks valid.
@@ -790,7 +773,6 @@ function check_is_email($email)
         return T_('The email address is invalid.');
     }
 }
-
 
 /**
  * Check email for new registering user
@@ -898,7 +880,6 @@ function param_check_new_user_email($var, $value = null, $link_Blog = null)
     return true;
 }
 
-
 /**
  * Check if the value is a valid login (in terms of allowed chars)
  *
@@ -931,7 +912,6 @@ function param_check_valid_login($var)
     return true;
 }
 
-
 /**
  * Check if the requested string can be used as user login
  *
@@ -942,7 +922,6 @@ function param_check_login($var, $required = false)
 {
     return param_validate($var, 'check_is_login', $required, null);
 }
-
 
 /**
  * Check that login is valid.
@@ -956,7 +935,6 @@ function check_is_login($login)
         return sprintf(T_('There is no user with username &laquo;%s&raquo;.'), $login);
     }
 }
-
 
 /**
  * Check that a given param is a valid URL
@@ -1002,7 +980,6 @@ function param_check_url($var, $context, $field_err_msg = null)
     return true;
 }
 
-
 /**
  * Checks if the url is valid
  *
@@ -1015,7 +992,6 @@ function check_is_url($url)
         return sprintf(T_('Please enter a valid URL, like for example: %s.'), 'http://www.b2evolution.net/');
     }
 }
-
 
 /**
  * Check if the value is a file name
@@ -1034,7 +1010,6 @@ function param_check_filename($var, $err_msg)
     return true;
 }
 
-
 /**
  * Check if the value of a param is a regular expression (syntax).
  *
@@ -1051,7 +1026,6 @@ function param_check_isregexp($var, $err_msg, $field_err_msg = null)
     }
     return true;
 }
-
 
 /**
  * Check if the value of a param MATCHES a regular expression (syntax).
@@ -1079,7 +1053,6 @@ function param_check_regexp($var, $regexp, $err_msg, $field_err_msg = null, $req
     return true;
 }
 
-
 /**
  * Sets a date parameter by converting locale date (if valid) to ISO date.
  *
@@ -1103,7 +1076,6 @@ function param_date($var, $err_msg, $required, $default = '', $date_format = nul
 
     return $iso_date;
 }
-
 
 /**
  * Format date from entered form in format of current user locale to ISO format(YYYY-MM-DD) in order to store in DB
@@ -1176,7 +1148,6 @@ function format_input_date_to_iso($date, $date_format = null)
     return false;
 }
 
-
 /**
  * Callback for preg_replace_callback in format_input_date_to_iso()
  */
@@ -1201,7 +1172,6 @@ function _format_input_date_to_iso_callback($matches)
         default => $matches[0],
     };
 }
-
 
 /**
  * Check if param is an ISO date.
@@ -1236,7 +1206,6 @@ function param_check_date($var, $err_msg, $required = false, $date_format = null
     return false;
 }
 
-
 /**
  * Checks if the param is a color
  *
@@ -1248,7 +1217,6 @@ function param_check_color($var, $err_msg, $required = false)
 {
     return param_validate($var, 'check_is_color', $required, $err_msg);
 }
-
 
 /**
  * Checks if the param is a decimal number
@@ -1262,7 +1230,6 @@ function check_is_color($color)
         return T_('The color value is invalid.');
     }
 }
-
 
 /**
  * Sets a date parameter with values from the request or to provided default,
@@ -1297,7 +1264,6 @@ function param_compact_date($var, $err_msg, $default = '', $memorize = false, $r
     // Nothing valid found....
     return '';
 }
-
 
 /**
  * Sets a time parameter with the value from the request of the var argument
@@ -1349,7 +1315,6 @@ function param_time($var, $default = '', $memorize = false, $override = false, $
     return false;
 }
 
-
 /**
  * Extend a LIST parameter with an ARRAY param.
  *
@@ -1399,7 +1364,6 @@ function param_extend_list($var, $var_ext_array, $save_prefix = true)
     return $GLOBALS[$var];
 }
 
-
 /**
  * Compiles the cat array from $cat (recursive + optional modifiers) and $catsel[] (non recursive)
  * and keeps those values available for future reference (category widget)
@@ -1424,7 +1388,6 @@ function param_compile_cat_array($restrict_to_blog = 0, $cat_default = null, $ca
     compile_cat_array($cat, $catsel, /* by ref */ $cat_array, /* by ref */ $cat_modifier, $restrict_to_blog);
 }
 
-
 /**
  * @param array of param names
  * @param string error message
@@ -1443,7 +1406,6 @@ function params_check_at_least_one($vars, $err_msg, $field_err_msg = null)
     param_error_multiple($vars, $err_msg, $field_err_msg);
     return false;
 }
-
 
 /**
  * Sets a combo parameter with values from the request,
@@ -1477,7 +1439,6 @@ function param_combo($var, $default, $allow_none, $err_msg = '')
     return $GLOBALS[$var];
 }
 
-
 /**
  * set a parameter with the second part(X2) of the value from request ( X1-X2 )
  *
@@ -1497,7 +1458,6 @@ function param_child_select_value($var)
     }
     return '';
 }
-
 
 /**
  * @param string param name
@@ -1520,7 +1480,6 @@ function param_check_phone($var, $required = false)
     return true;
 }
 
-
 /**
  * Checks if the phone number is valid
  *
@@ -1533,7 +1492,6 @@ function check_is_phone($phone)
         return sprintf(T_('Please enter a valid phone number like for example: %s.'), '+1 401-555-1234');
     }
 }
-
 
 /**
  * @param string param name
@@ -1589,7 +1547,6 @@ function param_check_passwords($var1, $var2, $required = false, $min_length = 6,
     return true;
 }
 
-
 /**
  * Checks if the word is valid
  *
@@ -1602,7 +1559,6 @@ function check_is_word($word)
         return T_('This field should be a single word; A-Z only.');
     }
 }
-
 
 /**
  * Check if there have been validation errors
@@ -1618,7 +1574,6 @@ function param_errors_detected()
     return $Messages->has_errors();
 }
 
-
 /**
  * Tell if there is an error on given field.
  */
@@ -1628,7 +1583,6 @@ function param_has_error($var)
 
     return isset($param_input_err_messages[$var]);
 }
-
 
 /**
  * Get error message for a param
@@ -1645,7 +1599,6 @@ function param_get_error_msg($var)
 
     return $param_input_err_messages[$var];
 }
-
 
 /**
  * Add an error for a variable, either to the Form's field and/or the global {@link $Messages} object.
@@ -1675,7 +1628,6 @@ function param_error($var, $err_msg, $field_err_msg = null, $group_header = null
     }
 }
 
-
 /**
  * Add an error for multiple variables, either to the Form's field and/or the global {@link $Messages} object.
  *
@@ -1701,7 +1653,6 @@ function param_error_multiple($vars, $err_msg, $field_err_msg = null)
         param_add_message_to_Log($var, $err_msg, 'error');
     }
 }
-
 
 /**
  * This function is used by {@link param_error()} and {@link param_error_multiple()}.
@@ -1747,8 +1698,6 @@ function param_add_message_to_Log($var, $err_msg, $log_category = 'error', $grou
     }
 }
 
-
-
 /**
  * Set a param (global) & Memorize it for automatic future use in regenerate_url()
  *
@@ -1781,7 +1730,6 @@ function memorize_param($var, $type, $default, $value = null)
     }
 }
 
-
 /**
  * Forget a param so that is will not get included in subsequent {@link regenerate_url()} calls.
  * @param string Param name
@@ -1795,7 +1743,6 @@ function forget_param($var)
     unset($global_param_list[$var]);
 }
 
-
 /**
  * Has the param already been memorized?
  */
@@ -1805,7 +1752,6 @@ function param_ismemorized($var)
 
     return isset($global_param_list[$var]);
 }
-
 
 /**
  * Set the value of a param (by force! :P)
@@ -1821,8 +1767,6 @@ function set_param($var, $value)
     return $GLOBALS[$var] = $value;
 }
 
-
-
 /**
  * Get the value of a param.
  *
@@ -1836,7 +1780,6 @@ function get_param($var)
 
     return $GLOBALS[$var];
 }
-
 
 /**
  * Construct an array of memorized params which are not in the ignore list
@@ -1868,7 +1811,6 @@ function get_memorized($ignore = '')
     }
     return $memo;
 }
-
 
 /**
  * Regenerate current URL from parameters
@@ -1930,7 +1872,7 @@ function regenerate_url($ignore = '', $set = '', $pagefileurl = '', $glue = '&am
                             $value_is_negative = false;
                             if ($value_is_string) { // Convert string param to array to remove one value
                                 $string_separator = (str_contains($value, ',')) ? ',' : ' ';
-                                if (str_starts_with($value, '-') && !str_starts_with($ignore_value, '-')) { // If value is negative
+                                if (str_starts_with($value, '-') && ! str_starts_with($ignore_value, '-')) { // If value is negative
                                     $value = substr($value, 1);
                                     $value_is_negative = true;
                                 }
@@ -2007,7 +1949,6 @@ function regenerate_url($ignore = '', $set = '', $pagefileurl = '', $glue = '&am
     return $url;
 }
 
-
 /**
  * Get URL param, urlencoded.
  * This handles arrays, recursively.
@@ -2026,7 +1967,6 @@ function get_param_urlencoded($var, $value, $glue = '&amp;')
         return rawurlencode($var) . '=' . rawurlencode($value);
     }
 }
-
 
 /**
  * Checks if a given regular expression is valid.
@@ -2050,7 +1990,6 @@ function is_regexp($reg_exp, $includes_delim = false)
     return ! _trapError();
 }
 
-
 /**
  * Meant to replace error handler temporarily.
  *
@@ -2068,7 +2007,6 @@ function _trapError($reset = 1)
         $iERRORES++;
     }
 }
-
 
 /**
  * Sets an HTML parameter and checks for sanitized code.
@@ -2089,7 +2027,6 @@ function _trapError($reset = 1)
 function param_html($var, $err_msg, $default = '', $memorize = false)
 {
 }
-
 
 /**
  * Checks for sanitized code.
@@ -2129,7 +2066,6 @@ function param_check_html($var, $err_msg = '#', $field_err_msg = '#', $context =
     return $altered_html;
 }
 
-
 /**
  * @param string param name
  * @param boolean required
@@ -2154,7 +2090,6 @@ function param_check_gender($var, $required = false)
     return true;
 }
 
-
 /**
  * Check html sanity of the not numeric and not object content in a general 'array' param. Handles the array recursivley.
  *
@@ -2178,7 +2113,6 @@ function param_check_general_array($param_value)
     return $param_value;
 }
 
-
 /**
  * DEPRECATED Stub for plugin compatibility:
  */
@@ -2194,7 +2128,6 @@ function format_to_post($content, $is_comment = 0, $encoding = null)
     // return altered content
     return $ret;
 }
-
 
 /**
  * Check raw HTML input for different levels of sanity including:
@@ -2421,7 +2354,6 @@ function check_html_sanity($content, $context = 'posting', $User = null, $encodi
     return $content;
 }
 
-
 /**
  * Balances Tags of string using a modified stack.
  *
@@ -2523,7 +2455,6 @@ function balance_tags($text)
     return $newtext;
 }
 
-
 /**
  * Check if a parameter is set or not
  *
@@ -2536,7 +2467,6 @@ function isset_param($var)
 {
     return isset($_POST[$var]) || isset($_GET[$var]);
 }
-
 
 /**
  * Check if a serialized data is an array and doesn't contain any object inside
@@ -2578,7 +2508,6 @@ function param_check_serialized_array($param_name)
     }
 }
 
-
 /**
  * Check if the file path is safe
  *
@@ -2614,7 +2543,6 @@ function is_safe_filepath($filepath)
     return true;
 }
 
-
 /**
  * Set a condition parameter
  *
@@ -2637,7 +2565,6 @@ function param_condition($var, $default = '', $memorize = false, $rules = null)
     return $condition;
 }
 
-
 /**
  * Format JSON object to/from DB format
  * Used recursively to find all sub grouped conditions
@@ -2647,77 +2574,98 @@ function param_condition($var, $default = '', $memorize = false, $rules = null)
  * @param string|array Allowed rules separated by comma, Use char "-" before each rule to deny it, NULL - to allow all rules
  * @return object
  */
-function param_format_condition($condition, $action, $rules = null)
+function param_format_condition( $condition, $action, $rules = NULL )
 {
-    $is_encoded = ! is_object($condition);
+	$is_encoded = ! is_object( $condition );
 
-    if ($is_encoded) {	// If source param is an encoded string, we should decode it firstly before formatting:
-        $condition = json_decode($condition, null, 512, JSON_THROW_ON_ERROR);
+	if( $is_encoded )
+	{	// If source param is an encoded string, we should decode it firstly before formatting:
+		$condition = json_decode( $condition );
 
-        if ($condition === null || ! isset($condition->valid) || $condition->valid !== true) {	// Wrong condition object:
-            return $action == 'db' ? '' : 'null';
-        }
+		if( $condition === NULL || ! isset( $condition->valid ) || $condition->valid !== true )
+		{	// Wrong condition object:
+			return $action == 'db' ? '' : 'null';
+		}
 
-        if (! isset($condition->condition)) {	// Set default condition:
-            $condition->condition = 'AND';
-        }
-    }
+		if( ! isset( $condition->condition ) )
+		{	// Set default condition:
+			$condition->condition = 'AND';
+		}
+	}
 
-    if (empty($condition->rules)) {	// No rules, Skip it:
-        if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
-            $condition = json_encode($condition, JSON_THROW_ON_ERROR);
-        }
-        return $condition;
-    }
+	if( empty( $condition->rules ) )
+	{	// No rules, Skip it:
+		if( $is_encoded )
+		{	// If the source param has been passed here as encoded we should return it in the same format:
+			$condition = json_encode( $condition );
+		}
+		return $condition;
+	}
 
-    if ($rules !== null) {
-        if (is_string($rules)) {	// Convert string to array:
-            $rules = array_map('trim', explode(',', $rules));
-        }
-        $allowed_rules = [];
-        $denied_rules = [];
-        foreach ($rules as $r => $rule) {
-            if (str_starts_with($rule, '-')) {	// Deny this rule:
-                $denied_rules[] = substr($rule, 1);
-            } else {	// Allow this rule:
-                $allowed_rules[] = $rule;
-            }
-        }
-    }
+	if( $rules !== NULL )
+	{
+		if( is_string( $rules ) )
+		{	// Convert string to array:
+			$rules = array_map( 'trim', explode( ',', $rules ) );
+		}
+		$allowed_rules = [];
+		$denied_rules = [];
+		foreach( $rules as $r => $rule )
+		{
+			if( str_starts_with($rule, '-') )
+			{	// Deny this rule:
+				$denied_rules[] = substr( $rule, 1 );
+			}
+			else
+			{	// Allow this rule:
+				$allowed_rules[] = $rule;
+			}
+		}
+	}
 
-    $condition_rules = [];
-    foreach ($condition->rules as $r => $rule) {
-        if (isset($rule->rules) && is_array($rule->rules)) {	// This is a group of conditions, Run this function recursively:
-            $condition_rules[] = param_format_condition($rule, $action, $rules);
-        } elseif ($rules === null ||
-                ($rules !== null && in_array($rule->id, $allowed_rules) && ! in_array($rule->id, $denied_rules))) {	// This is a single allowed field, Format condition only for this field:
-            if (! isset($rule->type)) {	// Set default type:
-                $rule->type = 'string';
-            }
-            if (is_array($rule->value)) {	// Field with multiple values like 'between'(field BETWEEN value_1 AND value_2):
-                foreach ($rule->value as $v => $rule_value) {
-                    $rule->value[$v] = param_format_condition_rule($rule_value, $rule->type, $action);
-                }
-            } else {	// Field with single value like 'equal'(field = value):
-                $rule->value = param_format_condition_rule($rule->value, $rule->type, $action);
-            }
-            $condition_rules[] = $rule;
-        }
-    }
+	$condition_rules = [];
+	foreach( $condition->rules as $r => $rule )
+	{
+		if( isset( $rule->rules ) && is_array( $rule->rules ) )
+		{	// This is a group of conditions, Run this function recursively:
+			$condition_rules[] = param_format_condition( $rule, $action, $rules );
+		}
+		elseif( $rules === NULL ||
+		        ( $rules !== NULL && in_array( $rule->id, $allowed_rules ) && ! in_array( $rule->id, $denied_rules ) ) )
+		{	// This is a single allowed field, Format condition only for this field:
+			if( ! isset( $rule->type ) )
+			{	// Set default type:
+				$rule->type = 'string';
+			}
+			if( is_array( $rule->value ) )
+			{	// Field with multiple values like 'between'(field BETWEEN value_1 AND value_2):
+				foreach( $rule->value as $v => $rule_value )
+				{
+					$rule->value[$v] = param_format_condition_rule( $rule_value, $rule->type, $action );
+				}
+			}
+			else
+			{	// Field with single value like 'equal'(field = value):
+				$rule->value = param_format_condition_rule( $rule->value, $rule->type, $action );
+			}
+			$condition_rules[] = $rule;
+		}
+	}
 
-    $condition->rules = $condition_rules;
+	$condition->rules = $condition_rules;
 
-    if (empty($condition->rules)) {	// Return empty string if condition has no allowed rules:
-        return $action == 'db' ? '' : 'null';
-    }
+	if( empty( $condition->rules ) )
+	{	// Return empty string if condition has no allowed rules:
+		return $action == 'db' ? '' : 'null';
+	}
 
-    if ($is_encoded) {	// If the source param has been passed here as encoded we should return it in the same format:
-        $condition = json_encode($condition, JSON_THROW_ON_ERROR);
-    }
+	if( $is_encoded )
+	{	// If the source param has been passed here as encoded we should return it in the same format:
+		$condition = json_encode( $condition );
+	}
 
-    return $condition;
+	return $condition;
 }
-
 
 /**
  * Format rule value to/from DB format
